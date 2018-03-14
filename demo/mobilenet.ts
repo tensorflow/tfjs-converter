@@ -56,8 +56,8 @@ export class MobileNet {
     const reshapedInput =
         preprocessedInput.reshape([1, ...preprocessedInput.shape]);
     const dict: NamedTensorMap = {};
-    dict[INPUT_NODE_NAME] = reshapedInput;
-    return this.model.eval(dict)[OUTPUT_NODE_NAME];
+    dict[INPUT_NODE_NAME] = [reshapedInput];
+    return this.model.eval(dict)[OUTPUT_NODE_NAME][0];
   }
 
   async getTopKClasses(predictions: dl.Tensor1D, topK: number, offset = 0):

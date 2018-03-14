@@ -98,7 +98,11 @@ export class TFModel {
         await dl.loadWeights(this.weightManifest, this.pathPrefix);
     this.executor =
         new GraphExecutor(OperationMapper.Instance.transformGraph(graph));
-    this.executor.weightMap = weightMap;
+    this.executor.weightMap =
+        Object.keys(weightMap).reduce((newMap: NamedTensorMap, key) => {
+          newMap[key] = [weightMap[key]];
+          return newMap;
+        }, {});
 
     return true;
   }

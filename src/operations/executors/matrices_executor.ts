@@ -24,18 +24,18 @@ import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorMap): dl.Tensor => {
+    (node: Node, tensorMap: NamedTensorMap): dl.Tensor[] => {
       switch (node.op) {
         case 'matMul':
-          return dl.matMul(
+          return [dl.matMul(
               getParamValue('a', node, tensorMap) as dl.Tensor2D,
               getParamValue('b', node, tensorMap) as dl.Tensor2D,
               getParamValue('transposeA', node, tensorMap) as boolean,
-              getParamValue('transposeB', node, tensorMap) as boolean);
+              getParamValue('transposeB', node, tensorMap) as boolean)];
         case 'transpose':
-          return dl.transpose(
+          return [dl.transpose(
               getParamValue('x', node, tensorMap) as dl.Tensor,
-              getParamValue('perm', node, tensorMap) as number[]);
+              getParamValue('perm', node, tensorMap) as number[])];
 
         default:
           throw TypeError(`Node type ${node.op} is not implemented`);

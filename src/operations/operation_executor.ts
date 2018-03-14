@@ -36,7 +36,7 @@ import {Node} from './index';
  * @param node
  * @param tensorMap contains tensors for executed nodes and weights
  */
-export function executeOp(node: Node, tensorMap: NamedTensorMap): dl.Tensor {
+export function executeOp(node: Node, tensorMap: NamedTensorMap): dl.Tensor[] {
   switch (node.category) {
     case 'arithmetic':
       return arithmetic.executeOp(node, tensorMap);

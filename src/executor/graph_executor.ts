@@ -77,6 +77,8 @@ export class GraphExecutor {
    * Releases the memory used by the weight tensors.
    */
   dispose() {
-    Object.keys(this.weightMap).forEach(key => this.weightMap[key].dispose());
+    Object.keys(this.weightMap)
+        .forEach(
+            key => this.weightMap[key].forEach(tensor => tensor.dispose()));
   }
 }

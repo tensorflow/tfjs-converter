@@ -17,5 +17,5 @@
 import {Tensor} from 'deeplearn';
 
 export type NamedTensorMap = {
-  [key: string]: Tensor
+  [key: string]: Tensor[]
 };

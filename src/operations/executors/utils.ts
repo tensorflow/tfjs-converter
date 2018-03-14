@@ -15,6 +15,7 @@
  * =============================================================================
  */
 
+import * as dl from 'deeplearn';
 import {NamedTensorMap} from '../../data/index';
 import {Node, ValueType} from '../index';
 
@@ -23,17 +24,30 @@ export function getParamValue(
   const param = node.params[paramName];
   if (param && param.inputIndex !== undefined) {
     if (param.type === 'tensor') {
-      return tensorMap[node.inputNames[param.inputIndex]];
+      return getTensor(node.inputNames[param.inputIndex], tensorMap);
     }
     if (param.type === 'tensors') {
       const inputs = param.inputIndex === 0 ?
           node.inputNames.slice(param.inputIndex, -param.inputParamLength) :
           node.inputNames.splice(param.inputIndex);
-      return inputs.map(name => tensorMap[name]);
+
+      return inputs.map(name => getTensor(name, tensorMap));
     }
     const data = Array.prototype.slice.call(
-        tensorMap[node.inputNames.slice(param.inputIndex)[0]].dataSync());
+        getTensor(node.inputNames.slice(param.inputIndex)[0], tensorMap)
+            .dataSync());
     return param.type === 'number' ? data[0] : data;
   }
   return param && param.value;
+}
+
+export function getTensor(name: string, tensorMap: NamedTensorMap): dl.Tensor {
+  const index = name.lastIndexOf(':');
+  if (index === -1) {
+    return tensorMap[name] ? tensorMap[name][0] : undefined;
+  } else {
+    return tensorMap[name.substring(0, index)] ?
+        tensorMap[name.substring(0, index)][Number(name.substring(index + 1))] :
+        undefined;
+  }
 }

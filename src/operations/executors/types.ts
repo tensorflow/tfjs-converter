@@ -26,5 +26,5 @@ import {Node} from '../index';
  * @param tensorMap contains tensors for executed nodes and weights
  */
 export interface OpExecutor {
-  (node: Node, tensorMap: NamedTensorMap): dl.Tensor;
+  (node: Node, tensorMap: NamedTensorMap): dl.Tensor[];
 }
