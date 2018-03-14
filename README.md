@@ -7,7 +7,7 @@ It has two main pieces:
 
 ## Inference with converted models
 
-There are three types files you need to make access files accessible through url:
+There are three types of files:
 
 * web_model.pb (model)
 * weights_manifest.json (weight manifest file)
