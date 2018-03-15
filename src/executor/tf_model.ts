@@ -19,7 +19,6 @@ import * as dl from 'deeplearn';
 import {WeightsManifestConfig} from 'deeplearn/dist/weights_loader';
 
 import {NamedTensorMap, NamedTensorsMap, tensorflow} from '../data/index';
-import {getTensor} from '../operations/executors/utils';
 import {OperationMapper} from '../operations/index';
 
 import {GraphExecutor} from './graph_executor';
@@ -91,7 +90,7 @@ export class TFModel {
     const graphPromise = this.loadRemoteProtoFile();
     const manifestPromise = this.loadWeightManifest();
 
-    const [graph, manifest] =
+    const [graph, _] =
         await Promise.all([graphPromise, manifestPromise]);
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;

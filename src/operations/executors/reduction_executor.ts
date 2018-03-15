@@ -23,8 +23,8 @@ import {Node} from '../index';
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
-export let executeOp: OpExecutor = (node: Node,
-                                    tensorMap: NamedTensorsMap): dl.Tensor[] => {
+export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
+                                       dl.Tensor[] => {
   switch (node.op) {
     case 'max': {
       const axis = getParamValue('axis', node, tensorMap) as number[];

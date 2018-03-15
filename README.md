@@ -39,10 +39,10 @@ import {TFModel} from 'tfjs-converter';
 
 const MODEL_FILE_URL = 'http://example.org/models/mobilenet/web_model.pb';
 const WEIGHT_MANIFEST_FILE_URL = 'http://example.org/models/mobilenet/weights_manifest.json';
-const OUTPUT_NAME = 'MobilenetV1/Predictions/Reshape_1';
+
 const model = new TFModel(MODEL_FILE_URL, WEIGHT_MANIFEST_FILE_URL);
 const cat = document.getElementById('cat');
-model.predict({input: dl.fromPixels(cat)}, OUTPUT_NAME); // run the inference on your model.
+model.predict({input: dl.fromPixels(cat)}); // run the inference on your model.
 ```
 
 

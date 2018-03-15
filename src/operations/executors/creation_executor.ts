@@ -24,8 +24,8 @@ import {Node} from '../index';
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
-export let executeOp: OpExecutor = (node: Node,
-                                    tensorMap: NamedTensorsMap): dl.Tensor[] => {
+export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
+                                       dl.Tensor[] => {
   switch (node.op) {
     case 'fill': {
       const shape = getParamValue('shape', node, tensorMap) as number[];
