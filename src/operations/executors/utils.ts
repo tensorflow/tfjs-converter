@@ -46,8 +46,9 @@ export function getTensor(name: string, tensorMap: NamedTensorMap): dl.Tensor {
   if (index === -1) {
     return tensorMap[name] ? tensorMap[name][0] : undefined;
   } else {
-    return tensorMap[name.substring(0, index)] ?
-        tensorMap[name.substring(0, index)][Number(name.substring(index + 1))] :
+    const nodeName = name.substring(0, index);
+    return tensorMap[nodeName] ?
+        tensorMap[nodeName][Number(name.substring(index + 1))] :
         undefined;
   }
 }
