@@ -17,16 +17,16 @@
 
 import {tidy} from 'deeplearn';
 
-import {NamedTensorMap} from '../data/index';
+import {NamedTensorsMap} from '../data/index';
 import * as operations from '../operations/index';
 
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
-  private _weightMap: NamedTensorMap = {};
-  get weightMap(): NamedTensorMap {
+  private _weightMap: NamedTensorsMap = {};
+  get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }
-  set weightMap(weightMap: NamedTensorMap) {
+  set weightMap(weightMap: NamedTensorsMap) {
     this._weightMap = weightMap;
   }
 
@@ -58,14 +58,14 @@ export class GraphExecutor {
    * @param inputs Tensor map for the model inputs, keyed by the input node
    * names.
    */
-  execute(inputs: NamedTensorMap): NamedTensorMap {
+  execute(inputs: NamedTensorsMap): NamedTensorsMap {
     const outputs = tidy(() => {
-      const tensors = this.compiledOrder.reduce<NamedTensorMap>((map, node) => {
+      const tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
         map[node.name] = operations.executeOp(node, map);
         return map;
       }, {...this.weightMap, ...inputs});
 
-      return this.graph.outputs.reduce<NamedTensorMap>((map, node) => {
+      return this.graph.outputs.reduce<NamedTensorsMap>((map, node) => {
         map[node.name] = tensors[node.name];
         return map;
       }, {});
