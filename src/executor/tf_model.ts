@@ -18,11 +18,11 @@
 import * as dl from 'deeplearn';
 import {WeightsManifestConfig} from 'deeplearn/dist/weights_loader';
 
-import {NamedTensorMap, tensorflow} from '../data/index';
+import {NamedTensorMap, NamedTensorsMap, tensorflow} from '../data/index';
+import {getTensor} from '../operations/executors/utils';
 import {OperationMapper} from '../operations/index';
 
 import {GraphExecutor} from './graph_executor';
-import { getTensor } from '../operations/executors/utils';
 
 export class TFModel {
   private executor: GraphExecutor;
@@ -99,12 +99,7 @@ export class TFModel {
         await dl.loadWeights(this.weightManifest, this.pathPrefix);
     this.executor =
         new GraphExecutor(OperationMapper.Instance.transformGraph(graph));
-    this.executor.weightMap =
-        Object.keys(weightMap).reduce((newMap: NamedTensorMap, key) => {
-          newMap[key] = [weightMap[key]];
-          return newMap;
-        }, {});
-
+    this.executor.weightMap = this.convertTensorMapToTensorsMap(weightMap);
     return true;
   }
 
@@ -114,9 +109,17 @@ export class TFModel {
    * node names.
    */
   eval(inputs: NamedTensorMap, outputName: string): dl.Tensor {
-    return getTensor(outputName, this.executor.execute(inputs));
+    return getTensor(
+        outputName,
+        this.executor.execute(this.convertTensorMapToTensorsMap(inputs)));
   }
 
+  private convertTensorMapToTensorsMap(map: NamedTensorMap): NamedTensorsMap {
+    return Object.keys(map).reduce((newMap: NamedTensorsMap, key) => {
+      newMap[key] = [map[key]];
+      return newMap;
+    }, {});
+  }
   /**
    * Releases the memory used by the weight tensors.
    */

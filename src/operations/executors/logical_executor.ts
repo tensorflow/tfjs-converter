@@ -17,14 +17,14 @@
 
 import * as dl from 'deeplearn';
 
-import {NamedTensorMap} from '../../data/index';
+import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node,
-                                    tensorMap: NamedTensorMap): dl.Tensor[] => {
+                                    tensorMap: NamedTensorsMap): dl.Tensor[] => {
   switch (node.op) {
     case 'equal': {
       return [dl.equal(

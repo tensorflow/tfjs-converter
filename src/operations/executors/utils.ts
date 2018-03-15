@@ -16,11 +16,11 @@
  */
 
 import * as dl from 'deeplearn';
-import {NamedTensorMap} from '../../data/index';
+import {NamedTensorsMap} from '../../data/index';
 import {Node, ValueType} from '../index';
 
 export function getParamValue(
-    paramName: string, node: Node, tensorMap: NamedTensorMap): ValueType {
+    paramName: string, node: Node, tensorMap: NamedTensorsMap): ValueType {
   const param = node.params[paramName];
   if (param && param.inputIndex !== undefined) {
     if (param.type === 'tensor') {
@@ -41,7 +41,7 @@ export function getParamValue(
   return param && param.value;
 }
 
-export function getTensor(name: string, tensorMap: NamedTensorMap): dl.Tensor {
+export function getTensor(name: string, tensorMap: NamedTensorsMap): dl.Tensor {
   const index = name.lastIndexOf(':');
   if (index === -1) {
     return tensorMap[name] ? tensorMap[name][0] : undefined;
