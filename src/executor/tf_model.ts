@@ -22,6 +22,7 @@ import {NamedTensorMap, tensorflow} from '../data/index';
 import {OperationMapper} from '../operations/index';
 
 import {GraphExecutor} from './graph_executor';
+import { getTensor } from '../operations/executors/utils';
 
 export class TFModel {
   private executor: GraphExecutor;
@@ -112,8 +113,8 @@ export class TFModel {
    * @param inputs tensor map of the inputs for the model, keyed by the input
    * node names.
    */
-  eval(inputs: NamedTensorMap): NamedTensorMap {
-    return this.executor.execute(inputs);
+  eval(inputs: NamedTensorMap, outputName: string): dl.Tensor {
+    return getTensor(outputName, this.executor.execute(inputs));
   }
 
   /**
