@@ -86,7 +86,7 @@ describe('Model', () => {
       await model.load();
       const input = dl.tensor1d([1], 'int32');
       const output = model.eval({'Input': input}, 'Add');
-      expect(output.dataSync()[0]).toEqual(2);
+      expect((output as dl.Tensor).dataSync()[0]).toEqual(2);
     });
   });
 

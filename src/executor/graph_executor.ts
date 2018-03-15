@@ -17,7 +17,8 @@
 
 import {tidy} from 'deeplearn';
 
-import {NamedTensorsMap} from '../data/index';
+import {NamedTensorMap, NamedTensorsMap} from '../data/index';
+import {getTensor} from '../operations/executors/utils';
 import * as operations from '../operations/index';
 
 export class GraphExecutor {
@@ -57,20 +58,31 @@ export class GraphExecutor {
    * Executes the inference for given input tensors.
    * @param inputs Tensor map for the model inputs, keyed by the input node
    * names.
+   * @param outputs output node name from the Tensorflow model, if no outputs
+   * are specified, the default outputs of the model would be used. You can
+   * inspect intermediate nodes of the model by adding them to the outputs
+   * array.
    */
-  execute(inputs: NamedTensorsMap): NamedTensorsMap {
-    const outputs = tidy(() => {
-      const tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-        map[node.name] = operations.executeOp(node, map);
-        return map;
-      }, {...this.weightMap, ...inputs});
 
-      return this.graph.outputs.reduce<NamedTensorsMap>((map, node) => {
-        map[node.name] = tensors[node.name];
+  execute(inputs: NamedTensorsMap, outputs?: string|string[]): NamedTensorMap {
+    const result = tidy(() => {
+      const tensors =
+          this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
+            map[node.name] = operations.executeOp(node, map);
+            return map;
+          }, {...this.weightMap, ...inputs});
+      if (outputs && !(outputs instanceof Array)) {
+        outputs = [outputs];
+      }
+      const requestedOutputs =
+          (outputs || this.graph.outputs.map(node => node.name)) as string[];
+
+      return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
+        map[name] = getTensor(name, tensors);
         return map;
       }, {});
     });
-    return outputs;
+    return result;
   }
 
   /**

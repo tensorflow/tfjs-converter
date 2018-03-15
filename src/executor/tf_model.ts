@@ -107,11 +107,21 @@ export class TFModel {
    * Executes infrerence for the model for given input tensors.
    * @param inputs tensor map of the inputs for the model, keyed by the input
    * node names.
+   * @param outputs output node name from the Tensorflow model, if no outputs
+   * are specified, the default outputs of the model would be used. You can
+   * inspect intermediate nodes of the model by adding them to the outputs
+   * array.
+   *
+   * @returns A single tensor if provided with a single output or no outputs are
+   * provided and there is only one default output, otherwise return a tensor
+   * map.
    */
-  eval(inputs: NamedTensorMap, outputName: string): dl.Tensor {
-    return getTensor(
-        outputName,
-        this.executor.execute(this.convertTensorMapToTensorsMap(inputs)));
+  eval(inputs: NamedTensorMap, outputs?: string|string[]): dl.Tensor
+      |NamedTensorMap {
+    const result = this.executor.execute(
+        this.convertTensorMapToTensorsMap(inputs), outputs);
+    const keys = Object.keys(result);
+    return (keys.length === 1) ? result[keys[0]] : result;
   }
 
   private convertTensorMapToTensorsMap(map: NamedTensorMap): NamedTensorsMap {
