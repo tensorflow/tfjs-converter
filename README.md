@@ -2,6 +2,7 @@
 
 **Tensorflow.js converter** is an open source library to load a pretrained TensorFlow model into the browser and run inference through Tensorflow.js.
 It has two main pieces:
+
 1. [Coversion Python script](./scripts/convert.py), converts your Tensorflow SavedModel to web friendly format.
 2. [Javascript API](./src/executor/tf_model.ts), simple one line API for inference.
 
@@ -17,7 +18,7 @@ Remember to serve the manifest and weight files with the same url path.
 
 For example, we have the mobilenet models converted and served for you in following location:
 
-```
+```html
   https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/optimized_model.pb
   https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/weights_manifest.json
   https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard1of5
@@ -42,7 +43,7 @@ const WEIGHT_MANIFEST_FILE_URL = 'http://example.org/models/mobilenet/weights_ma
 
 const model = new TFModel(MODEL_FILE_URL, WEIGHT_MANIFEST_FILE_URL);
 const cat = document.getElementById('cat');
-model.predict({input: dl.fromPixels(cat)}) // run the inference on your model.
+const prediction = model.predict({input: dl.fromPixels(cat)}) // run the inference on your model.
 ```
 
 
@@ -73,6 +74,7 @@ $ python node_modules/@tensorflow/tfjs-converter/scripts/convert.py --saved_mode
 
 This script would generate a collection of files, including model topology file, weight manifest file and weight files.
 In the above example, generated files are:
+
 * web_model.pb (model)
 * weights_manifest.json (weight manifest file)
 * group1-shard\*of\* (collection of weight files)
@@ -80,8 +82,28 @@ In the above example, generated files are:
 You can serve these files similarly as shown in the inference [example] (./demo).
 
 ### Limitations
+
 Currently Tensorflow.js only supports a limit set of Tensorflow Ops, here is the [full list](./docs/supported_ops.md).
 When you converting model with any unsupported Ops, the convert.py script will prompt the unsupported Ops list at the end of the execution. Please fill bugs to let us know what Ops you need support with.
+
+
+## FAQ
+
+1. What Tensorflow models does the converter currently support?
+
+CNN models are mostly supported, while RNN models are likely not supported. This is because RNN models normally contain control flow ops that we are currently still working on. You can use the convert.py to varify the model you have, it will prompt list of unsupported ops if your model is not supported yet. [(supported op list)](./docs/supported_ops.md)
+
+2. Will model with large weights work?
+
+If the model ops are supported, theoretically they should work. But due to memory and network limitations, the user experience in the browser would not be great. We would recommend use models that is less than 10MB.
+
+3. Will the model and weight files cached in the browser?
+
+Yes, we have sliced the weight file into 4MB chunks, which enable the browser to cached them automatically. And he model file is usually much smaller than 4MB, they should be also cached.
+
+4. Will it support model with quantization?
+
+Not yet, we planning to add quantization support soon.
 
 ## Development
 
