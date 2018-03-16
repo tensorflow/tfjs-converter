@@ -97,19 +97,19 @@ When you converting model with any unsupported Ops, the convert.py script will p
 
 1. What Tensorflow models does the converter currently support?
 
-CNN models are mostly supported, while RNN models are likely not supported. This is because RNN models normally contain control flow ops that we are currently still working on. You can use the convert.py to varify the model you have, it will prompt list of unsupported ops if your model is not supported yet. [(supported op list)](./docs/supported_ops.md)
+Image-based models (MobileNet, SqueezeNet, add more if you tested) are the most supported. Models with control flow ops (e.g. RNNs) are not yet supported. The convert.py script will validate the model you have and show a list of unsupported ops in your model. See [this list](./docs/supported_ops.md) for which ops are currently supported.
 
 2. Will model with large weights work?
 
-If the model ops are supported, theoretically they should work. But due to memory and network limitations, the user experience in the browser would not be great. We would recommend use models that is less than 10MB.
+While the browser supports loading 100-500MB models, the page load time, the inference time and the user experience would not be great. We recommend using models that are designed for edge devices (e.g. phones). These models are usually smaller than 30MB.
 
-3. Will the model and weight files cached in the browser?
+3. Will the model and weight files be cached in the browser?
 
-Yes, we have sliced the weight file into 4MB chunks, which enable the browser to cached them automatically. And he model file is usually much smaller than 4MB, they should be also cached.
+Yes, we are splitting the weights into files of 4MB chunks, which enable the browser to cache them automatically. If the model architecture is less than 4MB (most models are), it will also be cached.
 
 4. Will it support model with quantization?
 
-Not yet, we planning to add quantization support soon.
+Not yet. We are planning to add quantization support soon.
 
 ## Development
 
