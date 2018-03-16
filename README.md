@@ -50,8 +50,13 @@ model.predict({input: dl.fromPixels(cat)}); // run the inference on your model.
 ## Convert your own Tensorflow pre-trained model in [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) format
 
 ### Dependencies
+1. Clone the github repo:
 
-The python conversion script requires following packages:
+```bash
+  $ git clone git@github.com:tensorflow/tfjs-converter.git
+```
+
+2. Install following pip packages:
 
 ```bash
   $ pip install tensorflow numpy absl-py protobuf
@@ -60,7 +65,8 @@ The python conversion script requires following packages:
 ### Conversion
 
 ```bash
-$ python node_modules/@tensorflow/tfjs-converter/scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_names='MobilenetV1/Predictions/Reshape_1' --output_graph=/tmp/mobilenet/web_model.pb --saved_model_tags=serve
+$ cd tfjs-converter/
+$ python scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_names='MobilenetV1/Predictions/Reshape_1' --output_graph=/tmp/mobilenet/web_model.pb --saved_model_tags=serve
 ```
 
 | Options         | Description                                                      | Default value |
