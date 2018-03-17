@@ -20,11 +20,10 @@ import {NamedTensorMap, TFModel} from '@tensorflow/tfjs-converter';
 import {IMAGENET_CLASSES} from './imagenet_classes';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
-    'https://storage.googleapis.com/learnjs-data/tf_model_zoo/';
+    'https://storage.googleapis.com/tfjs-models/savedmodel/';
 const MODEL_FILE_URL = 'mobilenet_v1_1.0_224/optimized_model.pb';
 const WEIGHT_MANIFEST_FILE_URL = 'mobilenet_v1_1.0_224/weights_manifest.json';
 const INPUT_NODE_NAME = 'input';
-const OUTPUT_NODE_NAME = 'MobilenetV1/Predictions/Reshape_1';
 
 const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
 
@@ -60,7 +59,10 @@ export class MobileNet {
         preprocessedInput.reshape([1, ...preprocessedInput.shape]);
     const dict = {};
     dict[INPUT_NODE_NAME] = reshapedInput;
-    return this.model.eval(dict)[OUTPUT_NODE_NAME];
+
+    // The output node is determined by the model, when it is not provided to
+    // the eval method.
+    return this.model.eval(dict);
   }
 
   getTopKClasses(predictions, topK) {
