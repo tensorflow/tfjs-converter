@@ -124,7 +124,7 @@ the dev environment:
 ```bash
 $ git clone https://github.com/tensorflow/tfjs-converter.git
 $ cd tfjs-converter
-$ yarn prep # Installs dependencies.
+$ yarn # Installs dependencies.
 ```
 
 We recommend using [Visual Studio Code](https://code.visualstudio.com/) for
