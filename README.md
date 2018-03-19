@@ -7,11 +7,12 @@ into the browser and run inference through [TensorFlow.js](https://js.tensorflow
 
 A 2-step process to import your model:
 
-1. [Python conversion script](./scripts/convert.py), converts from a TensorFlow
-SavedModel to a web friendly format.
+1. [A python script](./scripts/convert.py) that converts from a TensorFlow
+SavedModel to a web friendly format. If you already have a converted model, or
+are using an already hosted model (e.g. MobileNet), skip this step.
 2. [Javascript API](./src/executor/tf_model.ts), for loading and running inference.
 
-## Step 1: Converting a [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) to TensorFlow.js format
+## Step 1: Converting a [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) to a web-friendly format
 
 1. Clone the github repo:
 
@@ -38,7 +39,7 @@ $ python scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_name
 |output_graph     | Full path of the name for the output graph file                  | |
 |saved_model_tags |SavedModel Tags of the MetaGraphDef to load, in comma separated string format| serve |
 
-### TensorFlow.js format
+### Web-friendly format
 
 The conversion script above produces 3 types of files:
 
