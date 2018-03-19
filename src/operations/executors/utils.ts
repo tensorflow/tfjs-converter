@@ -41,14 +41,31 @@ export function getParamValue(
   return param && param.value;
 }
 
-export function getTensor(name: string, tensorMap: NamedTensorsMap): dl.Tensor {
-  const index = name.lastIndexOf(':');
-  if (index === -1) {
-    return tensorMap[name] ? tensorMap[name][0] : undefined;
-  } else {
-    const nodeName = name.substring(0, index);
-    return tensorMap[nodeName] ?
-        tensorMap[nodeName][Number(name.substring(index + 1))] :
-        undefined;
-  }
+/**
+ * Retrieve the tensor based on input name by extracting the node name and
+ * output index information.
+ * @param name Node input name
+ * @param tensorsMap Tensors map keyed by the node
+ */
+export function getTensor(
+    name: string, tensorsMap: NamedTensorsMap): dl.Tensor {
+  const [nodeName, index] = getNodeNameAndIndex(name);
+
+  return tensorsMap[nodeName] ?
+      tensorsMap[nodeName][Number(name.substring(index + 1))] :
+      undefined;
+}
+
+/**
+ * Returns the node name and index from the Node input name.
+ * @param inputName The input name of the node, in format of
+ * node_name:output_index, i.e. MatMul:0, if the output_index is not set, it is
+ * default to 0.
+ */
+export function getNodeNameAndIndex(inputName: string): [string, number] {
+  const index = inputName.lastIndexOf(':');
+  if (index === -1) return [inputName, 0];
+
+  const nodeName = inputName.substring(0, index);
+  return [nodeName, Number(inputName.substring(index + 1))];
 }

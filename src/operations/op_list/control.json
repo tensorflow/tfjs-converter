@@ -1,0 +1,32 @@
+[
+  {
+    "tfOpName": "Switch",
+    "dlOpName": "switch",
+    "category": "control",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "data",
+        "type": "tensor"
+      },
+      {
+        "tfInputIndex": 1,
+        "dlParamName": "pred",
+        "type": "tensor"
+      }
+    ]
+  },
+  {
+    "tfOpName": "Merge",
+    "dlOpName": "merge",
+    "category": "control",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "tfInputParamLength": 0,
+        "dlParamName": "tensors",
+        "type": "tensors"
+      }
+    ]
+  }
+]

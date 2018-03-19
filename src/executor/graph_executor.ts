@@ -18,12 +18,15 @@
 import {tidy} from 'deeplearn';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/index';
-import {getTensor} from '../operations/executors/utils';
+import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
 import * as operations from '../operations/index';
+
+import {ExecutionContext} from './execution_context';
 
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
   private _weightMap: NamedTensorsMap = {};
+  private context: ExecutionContext = {frameId: 0, iterationId: 0};
   get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }
@@ -40,6 +43,12 @@ export class GraphExecutor {
    * cache the result for inference execution.
    */
   private compile() {
+    // Do not compile for graph with control flow, since the execution order
+    // requires runtime evaluation of the output tensors.
+    if (this.graph.withControlFlow) {
+      return;
+    }
+
     const stack = [...this.graph.inputs];
     const visited: {[key: string]: boolean} = {};
     while (stack.length > 0) {
@@ -47,7 +56,10 @@ export class GraphExecutor {
       visited[node.name] = true;
       this.compiledOrder.push(node);
       node.children.forEach((childNode) => {
-        if (childNode.inputNames.every(name => visited[name])) {
+        if (childNode.inputNames.every(name => {
+              const [nodeName, index] = getNodeNameAndIndex(name);
+              return visited[nodeName];
+            })) {
           stack.push(childNode);
         }
       });
@@ -66,11 +78,16 @@ export class GraphExecutor {
 
   execute(inputs: NamedTensorsMap, outputs?: string|string[]): NamedTensorMap {
     const result = tidy(() => {
-      const tensors =
-          this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-            map[node.name] = operations.executeOp(node, map);
-            return map;
-          }, {...this.weightMap, ...inputs});
+      let tensors = {};
+      if (this.graph.withControlFlow) {
+        tensors = this.executeWithControlFlow(inputs);
+      } else {
+        tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
+          map[node.name] = operations.executeOp(node, map);
+          return map;
+        }, {...this.weightMap, ...inputs});
+      }
+
       if (outputs && !(outputs instanceof Array)) {
         outputs = [outputs];
       }
@@ -83,6 +100,36 @@ export class GraphExecutor {
       }, {});
     });
     return result;
+  }
+
+  private executeWithControlFlow(inputs: NamedTensorsMap): NamedTensorsMap {
+    const stack = [...this.graph.inputs];
+    const tensorMap = {...this.weightMap, ...inputs};
+
+    while (stack.length > 0) {
+      const node = stack.pop();
+      tensorMap[node.name] = operations.executeOp(node, tensorMap);
+
+      node.children.forEach((childNode) => {
+        // Merge op can be push if any of its inputs has value.
+        if (childNode.op === 'Merge') {
+          if (childNode.inputNames.some(name => {
+                const [nodeName, index] = getNodeNameAndIndex(name);
+                return getTensor(name, tensorMap) !== undefined;
+              })) {
+            stack.push(childNode);
+          }
+          // Otherwise all inputs need to have value.
+        } else if (childNode.inputNames.every(name => {
+                     const [nodeName, index] = getNodeNameAndIndex(name);
+                     return getTensor(name, tensorMap) !== undefined;
+                   })) {
+          stack.push(childNode);
+        }
+      });
+    }
+
+    return tensorMap;
   }
 
   /**
