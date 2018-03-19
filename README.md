@@ -11,12 +11,12 @@ It has two main components:
 
 TensorFlow.js saved models are composed of three types of files:
 
-* *web_model.pb.* Model topology file.
-* *weights_manifest.json.* Manifest file that specifies the shape, type, and name of the weight tensors, as well as the files in which weight values are stored.
-* *group1-shard\*of\*.* Collection of weight-value files specified in the *weights_manifest.json*.
+* __*web_model.pb.*__ Model topology file.
+* __*weights_manifest.json.*__ Manifest file that specifies the shape, type, and name of the weight tensors, as well as the files in which weight values are stored.
+* __*group1-shard\*of\*.*__ Collection of weight-value files specified in the *weights_manifest.json*.
 
 When served, all the above files should have the same parent directory.
-For example, the [MobileNet v1 model](~https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.md~) is available for serving from the following location:
+For example, the [MobileNet v1 model](~https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.md~) is available at:
 
 ```html
 https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/optimized_model.pb
@@ -100,7 +100,7 @@ $ python scripts/convert.py \
 ### Limitations
 
 Currently TensorFlow.js only supports a [limited set of Tensorflow ops](./docs/supported_ops.md).
-If you convert a model containing any unsupported ops, `convert.py` script will throw an error listing
+If you attempt to convert a model containing any unsupported ops, `convert.py` will throw an error listing
 the unsupported ops. 
 
 Please [file bugs](https://github.com/tensorflow/tfjs-converter/issues) to request support for additional
@@ -126,7 +126,7 @@ Not yet. We are planning to add quantization support soon.
 
 ## Development
 
-To build **Tensorflow.js converter** from source, clone the project and prepare
+To build Tensorflow.js converter from source, clone the project and prepare
 the dev environment:
 
 ```bash
