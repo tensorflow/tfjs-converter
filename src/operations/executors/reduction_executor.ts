@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs-core';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
@@ -24,41 +24,41 @@ import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
-                                       tf.Tensor[] => {
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'max': {
       const axis = getParamValue('axis', node, tensorMap) as number[];
       const keepDims = getParamValue('keepDims', node, tensorMap) as boolean;
-      return [tf.max(
-          getParamValue('x', node, tensorMap) as tf.Tensor, axis, keepDims)];
+      return [tfc.max(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis, keepDims)];
     }
     case 'mean': {
       const axis = getParamValue('axis', node, tensorMap) as number[];
       const keepDims = getParamValue('keepDims', node, tensorMap) as boolean;
-      return [tf.mean(
-          getParamValue('x', node, tensorMap) as tf.Tensor, axis, keepDims)];
+      return [tfc.mean(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis, keepDims)];
     }
     case 'min': {
       const axis = getParamValue('axis', node, tensorMap) as number[];
       const keepDims = getParamValue('keepDims', node, tensorMap) as boolean;
-      return [tf.min(
-          getParamValue('x', node, tensorMap) as tf.Tensor, axis, keepDims)];
+      return [tfc.min(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis, keepDims)];
     }
     case 'sum': {
       const axis = getParamValue('axis', node, tensorMap) as number[];
       const keepDims = getParamValue('keepDims', node, tensorMap) as boolean;
-      return [tf.sum(
-          getParamValue('x', node, tensorMap) as tf.Tensor, axis, keepDims)];
+      return [tfc.sum(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis, keepDims)];
     }
     case 'argMax': {
       const axis = getParamValue('axis', node, tensorMap) as number;
-      return [tf.argMax(
-          getParamValue('x', node, tensorMap) as tf.Tensor, axis)];
+      return [tfc.argMax(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis)];
     }
     case 'argMin': {
       const axis = getParamValue('axis', node, tensorMap) as number;
-      return [tf.argMin(
-          getParamValue('x', node, tensorMap) as tf.Tensor, axis)];
+      return [tfc.argMin(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

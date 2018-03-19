@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as tf from '@tensorflow/tfjs-core';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {Node} from '../index';
 
@@ -23,8 +23,8 @@ import {createTensorAttr} from './test_helper';
 
 describe('logical', () => {
   let node: Node;
-  const input1 = [tf.scalar(1)];
-  const input2 = [tf.scalar(2)];
+  const input1 = [tfc.scalar(1)];
+  const input2 = [tfc.scalar(2)];
 
   beforeEach(() => {
     node = {
@@ -42,8 +42,8 @@ describe('logical', () => {
     ['equal', 'greater', 'greaterEqual', 'less', 'lessEqual', 'logicalAnd',
      'logicalOr']
         .forEach(op => {
-          it('should call tf.' + op, () => {
-            const spy = spyOn(tf, op as 'equal');
+          it('should call tfc.' + op, () => {
+            const spy = spyOn(tfc, op as 'equal');
             node.op = op;
             executeOp(node, {input1, input2});
 
@@ -51,25 +51,25 @@ describe('logical', () => {
           });
         });
     describe('logicalNot', () => {
-      it('should call tf.logicalNot', () => {
-        spyOn(tf, 'logicalNot');
+      it('should call tfc.logicalNot', () => {
+        spyOn(tfc, 'logicalNot');
         node.op = 'logicalNot';
         executeOp(node, {input1});
 
-        expect(tf.logicalNot).toHaveBeenCalledWith(input1[0]);
+        expect(tfc.logicalNot).toHaveBeenCalledWith(input1[0]);
       });
     });
 
     describe('where', () => {
-      it('should call tf.where', () => {
-        spyOn(tf, 'where');
+      it('should call tfc.where', () => {
+        spyOn(tfc, 'where');
         node.op = 'where';
         node.inputNames = ['input1', 'input2', 'input3'];
         node.params.condition = createTensorAttr(2);
-        const input3 = [tf.scalar(1)];
+        const input3 = [tfc.scalar(1)];
         executeOp(node, {input1, input2, input3});
 
-        expect(tf.where).toHaveBeenCalledWith(input3[0], input1[0], input2[0]);
+        expect(tfc.where).toHaveBeenCalledWith(input3[0], input1[0], input2[0]);
       });
     });
   });

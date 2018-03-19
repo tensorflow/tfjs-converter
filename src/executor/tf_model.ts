@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs-core';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap, tensorflow} from '../data/index';
 import {OperationMapper} from '../operations/index';
@@ -25,7 +25,7 @@ import {GraphExecutor} from './graph_executor';
 export class TFModel {
   private executor: GraphExecutor;
   private version = 'n/a';
-  private weightManifest: tf.WeightsManifestConfig;
+  private weightManifest: tfc.WeightsManifestConfig;
   private pathPrefix: string;
   // Returns the version information for the tensorflow model GraphDef.
   get modelVersion(): string {
@@ -93,7 +93,7 @@ export class TFModel {
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap =
-        await tf.loadWeights(this.weightManifest, this.pathPrefix);
+        await tfc.loadWeights(this.weightManifest, this.pathPrefix);
     this.executor =
         new GraphExecutor(OperationMapper.Instance.transformGraph(graph));
     this.executor.weightMap = this.convertTensorMapToTensorsMap(weightMap);
@@ -113,7 +113,7 @@ export class TFModel {
    * provided and there is only one default output, otherwise return a tensor
    * map.
    */
-  eval(inputs: NamedTensorMap, outputs?: string|string[]): tf.Tensor
+  eval(inputs: NamedTensorMap, outputs?: string|string[]): tfc.Tensor
       |NamedTensorMap {
     const result = this.executor.execute(
         this.convertTensorMapToTensorsMap(inputs), outputs);

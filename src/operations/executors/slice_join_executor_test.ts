@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as tf from '@tensorflow/tfjs-core';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {Node} from '../index';
 
@@ -24,9 +24,9 @@ import {createNumberAttr, createNumberAttrFromIndex, createNumericArrayAttr, cre
 
 describe('slice join', () => {
   let node: Node;
-  const input1 = [tf.scalar(1)];
-  const input2 = [tf.scalar(2)];
-  const input3 = [tf.scalar(3)];
+  const input1 = [tfc.scalar(1)];
+  const input2 = [tfc.scalar(2)];
+  const input3 = [tfc.scalar(3)];
   describe('multi-tensor ops', () => {
     beforeEach(() => {
       node = {
@@ -44,8 +44,8 @@ describe('slice join', () => {
     });
     describe('executeOp', () => {
       ['concat', 'stack'].forEach(op => {
-        it('should call tf.' + op, () => {
-          const spy = spyOn(tf, op as 'concat');
+        it('should call tfc.' + op, () => {
+          const spy = spyOn(tfc, op as 'concat');
           node.op = op;
           executeOp(node, {input1, input2, input3});
 
@@ -67,45 +67,45 @@ describe('slice join', () => {
       };
     });
     describe('executeOp', () => {
-      it('should call tf.reverse', () => {
-        spyOn(tf, 'reverse');
+      it('should call tfc.reverse', () => {
+        spyOn(tfc, 'reverse');
         node.op = 'reverse';
         node.params.axis = createNumberAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
         executeOp(node, {input1, input2});
 
-        expect(tf.reverse).toHaveBeenCalledWith(input1[0], 2);
+        expect(tfc.reverse).toHaveBeenCalledWith(input1[0], 2);
       });
 
-      it('should call tf.tile', () => {
-        spyOn(tf, 'tile');
+      it('should call tfc.tile', () => {
+        spyOn(tfc, 'tile');
         node.op = 'tile';
         node.params.reps = createNumberAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
         executeOp(node, {input1, input2});
 
-        expect(tf.tile).toHaveBeenCalledWith(input1[0], 2);
+        expect(tfc.tile).toHaveBeenCalledWith(input1[0], 2);
       });
 
-      it('should call tf.slice', () => {
-        spyOn(tf, 'slice');
+      it('should call tfc.slice', () => {
+        spyOn(tfc, 'slice');
         node.op = 'slice';
         node.params.begin = createNumericArrayAttr([1]);
         node.params.size = createNumericArrayAttr([2]);
         executeOp(node, {input1});
 
-        expect(tf.slice).toHaveBeenCalledWith(input1[0], [1], [2]);
+        expect(tfc.slice).toHaveBeenCalledWith(input1[0], [1], [2]);
       });
 
-      it('should call tf.gather', () => {
-        spyOn(tf, 'gather');
+      it('should call tfc.gather', () => {
+        spyOn(tfc, 'gather');
         node.op = 'gather';
         node.params.axis = createNumberAttr(1);
         node.params.indices = createTensorAttr(1);
         node.inputNames = ['input1', 'input2'];
         executeOp(node, {input1, input2});
 
-        expect(tf.gather).toHaveBeenCalledWith(input1[0], input2[0], 1);
+        expect(tfc.gather).toHaveBeenCalledWith(input1[0], input2[0], 1);
       });
     });
   });
