@@ -27,27 +27,28 @@ are using an already hosted model (e.g. MobileNet), skip this step.
 ```
 
 3. Run the `convert.py` script
+
 ```bash
 $ cd tfjs-converter/
 $ python scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_names='MobilenetV1/Predictions/Reshape_1' --output_graph=/tmp/mobilenet/web_model.pb --saved_model_tags=serve
 ```
 
-| Options         | Description                                                      | Default value |
-|---|---|---|
-|saved_model_dir  | Full path of the saved model directory                           | |
-|output_node_names| The names of the output nodes, comma separated                   | |
-|output_graph     | Full path of the name for the output graph file                  | |
-|saved_model_tags |SavedModel Tags of the MetaGraphDef to load, in comma separated string format| serve |
+| Options | Description
+|---|---|
+|`saved_model_dir`  | Full path of the saved model directory |
+|`output_node_names`| The names of the output nodes, comma separated |
+|`output_graph`     | Full path of the name for the output graph file|
+|`saved_model_tags` | Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.
 
 ### Web-friendly format
 
 The conversion script above produces 3 types of files:
 
-* `web_model.pb` (holds the dataflow graph)
+* `web_model.pb` (the dataflow graph)
 * `weights_manifest.json` (weight manifest file)
-* `group1-shard\*of\*` (collection of weight files)
+* `group1-shard\*of\*` (collection of binary weight files)
 
-For example, we have the MobileNet models converted and served for you in
+For example, here is the MobileNet model converted and served in
 following location:
 
 ```html
