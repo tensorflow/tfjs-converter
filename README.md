@@ -30,7 +30,11 @@ are using an already hosted model (e.g. MobileNet), skip this step.
 
 ```bash
 $ cd tfjs-converter/
-$ python scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_names='MobilenetV1/Predictions/Reshape_1' --output_graph=/tmp/mobilenet/web_model.pb --saved_model_tags=serve
+$ python scripts/convert.py \
+    --saved_model_dir=/tmp/mobilenet/ \
+    --output_node_names='MobilenetV1/Predictions/Reshape_1' \
+    --output_graph=/tmp/mobilenet/web_model.pb \
+    --saved_model_tags=serve
 ```
 
 | Options | Description
@@ -68,14 +72,15 @@ following location:
 2. Instantiate the [TFModel class](./src/executor/tf_model.ts) and run inference.
 
 ```typescript
-import {TFModel} from 'tfjs-converter';
+import * as tfc from '@tensorflow/tfjs-core';
+import {TFModel} from '@tensorflow/tfjs-converter';
 
 const MODEL_URL = 'https://.../mobilenet/web_model.pb';
 const WEIGHTS_URL = 'https://.../mobilenet/weights_manifest.json';
 
 const model = new TFModel(MODEL_URL, WEIGHTS_URL);
 const cat = document.getElementById('cat');
-model.predict({input: dl.fromPixels(cat)});
+model.predict({input: tfc.fromPixels(cat)});
 ```
 
 Check out our working [MobileNet demo](./demo/README.md).
@@ -107,6 +112,10 @@ Yes, we are splitting the weights into files of 4MB chunks, which enable the bro
 
 Not yet. We are planning to add quantization support soon.
 
+5. Why the predict() method for inference is so much slower on the first time then the subsequent calls?
+
+The time of first call also includes the compilation time of WebGL shader programs for the model. After the first call the shader programs are cached, which makes the subsequent calls much faster. You can warm up the cache by calling the predict method with an all zero inputs, right after the completion of the model loading.
+
 ## Development
 
 To build **TensorFlow.js converter** from source, we need to clone the project and prepare
@@ -115,7 +124,7 @@ the dev environment:
 ```bash
 $ git clone https://github.com/tensorflow/tfjs-converter.git
 $ cd tfjs-converter
-$ yarn prep # Installs dependencies.
+$ yarn # Installs dependencies.
 ```
 
 We recommend using [Visual Studio Code](https://code.visualstudio.com/) for
