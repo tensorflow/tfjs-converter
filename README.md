@@ -1,41 +1,46 @@
-# Getting started
+# Getting Started with TensorFlow.js Converter
 
-**Tensorflow.js converter** is an open source library to load a pretrained TensorFlow model into the browser and run inference through Tensorflow.js.
-It has two main pieces:
+**TensorFlow.js converter** is an open source library for loading pretrained TensorFlow models into the browser and running inference using TensorFlow.js.
 
-1. [Coversion Python script](./scripts/convert.py), converts your Tensorflow SavedModel to web friendly format.
-2. [Javascript API](./src/executor/tf_model.ts), simple one line API for inference.
+It has two main components:
 
-## Inference with converted models
+* **[JavaScript API](./src/executor/tf_model.ts).** A simple one-line API for performing inference on TensorFlow.js-compatible models.
+* **[convert.py](./scripts/convert.py).** A Python script that converts a TensorFlow `SavedModel` to a TensorFlow.js.
 
-There are three types of files:
+## TensorFlow.js Saved Model Format
 
-* web_model.pb (model)
-* weights_manifest.json (weight manifest file)
-* group1-shard\*of\* (collection of weight files)
+TensorFlow.js saved models are composed of three types of files:
 
-Remember to serve the manifest and weight files with the same url path.
+* **web_model.pb.** Model topology file.
+* **weights_manifest.json.** Manifest file that specifies the shape, type, and name of the weight tensors, as well as the files in which weight values are stored.
+* **group1-shard\*of\*.** Collection of weight-value files specified in the `weights_manifest.json`.
 
-For example, we have the mobilenet models converted and served for you in following location:
+When served, all the above files should have the same parent directory.
+
+For example, the [MobileNet v1 model](~https://github.com/tensorflow/models/blob/master/research/slim/nets/mobilenet_v1.md~) is available for serving from the following location:
 
 ```html
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/optimized_model.pb
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/weights_manifest.json
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard1of5
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard2of5
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard3of5
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard4of5
-  https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard5of5
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/optimized_model.pb
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/weights_manifest.json
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard1of5
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard2of5
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard3of5
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard4of5
+https://storage.cloud.google.com/tfjs-models/savedmodel/mobilenet_v1_1.0_224/group1-shard5of5
 ```
 
-1. Install the tfjs-converter npm package
+## Using the JavaScript API
+
+You can import TensorFlow.js saved models as follows:
+
+1. Install the `tfjs-converter` npm package:
 
 `yarn add @tensorflow/tfjs-converter` or `npm install @tensorflow/tfjs-converter`
 
-2. Instantiate the [TFModel class](./src/executor/tf_model.ts) and run inference. [Example](./demo/mobilenet.ts)
+2. Instantiate the [`TFModel` class](./src/executor/tf_model.ts) and run inference.
 
 
-```typescript
+```javascript
 import {TFModel} from 'tfjs-converter';
 
 const MODEL_FILE_URL = 'http://example.org/models/mobilenet/web_model.pb';
@@ -43,77 +48,81 @@ const WEIGHT_MANIFEST_FILE_URL = 'http://example.org/models/mobilenet/weights_ma
 
 const model = new TFModel(MODEL_FILE_URL, WEIGHT_MANIFEST_FILE_URL);
 const cat = document.getElementById('cat');
-model.predict({input: dl.fromPixels(cat)}); // run the inference on your model.
+model.predict({input: tf.fromPixels(cat)}); // run the inference on your model.
 ```
 
+See [the demo](./demo) for a complete set of example code for a TensorFlow.js app that uses MobileNet to
+perform image classification.
 
-## Convert your own Tensorflow pre-trained model in [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) format
+## Converting a TensorFlow [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) to TensorFlow.js format
 
-### Dependencies
-1. Clone the github repo:
+### Install dependencies
+
+1. Clone the GitHub repo:
 
 ```bash
-  $ git clone git@github.com:tensorflow/tfjs-converter.git
+$ git clone git@github.com:tensorflow/tfjs-converter.git
 ```
 
-2. Install following pip packages:
+2. Install `tensorflow`, `numpy`, `absl-py`, and `protobuf` packages:
 
 ```bash
-  $ pip install tensorflow numpy absl-py protobuf
+$ pip install tensorflow numpy absl-py protobuf
 ```
 
-### Conversion
+### Run the converter
+
+The `convert.py` script takes the following options:
+
+| Option         | Description                                                      | Default value |
+|---|---|---|
+|saved_model_dir  | Full path to the input SavedModel directory                           | |
+|output_node_names| The names of the output nodes, comma-separated                   | |
+|output_graph     | Desired Full path to the output graph (.pb) file                  | |
+|saved_model_tags |SavedModel Tags of the MetaGraphDef to load, in comma-separated string format| serve |
+
+The following command converts the `MobilenetV1/Predictions/Reshape_1` node of the TensorFlow `SavedModel` 
+in */tmp/mobilenet* to a TensorFlow.js model, saved at */tmp/mobilenet_tfjs/web_model.pb*:
 
 ```bash
 $ cd tfjs-converter/
-$ python scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_names='MobilenetV1/Predictions/Reshape_1' --output_graph=/tmp/mobilenet/web_model.pb --saved_model_tags=serve
+$ python scripts/convert.py --saved_model_dir=/tmp/mobilenet/ --output_node_names='MobilenetV1/Predictions/Reshape_1' --output_graph=/tmp/mobilenet_tfjs/web_model.pb --saved_model_tags=serve
 ```
-
-| Options         | Description                                                      | Default value |
-|---|---|---|
-|saved_model_dir  | Full path of the saved model directory                           | |
-|output_node_names| The names of the output nodes, comma separated                   | |
-|output_graph     | Full path of the name for the output graph file                  | |
-|saved_model_tags |SavedModel Tags of the MetaGraphDef to load, in comma separated string format| serve |
 
 ### Outputs
 
-This script would generate a collection of files, including model topology file, weight manifest file and weight files.
-In the above example, generated files are:
-
-* web_model.pb (model)
-* weights_manifest.json (weight manifest file)
-* group1-shard\*of\* (collection of weight files)
-
-You can serve these files similarly as shown in the inference [example] (./demo).
+`convert.py` generates the set of topology, manifest, and weight files described above in [TensorFlow.js Saved Model Format](#TensorFlow.js-Saved-Model-Format).
 
 ### Limitations
 
-Currently Tensorflow.js only supports a limit set of Tensorflow Ops, here is the [full list](./docs/supported_ops.md).
-When you converting model with any unsupported Ops, the convert.py script will prompt the unsupported Ops list at the end of the execution. Please fill bugs to let us know what Ops you need support with.
+Currently TensorFlow.js only supports a [limited set of Tensorflow ops](./docs/supported_ops.md).
+If you convert a model containing any unsupported ops, `convert.py` script will throw an error listing
+the unsupported ops. 
 
+Please [file bugs](https://github.com/tensorflow/tfjs-converter/issues) to request support for additional
+ops.
 
 ## FAQ
 
-1. What Tensorflow models does the converter currently support?
+1. What TensorFlow models does the converter currently support?
 
-Image-based models (MobileNet, SqueezeNet, add more if you tested) are the most supported. Models with control flow ops (e.g. RNNs) are not yet supported. The convert.py script will validate the model you have and show a list of unsupported ops in your model. See [this list](./docs/supported_ops.md) for which ops are currently supported.
+Image-based models (MobileNet, SqueezeNet, add more if you tested) are the most supported. Models with control-flow ops (e.g. RNNs) are not yet supported. See [Limitations](#Limitations) above for more details on supported ops.
 
-2. Will model with large weights work?
+2. Will models with large weights work?
 
-While the browser supports loading 100-500MB models, the page load time, the inference time and the user experience would not be great. We recommend using models that are designed for edge devices (e.g. phones). These models are usually smaller than 30MB.
+While the browser supports loading 100–500MB models, the page load time, inference time, and user experience would not be great. We recommend using models that are designed for edge devices (e.g., phones). These models are usually smaller than 30MB.
 
 3. Will the model and weight files be cached in the browser?
 
-Yes, we are splitting the weights into files of 4MB chunks, which enable the browser to cache them automatically. If the model architecture is less than 4MB (most models are), it will also be cached.
+Yes, TensorFlow.js converter splits the weights into 4MB-chunk files, which enables the browser to cache them automatically. If the model architecture is less than 4MB (most models are), it will also be cached.
 
-4. Will it support model with quantization?
+4. Does TensorFlow.js converter support models with quantization?
 
 Not yet. We are planning to add quantization support soon.
 
 ## Development
 
-To build **Tensorflow.js converter** from source, we need to clone the project and prepare
+To build **Tensorflow.js converter** from source, clone the project and prepare
 the dev environment:
 
 ```bash
@@ -123,7 +132,7 @@ $ yarn prep # Installs dependencies.
 ```
 
 We recommend using [Visual Studio Code](https://code.visualstudio.com/) for
-development. Make sure to install
+development. Make sure to install the
 [TSLint VSCode extension](https://marketplace.visualstudio.com/items?itemName=eg2.tslint)
 and the npm [clang-format](https://github.com/angular/clang-format) `1.2.2` or later
 with the
@@ -136,12 +145,11 @@ Before submitting a pull request, make sure the code passes all the tests and is
 $ yarn test
 $ yarn lint
 ```
-
 To run a subset of tests and/or on a specific browser:
 
 ```bash
 $ yarn test --browsers=Chrome --grep='execute'
- 
+
 > ...
 > Chrome 64.0.3282 (Linux 0.0.0): Executed 39 of 39 SUCCESS (0.129 secs / 0 secs)
 ```
