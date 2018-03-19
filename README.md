@@ -36,14 +36,15 @@ For example, we have the mobilenet models converted and served for you in follow
 
 
 ```typescript
-import {TFModel} from 'tfjs-converter';
+import * as tf from '@tesorflow/tfjs-core';
+import {TFModel} from '@tensorflow/tfjs-converter';
 
 const MODEL_FILE_URL = 'http://example.org/models/mobilenet/web_model.pb';
 const WEIGHT_MANIFEST_FILE_URL = 'http://example.org/models/mobilenet/weights_manifest.json';
 
 const model = new TFModel(MODEL_FILE_URL, WEIGHT_MANIFEST_FILE_URL);
 const cat = document.getElementById('cat');
-model.predict({input: dl.fromPixels(cat)}); // run the inference on your model.
+model.predict({input: tf.fromPixels(cat)}); // run the inference on your model.
 ```
 
 
@@ -110,6 +111,8 @@ Yes, we are splitting the weights into files of 4MB chunks, which enable the bro
 4. Will it support model with quantization?
 
 Not yet. We are planning to add quantization support soon.
+
+5.
 
 ## Development
 

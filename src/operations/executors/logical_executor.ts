@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
@@ -24,51 +24,51 @@ import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
-                                       dl.Tensor[] => {
+                                       tf.Tensor[] => {
   switch (node.op) {
     case 'equal': {
-      return [dl.equal(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.equal(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'greater': {
-      return [dl.greater(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.greater(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'greaterEqual': {
-      return [dl.greaterEqual(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.greaterEqual(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'less': {
-      return [dl.less(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.less(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'lessEqual': {
-      return [dl.lessEqual(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.lessEqual(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'logicalAnd': {
-      return [dl.logicalAnd(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.logicalAnd(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'logicalNot': {
-      return [dl.logicalNot(getParamValue('a', node, tensorMap) as dl.Tensor)];
+      return [tf.logicalNot(getParamValue('a', node, tensorMap) as tf.Tensor)];
     }
     case 'logicalOr': {
-      return [dl.logicalOr(
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.logicalOr(
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     case 'where': {
-      return [dl.where(
-          getParamValue('condition', node, tensorMap) as dl.Tensor,
-          getParamValue('a', node, tensorMap) as dl.Tensor,
-          getParamValue('b', node, tensorMap) as dl.Tensor)];
+      return [tf.where(
+          getParamValue('condition', node, tensorMap) as tf.Tensor,
+          getParamValue('a', node, tensorMap) as tf.Tensor,
+          getParamValue('b', node, tensorMap) as tf.Tensor)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

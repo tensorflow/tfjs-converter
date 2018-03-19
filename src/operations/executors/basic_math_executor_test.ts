@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {Node} from '../index';
 
@@ -23,7 +23,7 @@ import {createNumberAttr, createTensorAttr} from './test_helper';
 
 describe('basic math', () => {
   let node: Node;
-  const input1 = [dl.scalar(1)];
+  const input1 = [tf.scalar(1)];
 
   beforeEach(() => {
     node = {
@@ -42,8 +42,8 @@ describe('basic math', () => {
      'floor', 'log', 'relu', 'selu', 'sigmoid', 'sin', 'sinh', 'sqrt', 'square',
      'tanh', 'tan']
         .forEach(op => {
-          it('should call dl.' + op, () => {
-            const spy = spyOn(dl, op as 'abs');
+          it('should call tf.' + op, () => {
+            const spy = spyOn(tf, op as 'abs');
             node.op = op;
             executeOp(node, {input1});
 
@@ -51,28 +51,28 @@ describe('basic math', () => {
           });
         });
     describe('clipByValue', () => {
-      it('should call dl.clipByValue', () => {
-        spyOn(dl, 'clipByValue');
+      it('should call tf.clipByValue', () => {
+        spyOn(tf, 'clipByValue');
         node.op = 'clipByValue';
         node.params['clipValueMax'] = createNumberAttr(6);
         node.params['clipValueMin'] = createNumberAttr(0);
 
         executeOp(node, {input1});
 
-        expect(dl.clipByValue).toHaveBeenCalledWith(input1[0], 0, 6);
+        expect(tf.clipByValue).toHaveBeenCalledWith(input1[0], 0, 6);
       });
     });
     describe('rsqrt', () => {
-      it('should call dl.div', () => {
-        const input1 = [dl.scalar(1)];
+      it('should call tf.div', () => {
+        const input1 = [tf.scalar(1)];
         node.op = 'rsqrt';
-        spyOn(dl, 'div');
-        spyOn(dl, 'sqrt').and.returnValue(input1);
+        spyOn(tf, 'div');
+        spyOn(tf, 'sqrt').and.returnValue(input1);
 
         executeOp(node, {input1});
 
-        expect(dl.sqrt).toHaveBeenCalledWith(input1[0]);
-        expect(dl.div).toHaveBeenCalledWith(jasmine.any(dl.Tensor), input1);
+        expect(tf.sqrt).toHaveBeenCalledWith(input1[0]);
+        expect(tf.div).toHaveBeenCalledWith(jasmine.any(tf.Tensor), input1);
       });
     });
   });

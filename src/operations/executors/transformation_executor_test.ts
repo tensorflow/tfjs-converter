@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {Node} from '../index';
 // tslint:disable-next-line:max-line-length
@@ -23,8 +23,8 @@ import {executeOp} from './transformation_executor';
 
 describe('transformation', () => {
   let node: Node;
-  const input1 = [dl.scalar(1)];
-  const input2 = [dl.tensor1d([1, 1])];
+  const input1 = [tf.scalar(1)];
+  const input2 = [tf.tensor1d([1, 1])];
 
   beforeEach(() => {
     node = {
@@ -40,28 +40,28 @@ describe('transformation', () => {
 
   describe('executeOp', () => {
     describe('cast', () => {
-      it('should call dl.cast', () => {
-        spyOn(dl, 'cast');
+      it('should call tf.cast', () => {
+        spyOn(tf, 'cast');
         node.op = 'cast';
         node.params.dtype = createDtypeAttr('float32');
         executeOp(node, {input1});
 
-        expect(dl.cast).toHaveBeenCalledWith(input1[0], 'float32');
+        expect(tf.cast).toHaveBeenCalledWith(input1[0], 'float32');
       });
     });
     describe('expandDims', () => {
-      it('should call dl.expandDims', () => {
-        spyOn(dl, 'expandDims');
+      it('should call tf.expandDims', () => {
+        spyOn(tf, 'expandDims');
         node.op = 'expandDims';
         node.params.axis = createNumberAttr(1);
         executeOp(node, {input1});
 
-        expect(dl.expandDims).toHaveBeenCalledWith(input1[0], 1);
+        expect(tf.expandDims).toHaveBeenCalledWith(input1[0], 1);
       });
     });
     describe('pad', () => {
-      it('should call dl.pad', () => {
-        spyOn(dl, 'pad');
+      it('should call tf.pad', () => {
+        spyOn(tf, 'pad');
         node.op = 'pad';
         node.params.padding = createNumericArrayAttrFromIndex(1);
         node.params.constantValue = createNumberAttr(1);
@@ -69,29 +69,29 @@ describe('transformation', () => {
 
         executeOp(node, {input1, input2});
 
-        expect(dl.pad).toHaveBeenCalledWith(input1[0], [1, 1], 1);
+        expect(tf.pad).toHaveBeenCalledWith(input1[0], [1, 1], 1);
       });
     });
     describe('reshape', () => {
-      it('should call dl.reshape', () => {
-        spyOn(dl, 'reshape');
+      it('should call tf.reshape', () => {
+        spyOn(tf, 'reshape');
         node.op = 'reshape';
         node.params.shape = createNumericArrayAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
 
         executeOp(node, {input1, input2});
 
-        expect(dl.reshape).toHaveBeenCalledWith(input1[0], [1, 1]);
+        expect(tf.reshape).toHaveBeenCalledWith(input1[0], [1, 1]);
       });
     });
     describe('squeeze', () => {
-      it('should call dl.squeeze', () => {
-        spyOn(dl, 'squeeze');
+      it('should call tf.squeeze', () => {
+        spyOn(tf, 'squeeze');
         node.op = 'squeeze';
         node.params.axis = createNumberAttr(1);
         executeOp(node, {input1});
 
-        expect(dl.squeeze).toHaveBeenCalledWith(input1[0], 1);
+        expect(tf.squeeze).toHaveBeenCalledWith(input1[0], 1);
       });
     });
   });

@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
@@ -24,27 +24,27 @@ import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorsMap): dl.Tensor[] => {
+    (node: Node, tensorMap: NamedTensorsMap): tf.Tensor[] => {
       switch (node.op) {
         case 'batchNormalization': {
-          return [dl.batchNormalization(
-              getParamValue('x', node, tensorMap) as dl.Tensor,
-              getParamValue('mean', node, tensorMap) as dl.Tensor,
-              getParamValue('variance', node, tensorMap) as dl.Tensor,
+          return [tf.batchNormalization(
+              getParamValue('x', node, tensorMap) as tf.Tensor,
+              getParamValue('mean', node, tensorMap) as tf.Tensor,
+              getParamValue('variance', node, tensorMap) as tf.Tensor,
               getParamValue('epislon', node, tensorMap) as number,
-              getParamValue('scale', node, tensorMap) as dl.Tensor,
-              getParamValue('offset', node, tensorMap) as dl.Tensor)];
+              getParamValue('scale', node, tensorMap) as tf.Tensor,
+              getParamValue('offset', node, tensorMap) as tf.Tensor)];
         }
         case 'localResponseNormalization': {
-          return [dl.localResponseNormalization(
-              getParamValue('x', node, tensorMap) as dl.Tensor3D | dl.Tensor4D,
+          return [tf.localResponseNormalization(
+              getParamValue('x', node, tensorMap) as tf.Tensor3D | tf.Tensor4D,
               getParamValue('radius', node, tensorMap) as number,
               getParamValue('bias', node, tensorMap) as number,
               getParamValue('alpha', node, tensorMap) as number,
               getParamValue('beta', node, tensorMap) as number)];
         }
         case 'softmax': {
-          return [dl.softmax(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.softmax(getParamValue('x', node, tensorMap) as tf.Tensor)];
         }
         default:
           throw TypeError(`Node type ${node.op} is not implemented`);

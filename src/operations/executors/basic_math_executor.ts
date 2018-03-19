@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
@@ -24,61 +24,61 @@ import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
 export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorsMap): dl.Tensor[] => {
+    (node: Node, tensorMap: NamedTensorsMap): tf.Tensor[] => {
       switch (node.op) {
         case 'abs':
-          return [dl.abs(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.abs(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'acos':
-          return [dl.acos(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.acos(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'asin':
-          return [dl.asin(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.asin(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'atan':
-          return [dl.atan(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.atan(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'ceil':
-          return [dl.ceil(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.ceil(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'cos':
-          return [dl.cos(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.cos(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'cosh':
-          return [dl.cosh(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.cosh(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'elu':
-          return [dl.elu(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.elu(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'exp':
-          return [dl.exp(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.exp(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'floor':
-          return [dl.floor(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.floor(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'log':
-          return [dl.log(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.log(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'relu':
-          return [dl.relu(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.relu(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'selu':
-          return [dl.selu(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.selu(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'sigmoid':
-          return [dl.sigmoid(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.sigmoid(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'sin':
-          return [dl.sin(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.sin(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'sinh': {
-          return [dl.sinh(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.sinh(getParamValue('x', node, tensorMap) as tf.Tensor)];
         }
         case 'sqrt': {
-          return [dl.sqrt(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.sqrt(getParamValue('x', node, tensorMap) as tf.Tensor)];
         }
         case 'square': {
-          return [dl.square(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.square(getParamValue('x', node, tensorMap) as tf.Tensor)];
         }
         case 'tanh': {
-          return [dl.tanh(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.tanh(getParamValue('x', node, tensorMap) as tf.Tensor)];
         }
         case 'tan':
-          return [dl.tan(getParamValue('x', node, tensorMap) as dl.Tensor)];
+          return [tf.tan(getParamValue('x', node, tensorMap) as tf.Tensor)];
         case 'clipByValue':
-          return [dl.clipByValue(
-              getParamValue('x', node, tensorMap) as dl.Tensor,
+          return [tf.clipByValue(
+              getParamValue('x', node, tensorMap) as tf.Tensor,
               getParamValue('clipValueMin', node, tensorMap) as number,
               getParamValue('clipValueMax', node, tensorMap) as number)];
         case 'rsqrt':
-          return [dl.div(
-              dl.scalar(1.0, 'float32'),
-              dl.sqrt(getTensor(node.inputNames[0], tensorMap)))];
+          return [tf.div(
+              tf.scalar(1.0, 'float32'),
+              tf.sqrt(getTensor(node.inputNames[0], tensorMap)))];
 
         default:
           throw TypeError(`Node type ${node.op} is not implemented`);

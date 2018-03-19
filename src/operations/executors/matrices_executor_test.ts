@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {Node} from '../index';
 
@@ -24,8 +24,8 @@ import {createBoolAttr, createNumericArrayAttr, createTensorAttr} from './test_h
 
 describe('matrices', () => {
   let node: Node;
-  const input1 = [dl.scalar(1)];
-  const input2 = [dl.scalar(2)];
+  const input1 = [tf.scalar(1)];
+  const input2 = [tf.scalar(2)];
 
   beforeEach(() => {
     node = {
@@ -41,21 +41,21 @@ describe('matrices', () => {
 
   describe('executeOp', () => {
     describe('matMul', () => {
-      it('should call dl.matMul', () => {
-        spyOn(dl, 'matMul');
+      it('should call tf.matMul', () => {
+        spyOn(tf, 'matMul');
         node.op = 'matMul';
         node.params.transposeA = createBoolAttr(true);
         node.params.transposeB = createBoolAttr(false);
         executeOp(node, {input1, input2});
 
-        expect(dl.matMul).toHaveBeenCalledWith(
+        expect(tf.matMul).toHaveBeenCalledWith(
             input1[0], input2[0], true, false);
       });
     });
 
     describe('transpose', () => {
-      it('should call dl.transpose', () => {
-        spyOn(dl, 'transpose');
+      it('should call tf.transpose', () => {
+        spyOn(tf, 'transpose');
         node.op = 'transpose';
         node.inputNames = ['input1', 'input2', 'input3'];
         node.params = {
@@ -64,7 +64,7 @@ describe('matrices', () => {
         };
         executeOp(node, {input1});
 
-        expect(dl.transpose).toHaveBeenCalledWith(input1[0], [1, 2]);
+        expect(tf.transpose).toHaveBeenCalledWith(input1[0], [1, 2]);
       });
     });
   });

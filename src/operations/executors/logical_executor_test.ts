@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import * as dl from 'deeplearn';
+import * as tf from '@tensorflow/tfjs-core';
 
 import {Node} from '../index';
 
@@ -23,8 +23,8 @@ import {createTensorAttr} from './test_helper';
 
 describe('logical', () => {
   let node: Node;
-  const input1 = [dl.scalar(1)];
-  const input2 = [dl.scalar(2)];
+  const input1 = [tf.scalar(1)];
+  const input2 = [tf.scalar(2)];
 
   beforeEach(() => {
     node = {
@@ -42,8 +42,8 @@ describe('logical', () => {
     ['equal', 'greater', 'greaterEqual', 'less', 'lessEqual', 'logicalAnd',
      'logicalOr']
         .forEach(op => {
-          it('should call dl.' + op, () => {
-            const spy = spyOn(dl, op as 'equal');
+          it('should call tf.' + op, () => {
+            const spy = spyOn(tf, op as 'equal');
             node.op = op;
             executeOp(node, {input1, input2});
 
@@ -51,25 +51,25 @@ describe('logical', () => {
           });
         });
     describe('logicalNot', () => {
-      it('should call dl.logicalNot', () => {
-        spyOn(dl, 'logicalNot');
+      it('should call tf.logicalNot', () => {
+        spyOn(tf, 'logicalNot');
         node.op = 'logicalNot';
         executeOp(node, {input1});
 
-        expect(dl.logicalNot).toHaveBeenCalledWith(input1[0]);
+        expect(tf.logicalNot).toHaveBeenCalledWith(input1[0]);
       });
     });
 
     describe('where', () => {
-      it('should call dl.where', () => {
-        spyOn(dl, 'where');
+      it('should call tf.where', () => {
+        spyOn(tf, 'where');
         node.op = 'where';
         node.inputNames = ['input1', 'input2', 'input3'];
         node.params.condition = createTensorAttr(2);
-        const input3 = [dl.scalar(1)];
+        const input3 = [tf.scalar(1)];
         executeOp(node, {input1, input2, input3});
 
-        expect(dl.where).toHaveBeenCalledWith(input3[0], input1[0], input2[0]);
+        expect(tf.where).toHaveBeenCalledWith(input3[0], input1[0], input2[0]);
       });
     });
   });

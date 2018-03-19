@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as tf from '@tensorflow/tfjs';
+import * as tf from '@tensorflow/tfjs-core';
 import {NamedTensorMap, TFModel} from '@tensorflow/tfjs-converter';
 import {IMAGENET_CLASSES} from './imagenet_classes';
 
@@ -59,7 +59,7 @@ export class MobileNet {
         preprocessedInput.reshape([1, ...preprocessedInput.shape]);
     const dict = {};
     dict[INPUT_NODE_NAME] = reshapedInput;
-    return this.model.eval(dict)[OUTPUT_NODE_NAME];
+    return this.model.eval(dict, OUTPUT_NODE_NAME);
   }
 
   getTopKClasses(predictions, topK) {
