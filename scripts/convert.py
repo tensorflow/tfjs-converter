@@ -83,7 +83,7 @@ def validate(nodes):
 
     names = set([x['tfOpName'] for x in ops])
     not_supported = set(
-        [x.op for x in [x for x in nodes if (x.op not in names)]])
+        [x.op for x in [x for x in nodes if x.op not in names]])
     return not_supported
 
 
@@ -167,7 +167,7 @@ def convert(output_node_names, output_graph, saved_model_tags,
         True,
         '',
         saved_model_tags=saved_model_tags,
-        input_saved_model_dir= saved_model_dir)
+        input_saved_model_dir=saved_model_dir)
     graph = load_graph(output_graph + '.frozen')
     unsupported = validate(graph.as_graph_def().node)
     if unsupported:
