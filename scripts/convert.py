@@ -48,7 +48,7 @@ def get_cluster():
     return cluster
 
 
-def load_graph(graph_filename):
+def load_graph(graph_filename, output_node_names):
     """Loads GraphDef. Returns Python Graph object.
 
     Args:
@@ -62,7 +62,7 @@ def load_graph(graph_filename):
         # Set name to empty to avoid using the default name 'import'.
         tf.import_graph_def(graph_def, name='')
 
-    for node in FLAGS.output_node_names.split(','):
+    for node in output_node_names.split(','):
         graph.add_to_collection('train_op',
                                 graph.get_operation_by_name(node.strip()))
 
@@ -87,7 +87,7 @@ def validate(nodes):
     return not_supported
 
 
-def optimize_graph(graph):
+def optimize_graph(graph, output_graph):
     """Takes a Python Graph object and optimizes the graph.
 
     Args:
@@ -103,11 +103,11 @@ def optimize_graph(graph):
     optimized_graph = tf_optimizer.OptimizeGraph(
         rewriter_config, meta_graph, cluster=get_cluster())
 
-    extract_weights(graph, optimized_graph)
+    extract_weights(graph, optimized_graph, output_graph)
     return optimize_graph
 
 
-def extract_weights(graph, graph_def):
+def extract_weights(graph, graph_def, output_graph):
     """Takes a Python GraphDef object and extract the weights.
 
     Args:
@@ -116,9 +116,9 @@ def extract_weights(graph, graph_def):
         the model topology
     """
     constants = [node for node in graph_def.node if node.op == 'Const']
-    print('Writing weight file ' + FLAGS.output_graph + '...')
+    print('Writing weight file ' + output_graph + '...')
     const_manifest = []
-    path = os.path.dirname(FLAGS.output_graph)
+    path = os.path.dirname(output_graph)
 
     with tf.Session(graph=graph) as sess:
         for const in constants:
@@ -135,10 +135,10 @@ def extract_weights(graph, graph_def):
     tfc.write_weights([const_manifest], path)
 
     file_io.atomic_write_string_to_file(
-        os.path.abspath(FLAGS.output_graph), graph_def.SerializeToString())
+        os.path.abspath(output_graph), graph_def.SerializeToString())
 
     file_io.atomic_write_string_to_file(
-        os.path.abspath(FLAGS.output_graph + 'txt'),
+        os.path.abspath(output_graph + 'txt'),
         text_format.MessageToString(graph_def))
 
 
@@ -168,12 +168,12 @@ def convert(output_node_names, output_graph, saved_model_tags,
         '',
         saved_model_tags=saved_model_tags,
         input_saved_model_dir=saved_model_dir)
-    graph = load_graph(output_graph + '.frozen')
+    graph = load_graph(output_graph + '.frozen', output_node_names)
     unsupported = validate(graph.as_graph_def().node)
     if unsupported:
         print('Unsupported Ops in the model\n' + ', '.join(unsupported))
     else:
-        optimize_graph(graph)
+        optimize_graph(graph, output_graph)
 
 
 def main(_):
