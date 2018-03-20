@@ -238,7 +238,7 @@
         "tfParamName": "data_format",
         "dlParamName": "dataFormat",
         "type": "string",
-        "defalutValue": "NHWC"
+        "defaultValue": "NHWC"
       },
       {
         "tfParamName": "dilations",
@@ -276,7 +276,7 @@
         "tfParamName": "data_format",
         "dlParamName": "dataFormat",
         "type": "string",
-        "defalutValue": "NWC"
+        "defaultValue": "NHWC"
       },
       {
         "tfParamName": "dilations",
