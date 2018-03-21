@@ -68,6 +68,7 @@ def load_graph(graph_filename, output_node_names):
 
     return graph
 
+
 def validate(nodes):
     """Validate if the node's op is compatible with TensorFlow.js.
 
@@ -78,8 +79,10 @@ def validate(nodes):
     op_list_path = 'src/operations/op_list/'
     dir_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), '..')
     for filename in os.listdir(os.path.join(dir_path, op_list_path)):
-        with open(os.path.join(dir_path, op_list_path, filename)) as json_data:
-            ops += json.load(json_data)
+        if os.path.splitext(filename)[1] == '.json':
+            with open(os.path.join(dir_path, op_list_path,
+                                   filename)) as json_data:
+                ops += json.load(json_data)
 
     names = set([x['tfOpName'] for x in ops])
     not_supported = set(
@@ -155,6 +158,11 @@ def convert(output_node_names, output_graph, saved_model_tags,
       saved_model_dir: string The saved model directory.
 
     """
+
+    directory = os.path.dirname(output_graph)
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
     freeze_graph.freeze_graph(
         '',
         '',
@@ -174,6 +182,10 @@ def convert(output_node_names, output_graph, saved_model_tags,
         print('Unsupported Ops in the model\n' + ', '.join(unsupported))
     else:
         optimize_graph(graph, output_graph)
+
+    # clean up the temp files
+    if os.path.exists(output_graph + '.frozen'):
+        os.remove(output_graph + '.frozen')
 
 
 def main(_):
