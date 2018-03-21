@@ -156,6 +156,7 @@ def convert(output_node_names, output_graph, saved_model_tags,
     if not os.path.exists(directory):
         os.makedirs(directory)
 
+    frozen_file = output_graph + '.frozen'
     freeze_graph.freeze_graph(
         '',
         '',
@@ -164,7 +165,7 @@ def convert(output_node_names, output_graph, saved_model_tags,
         output_node_names,
         '',
         '',
-        output_graph + '.frozen',
+        frozen_file,
         True,
         '',
         saved_model_tags=saved_model_tags,
@@ -177,8 +178,8 @@ def convert(output_node_names, output_graph, saved_model_tags,
         optimize_graph(graph, output_graph)
 
     # clean up the temp files
-    if os.path.exists(output_graph + '.frozen'):
-        os.remove(output_graph + '.frozen')
+    if os.path.exists(frozen_file):
+        os.remove(frozen_file)
 
 
 def main(_):
