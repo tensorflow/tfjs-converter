@@ -65,3 +65,5 @@ export interface ParamValue {
   inputParamLength?: number;
   type: ParamTypes;
 }
+
+export type OpMapperList = OpMapper[];
