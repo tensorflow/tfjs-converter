@@ -19,8 +19,6 @@ from tensorflow.python.grappler import tf_optimizer
 from tensorflow.python.lib.io import file_io
 from tensorflow.python.tools import freeze_graph
 
-from google.protobuf import text_format
-
 sys.path.append(
     os.path.join(
         os.path.dirname(__file__), '..',
@@ -139,11 +137,6 @@ def extract_weights(graph, graph_def, output_graph):
 
     file_io.atomic_write_string_to_file(
         os.path.abspath(output_graph), graph_def.SerializeToString())
-
-    file_io.atomic_write_string_to_file(
-        os.path.abspath(output_graph + 'txt'),
-        text_format.MessageToString(graph_def))
-
 
 def convert(output_node_names, output_graph, saved_model_tags,
             saved_model_dir):
