@@ -20,14 +20,14 @@ import h5py
 import keras
 import numpy as np
 
-from tensorflowjs.converters import h5_conversion
+from tensorflowjs.converters import keras_h5_conversion
 
 
 class ConvertH5WeightsTest(unittest.TestCase):
 
   def setUp(self):
     self._tmp_dir = tempfile.mkdtemp()
-    self._converter = h5_conversion.HDF5Converter()
+    self._converter = keras_h5_conversion.HDF5Converter()
     super(ConvertH5WeightsTest, self).setUp()
 
   def tearDown(self):
@@ -154,7 +154,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     dense_layer = keras.layers.Dense(3)
     t_output = dense_layer(t_input)
     model = keras.Model(t_input, t_output)
-    h5_conversion.save_keras_model(model, self._tmp_dir)
+    keras_h5_conversion.save_keras_model(model, self._tmp_dir)
 
     # Verify the content of the artifacts output directory.
     self.assertTrue(
@@ -177,7 +177,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     os.makedirs(artifacts_dir)
     model = keras.Sequential()
     model.add(keras.layers.Dense(3, input_shape=[2]))
-    h5_conversion.save_keras_model(model, artifacts_dir)
+    keras_h5_conversion.save_keras_model(model, artifacts_dir)
 
     # Verify the content of the artifacts output directory.
     self.assertTrue(
@@ -204,7 +204,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     t_output = dense_layer(t_input)
     model = keras.Model(t_input, t_output)
     with self.assertRaisesRegexp(ValueError, r'already exists as a file'):
-      h5_conversion.save_keras_model(model, artifacts_dir)
+      keras_h5_conversion.save_keras_model(model, artifacts_dir)
 
 
 if __name__ == '__main__':

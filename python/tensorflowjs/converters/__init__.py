@@ -10,4 +10,4 @@ from __future__ import division
 from __future__ import print_function
 
 # pylint: disable=unused-imports
-from tensorflowjs.converters.h5_conversion import save_keras_model
+from tensorflowjs.converters.keras_h5_conversion import save_keras_model

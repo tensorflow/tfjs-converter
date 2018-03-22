@@ -47,7 +47,7 @@ setuptools.setup(
         'tensorflowjs',
         'tensorflowjs.write_weights',
         'tensorflowjs.converters',
-        'tensorflowjs.converters.h5_conversion',
+        'tensorflowjs.converters.keras_h5_conversion',
         'tensorflowjs.converters.converter',
     ],
     install_requires=REQUIRED_PACKAGES,

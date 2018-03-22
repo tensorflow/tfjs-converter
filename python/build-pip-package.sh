@@ -43,10 +43,6 @@ done
 echo "Copying README.md"
 cp "${SCRIPTS_DIR}/README.md" "${TMP_DIR}/"
 
-# Copy LICENSE.
-echo "Copying LICENSE"
-cp "${SCRIPTS_DIR}/../LICENSE" "${TMP_DIR}/LICENSE.txt"
-
 # Copy setup.cfg
 echo "Copying setup.cfg"
 cp "${SCRIPTS_DIR}/setup.cfg" "${TMP_DIR}/"

@@ -15,7 +15,7 @@ import os
 
 import h5py
 
-from tensorflowjs.converters import h5_conversion
+from tensorflowjs.converters import keras_h5_conversion
 
 
 def dispatch_pykeras_conversion(h5_path, output_dir=None):
@@ -41,7 +41,7 @@ def dispatch_pykeras_conversion(h5_path, output_dir=None):
         will be `None`.
       groups: an array of weight_groups as defined in tfjs weights_writer.
   """
-  converter = h5_conversion.HDF5Converter()
+  converter = keras_h5_conversion.HDF5Converter()
 
   h5_file = h5py.File(h5_path)
   if 'layer_names' in h5_file.attrs:
