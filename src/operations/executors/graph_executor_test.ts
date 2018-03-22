@@ -81,14 +81,13 @@ describe('graph', () => {
       });
     });
   });
-  describe('noop', () => {
+  describe('print', () => {
     it('should return empty', () => {
       node.op = 'print';
       node.inputNames = ['input1', 'input2'];
       node.params.x = createTensorAttr(0);
       node.params.data = createTensorsAttr(1, 1);
       node.params.message = createStrAttr('message');
-      node.params.firstN = createNumberAttr(1);
       node.params.summarize = createNumberAttr(1);
       spyOn(console, 'log');
 

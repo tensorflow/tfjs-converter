@@ -70,7 +70,7 @@
         "tfParamName": "first_n",
         "dlParamName": "firstN",
         "type": "number",
-        "defaultValue": -1
+        "notSupprted": true
       },
       {
         "tfParamName": "summarize",
