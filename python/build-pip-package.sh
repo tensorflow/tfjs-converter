@@ -32,10 +32,10 @@ pushd "${SCRIPTS_DIR}" > /dev/null
 echo
 
 # Copy all non-test .py files.
-PY_FILES=$(find ./ -name '*.py' ! -name '*_test.py')
+PY_FILES=$(find . -name '*.py' ! -name '*_test.py')
 for PY_FILE in ${PY_FILES}; do
   echo "Copying ${PY_FILE}"
-  PY_DIR=$(dirname ${PY_FILE})
+  PY_DIR=$(dirname "${PY_FILE}")
   mkdir -p "${TMP_DIR}/${PY_DIR}"
   cp "${PY_FILE}" "${TMP_DIR}/${PY_DIR}"
 done
