@@ -148,7 +148,11 @@ def convert_tf_saved_model(output_node_names,
 
   Args:
     output_node_names: string The names of the output nodes, comma separated.
-    output_graph: string The name of the output graph file.
+    output_dir: string The name of the output directory. The directory
+      will consist of
+      - a file named 'tensorflowjs_model.pb'
+      - a JSON weights manifest file named 'weights_manifest.json'
+      - possibly sharded binary weight files.
     saved_model_tags: string Tagset of the MetaGraphDef to load, in comma
       separated string format.
     saved_model_dir: string The saved model directory.
