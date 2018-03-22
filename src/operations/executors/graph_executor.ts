@@ -44,7 +44,9 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
       const data = getParamValue('data', node, tensorMap) as tfc.Tensor[];
       const message = getParamValue('message', node, tensorMap) as string;
       const summarize = getParamValue('summarize', node, tensorMap) as number;
-
+      console.warn(
+          'The graph has a tf.print() operation,' +
+          'usually used for debugging, which slows down performance.');
       console.log(message);
       for (let i = 0; i < data.length; i++) {
         console.log(

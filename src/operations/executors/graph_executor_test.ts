@@ -90,8 +90,10 @@ describe('graph', () => {
       node.params.message = createStrAttr('message');
       node.params.summarize = createNumberAttr(1);
       spyOn(console, 'log');
+      spyOn(console, 'warn');
 
       expect(executeOp(node, {input1, input2})).toEqual(input1);
+      expect(console.warn).toHaveBeenCalled();
       expect(console.log).toHaveBeenCalledWith('message');
       expect(console.log).toHaveBeenCalledWith([1]);
     });
