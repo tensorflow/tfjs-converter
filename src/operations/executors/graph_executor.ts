@@ -37,6 +37,22 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
     case 'shape':
       return [tfc.tensor1d(
           (getParamValue('x', node, tensorMap) as tfc.Tensor).shape, 'int32')];
+    case 'noop':
+      return [];
+    case 'print':
+      const input = getParamValue('x', node, tensorMap) as tfc.Tensor;
+      const data = getParamValue('data', node, tensorMap) as tfc.Tensor[];
+      const message = getParamValue('message', node, tensorMap) as string;
+      const firstN = getParamValue('firstN', node, tensorMap) as number;
+      const summarize = getParamValue('summarize', node, tensorMap) as number;
+
+      console.log(message);
+      const count = firstN < 0 ? data.length : firstN;
+      for (let i = 0; i < count && i < data.length; i++) {
+        console.log(
+            Array.prototype.slice.call(data[0].dataSync()).slice(0, summarize));
+      }
+      return [input];
 
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);
