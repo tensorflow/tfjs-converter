@@ -21,7 +21,9 @@ cd "${SCRIPTS_DIR}"
 
 export PYTHONPATH=".:${PYTHONPATH}"
 for TEST_FILE in ${TEST_FILES}; do
-  echo "Running test: ${TEST_FILE}"
+  echo
+  echo "====== Running test: ${TEST_FILE} ======"
+  echo
   python "${TEST_FILE}"
 done
 

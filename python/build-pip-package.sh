@@ -29,9 +29,10 @@ TMP_DIR=$(mktemp -d)
 echo "Using temporary directory: ${TMP_DIR}"
 
 pushd "${SCRIPTS_DIR}" > /dev/null
-PY_FILES=$(find ./ -name '*.py' ! -name '*_test.py')
-
 echo
+
+# Copy all non-test .py files.
+PY_FILES=$(find ./ -name '*.py' ! -name '*_test.py')
 for PY_FILE in ${PY_FILES}; do
   echo "Copying ${PY_FILE}"
   PY_DIR=$(dirname ${PY_FILE})
@@ -39,11 +40,28 @@ for PY_FILE in ${PY_FILES}; do
   cp "${PY_FILE}" "${TMP_DIR}/${PY_DIR}"
 done
 
+# Copy .json files under op_list
+OP_LIST_DIR="tensorflowjs/op_list"
+JSON_FILES=$(find -L "${SCRIPTS_DIR}/${OP_LIST_DIR}" -name '*.json')
+if [[ -z "${JSON_FILES}" ]]; then
+  echo "ERROR: Failed to find any .json files in ${SCRIPTS_DIR}/${OP_LIST_DIR}"
+  exit 1
+fi
+
+mkdir -p "${TMP_DIR}/${OP_LIST_DIR}"
+echo
+for JSON_FILE in ${JSON_FILES}; do
+  echo "Copying JSON file: $(basename "${JSON_FILE}")"
+  cp "${JSON_FILE}" "${TMP_DIR}/${OP_LIST_DIR}"
+done
+
 # Copy README.md.
+echo
 echo "Copying README.md"
 cp "${SCRIPTS_DIR}/README.md" "${TMP_DIR}/"
 
 # Copy setup.cfg
+echo
 echo "Copying setup.cfg"
 cp "${SCRIPTS_DIR}/setup.cfg" "${TMP_DIR}/"
 
