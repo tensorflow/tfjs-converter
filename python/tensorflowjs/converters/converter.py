@@ -94,13 +94,15 @@ def main():
       '--output_node_names',
       type=str,
       help='The names of the output nodes, separated by commas. E.g., '
-      '"logits,activations".')
+      '"logits,activations". Applicable only if input format is '
+      '"tf_saved_model".')
   parser.add_argument(
       '--saved_model_tags',
       type=str,
       default='serve',
       help='Tags of the MetaGraphDef to load, in comma separated string '
-      'format. Defaults to "serve".')
+      'format. Defaults to "serve". Applicable only if input format is '
+      '"tf_saved_model".')
   parser.add_argument(
       'output_dir', type=str, help='Path for all output artifacts.')
 
@@ -109,6 +111,11 @@ def main():
   # TODO(cais, piyu): More conversion logics can be added as additional
   #   branches below.
   if FLAGS.input_format == 'keras':
+    if FLAGS.output_node_names:
+      raise ValueError(
+          'The --output_node_names flag is applicable only to input format '
+          '"tensorflow", but the current input format is "keras".')
+
     dispatch_pykeras_conversion(FLAGS.input_path, output_dir=FLAGS.output_dir)
   elif FLAGS.input_path == 'tf_saved_model':
     tf_saved_model_conversion.convert_tf_saved_model(FLAGS.output_node_names,
