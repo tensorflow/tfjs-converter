@@ -39,7 +39,7 @@ const pipVersionCode =
 # This code is auto-generated, do not modify this file!
 version = '${version}'
 `
-fs.writeFile('python/tensorflowjs/__version__.py', pipVersionCode, err => {
+fs.writeFile('python/tensorflowjs/version.py', pipVersionCode, err => {
   if (err != null) {
     throw new Error(`Could not save pip version file ${version}: ${err}`);
   }
