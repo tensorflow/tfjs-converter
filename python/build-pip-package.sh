@@ -16,6 +16,12 @@
 
 # Build pip package for keras_model_converter.
 
+dir_resolve()
+{
+  cd "$1" 2>/dev/null || return $?  # cd to desired directory
+  echo "`pwd -P`" # output full, link-resolved path
+}
+
 set -e
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -28,7 +34,7 @@ if [[ $# != 1 ]]; then
   echo "  OUTPUT_DIR: Directory where the pip (.whl) file will be written."
   exit 1
 fi
-DEST_DIR="$1"
+DEST_DIR=$(readlink --canonicalize $1)
 
 mkdir -p "${DEST_DIR}"
 
