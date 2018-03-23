@@ -126,4 +126,10 @@ if [[ "${RUN_TEST}" == "1" ]]; then
   popd > /dev/null
 
   rm -rf "${TEST_ON_INSTALL_DIR}"
+
+  echo
+  echo "Test-on-install PASSED."
+  echo
+  echo "Your pip wheel is at:"
+  echo "  ${WHEEL_PATH}"
 fi

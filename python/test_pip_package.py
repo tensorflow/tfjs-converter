@@ -99,7 +99,7 @@ class APIAndShellTest(unittest.TestCase):
 
   @classmethod
   def tearDownClass(cls):
-    shutil.rmtree(cls.tf_saved_model_dir)
+    shutil.rmtree(cls.class_tmp_dir)
 
   def setUp(self):
     # Make sure this file is not being run from the source directory, to
