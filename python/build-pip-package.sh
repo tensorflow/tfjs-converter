@@ -27,7 +27,7 @@ if [[ $# -lt 1 ]]; then
   echo "Args:"
   echo "  OUTPUT_DIR: Directory where the pip (.whl) file will be written."
   echo "  --test:     Test the pip package by installing it and running"
-  echo "              test_pip_package.sh."
+  echo "              test_pip_package.py against the install."
   echo
   exit 1
 fi
