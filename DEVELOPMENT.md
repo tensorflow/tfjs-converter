@@ -39,7 +39,7 @@ you prefer.
 
    ```sh
    cd python
-   bazel test scripts/...
+   bazel test tensorflowjs/...
    ```
 
 Be sure to run the tests under **both** Python 2 and Python 3.
