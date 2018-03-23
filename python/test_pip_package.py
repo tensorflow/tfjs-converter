@@ -255,10 +255,6 @@ class APIAndShellTest(unittest.TestCase):
 
   def testConvertTFSavedModelWithCommandLineWorks(self):
     output_dir = os.path.join(self._tmp_dir)
-    # _createTensorFlowSavedModel('b', saved_model_dir)
-
-    # tfjs.converters.convert_tf_saved_model(
-    #     'b/Softmax', saved_model_dir, 'serve', saved_model_dir)
     process = subprocess.Popen(
         ['tensorflowjs_converter', '--input_format', 'tf_saved_model',
          '--output_node_names', 'a/Softmax', '--saved_model_tags', 'serve',
