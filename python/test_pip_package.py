@@ -68,14 +68,12 @@ def _createTensorFlowSavedModel(name_scope, save_path):
 
   with tf.name_scope(name_scope):
     x = tf.constant([[37.0, -23.0], [1.0, 4.0]])
-    # Use a random variable name to prevent name clash between different
-    # test methods.
     w = tf.get_variable('w', shape=[2, 2])
     y = tf.matmul(x, w)
     tf.nn.softmax(y)
     init_op = w.initializer
 
-    # Create a builder
+    # Create a builder.
     builder = tf.saved_model.builder.SavedModelBuilder(save_path)
 
     with tf.Session() as sess:
