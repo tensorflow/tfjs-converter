@@ -95,7 +95,6 @@ popd > /dev/null
 
 WHEEL_PATH=""
 echo
-echo "DEST_DIR = ${DEST_DIR}"  # DEBUG
 echo "Generated wheel file(s) in ${DEST_DIR} :"
 for WHEEL in ${WHEELS}; do
   WHEEL_BASE_NAME="$(basename "${WHEEL}")"

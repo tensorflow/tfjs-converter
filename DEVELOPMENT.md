@@ -58,9 +58,9 @@ pip install --force-reinstall \
   /tmp/my_tensorflowjs_pip/tensorflowjs-0.0.1-py2-none-any.whl
 ```
 
-`build-pip-package.sh` provides a flag with which you can run a test-on-install
-after building the pip package. Make sure you are using a `virutalenv` or
-`pipenv` to avoid changing your base environmnet.
+`build-pip-package.sh` provides a flag (`--test`) with which you can run a
+test-on-install after building the pip package. Make sure you are using a
+`virutalenv` or `pipenv` to avoid changing your base environmnet.
 
 ```sh
 ./build-pip-package.sh --test /tmp/my_tensorflowjs_pip
