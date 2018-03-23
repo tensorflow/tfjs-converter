@@ -33,13 +33,12 @@ converter --input_format {tf_saved_model,keras}
 
 
 ```bash
-$ cd tfjs-converter/
 $ python -m  tensorflowjs.converters.converter \
     --input_format=tf_saved_model \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
     --saved_model_tags=serve
     /tmp/mobilenet/ \
-    /tmp/mobilenet_web/ \
+    /tmp/mobilenet_web/
 ```
 
 | Options | Description
