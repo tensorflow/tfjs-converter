@@ -5,14 +5,14 @@
 There are some Python libraries, binary and tests in the `python/` directory.
 
 It is recommended to do your Python development and testing in a
-[virtualenv](https://virtualenv.pypa.io/en/stable/) or 
+[virtualenv](https://virtualenv.pypa.io/en/stable/) or
 [pipenv](https://docs.pipenv.org/).
 
 As a prerequisite, install the following dependencies for python testing
-* `pip install h5py`
-* `pip install keras`
-* `pip install numpy`
-* `pip install tensorflow`
+```sh
+cd python
+pip install -r requirement.txt
+```
 
 For Python linter, install `pylint`, e.g.,
 * `apt-get install -y pylint`
