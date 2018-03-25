@@ -35,7 +35,7 @@ $ python -m tensorflowjs.converters.converter input_dir output_dir
 
 | Options | Description
 |---|---|
-|`--input_format`  | The format of input model, use tf_saved_model for SavedModel. |
+|`--input_format`     | The format of input model, use tf_saved_model for SavedModel. |
 |`--output_node_names`| he names of the output nodes, separated by commas.|
 |`--saved_model_tags` | Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
 
