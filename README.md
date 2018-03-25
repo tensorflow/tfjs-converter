@@ -20,34 +20,34 @@ are using an already hosted model (e.g. MobileNet), skip this step.
   $ pip install tensorflowjs
 ```
 
-3. Run the tensorflowjs `converter.py` script
+2. Run the tensorflowjs `tensorflowjs converter` script
 
 Usage:
-
 ```bash
-converter --input_format {tf_saved_model,keras}
-          --output_node_names OUTPUT_NODE_NAMES
-          --saved_model_tags SAVED_MODEL_TAGS
-          input_path output_dir
+$ python -m tensorflowjs.converters.converter input_dir output_dir
 ```
 
+|Positional Arguments | Description |
+|---|---|
+|`input_path`  | Full path of the saved model directory.|
+|`output_dir`  | Path for all output artifacts.|
 
-```bash
-$ python -m  tensorflowjs.converters.converter \
-    --input_format=tf_saved_model \
-    --output_node_names='MobilenetV1/Predictions/Reshape_1' \
-    --saved_model_tags=serve
-    /tmp/mobilenet/ \
-    /tmp/mobilenet_web/
-```
 
 | Options | Description
 |---|---|
-|`input_format`  | The format of input model, use tf_saved_model for SavedModel. |
-|`output_node_names`| he names of the output nodes, separated by commas.|
-|`saved_model_tags` | Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
-|`input_path`  | Full path of the saved model directory.|
-|`output_dir`     | Path for all output artifacts. |
+|`--input_format`  | The format of input model, use tf_saved_model for SavedModel. |
+|`--output_node_names`| he names of the output nodes, separated by commas.|
+|`--saved_model_tags` | Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
+
+Example:
+```bash
+$ python -m tensorflowjs.converters.converter \
+    --input_format=tf_saved_model \
+    --output_node_names='MobilenetV1/Predictions/Reshape_1' \
+    --saved_model_tags=serve
+    /mobilenet/saved_model \
+    /mobilenet/web_model
+```
 
 ### Web-friendly format
 
