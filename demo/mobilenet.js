@@ -16,7 +16,7 @@
  */
 
 import * as tfc from '@tensorflow/tfjs-core';
-import {NamedTensorMap, TFModel} from '@tensorflow/tfjs-converter';
+import {NamedTensorMap, FrozenModel} from '@tensorflow/tfjs-converter';
 import {IMAGENET_CLASSES} from './imagenet_classes';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
@@ -31,7 +31,7 @@ export class MobileNet {
   // yolo variables
 
   constructor() {
-    this.model = new TFModel(
+    this.model = new FrozenModel(
       GOOGLE_CLOUD_STORAGE_DIR + MODEL_FILE_URL,
       GOOGLE_CLOUD_STORAGE_DIR + WEIGHT_MANIFEST_FILE_URL);
   }
@@ -59,7 +59,7 @@ export class MobileNet {
         preprocessedInput.reshape([1, ...preprocessedInput.shape]);
     const dict = {};
     dict[INPUT_NODE_NAME] = reshapedInput;
-    return this.model.eval(dict, OUTPUT_NODE_NAME);
+    return this.model.execute(dict, OUTPUT_NODE_NAME);
   }
 
   getTopKClasses(predictions, topK) {
