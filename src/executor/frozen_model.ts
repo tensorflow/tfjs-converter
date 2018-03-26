@@ -134,3 +134,10 @@ export class FrozenModel {
     this.executor.dispose();
   }
 }
+
+export async function loadFrozenModel(
+    modelUrl: string, weightsManifestUrl: string): Promise<FrozenModel> {
+  const model = new FrozenModel(modelUrl, weightsManifestUrl);
+  await model.load();
+  return model;
+}

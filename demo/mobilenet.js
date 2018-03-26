@@ -16,7 +16,7 @@
  */
 
 import * as tfc from '@tensorflow/tfjs-core';
-import {NamedTensorMap, FrozenModel} from '@tensorflow/tfjs-converter';
+import {NamedTensorMap, FrozenModel, loadFrozenModel} from '@tensorflow/tfjs-converter';
 import {IMAGENET_CLASSES} from './imagenet_classes';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
@@ -28,20 +28,18 @@ const OUTPUT_NODE_NAME = 'MobilenetV1/Predictions/Reshape_1';
 const PREPROCESS_DIVISOR = tfc.scalar(255 / 2);
 
 export class MobileNet {
-  // yolo variables
+  constructor() {}
 
-  constructor() {
-    this.model = new FrozenModel(
+  async load() {
+    this.model = await loadFrozenModel(
       GOOGLE_CLOUD_STORAGE_DIR + MODEL_FILE_URL,
       GOOGLE_CLOUD_STORAGE_DIR + WEIGHT_MANIFEST_FILE_URL);
   }
 
-  async load() {
-    await this.model.load();
-  }
-
   dispose() {
-    this.model.dispose();
+    if (this.model) {
+      this.model.dispose();
+    }
   }
   /**
    * Infer through SqueezeNet, assumes variables have been loaded. This does
