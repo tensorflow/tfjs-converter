@@ -41,7 +41,7 @@ DEST_DIR="$1"
 
 mkdir -p "${DEST_DIR}"
 
-DEST_DIR=$(cd "${DEST_DIR}" 2>/dev/null && pwd -P)
+DEST_DIR="$(cd "${DEST_DIR}" 2>/dev/null && pwd -P)"
 
 TMP_DIR="$(mktemp -d)"
 echo "Using temporary directory: ${TMP_DIR}"
