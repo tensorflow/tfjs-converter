@@ -73,12 +73,12 @@ following location:
 
 ```typescript
 import * as tfc from '@tensorflow/tfjs-core';
-import {FrozenModel} from '@tensorflow/tfjs-converter';
+import {loadFrozenModel} from '@tensorflow/tfjs-converter';
 
 const MODEL_URL = 'https://.../mobilenet/web_model.pb';
 const WEIGHTS_URL = 'https://.../mobilenet/weights_manifest.json';
 
-const model = new FrozenModel(MODEL_URL, WEIGHTS_URL);
+const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 const cat = document.getElementById('cat');
 model.predict({input: tfc.fromPixels(cat)});
 ```
