@@ -19,7 +19,7 @@ import * as tfc from '@tensorflow/tfjs-core';
 
 import * as data from '../data/index';
 
-import {FrozenModel} from './index';
+import {FrozenModel, loadFrozenModel} from './index';
 
 const MODEL_URL = 'http://example.org/model.pb';
 const WEIGHT_MANIFEST_URL = 'http://example.org/weights_manifest.json';
@@ -118,5 +118,10 @@ describe('Model', () => {
       const loaded = await model.load();
       expect(loaded).toBe(true);
     });
+  });
+
+  describe('loadFrozenModel', async () => {
+    const model = await loadFrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+    expect(model).not.toBeUndefined();
   });
 });

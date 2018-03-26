@@ -16,7 +16,7 @@
  */
 
 import * as tfc from '@tensorflow/tfjs-core';
-import {NamedTensorMap, FrozenModel, loadFrozenModel} from '@tensorflow/tfjs-converter';
+import {NamedTensorMap, loadFrozenModel} from '@tensorflow/tfjs-converter';
 import {IMAGENET_CLASSES} from './imagenet_classes';
 
 const GOOGLE_CLOUD_STORAGE_DIR =
