@@ -47,7 +47,7 @@
 
 "@tensorflow/tfjs-converter@../tensorflow-tfjs-converter-0.0.3.tgz":
   version "0.0.3"
-  resolved "../tensorflow-tfjs-converter-0.0.3.tgz#5866bdeed7b8bc98d3578ce4ec4592a814c1ff08"
+  resolved "../tensorflow-tfjs-converter-0.0.3.tgz#8be8ae8cf4ad6c67d3576496ea7acb864773c36e"
   dependencies:
     "@types/long" "~3.0.32"
     protobufjs "~6.8.0"
