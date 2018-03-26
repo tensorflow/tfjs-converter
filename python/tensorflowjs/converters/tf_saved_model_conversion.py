@@ -36,112 +36,110 @@ DEFAULT_MODEL_PB_FILENAME = 'tensorflowjs_model.pb'
 
 
 def get_cluster():
-  """ Grappler optimization configuration for GPU."""
-  named_device = device_properties_pb2.NamedDevice()
-  named_device.name = '/GPU:0'
-  named_device.properties.type = 'GPU'
-  named_device.properties.environment['architecture'] = '4'
-  cluster = gcluster.Cluster(devices=[named_device])
-  return cluster
+    """ Grappler optimization configuration for GPU."""
+    named_device = device_properties_pb2.NamedDevice()
+    named_device.name = '/GPU:0'
+    named_device.properties.type = 'GPU'
+    named_device.properties.environment['architecture'] = '4'
+    cluster = gcluster.Cluster(devices=[named_device])
+    return cluster
 
 
 def load_graph(graph_filename, output_node_names):
-  """Loads GraphDef. Returns Python Graph object.
+    """Loads GraphDef. Returns Python Graph object.
 
   Args:
     graph_filename: string file name for the frozen graph
   """
-  with tf.gfile.Open(graph_filename, 'rb') as f:
-    graph_def = tf.GraphDef()
-    graph_def.ParseFromString(f.read())
+    with tf.gfile.Open(graph_filename, 'rb') as f:
+        graph_def = tf.GraphDef()
+        graph_def.ParseFromString(f.read())
 
-  with tf.Graph().as_default() as graph:
-    # Set name to empty to avoid using the default name 'import'.
-    tf.import_graph_def(graph_def, name='')
+    with tf.Graph().as_default() as graph:
+        # Set name to empty to avoid using the default name 'import'.
+        tf.import_graph_def(graph_def, name='')
 
-  for node in output_node_names.split(','):
-    graph.add_to_collection('train_op',
-                            graph.get_operation_by_name(node.strip()))
+    for node in output_node_names.split(','):
+        graph.add_to_collection('train_op',
+                                graph.get_operation_by_name(node.strip()))
 
-  return graph
+    return graph
 
 
 def validate(nodes):
-  """Validate if the node's op is compatible with TensorFlow.js.
+    """Validate if the node's op is compatible with TensorFlow.js.
 
   Args:
     nodes: tf.NodeDef tensorflow NodeDef objects from GraphDef
   """
-  ops = []
-  op_list_path = os.path.join(
-      os.path.dirname(os.path.abspath(__file__)), '../op_list/')
-  for filename in os.listdir(op_list_path):
-    if os.path.splitext(filename)[1] == '.json':
-      with open(os.path.join(op_list_path, filename)) as json_data:
-        ops += json.load(json_data)
+    ops = []
+    op_list_path = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)), '../op_list/')
+    for filename in os.listdir(op_list_path):
+        if os.path.splitext(filename)[1] == '.json':
+            with open(os.path.join(op_list_path, filename)) as json_data:
+                ops += json.load(json_data)
 
-  names = set([x['tfOpName'] for x in ops])
-  not_supported = set(
-      [x.op for x in [x for x in nodes if x.op not in names]])
-  return not_supported
+    names = set([x['tfOpName'] for x in ops])
+    not_supported = set(
+        [x.op for x in [x for x in nodes if x.op not in names]])
+    return not_supported
 
 
 def optimize_graph(graph, output_graph):
-  """Takes a Python Graph object and optimizes the graph.
+    """Takes a Python Graph object and optimizes the graph.
 
   Args:
     graph: tf.Graph tensorflow dataflow graph
   """
-  rewriter_config = rewriter_config_pb2.RewriterConfig()
-  rewriter_config.optimizers[:] = [
-      'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning',
-      'constfold', 'arithmetic', 'dependency'
-  ]
-  meta_graph = tf.train.export_meta_graph(
-      graph_def=graph.as_graph_def(), graph=graph)
-  optimized_graph = tf_optimizer.OptimizeGraph(
-      rewriter_config, meta_graph, cluster=get_cluster())
+    rewriter_config = rewriter_config_pb2.RewriterConfig()
+    rewriter_config.optimizers[:] = [
+        'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning',
+        'constfold', 'arithmetic', 'dependency'
+    ]
+    meta_graph = tf.train.export_meta_graph(
+        graph_def=graph.as_graph_def(), graph=graph)
+    optimized_graph = tf_optimizer.OptimizeGraph(
+        rewriter_config, meta_graph, cluster=get_cluster())
 
-  extract_weights(graph, optimized_graph, output_graph)
-  return optimize_graph
+    extract_weights(graph, optimized_graph, output_graph)
+    return optimize_graph
 
 
 def extract_weights(graph, graph_def, output_graph):
-  """Takes a Python GraphDef object and extract the weights.
+    """Takes a Python GraphDef object and extract the weights.
 
   Args:
     graph: tf.Graph tensorflow dataflow graph
     graph_def: tf.GraphDef tensorflow GraphDef proto object, which represents
       the model topology
   """
-  constants = [node for node in graph_def.node if node.op == 'Const']
-  print('Writing weight file ' + output_graph + '...')
-  const_manifest = []
-  path = os.path.dirname(output_graph)
+    constants = [node for node in graph_def.node if node.op == 'Const']
+    print('Writing weight file ' + output_graph + '...')
+    const_manifest = []
+    path = os.path.dirname(output_graph)
 
-  with tf.Session(graph=graph) as sess:
-    for const in constants:
-      tensor = graph.get_tensor_by_name(const.name + ':0')
-      value = tensor.eval(session=sess)
-      if not isinstance(value, np.ndarray):
-        value = np.array(value)
+    with tf.Session(graph=graph) as sess:
+        for const in constants:
+            tensor = graph.get_tensor_by_name(const.name + ':0')
+            value = tensor.eval(session=sess)
+            if not isinstance(value, np.ndarray):
+                value = np.array(value)
 
-      const_manifest.append({'name': const.name, 'data': value})
+            const_manifest.append({'name': const.name, 'data': value})
 
-      # Remove the binary array from tensor and save it to the external file.
-      const.attr["value"].tensor.ClearField('tensor_content')
+            # Remove the binary array from tensor and save it to the external file.
+            const.attr["value"].tensor.ClearField('tensor_content')
 
-  write_weights.write_weights([const_manifest], path)
+    write_weights.write_weights([const_manifest], path)
 
-  file_io.atomic_write_string_to_file(
-      os.path.abspath(output_graph), graph_def.SerializeToString())
+    file_io.atomic_write_string_to_file(
+        os.path.abspath(output_graph), graph_def.SerializeToString())
 
 
-def convert_tf_saved_model(output_node_names,
-                           output_dir,
-                           saved_model_tags,
-                           saved_model_dir):
-  """Freeze the SavedModel and check the model compatibility with Tensorflow.js.
+def convert_tf_saved_model(saved_model_dir, saved_model_tags,
+                           output_node_names, output_dir):
+    """Freeze the SavedModel and check the model compatibility with Tensorflow.js.
 
   Optimize and convert the model to Tensorflow.js format, when the model passes
   the compatiblity check.
@@ -158,31 +156,31 @@ def convert_tf_saved_model(output_node_names,
     saved_model_dir: string The saved model directory.
   """
 
-  if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-  output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+    output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
 
-  frozen_file = output_graph + '.frozen'
-  freeze_graph.freeze_graph(
-      '',
-      '',
-      True,
-      '',
-      output_node_names,
-      '',
-      '',
-      frozen_file,
-      True,
-      '',
-      saved_model_tags=saved_model_tags,
-      input_saved_model_dir=saved_model_dir)
-  graph = load_graph(output_graph + '.frozen', output_node_names)
-  unsupported = validate(graph.as_graph_def().node)
-  if unsupported:
-    print('Unsupported Ops in the model\n' + ', '.join(unsupported))
-  else:
-    optimize_graph(graph, output_graph)
+    frozen_file = output_graph + '.frozen'
+    freeze_graph.freeze_graph(
+        '',
+        '',
+        True,
+        '',
+        output_node_names,
+        '',
+        '',
+        frozen_file,
+        True,
+        '',
+        saved_model_tags=saved_model_tags,
+        input_saved_model_dir=saved_model_dir)
+    graph = load_graph(output_graph + '.frozen', output_node_names)
+    unsupported = validate(graph.as_graph_def().node)
+    if unsupported:
+        print('Unsupported Ops in the model\n' + ', '.join(unsupported))
+    else:
+        optimize_graph(graph, output_graph)
 
-  # Clean up the temp files.
-  if os.path.exists(frozen_file):
-    os.remove(frozen_file)
+    # Clean up the temp files.
+    if os.path.exists(frozen_file):
+        os.remove(frozen_file)
