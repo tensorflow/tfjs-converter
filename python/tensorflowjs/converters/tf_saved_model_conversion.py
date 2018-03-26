@@ -48,9 +48,9 @@ def get_cluster():
 def load_graph(graph_filename, output_node_names):
   """Loads GraphDef. Returns Python Graph object.
 
-Args:
-  graph_filename: string file name for the frozen graph
-"""
+  Args:
+    graph_filename: string file name for the frozen graph
+  """
   with tf.gfile.Open(graph_filename, 'rb') as f:
     graph_def = tf.GraphDef()
     graph_def.ParseFromString(f.read())
@@ -69,9 +69,9 @@ Args:
 def validate(nodes):
   """Validate if the node's op is compatible with TensorFlow.js.
 
-Args:
-  nodes: tf.NodeDef tensorflow NodeDef objects from GraphDef
-"""
+  Args:
+    nodes: tf.NodeDef tensorflow NodeDef objects from GraphDef
+  """
   ops = []
   op_list_path = os.path.join(
       os.path.dirname(os.path.abspath(__file__)), '../op_list/')
@@ -89,9 +89,9 @@ Args:
 def optimize_graph(graph, output_graph):
   """Takes a Python Graph object and optimizes the graph.
 
-Args:
-  graph: tf.Graph tensorflow dataflow graph
-"""
+  Args:
+    graph: tf.Graph tensorflow dataflow graph
+  """
   rewriter_config = rewriter_config_pb2.RewriterConfig()
   rewriter_config.optimizers[:] = [
       'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning',
@@ -109,11 +109,11 @@ Args:
 def extract_weights(graph, graph_def, output_graph):
   """Takes a Python GraphDef object and extract the weights.
 
-Args:
-  graph: tf.Graph tensorflow dataflow graph
-  graph_def: tf.GraphDef tensorflow GraphDef proto object, which represents
-    the model topology
-"""
+  Args:
+    graph: tf.Graph tensorflow dataflow graph
+    graph_def: tf.GraphDef tensorflow GraphDef proto object, which represents
+      the model topology
+  """
   constants = [node for node in graph_def.node if node.op == 'Const']
   print('Writing weight file ' + output_graph + '...')
   const_manifest = []
@@ -141,20 +141,20 @@ def convert_tf_saved_model(saved_model_dir, saved_model_tags,
                            output_node_names, output_dir):
   """Freeze the SavedModel and check the model compatibility with Tensorflow.js.
 
-Optimize and convert the model to Tensorflow.js format, when the model passes
-the compatiblity check.
+  Optimize and convert the model to Tensorflow.js format, when the model passes
+  the compatiblity check.
 
-Args:
-  saved_model_dir: string The saved model directory.
-  saved_model_tags: string Tagset of the MetaGraphDef to load, in comma
-    separated string format.
-  output_node_names: string The names of the output nodes, comma separated.
-  output_dir: string The name of the output directory. The directory
-    will consist of
-    - a file named 'tensorflowjs_model.pb'
-    - a JSON weights manifest file named 'weights_manifest.json'
-    - possibly sharded binary weight files.
-"""
+  Args:
+    saved_model_dir: string The saved model directory.
+    saved_model_tags: string Tagset of the MetaGraphDef to load, in comma
+      separated string format.
+    output_node_names: string The names of the output nodes, comma separated.
+    output_dir: string The name of the output directory. The directory
+      will consist of
+      - a file named 'tensorflowjs_model.pb'
+      - a JSON weights manifest file named 'weights_manifest.json'
+      - possibly sharded binary weight files.
+  """
 
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
