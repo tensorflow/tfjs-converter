@@ -35,15 +35,15 @@ import tensorflowjs as tfjs
 def _createKerasModel(layer_name_prefix, h5_path=None):
   """Create a Keras model for testing.
 
-Args:
-  layer_name_prefix: A prefix string for layer names. This helps avoid
-    clashes in layer names between different test methods.
-  h5_path: Optional string path for a HDF5 (.h5) file to save the model
-    in.
+  Args:
+    layer_name_prefix: A prefix string for layer names. This helps avoid
+      clashes in layer names between different test methods.
+    h5_path: Optional string path for a HDF5 (.h5) file to save the model
+      in.
 
-Returns:
-  An instance of keras.Model.
-"""
+  Returns:
+    An instance of keras.Model.
+  """
   input_tensor = keras.layers.Input((3, ))
   dense1 = keras.layers.Dense(
       4,
@@ -65,11 +65,11 @@ Returns:
 def _createTensorFlowSavedModel(name_scope, save_path):
   """Create a TensorFlow SavedModel for testing.
 
-Args:
-   name_scope: Name scope to create the model under. This helps avoid
-     op and variable name clashes between different test methods.
-   save_path: The directory path in which to save the model.t
-"""
+  Args:
+    name_scope: Name scope to create the model under. This helps avoid
+      op and variable name clashes between different test methods.
+    save_path: The directory path in which to save the model.
+  """
 
   with tf.name_scope(name_scope):
     x = tf.constant([[37.0, -23.0], [1.0, 4.0]])

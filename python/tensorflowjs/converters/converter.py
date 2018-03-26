@@ -30,26 +30,26 @@ from tensorflowjs.converters import tf_saved_model_conversion
 def dispatch_pykeras_conversion(h5_path, output_dir=None):
   """Converts a Keras HDF5 saved-model file to TensorFlow.js format.
 
-Auto-detects saved_model versus weights-only and generates the correct
-json in either case. This function accepts Keras HDF5 files in two formats:
-  - A weights-only HDF5 (e.g., generated with Keras Model's `save_weights()`
-    method),
-  - A topology+weights combined HDF5 (e.g., generated with
-    `keras.model.save_model`).
+  Auto-detects saved_model versus weights-only and generates the correct
+  json in either case. This function accepts Keras HDF5 files in two formats:
+    - A weights-only HDF5 (e.g., generated with Keras Model's `save_weights()`
+      method),
+    - A topology+weights combined HDF5 (e.g., generated with
+      `keras.model.save_model`).
 
-Args:
-  h5_path: path to an HDF5 file containing keras model data as a `str`.
-  output_dir: Output directory to which the TensorFlow.js-format model JSON
-    file and weights files will be written. If the directory does not exist,
-    it will be created.
+  Args:
+    h5_path: path to an HDF5 file containing keras model data as a `str`.
+    output_dir: Output directory to which the TensorFlow.js-format model JSON
+      file and weights files will be written. If the directory does not exist,
+      it will be created.
 
-Returns:
-  (model_json, groups)
-    model_json: a json dictionary (empty if unused) for model topology.
-      If `h5_path` points to a weights-only HDF5 file, this return value
-      will be `None`.
-    groups: an array of weight_groups as defined in tfjs weights_writer.
-"""
+  Returns:
+    (model_json, groups)
+      model_json: a json dictionary (empty if unused) for model topology.
+        If `h5_path` points to a weights-only HDF5 file, this return value
+        will be `None`.
+      groups: an array of weight_groups as defined in tfjs weights_writer.
+  """
   converter = keras_h5_conversion.HDF5Converter()
 
   h5_file = h5py.File(h5_path)
