@@ -88,7 +88,7 @@ Check out our working [MobileNet demo](./demo/README.md).
 
 Currently TensorFlow.js only supports a limited set of TensorFlow Ops. See the
 [full list](./docs/supported_ops.md).
-If your model uses an unsupported ops, the `convert.py` script will fail and
+If your model uses an unsupported ops, the `tensorflowjs_coverter` script will fail and
 produce a list of the unsupported ops in your model. Please file issues to let us
 know what ops you need support with.
 
