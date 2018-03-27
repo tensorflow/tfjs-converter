@@ -68,18 +68,18 @@ following location:
 
 `yarn add @tensorflow/tfjs-converter` or `npm install @tensorflow/tfjs-converter`
 
-2. Instantiate the [TFModel class](./src/executor/tf_model.ts) and run inference.
+2. Instantiate the [FrozenModel class](./src/executor/frozen_model.ts) and run inference.
 
 ```typescript
 import * as tfc from '@tensorflow/tfjs-core';
-import {TFModel} from '@tensorflow/tfjs-converter';
+import {loadFrozenModel} from '@tensorflow/tfjs-converter';
 
 const MODEL_URL = 'https://.../mobilenet/web_model.pb';
 const WEIGHTS_URL = 'https://.../mobilenet/weights_manifest.json';
 
-const model = new TFModel(MODEL_URL, WEIGHTS_URL);
+const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 const cat = document.getElementById('cat');
-model.predict({input: tfc.fromPixels(cat)});
+model.execute({input: tfc.fromPixels(cat)});
 ```
 
 Check out our working [MobileNet demo](./demo/README.md).
