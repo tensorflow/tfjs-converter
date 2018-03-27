@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
@@ -24,19 +24,35 @@ import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
-                                       dl.Tensor[] => {
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'const': {
       return tensorMap[node.name];
     }
     case 'placeholder':
-      const def = getParamValue('default', node, tensorMap) as dl.Tensor;
+      const def = getParamValue('default', node, tensorMap) as tfc.Tensor;
       return [getTensor(node.name, tensorMap) || def];
     case 'identity':
-      return [getParamValue('x', node, tensorMap) as dl.Tensor];
+      return [getParamValue('x', node, tensorMap) as tfc.Tensor];
     case 'shape':
-      return [dl.tensor1d(
-          (getParamValue('x', node, tensorMap) as dl.Tensor).shape, 'int32')];
+      return [tfc.tensor1d(
+          (getParamValue('x', node, tensorMap) as tfc.Tensor).shape, 'int32')];
+    case 'noop':
+      return [];
+    case 'print':
+      const input = getParamValue('x', node, tensorMap) as tfc.Tensor;
+      const data = getParamValue('data', node, tensorMap) as tfc.Tensor[];
+      const message = getParamValue('message', node, tensorMap) as string;
+      const summarize = getParamValue('summarize', node, tensorMap) as number;
+      console.warn(
+          'The graph has a tf.print() operation,' +
+          'usually used for debugging, which slows down performance.');
+      console.log(message);
+      for (let i = 0; i < data.length; i++) {
+        console.log(
+            Array.prototype.slice.call(data[0].dataSync()).slice(0, summarize));
+      }
+      return [input];
 
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

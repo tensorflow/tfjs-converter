@@ -28,5 +28,72 @@
         "type": "tensors"
       }
     ]
+  },
+  {
+    "tfOpName": "Enter",
+    "dlOpName": "enter",
+    "category": "control",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "tfInputParamLength": 0,
+        "dlParamName": "tensor",
+        "type": "tensor"
+      },
+      {
+        "tfParamName": "T",
+        "dlParamName": "dtype",
+        "type": "dtype",
+        "notSupported": true
+      },
+      {
+        "tfParamName": "frame_name",
+        "dlParamName": "frameName",
+        "type": "string"
+      },
+      {
+        "tfParamName": "is_constant",
+        "dlParamName": "isConstant",
+        "type": "bool"
+      }
+    ]
+  },
+  {
+    "tfOpName": "Exit",
+    "dlOpName": "exit",
+    "category": "control",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "tfInputParamLength": 0,
+        "dlParamName": "tensor",
+        "type": "tensor"
+      },
+      {
+        "tfParamName": "T",
+        "dlParamName": "dtype",
+        "type": "dtype",
+        "notSupported": true
+      }
+    ]
+  },
+  {
+    "tfOpName": "NextIteration",
+    "dlOpName": "nextIteration",
+    "category": "control",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "tfInputParamLength": 0,
+        "dlParamName": "tensor",
+        "type": "tensor"
+      },
+      {
+        "tfParamName": "T",
+        "dlParamName": "dtype",
+        "type": "dtype",
+        "notSupported": true
+      }
+    ]
   }
 ]

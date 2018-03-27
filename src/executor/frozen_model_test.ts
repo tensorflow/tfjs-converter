@@ -15,18 +15,18 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import * as data from '../data/index';
 
-import {TFModel} from './index';
+import {FrozenModel, loadFrozenModel} from './index';
 
 const MODEL_URL = 'http://example.org/model.pb';
 const WEIGHT_MANIFEST_URL = 'http://example.org/weights_manifest.json';
 const RELATIVE_MODEL_URL = '/path/model.pb';
 const RELATIVE_WEIGHT_MANIFEST_URL = '/path/weights_manifest.json';
-let model: TFModel;
-const bias = dl.tensor1d([1], 'int32');
+let model: FrozenModel;
+const bias = tfc.tensor1d([1], 'int32');
 const WEIGHT_MAP = {
   'Const': bias
 };
@@ -66,8 +66,8 @@ describe('Model', () => {
   beforeEach(() => {
     spyOn(data.tensorflow.GraphDef, 'decode').and.returnValue(SIMPLE_MODEL);
     const weightPromise = new Promise((resolve => resolve(WEIGHT_MAP)));
-    spyOn(dl, 'loadWeights').and.returnValue(weightPromise);
-    model = new TFModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+    spyOn(tfc, 'loadWeights').and.returnValue(weightPromise);
+    model = new FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
     spyOn(window, 'fetch')
         .and.callFake(
             () => new Promise(
@@ -84,15 +84,15 @@ describe('Model', () => {
   describe('eval', () => {
     it('should generate the output', async () => {
       await model.load();
-      const input = dl.tensor1d([1], 'int32');
-      const output = model.eval({'Input': input}, 'Add');
-      expect((output as dl.Tensor).dataSync()[0]).toEqual(2);
+      const input = tfc.tensor1d([1], 'int32');
+      const output = model.execute({'Input': input}, 'Add');
+      expect((output as tfc.Tensor).dataSync()[0]).toEqual(2);
     });
   });
 
   describe('dispose', async () => {
     it('should dispose the weights', async () => {
-      model = new TFModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+      model = new FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
       spyOn(bias, 'dispose');
 
       await model.load();
@@ -111,12 +111,17 @@ describe('Model', () => {
 
   describe('relative path', () => {
     beforeEach(() => {
-      model = new TFModel(RELATIVE_MODEL_URL, RELATIVE_WEIGHT_MANIFEST_URL);
+      model = new FrozenModel(RELATIVE_MODEL_URL, RELATIVE_WEIGHT_MANIFEST_URL);
     });
 
     it('load', async () => {
       const loaded = await model.load();
       expect(loaded).toBe(true);
     });
+  });
+
+  describe('loadFrozenModel', async () => {
+    const model = await loadFrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+    expect(model).not.toBeUndefined();
   });
 });

@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {tidy} from 'deeplearn';
+import {tidy} from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/index';
 import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
@@ -113,17 +113,12 @@ export class GraphExecutor {
       node.children.forEach((childNode) => {
         // Merge op can be push if any of its inputs has value.
         if (childNode.op === 'Merge') {
-          if (childNode.inputNames.some(name => {
-                const [nodeName, index] = getNodeNameAndIndex(name);
-                return getTensor(name, tensorMap) !== undefined;
-              })) {
+          if (childNode.inputNames.some(name => !!getTensor(name, tensorMap))) {
             stack.push(childNode);
           }
           // Otherwise all inputs need to have value.
-        } else if (childNode.inputNames.every(name => {
-                     const [nodeName, index] = getNodeNameAndIndex(name);
-                     return getTensor(name, tensorMap) !== undefined;
-                   })) {
+        } else if (childNode.inputNames.every(
+                       name => !!getTensor(name, tensorMap))) {
           stack.push(childNode);
         }
       });

@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
@@ -24,23 +24,32 @@ import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
-                                       dl.Tensor[] => {
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'conv1d': {
       const stride = getParamValue('stride', node, tensorMap) as number;
       const pad = getParamValue('pad', node, tensorMap);
-      return [dl.conv1d(
-          getParamValue('x', node, tensorMap) as dl.Tensor3D,
-          getParamValue('filter', node, tensorMap) as dl.Tensor3D, stride,
-          pad as 'valid' | 'same')];
+      const dataFormat =
+          (getParamValue('dataFormat', node, tensorMap) as string)
+              .toUpperCase();
+      const dilation = getParamValue('dilation', node, tensorMap) as number;
+      return [tfc.conv1d(
+          getParamValue('x', node, tensorMap) as tfc.Tensor3D,
+          getParamValue('filter', node, tensorMap) as tfc.Tensor3D, stride,
+          pad as 'valid' | 'same', dataFormat as 'NWC' | 'NCW', dilation)];
     }
     case 'conv2d': {
       const stride = getParamValue('strides', node, tensorMap) as number[];
       const pad = getParamValue('pad', node, tensorMap);
-      return [dl.conv2d(
-          getParamValue('x', node, tensorMap) as dl.Tensor3D | dl.Tensor4D,
-          getParamValue('filter', node, tensorMap) as dl.Tensor4D,
-          [stride[1], stride[2]], pad as 'valid' | 'same')];
+      const dataFormat =
+          (getParamValue('dataFormat', node, tensorMap) as string)
+              .toUpperCase();
+      const dilations = getParamValue('dilations', node, tensorMap) as number[];
+      return [tfc.conv2d(
+          getParamValue('x', node, tensorMap) as tfc.Tensor3D | tfc.Tensor4D,
+          getParamValue('filter', node, tensorMap) as tfc.Tensor4D,
+          [stride[1], stride[2]], pad as 'valid' | 'same',
+          dataFormat as 'NHWC' | 'NCHW', [dilations[0], dilations[1]])];
     }
     case 'conv2dTranspose': {
       const shape =
@@ -49,20 +58,25 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
           [number, number, number, number];
       const stride = getParamValue('strides', node, tensorMap) as number[];
       const pad = getParamValue('pad', node, tensorMap);
-      return [dl.conv2dTranspose(
-          getParamValue('x', node, tensorMap) as dl.Tensor3D | dl.Tensor4D,
-          getParamValue('filter', node, tensorMap) as dl.Tensor4D, shape,
+      return [tfc.conv2dTranspose(
+          getParamValue('x', node, tensorMap) as tfc.Tensor3D | tfc.Tensor4D,
+          getParamValue('filter', node, tensorMap) as tfc.Tensor4D, shape,
           [stride[1], stride[2]], pad as 'valid' | 'same')];
     }
     case 'depthwiseConv2d': {
       const stride = getParamValue('strides', node, tensorMap) as number[];
       const pad = getParamValue('pad', node, tensorMap);
-      const rates = getParamValue('rates', node, tensorMap) as number[];
-      return [dl.depthwiseConv2d(
-          getParamValue('input', node, tensorMap) as dl.Tensor3D | dl.Tensor4D,
-          getParamValue('filter', node, tensorMap) as dl.Tensor4D,
+      const dilations = getParamValue('dilations', node, tensorMap) as number[];
+      const dataFormat =
+          (getParamValue('dataFormat', node, tensorMap) as string)
+              .toUpperCase();
+
+      return [tfc.depthwiseConv2d(
+          getParamValue('input', node, tensorMap) as tfc.Tensor3D |
+              tfc.Tensor4D,
+          getParamValue('filter', node, tensorMap) as tfc.Tensor4D,
           [stride[1], stride[2]], pad as 'valid' | 'same',
-          [rates[0], rates[1]])];
+          dataFormat as 'NHWC' | 'NCHW', [dilations[0], dilations[1]])];
     }
 
     case 'avgPool': {
@@ -71,8 +85,8 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
       const kernelSize =
           getParamValue('kernelSize', node, tensorMap) as number[];
 
-      return [dl.avgPool(
-          getParamValue('x', node, tensorMap) as dl.Tensor3D | dl.Tensor4D,
+      return [tfc.avgPool(
+          getParamValue('x', node, tensorMap) as tfc.Tensor3D | tfc.Tensor4D,
           [kernelSize[1], kernelSize[2]], [stride[1], stride[2]],
           pad as 'valid' | 'same')];
     }
@@ -83,8 +97,8 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
       const kernelSize =
           getParamValue('kernelSize', node, tensorMap) as number[];
 
-      return [dl.maxPool(
-          getParamValue('x', node, tensorMap) as dl.Tensor3D | dl.Tensor4D,
+      return [tfc.maxPool(
+          getParamValue('x', node, tensorMap) as tfc.Tensor3D | tfc.Tensor4D,
           [kernelSize[1], kernelSize[2]], [stride[1], stride[2]],
           pad as 'valid' | 'same')];
     }

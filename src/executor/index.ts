@@ -16,5 +16,9 @@
  */
 
 export * from './graph_executor';
+<<<<<<< HEAD
 export * from './tf_model';
 export * from './execution_context';
+=======
+export * from './frozen_model';
+>>>>>>> master

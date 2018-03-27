@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
-# Copyright 2017 Google Inc. All Rights Reserved.
+# Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -12,11 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# =============================================================================
-rm -rf dist/ && \
-yarn && \
-node_modules/.bin/mkdirp dist && \
-yarn make-version && \
-node_modules/.bin/browserify --standalone tf-js-converter src/index.ts -p [tsify] > dist/tfjsconverter.js && \
-node_modules/.bin/uglifyjs dist/tfjsconverter.js -c -m -o dist/tfjsconverter.min.js && \
-echo "Stored standalone library at dist/tfjsconverter(.min).js"
+# ==============================================================================
+
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+
+# pylint: disable=unused-imports,line-too-long
+from tensorflowjs.converters.keras_h5_conversion import save_keras_model
+from tensorflowjs.converters.tf_saved_model_conversion import convert_tf_saved_model

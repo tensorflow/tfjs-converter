@@ -15,18 +15,17 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
-import {WeightsManifestConfig} from 'deeplearn/dist/weights_loader';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap, tensorflow} from '../data/index';
 import {OperationMapper} from '../operations/index';
 
 import {GraphExecutor} from './graph_executor';
 
-export class TFModel {
+export class FrozenModel {
   private executor: GraphExecutor;
   private version = 'n/a';
-  private weightManifest: WeightsManifestConfig;
+  private weightManifest: tfc.WeightsManifestConfig;
   private pathPrefix: string;
   // Returns the version information for the tensorflow model GraphDef.
   get modelVersion(): string {
@@ -90,12 +89,11 @@ export class TFModel {
     const graphPromise = this.loadRemoteProtoFile();
     const manifestPromise = this.loadWeightManifest();
 
-    const [graph, _] =
-        await Promise.all([graphPromise, manifestPromise]);
+    const [graph, ] = await Promise.all([graphPromise, manifestPromise]);
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap =
-        await dl.loadWeights(this.weightManifest, this.pathPrefix);
+        await tfc.loadWeights(this.weightManifest, this.pathPrefix);
     this.executor =
         new GraphExecutor(OperationMapper.Instance.transformGraph(graph));
     this.executor.weightMap = this.convertTensorMapToTensorsMap(weightMap);
@@ -115,7 +113,7 @@ export class TFModel {
    * provided and there is only one default output, otherwise return a tensor
    * map.
    */
-  eval(inputs: NamedTensorMap, outputs?: string|string[]): dl.Tensor
+  execute(inputs: NamedTensorMap, outputs?: string|string[]): tfc.Tensor
       |NamedTensorMap {
     const result = this.executor.execute(
         this.convertTensorMapToTensorsMap(inputs), outputs);
@@ -135,4 +133,11 @@ export class TFModel {
   dispose() {
     this.executor.dispose();
   }
+}
+
+export async function loadFrozenModel(
+    modelUrl: string, weightsManifestUrl: string): Promise<FrozenModel> {
+  const model = new FrozenModel(modelUrl, weightsManifestUrl);
+  await model.load();
+  return model;
 }

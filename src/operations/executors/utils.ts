@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tfc from '@tensorflow/tfjs-core';
 import {NamedTensorsMap} from '../../data/index';
 import {Node, ValueType} from '../index';
 
@@ -48,7 +48,7 @@ export function getParamValue(
  * @param tensorsMap Tensors map keyed by the node
  */
 export function getTensor(
-    name: string, tensorsMap: NamedTensorsMap): dl.Tensor {
+    name: string, tensorsMap: NamedTensorsMap): tfc.Tensor {
   const [nodeName, index] = getNodeNameAndIndex(name);
 
   return tensorsMap[nodeName] ?

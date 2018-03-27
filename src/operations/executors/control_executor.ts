@@ -15,26 +15,44 @@
  * =============================================================================
  */
 
-import * as dl from 'deeplearn';
+import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
 export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorsMap): dl.Tensor[] => {
+    (node: Node, tensorMap: NamedTensorsMap,
+     contexts: ExecutionContext[]): tfc.Tensor[] => {
       switch (node.op) {
         case 'switch': {
-          const pred = getParamValue('pred', node, tensorMap) as dl.Tensor;
-          const data = getParamValue('data', node, tensorMap) as dl.Tensor;
+          const pred = getParamValue('pred', node, tensorMap) as tfc.Tensor;
+          const data = getParamValue('data', node, tensorMap) as tfc.Tensor;
+          // Outputs nodes :0 => false, :1 => true
           return pred.dataSync()[0] ? [undefined, data] : [data, undefined];
         }
         case 'merge':
           const inputName = node.inputNames.find(
               name => getTensor(name, tensorMap) !== undefined);
           return inputName ? [getTensor(name, tensorMap)] : undefined;
+
+        case 'enter':
+          context.frameId += 1;
+          const data = getParamValue('tensor', node, tensorMap) as tfc.Tensor;
+          return [data];
+
+        case 'exit':
+          context.frameId -= 1;
+          const tensor = getParamValue('tensor', node, tensorMap) as tfc.Tensor;
+          return [tensor];
+
+        case 'nextIteration':
+          context.iterationId += 1;
+          const input = getParamValue('tensor', node, tensorMap) as tfc.Tensor;
+          return [input];
         default:
           throw TypeError(`Node type ${node.op} is not implemented`);
       }
