@@ -65,9 +65,8 @@ class ConvertTest(unittest.TestCase):
 
     tf_saved_model_conversion.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
-        'serve',
         'Softmax',
-        os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
+        os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     )
 
     weights = [{

@@ -169,9 +169,9 @@ class APIAndShellTest(unittest.TestCase):
     output_dir = os.path.join(self._tmp_dir, 'tensorflowjs_model')
     tfjs.converters.convert_tf_saved_model(
         self.tf_saved_model_dir,
-        'serve',
         'a/Softmax',
         output_dir,
+        saved_model_tags='serve'
     )
 
     weights = [{

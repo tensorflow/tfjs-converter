@@ -121,8 +121,8 @@ def main():
         FLAGS.input_path, output_dir=FLAGS.output_dir)
   elif FLAGS.input_format == 'tf_saved_model':
     tf_saved_model_conversion.convert_tf_saved_model(
-        FLAGS.input_path, FLAGS.saved_model_tags, FLAGS.output_node_names,
-        FLAGS.output_dir)
+        FLAGS.input_path, FLAGS.output_node_names,
+        FLAGS.output_dir, saved_model_tags=FLAGS.saved_model_tags)
   else:
     raise ValueError('Invalid input format: \'%s\'' % FLAGS.input_format)
 

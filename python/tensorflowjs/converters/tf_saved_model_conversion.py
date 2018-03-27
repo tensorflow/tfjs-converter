@@ -137,8 +137,8 @@ def extract_weights(graph, graph_def, output_graph):
       os.path.abspath(output_graph), graph_def.SerializeToString())
 
 
-def convert_tf_saved_model(saved_model_dir, saved_model_tags,
-                           output_node_names, output_dir):
+def convert_tf_saved_model(saved_model_dir, output_node_names,
+                           output_dir, saved_model_tags='serve'):
   """Freeze the SavedModel and check the model compatibility with Tensorflow.js.
 
   Optimize and convert the model to Tensorflow.js format, when the model passes
@@ -146,14 +146,14 @@ def convert_tf_saved_model(saved_model_dir, saved_model_tags,
 
   Args:
     saved_model_dir: string The saved model directory.
-    saved_model_tags: string Tagset of the MetaGraphDef to load, in comma
-      separated string format.
     output_node_names: string The names of the output nodes, comma separated.
     output_dir: string The name of the output directory. The directory
       will consist of
       - a file named 'tensorflowjs_model.pb'
       - a JSON weights manifest file named 'weights_manifest.json'
       - possibly sharded binary weight files.
+    saved_model_tags: string Tagset of the MetaGraphDef to load, in comma
+      separated string format. Defaulted to 'serve'
   """
 
   if not os.path.exists(output_dir):
