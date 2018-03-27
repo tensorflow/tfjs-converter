@@ -26,7 +26,7 @@ import {ExecutionContext} from './execution_context';
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
   private _weightMap: NamedTensorsMap = {};
-  private context: ExecutionContext = {frameId: 0, iterationId: 0};
+  private context: ExecutionContext = new ExecutionContext(this);
   get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }

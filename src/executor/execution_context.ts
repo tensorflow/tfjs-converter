@@ -15,11 +15,49 @@
  * =============================================================================
  */
 
-export interface ExecutionContext {
+import {GraphExecutor} from './graph_executor';
+
+export interface ExecutionContextId {
   frameId: number;
   iterationId: number;
 }
 
-export function contextHash(context: ExecutionContext) {
-  return `#${context.frameId}-${context.iterationId}`;
+export class ExecutionContext {
+  private contexts: ExecutionContextId[] = [this.newFrame(0)];
+
+  constructor(private executor: GraphExecutor) {}
+
+  private newFrame(frameId: number) {
+    return {frameId, iterationId: 0};
+  }
+
+  currentContext(): ExecutionContextId {
+    return this.contexts[0];
+  }
+
+  currentContextId(): string {
+    const currentContext = this.currentContext();
+    return `${currentContext.frameId}-${currentContext.iterationId}`;
+  }
+
+  enterFrame() {
+    let frameId = 0;
+    if (this.currentContext()) {
+      frameId = this.currentContext().frameId + 1;
+    }
+    this.contexts.push(this.newFrame(frameId));
+  }
+
+  exitFrame(): ExecutionContextId {
+    if (this.contexts.length <= 1) {
+      throw new Error('Cannot exit the root execution frame.');
+    }
+    return this.contexts.pop();
+  }
+
+  nextIteration() {
+    if (this.currentContext()) {
+      this.currentContext().iterationId += 1;
+    }
+  }
 }
