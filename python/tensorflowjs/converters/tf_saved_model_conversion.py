@@ -131,10 +131,10 @@ def extract_weights(graph_def, output_graph):
       if not isinstance(value, np.ndarray):
         value = np.array(value)
 
-    const_manifest.append({'name': const.name, 'data': value})
+      const_manifest.append({'name': const.name, 'data': value})
 
-    # Remove the binary array from tensor and save it to the external file.
-    const.attr["value"].tensor.ClearField('tensor_content')
+      # Remove the binary array from tensor and save it to the external file.
+      const.attr["value"].tensor.ClearField('tensor_content')
 
   write_weights.write_weights([const_manifest], path)
 
