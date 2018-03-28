@@ -124,16 +124,17 @@ def extract_weights(graph_def, output_graph):
 
   graph = tf.Graph()
   with tf.Session(graph=graph) as sess:
-      tf.import_graph_def(graph_def, name='')
+    tf.import_graph_def(graph_def, name='')
+    for const in constants:
       tensor = graph.get_tensor_by_name(const.name + ':0')
       value = tensor.eval(session=sess)
       if not isinstance(value, np.ndarray):
         value = np.array(value)
 
-      const_manifest.append({'name': const.name, 'data': value})
+    const_manifest.append({'name': const.name, 'data': value})
 
-      # Remove the binary array from tensor and save it to the external file.
-      const.attr["value"].tensor.ClearField('tensor_content')
+    # Remove the binary array from tensor and save it to the external file.
+    const.attr["value"].tensor.ClearField('tensor_content')
 
   write_weights.write_weights([const_manifest], path)
 
