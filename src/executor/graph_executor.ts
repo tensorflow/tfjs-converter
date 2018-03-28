@@ -57,7 +57,7 @@ export class GraphExecutor {
       this.compiledOrder.push(node);
       node.children.forEach((childNode) => {
         if (childNode.inputNames.every(name => {
-              const [nodeName, ] = getNodeNameAndIndex(name);
+              const [nodeName, ] = getNodeNameAndIndex(name, this.context);
               return visited[nodeName];
             })) {
           stack.push(childNode);
@@ -108,8 +108,8 @@ export class GraphExecutor {
 
     while (stack.length > 0) {
       const node = stack.pop();
-      tensorMap[node.name] =
-          operations.executeOp(node, tensorMap, this.context);
+      const [nodeName, ] = getNodeNameAndIndex(node.name, this.context);
+      tensorMap[nodeName] = operations.executeOp(node, tensorMap, this.context);
 
       node.children.forEach((childNode) => {
         // Merge op can be push if any of its inputs has value.

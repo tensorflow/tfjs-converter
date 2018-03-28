@@ -54,11 +54,8 @@ export function getParamValue(
 export function getTensor(
     name: string, tensorsMap: NamedTensorsMap,
     context: ExecutionContext): tfc.Tensor {
-  const [nodeName, index] = getNodeNameAndIndex(name);
-  const nodeNameWithContextId = getNodeNameWithContextId(nodeName, context);
-  return tensorsMap[nodeNameWithContextId] ?
-      tensorsMap[nodeNameWithContextId][index] :
-      undefined;
+  const [nodeName, index] = getNodeNameAndIndex(name, context);
+  return tensorsMap[nodeName] ? tensorsMap[nodeName][index] : undefined;
 }
 
 /**
@@ -67,11 +64,13 @@ export function getTensor(
  * node_name:output_index, i.e. MatMul:0, if the output_index is not set, it is
  * default to 0.
  */
-export function getNodeNameAndIndex(inputName: string): [string, number] {
+export function getNodeNameAndIndex(
+    inputName: string, context: ExecutionContext): [string, number] {
   const index = inputName.lastIndexOf(':');
   if (index === -1) return [inputName, 0];
 
-  const nodeName = inputName.substring(0, index);
+  const nodeName =
+      getNodeNameWithContextId(inputName.substring(0, index), context);
   return [nodeName, Number(inputName.substring(index + 1))];
 }
 
