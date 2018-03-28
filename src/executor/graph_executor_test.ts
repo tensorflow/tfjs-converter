@@ -16,8 +16,10 @@
  */
 
 import * as tfc from '@tensorflow/tfjs-core';
+
 import * as operations from '../operations/index';
-import {GraphExecutor} from './index';
+
+import {ExecutionContext, GraphExecutor} from './index';
 
 let executor: GraphExecutor;
 let inputNode: operations.Node;
@@ -80,8 +82,9 @@ describe('GraphExecutor', () => {
         executor.execute({input: [inputTensor]});
 
         expect(spy.calls.allArgs()).toEqual([
-          [inputNode, jasmine.any(Object)], [constNode, jasmine.any(Object)],
-          [outputNode, jasmine.any(Object)]
+          [inputNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
+          [constNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
+          [outputNode, jasmine.any(Object), jasmine.any(ExecutionContext)]
         ]);
       });
     });

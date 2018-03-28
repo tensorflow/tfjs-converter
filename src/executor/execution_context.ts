@@ -15,8 +15,6 @@
  * =============================================================================
  */
 
-import {GraphExecutor} from './graph_executor';
-
 export interface ExecutionContextId {
   frameId: number;
   iterationId: number;
@@ -25,25 +23,27 @@ export interface ExecutionContextId {
 export class ExecutionContext {
   private contexts: ExecutionContextId[] = [this.newFrame(0)];
 
-  constructor(private executor: GraphExecutor) {}
+  constructor() {}
 
   private newFrame(frameId: number) {
     return {frameId, iterationId: 0};
   }
 
-  currentContext(): ExecutionContextId {
+  get currentContext(): ExecutionContextId {
     return this.contexts[0];
   }
 
-  currentContextId(): string {
-    const currentContext = this.currentContext();
-    return `${currentContext.frameId}-${currentContext.iterationId}`;
+  get currentContextId(): string {
+    return (this.currentContext.frameId === 0 &&
+            this.currentContext.iterationId === 0) ?
+        '' :
+        `${this.currentContext.frameId}-${this.currentContext.iterationId}`;
   }
 
   enterFrame() {
     let frameId = 0;
-    if (this.currentContext()) {
-      frameId = this.currentContext().frameId + 1;
+    if (this.currentContext) {
+      frameId = this.currentContext.frameId + 1;
     }
     this.contexts.push(this.newFrame(frameId));
   }
@@ -56,8 +56,8 @@ export class ExecutionContext {
   }
 
   nextIteration() {
-    if (this.currentContext()) {
-      this.currentContext().iterationId += 1;
+    if (this.currentContext) {
+      this.currentContext.iterationId += 1;
     }
   }
 }

@@ -16,7 +16,9 @@
  */
 
 import * as tfc from '@tensorflow/tfjs-core';
+
 import {NamedTensorsMap} from '../data/index';
+import {ExecutionContext} from '../executor';
 
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basicMath from './executors/basic_math_executor';
@@ -37,30 +39,31 @@ import {Node} from './index';
  * @param tensorMap contains tensors for executed nodes and weights
  */
 export function executeOp(
-    node: Node, tensorMap: NamedTensorsMap): tfc.Tensor[] {
+    node: Node, tensorMap: NamedTensorsMap,
+    context: ExecutionContext): tfc.Tensor[] {
   switch (node.category) {
     case 'arithmetic':
-      return arithmetic.executeOp(node, tensorMap);
+      return arithmetic.executeOp(node, tensorMap, context);
     case 'basic_math':
-      return basicMath.executeOp(node, tensorMap);
+      return basicMath.executeOp(node, tensorMap, context);
     case 'convolution':
-      return convolution.executeOp(node, tensorMap);
+      return convolution.executeOp(node, tensorMap, context);
     case 'creation':
-      return creation.executeOp(node, tensorMap);
+      return creation.executeOp(node, tensorMap, context);
     case 'graph':
-      return graph.executeOp(node, tensorMap);
+      return graph.executeOp(node, tensorMap, context);
     case 'logical':
-      return logical.executeOp(node, tensorMap);
+      return logical.executeOp(node, tensorMap, context);
     case 'matrices':
-      return matrices.executeOp(node, tensorMap);
+      return matrices.executeOp(node, tensorMap, context);
     case 'normalization':
-      return normalization.executeOp(node, tensorMap);
+      return normalization.executeOp(node, tensorMap, context);
     case 'reduction':
-      return reduction.executeOp(node, tensorMap);
+      return reduction.executeOp(node, tensorMap, context);
     case 'slice_join':
-      return sliceJoin.executeOp(node, tensorMap);
+      return sliceJoin.executeOp(node, tensorMap, context);
     case 'transformation':
-      return transformation.executeOp(node, tensorMap);
+      return transformation.executeOp(node, tensorMap, context);
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);
   }

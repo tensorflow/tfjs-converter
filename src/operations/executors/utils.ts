@@ -18,25 +18,27 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node, ValueType} from '../index';
 
 export function getParamValue(
-    paramName: string, node: Node, tensorMap: NamedTensorsMap): ValueType {
+    paramName: string, node: Node, tensorMap: NamedTensorsMap,
+    context: ExecutionContext): ValueType {
   const param = node.params[paramName];
   if (param && param.inputIndex !== undefined) {
     if (param.type === 'tensor') {
-      return getTensor(node.inputNames[param.inputIndex], tensorMap);
+      return getTensor(node.inputNames[param.inputIndex], tensorMap, context);
     }
     if (param.type === 'tensors') {
       const inputs = param.inputIndex === 0 ?
           node.inputNames.slice(param.inputIndex, -param.inputParamLength) :
           node.inputNames.splice(param.inputIndex);
 
-      return inputs.map(name => getTensor(name, tensorMap));
+      return inputs.map(name => getTensor(name, tensorMap, context));
     }
     const data = Array.prototype.slice.call(
-        getTensor(node.inputNames.slice(param.inputIndex)[0], tensorMap)
+        getTensor(
+            node.inputNames.slice(param.inputIndex)[0], tensorMap, context)
             .dataSync());
     return param.type === 'number' ? data[0] : data;
   }
@@ -51,11 +53,11 @@ export function getParamValue(
  */
 export function getTensor(
     name: string, tensorsMap: NamedTensorsMap,
-    executor: GraphExecutor): tfc.Tensor {
+    context: ExecutionContext): tfc.Tensor {
   const [nodeName, index] = getNodeNameAndIndex(name);
-
-  return tensorsMap[nodeName] ?
-      tensorsMap[nodeName][Number(name.substring(index + 1))] :
+  const nodeNameWithContextId = getNodeNameWithContextId(nodeName, context);
+  return tensorsMap[nodeNameWithContextId] ?
+      tensorsMap[nodeNameWithContextId][index] :
       undefined;
 }
 
@@ -71,4 +73,10 @@ export function getNodeNameAndIndex(inputName: string): [string, number] {
 
   const nodeName = inputName.substring(0, index);
   return [nodeName, Number(inputName.substring(index + 1))];
+}
+
+function getNodeNameWithContextId(
+    name: string, context: ExecutionContext): string {
+  return !!context.currentContextId ? `${name}-${context.currentContextId}` :
+                                      name;
 }

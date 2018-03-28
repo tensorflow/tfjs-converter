@@ -14,6 +14,8 @@
  * limitations under the License.
  * =============================================================================
  */
+import {ExecutionContext} from '../executor';
+
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';
 import * as convolution from './executors/convolution_executor';
@@ -30,6 +32,8 @@ import {Node} from './types';
 
 describe('OperationExecutor', () => {
   let node: Node;
+  const context = new ExecutionContext();
+
   beforeEach(() => {
     node = {
       name: 'test',
@@ -49,8 +53,8 @@ describe('OperationExecutor', () => {
           it('should call ' + category.CATEGORY + ' executor', () => {
             spyOn(category, 'executeOp');
             node.category = category.CATEGORY;
-            executeOp(node, {});
-            expect(category.executeOp).toHaveBeenCalledWith(node, {});
+            executeOp(node, {}, context);
+            expect(category.executeOp).toHaveBeenCalledWith(node, {}, context);
           });
         });
   });

@@ -26,7 +26,7 @@ import {ExecutionContext} from './execution_context';
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
   private _weightMap: NamedTensorsMap = {};
-  private context: ExecutionContext = new ExecutionContext(this);
+  private context: ExecutionContext = new ExecutionContext();
   get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }
@@ -57,7 +57,7 @@ export class GraphExecutor {
       this.compiledOrder.push(node);
       node.children.forEach((childNode) => {
         if (childNode.inputNames.every(name => {
-              const [nodeName, index] = getNodeNameAndIndex(name);
+              const [nodeName, ] = getNodeNameAndIndex(name);
               return visited[nodeName];
             })) {
           stack.push(childNode);
@@ -83,7 +83,7 @@ export class GraphExecutor {
         tensors = this.executeWithControlFlow(inputs);
       } else {
         tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-          map[node.name] = operations.executeOp(node, map);
+          map[node.name] = operations.executeOp(node, map, this.context);
           return map;
         }, {...this.weightMap, ...inputs});
       }
@@ -95,7 +95,7 @@ export class GraphExecutor {
           (outputs || this.graph.outputs.map(node => node.name)) as string[];
 
       return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
-        map[name] = getTensor(name, tensors);
+        map[name] = getTensor(name, tensors, this.context);
         return map;
       }, {});
     });
@@ -108,17 +108,19 @@ export class GraphExecutor {
 
     while (stack.length > 0) {
       const node = stack.pop();
-      tensorMap[node.name] = operations.executeOp(node, tensorMap);
+      tensorMap[node.name] =
+          operations.executeOp(node, tensorMap, this.context);
 
       node.children.forEach((childNode) => {
         // Merge op can be push if any of its inputs has value.
         if (childNode.op === 'Merge') {
-          if (childNode.inputNames.some(name => !!getTensor(name, tensorMap))) {
+          if (childNode.inputNames.some(
+                  name => !!getTensor(name, tensorMap, this.context))) {
             stack.push(childNode);
           }
           // Otherwise all inputs need to have value.
         } else if (childNode.inputNames.every(
-                       name => !!getTensor(name, tensorMap))) {
+                       name => !!getTensor(name, tensorMap, this.context))) {
           stack.push(childNode);
         }
       });
