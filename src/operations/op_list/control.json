@@ -1,5 +1,17 @@
 [
   {
+    "tfOpName": "LoopCond",
+    "dlOpName": "loopCond",
+    "category": "control",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "pred",
+        "type": "tensor"
+      }
+    ]
+  },
+  {
     "tfOpName": "Switch",
     "dlOpName": "switch",
     "category": "control",

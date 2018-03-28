@@ -112,7 +112,7 @@ export class GraphExecutor {
       tensorMap[nodeName] = operations.executeOp(node, tensorMap, this.context);
 
       node.children.forEach((childNode) => {
-        // Merge op can be push if any of its inputs has value.
+        // Merge op can be pushed if any of its inputs has value.
         if (childNode.op === 'Merge') {
           if (childNode.inputNames.some(
                   name => !!getTensor(name, tensorMap, this.context))) {

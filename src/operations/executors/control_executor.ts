@@ -24,43 +24,45 @@ import {Node} from '../index';
 import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
-export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorsMap,
-     context: ExecutionContext): tfc.Tensor[] => {
-      switch (node.op) {
-        case 'switch': {
-          const pred =
-              getParamValue('pred', node, tensorMap, context) as tfc.Tensor;
-          const data =
-              getParamValue('data', node, tensorMap, context) as tfc.Tensor;
-          // Outputs nodes :0 => false, :1 => true
-          return pred.dataSync()[0] ? [undefined, data] : [data, undefined];
-        }
-        case 'merge':
-          const inputName = node.inputNames.find(
-              name => getTensor(name, tensorMap, context) !== undefined);
-          return inputName ? [getTensor(name, tensorMap, context)] : undefined;
+export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
+                                    context: ExecutionContext):
+                                       tfc.Tensor[] => {
+  switch (node.op) {
+    case 'loopCond':
+      return [getParamValue('pred', node, tensorMap, context) as tfc.Tensor];
+    case 'switch': {
+      const pred =
+          getParamValue('pred', node, tensorMap, context) as tfc.Tensor;
+      const data =
+          getParamValue('data', node, tensorMap, context) as tfc.Tensor;
+      // Outputs nodes :0 => false, :1 => true
+      return pred.dataSync()[0] ? [undefined, data] : [data, undefined];
+    }
+    case 'merge':
+      const inputName = node.inputNames.find(
+          name => getTensor(name, tensorMap, context) !== undefined);
+      return inputName ? [getTensor(name, tensorMap, context)] : undefined;
 
-        case 'enter':
-          context.enterFrame();
-          const data =
-              getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
-          return [data];
+    case 'enter':
+      context.enterFrame();
+      const data =
+          getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
+      return [data];
 
-        case 'exit':
-          context.exitFrame();
-          const tensor =
-              getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
-          return [tensor];
+    case 'exit':
+      context.exitFrame();
+      const tensor =
+          getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
+      return [tensor];
 
-        case 'nextIteration':
-          context.nextIteration();
-          const input =
-              getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
-          return [input];
-        default:
-          throw TypeError(`Node type ${node.op} is not implemented`);
-      }
-    };
+    case 'nextIteration':
+      context.nextIteration();
+      const input =
+          getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
+      return [input];
+    default:
+      throw TypeError(`Node type ${node.op} is not implemented`);
+  }
+};
 
 export const CATEGORY = 'arithmetic';
