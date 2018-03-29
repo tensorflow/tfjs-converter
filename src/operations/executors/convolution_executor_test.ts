@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './convolution_executor';
@@ -26,7 +26,8 @@ import {createNumberAttr, createNumericArrayAttr, createStrAttr, createTensorAtt
 describe('convolution', () => {
   let node: Node;
   const input = [tfc.scalar(1)];
-  const context = new ExecutionContext();
+  const executor = new GraphExecutor(
+      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
 
   beforeEach(() => {
     node = {
@@ -49,7 +50,7 @@ describe('convolution', () => {
         node.params['pad'] = createStrAttr('same');
         node.params['kernelSize'] = createNumericArrayAttr([1, 2, 2, 1]);
 
-        executeOp(node, {input}, context);
+        executeOp(node, {input}, executor);
 
         expect(tfc.avgPool)
             .toHaveBeenCalledWith(input[0], [2, 2], [2, 2], 'same');
@@ -64,7 +65,7 @@ describe('convolution', () => {
         node.params['pad'] = createStrAttr('same');
         node.params['kernelSize'] = createNumericArrayAttr([1, 2, 2, 1]);
 
-        executeOp(node, {input}, context);
+        executeOp(node, {input}, executor);
 
         expect(tfc.maxPool)
             .toHaveBeenCalledWith(input[0], [2, 2], [2, 2], 'same');
@@ -84,7 +85,7 @@ describe('convolution', () => {
         const input2 = [tfc.scalar(1.0)];
         node.inputNames = ['input1', 'input2'];
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.conv2d)
             .toHaveBeenCalledWith(
@@ -104,7 +105,7 @@ describe('convolution', () => {
         const input2 = [tfc.scalar(1.0)];
         node.inputNames = ['input1', 'input2'];
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.conv2dTranspose)
             .toHaveBeenCalledWith(
@@ -126,7 +127,7 @@ describe('convolution', () => {
         const input2 = [tfc.scalar(1.0)];
         node.inputNames = ['input1', 'input2'];
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.conv1d)
             .toHaveBeenCalledWith(input1[0], input2[0], 1, 'same', 'NWC', 1);
@@ -148,7 +149,7 @@ describe('convolution', () => {
         const input2 = [tfc.scalar(1.0)];
         node.inputNames = ['input1', 'input2'];
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.depthwiseConv2d)
             .toHaveBeenCalledWith(

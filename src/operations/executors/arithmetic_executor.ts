@@ -18,53 +18,52 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
-export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorsMap,
-     context: ExecutionContext): tfc.Tensor[] => {
-      switch (node.op) {
-        case 'add': {
-          return [tfc.add(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        }
-        case 'mul':
-          return [tfc.mul(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        case 'div': {
-          return [tfc.div(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        }
-        case 'sub': {
-          return [tfc.sub(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        }
-        case 'minimum': {
-          return [tfc.minimum(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        }
-        case 'maximum': {
-          return [tfc.maximum(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        }
-        case 'pow': {
-          return [tfc.pow(
-              getParamValue('a', node, tensorMap, context) as tfc.Tensor,
-              getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-        }
-        default:
-          throw TypeError(`Node type ${node.op} is not implemented`);
-      }
-    };
+export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
+                                    executor: GraphExecutor): tfc.Tensor[] => {
+  switch (node.op) {
+    case 'add': {
+      return [tfc.add(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    }
+    case 'mul':
+      return [tfc.mul(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    case 'div': {
+      return [tfc.div(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    }
+    case 'sub': {
+      return [tfc.sub(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    }
+    case 'minimum': {
+      return [tfc.minimum(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    }
+    case 'maximum': {
+      return [tfc.maximum(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    }
+    case 'pow': {
+      return [tfc.pow(
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor)];
+    }
+    default:
+      throw TypeError(`Node type ${node.op} is not implemented`);
+  }
+};
 
 export const CATEGORY = 'arithmetic';

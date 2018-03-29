@@ -18,26 +18,25 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+                                    executor: GraphExecutor): tfc.Tensor[] => {
   switch (node.op) {
     case 'matMul':
       return [tfc.matMul(
-          getParamValue('a', node, tensorMap, context) as tfc.Tensor2D,
-          getParamValue('b', node, tensorMap, context) as tfc.Tensor2D,
-          getParamValue('transposeA', node, tensorMap, context) as boolean,
-          getParamValue('transposeB', node, tensorMap, context) as boolean)];
+          getParamValue('a', node, tensorMap, executor) as tfc.Tensor2D,
+          getParamValue('b', node, tensorMap, executor) as tfc.Tensor2D,
+          getParamValue('transposeA', node, tensorMap, executor) as boolean,
+          getParamValue('transposeB', node, tensorMap, executor) as boolean)];
     case 'transpose':
       return [tfc.transpose(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor,
-          getParamValue('perm', node, tensorMap, context) as number[])];
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('perm', node, tensorMap, executor) as number[])];
 
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

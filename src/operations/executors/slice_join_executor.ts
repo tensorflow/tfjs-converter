@@ -18,53 +18,52 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+                                    executor: GraphExecutor): tfc.Tensor[] => {
   switch (node.op) {
     case 'concat': {
-      const axis = getParamValue('axis', node, tensorMap, context) as number;
+      const axis = getParamValue('axis', node, tensorMap, executor) as number;
       const inputs =
-          getParamValue('tensors', node, tensorMap, context) as tfc.Tensor[];
+          getParamValue('tensors', node, tensorMap, executor) as tfc.Tensor[];
       return [tfc.concat(inputs, axis)];
     }
     case 'gather': {
-      const axis = getParamValue('axis', node, tensorMap, context) as number;
-      const input = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
+      const axis = getParamValue('axis', node, tensorMap, executor) as number;
+      const input = getParamValue('x', node, tensorMap, executor) as tfc.Tensor;
       const indices =
-          getParamValue('indices', node, tensorMap, context) as tfc.Tensor1D;
+          getParamValue('indices', node, tensorMap, executor) as tfc.Tensor1D;
       return [tfc.gather(input, indices, axis)];
     }
     case 'reverse': {
-      const axis = getParamValue('axis', node, tensorMap, context) as number;
-      const input = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
+      const axis = getParamValue('axis', node, tensorMap, executor) as number;
+      const input = getParamValue('x', node, tensorMap, executor) as tfc.Tensor;
       return [tfc.reverse(input, axis)];
     }
     case 'slice': {
       // tslint:disable-next-line:no-any
-      const begin = getParamValue('begin', node, tensorMap, context) as any;
+      const begin = getParamValue('begin', node, tensorMap, executor) as any;
       // tslint:disable-next-line:no-any
-      const size = getParamValue('size', node, tensorMap, context) as any;
+      const size = getParamValue('size', node, tensorMap, executor) as any;
       return [tfc.slice(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor, begin,
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, begin,
           size)];
     }
     case 'stack': {
-      const axis = getParamValue('axis', node, tensorMap, context) as number;
+      const axis = getParamValue('axis', node, tensorMap, executor) as number;
       return [tfc.stack(
-          getParamValue('tensors', node, tensorMap, context) as tfc.Tensor[],
+          getParamValue('tensors', node, tensorMap, executor) as tfc.Tensor[],
           axis)];
     }
     case 'tile': {
-      const reps = getParamValue('reps', node, tensorMap, context) as number[];
+      const reps = getParamValue('reps', node, tensorMap, executor) as number[];
       return [tfc.tile(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor, reps)];
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, reps)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

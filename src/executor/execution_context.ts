@@ -30,7 +30,7 @@ export class ExecutionContext {
   }
 
   get currentContext(): ExecutionContextId {
-    return this.contexts[0];
+    return this.contexts[this.contexts.length - 1];
   }
 
   get currentContextId(): string {

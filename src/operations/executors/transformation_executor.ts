@@ -18,44 +18,43 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+                                    executor: GraphExecutor): tfc.Tensor[] => {
   switch (node.op) {
     case 'cast': {
       return [tfc.cast(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor,
-          getParamValue('dtype', node, tensorMap, context) as 'int32' |
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('dtype', node, tensorMap, executor) as 'int32' |
               'float32' | 'bool')];
     }
     case 'expandDims': {
       const axis = node.params['axis'].value as number;
       return [tfc.expandDims(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis)];
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis)];
     }
     case 'squeeze': {
       const axis = node.params['axis'].value as number[];
       return [tfc.squeeze(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis)];
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis)];
     }
 
     case 'reshape': {
       return [tfc.reshape(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor,
-          getParamValue('shape', node, tensorMap, context) as number[])];
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor,
+          getParamValue('shape', node, tensorMap, executor) as number[])];
     }
     case 'pad': {
       return [tfc.pad(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor,
+          getParamValue('x', node, tensorMap, executor) as tfc.Tensor,
           // tslint:disable-next-line:no-any
-          getParamValue('padding', node, tensorMap, context) as any,
-          getParamValue('constantValue', node, tensorMap, context) as number)];
+          getParamValue('padding', node, tensorMap, executor) as any,
+          getParamValue('constantValue', node, tensorMap, executor) as number)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

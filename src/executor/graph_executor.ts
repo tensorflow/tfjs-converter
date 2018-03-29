@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {tidy} from '@tensorflow/tfjs-core';
+import {Tensor, tidy} from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/index';
 import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
@@ -57,7 +57,7 @@ export class GraphExecutor {
       this.compiledOrder.push(node);
       node.children.forEach((childNode) => {
         if (childNode.inputNames.every(name => {
-              const [nodeName, ] = getNodeNameAndIndex(name, this.context);
+              const [nodeName, ] = getNodeNameAndIndex(name, this);
               return visited[nodeName];
             })) {
           stack.push(childNode);
@@ -83,7 +83,7 @@ export class GraphExecutor {
         tensors = this.executeWithControlFlow(inputs);
       } else {
         tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-          map[node.name] = operations.executeOp(node, map, this.context);
+          map[node.name] = operations.executeOp(node, map, this);
           return map;
         }, {...this.weightMap, ...inputs});
       }
@@ -95,7 +95,7 @@ export class GraphExecutor {
           (outputs || this.graph.outputs.map(node => node.name)) as string[];
 
       return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
-        map[name] = getTensor(name, tensors, this.context);
+        map[name] = getTensor(name, tensors, this);
         return map;
       }, {});
     });
@@ -108,19 +108,19 @@ export class GraphExecutor {
 
     while (stack.length > 0) {
       const node = stack.pop();
-      const [nodeName, ] = getNodeNameAndIndex(node.name, this.context);
-      tensorMap[nodeName] = operations.executeOp(node, tensorMap, this.context);
-
+      const tensors = operations.executeOp(node, tensorMap, this);
+      const [nodeName, ] = getNodeNameAndIndex(node.name, this);
+      tensorMap[nodeName] = tensors;
       node.children.forEach((childNode) => {
         // Merge op can be pushed if any of its inputs has value.
-        if (childNode.op === 'Merge') {
+        if (childNode.op === 'merge') {
           if (childNode.inputNames.some(
-                  name => !!getTensor(name, tensorMap, this.context))) {
+                  name => !!getTensor(name, tensorMap, this))) {
             stack.push(childNode);
           }
           // Otherwise all inputs need to have value.
         } else if (childNode.inputNames.every(
-                       name => !!getTensor(name, tensorMap, this.context))) {
+                       name => !!getTensor(name, tensorMap, this))) {
           stack.push(childNode);
         }
       });
@@ -129,6 +129,25 @@ export class GraphExecutor {
     return tensorMap;
   }
 
+  get currentContextId(): string {
+    return this.context.currentContextId;
+  }
+
+  enterFrame() {
+    this.context.enterFrame();
+  }
+
+  exitFrame() {
+    this.context.exitFrame();
+  }
+
+  nextIteration() {
+    this.context.nextIteration();
+  }
+
+  getWeight(name: string): Tensor[] {
+    return this.weightMap[name];
+  }
   /**
    * Releases the memory used by the weight tensors.
    */

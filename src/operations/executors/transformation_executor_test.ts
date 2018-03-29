@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 // tslint:disable-next-line:max-line-length
@@ -27,7 +27,8 @@ describe('transformation', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
   const input2 = [tfc.tensor1d([1, 1])];
-  const context = new ExecutionContext();
+  const executor = new GraphExecutor(
+      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
 
   beforeEach(() => {
     node = {
@@ -47,7 +48,7 @@ describe('transformation', () => {
         spyOn(tfc, 'cast');
         node.op = 'cast';
         node.params.dtype = createDtypeAttr('float32');
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.cast).toHaveBeenCalledWith(input1[0], 'float32');
       });
@@ -57,7 +58,7 @@ describe('transformation', () => {
         spyOn(tfc, 'expandDims');
         node.op = 'expandDims';
         node.params.axis = createNumberAttr(1);
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.expandDims).toHaveBeenCalledWith(input1[0], 1);
       });
@@ -70,7 +71,7 @@ describe('transformation', () => {
         node.params.constantValue = createNumberAttr(1);
         node.inputNames = ['input1', 'input2'];
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.pad).toHaveBeenCalledWith(input1[0], [1, 1], 1);
       });
@@ -82,7 +83,7 @@ describe('transformation', () => {
         node.params.shape = createNumericArrayAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.reshape).toHaveBeenCalledWith(input1[0], [1, 1]);
       });
@@ -92,7 +93,7 @@ describe('transformation', () => {
         spyOn(tfc, 'squeeze');
         node.op = 'squeeze';
         node.params.axis = createNumberAttr(1);
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.squeeze).toHaveBeenCalledWith(input1[0], 1);
       });

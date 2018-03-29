@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './creation_executor';
@@ -27,7 +27,8 @@ describe('creation', () => {
   let node: Node;
   const input1 = [tfc.tensor1d([1, 2, 3])];
   const input2 = [tfc.scalar(1)];
-  const context = new ExecutionContext();
+  const executor = new GraphExecutor(
+      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
 
   beforeEach(() => {
     node = {
@@ -49,7 +50,7 @@ describe('creation', () => {
         node.params['shape'] = createNumericArrayAttrFromIndex(0);
         node.params['value'] = createNumberAttrFromIndex(1);
 
-        executeOp(node, {input1, input2}, context);
+        executeOp(node, {input1, input2}, executor);
 
         expect(tfc.fill).toHaveBeenCalledWith([1, 2, 3], 1);
       });
@@ -64,7 +65,7 @@ describe('creation', () => {
         node.inputNames = ['input', 'input2', 'input3'];
         const input = [tfc.scalar(0)];
         const input3 = [tfc.scalar(2)];
-        executeOp(node, {input, input2, input3}, context);
+        executeOp(node, {input, input2, input3}, executor);
 
         expect(tfc.linspace).toHaveBeenCalledWith(0, 1, 2);
       });
@@ -81,7 +82,7 @@ describe('creation', () => {
         const input = [tfc.tensor1d([0])];
         const input3 = [tfc.scalar(2)];
         const input4 = [tfc.scalar(3)];
-        executeOp(node, {input, input2, input3, input4}, context);
+        executeOp(node, {input, input2, input3, input4}, executor);
 
         expect(tfc.oneHot).toHaveBeenCalledWith([0], 1, 2, 3);
       });
@@ -92,7 +93,7 @@ describe('creation', () => {
         node.op = 'ones';
         node.params['shape'] = createNumericArrayAttrFromIndex(0);
         node.params['dtype'] = createDtypeAttr('float32');
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.ones).toHaveBeenCalledWith([1, 2, 3], 'float32');
       });
@@ -101,7 +102,7 @@ describe('creation', () => {
       it('should call tfc.onesLike', () => {
         spyOn(tfc, 'onesLike');
         node.op = 'onesLike';
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.onesLike).toHaveBeenCalledWith(input1[0]);
       });
@@ -117,7 +118,7 @@ describe('creation', () => {
         node.inputNames = ['input', 'input2', 'input3'];
         const input = [tfc.scalar(0)];
         const input3 = [tfc.scalar(2)];
-        executeOp(node, {input, input2, input3}, context);
+        executeOp(node, {input, input2, input3}, executor);
 
         expect(tfc.range).toHaveBeenCalledWith(0, 1, 2, 'float32');
       });
@@ -133,7 +134,7 @@ describe('creation', () => {
         node.params['dtype'] = createDtypeAttr('float32');
         node.params['seed'] = createNumberAttr(0);
 
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.randomUniform)
             .toHaveBeenCalledWith([1, 2, 3], 0, 1, 'float32');
@@ -150,7 +151,7 @@ describe('creation', () => {
         node.params['dtype'] = createDtypeAttr('float32');
         node.params['seed'] = createNumberAttr(0);
 
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.truncatedNormal)
             .toHaveBeenCalledWith([1, 2, 3], 0, 1, 'float32', 0);
@@ -162,7 +163,7 @@ describe('creation', () => {
         node.op = 'zeros';
         node.params['shape'] = createNumericArrayAttrFromIndex(0);
         node.params['dtype'] = createDtypeAttr('float32');
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.zeros).toHaveBeenCalledWith([1, 2, 3], 'float32');
       });
@@ -171,7 +172,7 @@ describe('creation', () => {
       it('should call tfc.zerosLike', () => {
         spyOn(tfc, 'zerosLike');
         node.op = 'zerosLike';
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.zerosLike).toHaveBeenCalledWith(input1[0]);
       });

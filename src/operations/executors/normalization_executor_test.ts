@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {ExecutionContext} from '../../executor';
+import {GraphExecutor} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './normalization_executor';
@@ -25,7 +25,8 @@ import {createNumberAttr, createTensorAttr} from './test_helper';
 describe('normalization', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
-  const context = new ExecutionContext();
+  const executor = new GraphExecutor(
+      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
 
   beforeEach(() => {
     node = {
@@ -54,7 +55,7 @@ describe('normalization', () => {
         const input3 = [tfc.scalar(2)];
         const input4 = [tfc.scalar(3)];
         const input5 = [tfc.scalar(4)];
-        executeOp(node, {input1, input2, input3, input4, input5}, context);
+        executeOp(node, {input1, input2, input3, input4, input5}, executor);
 
         expect(tfc.batchNormalization)
             .toHaveBeenCalledWith(
@@ -71,7 +72,7 @@ describe('normalization', () => {
         node.params.alpha = createNumberAttr(3);
         node.params.beta = createNumberAttr(4);
 
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.localResponseNormalization)
             .toHaveBeenCalledWith(input1[0], 1, 2, 3, 4);
@@ -83,7 +84,7 @@ describe('normalization', () => {
         spyOn(tfc, 'softmax');
         node.op = 'softmax';
 
-        executeOp(node, {input1}, context);
+        executeOp(node, {input1}, executor);
 
         expect(tfc.softmax).toHaveBeenCalledWith(input1[0]);
       });
