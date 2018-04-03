@@ -15,41 +15,90 @@
 # ==============================================================================
 
 # Build pip package for keras_model_converter.
+#
+# Run this script outside a virtualenv, as this script will activate virtualenvs
+# for python2 and python3 to generate the wheel files.
+#
+# Usage:
+#   build-pip-package.sh \
+#       [--test] [--upload] [--upload-to-test] [--confirm-upload] <DEST_DIR>
+#
+# Positional arguments:
+#   DEST_DIR: Destination directory for writing the pip wheels.
+#
+# Optional argumnets:
+#   --test: Test the pip packages by installing it (inside virtualenv)
+#           and running test_pip_package.py against the install.
+#   --upload:         Upload the py2 and py3 wheels to prod PyPI.
+#   --upload-to-test: Upload the py2 and py3 wheels to test PyPI, mutually
+#                     exclusive with --upload.
+#   --confirm-upload: Do not prompt for yes/no before uploading to test or
+#                     prod PyPI. Use with care!
+
 set -e
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-if [[ $# -lt 1 ]]; then
+RUN_TEST=0
+UPLOAD_TO_PROD_PYPI=0
+UPLOAD_TO_TEST_PYPI=0
+CONFIRM_UPLOAD=0
+DEST_DIR=""
+while true; do
+  if [[ "$1" == "--test" ]]; then
+    RUN_TEST=1
+  elif [[ "$1" == "--upload" ]]; then
+    UPLOAD_TO_PROD_PYPI=1
+  elif [[ "$1" == "--upload-to-test" ]]; then
+    UPLOAD_TO_TEST_PYPI=1
+  elif [[ "$1" == "--confirm-upload" ]]; then
+    CONFIRM_UPLOAD=1
+  elif [[ "$1" != --* ]]; then
+    DEST_DIR="$1"
+  else
+    echo "Usage:"
+    echo "  build-pip-packages.sh \\"
+    echo "      [--test] [--upload] [--upload-to-test] [--confirm-upload] <OUTPUT_DIR>"
+    echo
+    exit 1
+  fi
+  shift
+
+  if [[ -z "$1" ]]; then
+    break
+  fi
+done
+
+if [[ ${UPLOAD_TO_TEST_PYPI} == 1 && ${UPLOAD_TO_PROD_PYPI} == 1 ]]; then
+  echo "ERROR: Do not use --upload and --upload-to-test together."
+  exit 1
+fi
+
+if [[ -z "${DEST_DIR}" ]]; then
   echo "Usage:"
-  echo "  build-pip-packages.sh [--test] <OUTPUT_DIR>"
-  echo
-  echo "Args:"
-  echo "  OUTPUT_DIR: Directory where the pip (.whl) file will be written."
-  echo "  --test:     Test the pip package by installing it and running"
-  echo "              test_pip_package.py against the install."
+  echo "  build-pip-packages.sh \\"
+  echo "      [--test] [--upload] [--upload-to-test] [--confirm-upload] <OUTPUT_DIR>"
   echo
   exit 1
 fi
 
-RUN_TEST=0
-if [[ "$1" == "--test" ]]; then
-  RUN_TEST=1
-  shift
+# Test if we are currently in a virtualenv.
+echo 1
+REAL_PREFIX_OUT="$(python -c "import sys; print(hasattr(sys, 'real_prefix'))")"
+echo ${REAL_PREFIX_OUT}
+if [[ "${REAL_PREFIX_OUT}" == "True" ]]; then
+  echo "ERROR: Do not run this script in a virtualenv."
+  echo
+  exit 1
 fi
 
-DEST_DIR="$1"
-
 mkdir -p "${DEST_DIR}"
-
 DEST_DIR="$(cd "${DEST_DIR}" 2>/dev/null && pwd -P)"
 
+# Copy all non-test .py files.
 TMP_DIR="$(mktemp -d)"
 echo "Using temporary directory: ${TMP_DIR}"
 
-pushd "${SCRIPTS_DIR}" > /dev/null
-echo
-
-# Copy all non-test .py files.
 PY_FILES=$(find . -name '*.py' ! -name '*_test.py')
 for PY_FILE in ${PY_FILES}; do
   echo "Copying ${PY_FILE}"
@@ -84,15 +133,42 @@ echo "Copying setup.cfg"
 cp "${SCRIPTS_DIR}/setup.cfg" "${TMP_DIR}/"
 
 echo
-popd
 
-pushd "${TMP_DIR}" > /dev/null
+# Check virtualenv is on path.
+if [[ -z "$(which virtualenv)" ]]; then
+  echo "ERROR: Cannot find virtualenv on path. Install virtualenv first."
+  exit 1
+fi
 
-python setup.py bdist_wheel
-WHEELS=$(ls dist/*.whl)
-mv dist/*.whl "${DEST_DIR}/"
+# Create virtualenvs for python2 and python3; build (and test) the wheels inside
+# them.
+VENV_PYTHON_BINS="python2 python3"
+echo 21  # DEBUG
+for VENV_PYTHON_BIN in ${VENV_PYTHON_BINS}; do
+  echo "VENV_PYTHON_BIN = ${VENV_PYTHON_BIN}"   # DEBUG
+  TMP_VENV_DIR="$(mktemp -d)"
+  virtualenv -p "${VENV_PYTHON_BIN}" "${TMP_VENV_DIR}"
+  source "${TMP_VENV_DIR}/bin/activate"
 
-popd > /dev/null
+  pip install -r "${SCRIPTS_DIR}/requirements.txt"
+
+  pushd "${TMP_DIR}" > /dev/null
+  echo
+
+  echo "Building wheel for $(python --version)..."
+  echo
+  
+  python setup.py bdist_wheel
+  WHEELS=$(ls dist/*.whl)
+  mv dist/*.whl "${DEST_DIR}/"
+
+  popd > /dev/null
+  
+  deactivate
+  rm -rf "${TMP_VENV_DIR}"
+done
+
+exit 0   # DEBUG
 
 WHEEL_PATH=""
 echo
