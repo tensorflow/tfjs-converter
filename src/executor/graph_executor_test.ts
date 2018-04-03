@@ -26,67 +26,121 @@ let inputNode: operations.Node;
 let constNode: operations.Node;
 let outputNode: operations.Node;
 let graph: operations.Graph;
+let graphWithControlFlow: operations.Graph;
 
 describe('GraphExecutor', () => {
-  beforeEach(() => {
-    inputNode = {
-      inputNames: [],
-      inputs: [],
-      children: [],
-      name: 'input',
-      op: 'placeholder',
-      category: 'graph',
-      params: {}
-    };
-    constNode = {
-      inputNames: [],
-      inputs: [],
-      children: [],
-      name: 'const',
-      op: 'const',
-      category: 'graph',
-      params: {}
-    };
-    outputNode = {
-      inputNames: ['input', 'const'],
-      inputs: [inputNode, constNode],
-      children: [],
-      name: 'output',
-      op: 'add',
-      category: 'arithmetic',
-      params: {}
-    };
-    graph = {
-      inputs: [constNode, inputNode],
-      nodes: {'input': inputNode, 'const': constNode, 'output': outputNode},
-      outputs: [outputNode],
-      withControlFlow: false
-    };
-    inputNode.children.push(outputNode);
-    constNode.children.push(outputNode);
-    executor = new GraphExecutor(graph);
-  });
+  beforeEach(() => {});
   afterEach(() => {});
 
   describe('execute graph', () => {
-    describe('graph level', () => {
-      it('should execute the op', () => {
-        const inputTensor = tfc.scalar(1);
-        const constTensor = tfc.scalar(2);
-        const spy =
-            spyOn(operations, 'executeOp')
-                .and.callFake((node: operations.Node) => {
-                  return node.op === 'const' ? constTensor : inputTensor;
-                });
+    it('should execute the op', () => {
+      inputNode = {
+        inputNames: [],
+        inputs: [],
+        children: [],
+        name: 'input',
+        op: 'placeholder',
+        category: 'graph',
+        params: {}
+      };
+      constNode = {
+        inputNames: [],
+        inputs: [],
+        children: [],
+        name: 'const',
+        op: 'const',
+        category: 'graph',
+        params: {}
+      };
+      outputNode = {
+        inputNames: ['input', 'const'],
+        inputs: [inputNode, constNode],
+        children: [],
+        name: 'output',
+        op: 'add',
+        category: 'arithmetic',
+        params: {}
+      };
+      graph = {
+        inputs: [constNode, inputNode],
+        nodes: {'input': inputNode, 'const': constNode, 'output': outputNode},
+        outputs: [outputNode],
+        withControlFlow: false
+      };
+      inputNode.children.push(outputNode);
+      constNode.children.push(outputNode);
 
-        executor.execute({input: [inputTensor]});
+      executor = new GraphExecutor(graph);
+      const inputTensor = tfc.scalar(1);
+      const constTensor = tfc.scalar(2);
+      const spy =
+          spyOn(operations, 'executeOp')
+              .and.callFake((node: operations.Node) => {
+                return node.op === 'const' ? [constTensor] : [inputTensor];
+              });
 
-        expect(spy.calls.allArgs()).toEqual([
-          [inputNode, jasmine.any(Object), executor],
-          [constNode, jasmine.any(Object), executor],
-          [outputNode, jasmine.any(Object), executor]
-        ]);
-      });
+      executor.execute({input: [inputTensor]});
+
+      expect(spy.calls.allArgs()).toEqual([
+        [inputNode, jasmine.any(Object), executor],
+        [constNode, jasmine.any(Object), executor],
+        [outputNode, jasmine.any(Object), executor]
+      ]);
+    });
+
+    it('should execute control flow graph', () => {
+      inputNode = {
+        inputNames: [],
+        inputs: [],
+        children: [],
+        name: 'input',
+        op: 'placeholder',
+        category: 'graph',
+        params: {}
+      };
+      constNode = {
+        inputNames: [],
+        inputs: [],
+        children: [],
+        name: 'const',
+        op: 'const',
+        category: 'graph',
+        params: {}
+      };
+      outputNode = {
+        inputNames: ['input', 'const'],
+        inputs: [inputNode, constNode],
+        children: [],
+        name: 'output',
+        op: 'merge',
+        category: 'control',
+        params: {}
+      };
+      inputNode.children.push(outputNode);
+      constNode.children.push(outputNode);
+      graphWithControlFlow = {
+        inputs: [constNode, inputNode],
+        nodes: {'input': inputNode, 'const': constNode, 'output': outputNode},
+        outputs: [outputNode],
+        withControlFlow: true
+      };
+
+      executor = new GraphExecutor(graphWithControlFlow);
+      const inputTensor = tfc.scalar(1);
+      const constTensor = tfc.scalar(2);
+      const spy =
+          spyOn(operations, 'executeOp')
+              .and.callFake((node: operations.Node) => {
+                return node.op === 'const' ? [constTensor] : [inputTensor];
+              });
+
+      executor.execute({input: [inputTensor]});
+
+      expect(spy.calls.allArgs()).toEqual([
+        [inputNode, jasmine.any(Object), executor],
+        [outputNode, jasmine.any(Object), executor],
+        [constNode, jasmine.any(Object), executor]
+      ]);
     });
   });
 });

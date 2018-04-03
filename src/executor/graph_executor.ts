@@ -56,7 +56,7 @@ export class GraphExecutor {
       visited[node.name] = true;
       this.compiledOrder.push(node);
       node.children.forEach((childNode) => {
-        if (childNode.inputNames.every(name => {
+        if (!visited[childNode.name] && childNode.inputNames.every(name => {
               const [nodeName, ] = getNodeNameAndIndex(name, this);
               return visited[nodeName];
             })) {
@@ -105,23 +105,28 @@ export class GraphExecutor {
   private executeWithControlFlow(inputs: NamedTensorsMap): NamedTensorsMap {
     const stack = [...this.graph.inputs];
     const tensorMap = {...this.weightMap, ...inputs};
+    const visited: {[key: string]: boolean} = {};
 
     while (stack.length > 0) {
       const node = stack.pop();
       const tensors = operations.executeOp(node, tensorMap, this);
       const [nodeName, ] = getNodeNameAndIndex(node.name, this);
       tensorMap[nodeName] = tensors;
+      visited[nodeName] = true;
       node.children.forEach((childNode) => {
-        // Merge op can be pushed if any of its inputs has value.
-        if (childNode.op === 'merge') {
-          if (childNode.inputNames.some(
-                  name => !!getTensor(name, tensorMap, this))) {
+        const [nodeName, ] = getNodeNameAndIndex(childNode.name, this);
+        if (!visited[nodeName]) {
+          // Merge op can be pushed if any of its inputs has value.
+          if (childNode.op === 'merge') {
+            if (childNode.inputNames.some(
+                    name => !!getTensor(name, tensorMap, this))) {
+              stack.push(childNode);
+            }
+            // Otherwise all inputs need to have value.
+          } else if (childNode.inputNames.every(
+                         name => !!getTensor(name, tensorMap, this))) {
             stack.push(childNode);
           }
-          // Otherwise all inputs need to have value.
-        } else if (childNode.inputNames.every(
-                       name => !!getTensor(name, tensorMap, this))) {
-          stack.push(childNode);
         }
       });
     }

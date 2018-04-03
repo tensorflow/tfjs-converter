@@ -65,4 +65,4 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
   }
 };
 
-export const CATEGORY = 'arithmetic';
+export const CATEGORY = 'control';
