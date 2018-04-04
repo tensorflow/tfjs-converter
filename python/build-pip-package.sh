@@ -105,7 +105,7 @@ fi
 if [[ "${UPLOAD_TO_PROD_PYPI}" == 1 || "${UPLOAD_TO_TEST_PYPI}" == 1 ]]; then
   if [[ -z "$(which twine)" ]]; then
     echo "ERROR: You intend to upload wheels to PyPI, but twine is not on path."
-    echo "  Do `pip install twine` first."
+    echo "  Do: pip install twine"
     exit 1
   fi
 fi
