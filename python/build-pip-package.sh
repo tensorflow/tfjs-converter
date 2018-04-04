@@ -52,7 +52,7 @@
 #     repository = https://upload.pypi.org/legacy/
 #     username:<PYPIUSERNAME>
 #     password:<PYPIPWD>
-# ````
+# ```
 
 set -e
 
