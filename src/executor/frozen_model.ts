@@ -65,8 +65,7 @@ export class FrozenModel {
    */
   private async loadRemoteProtoFile(): Promise<tensorflow.GraphDef> {
     try {
-      const response =
-          await fetch(new Request(this.modelUrl, this.requestOption));
+      const response = await fetch(this.modelUrl, this.requestOption);
       return tensorflow.GraphDef.decode(
           new Uint8Array(await response.arrayBuffer()));
     } catch (error) {
@@ -80,8 +79,7 @@ export class FrozenModel {
    */
   private async loadWeightManifest(): Promise<void> {
     try {
-      const manifest =
-          await fetch(new Request(this.weightManifestUrl, this.requestOption));
+      const manifest = await fetch(this.weightManifestUrl, this.requestOption);
       this.weightManifest = await manifest.clone().json();
     } catch (error) {
       throw new Error(`${this.weightManifestUrl} not found. ${error}`);

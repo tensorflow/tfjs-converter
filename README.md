@@ -92,7 +92,7 @@ If your server requests credentials for accessing the model files, you can provi
 const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL, {credentials: 'include'});
 ```
 
-please see [Request documentation](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request) for details.
+please see [fetch() documentation](https://developer.mozilla.org/en-US/docs/Web/API/WindowOrWorkerGlobalScope/fetch) for details.
 
 ## Supported operations
 
