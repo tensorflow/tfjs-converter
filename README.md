@@ -86,7 +86,7 @@ model.execute({input: tfc.fromPixels(cat)});
 
 Check out our working [MobileNet demo](./demo/README.md).
 
-If your server requests credentials for accessing the model files, you can provide the optional RequestOption params.
+If your server requests credentials for accessing the model files, you can provide the optional RequestOption param.
 
 ```typesscript
 const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL, {credentials: 'include'});
