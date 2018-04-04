@@ -14,7 +14,7 @@
 # limitations under the License.
 # =============================================================================
 
-yarn prep
+yarn
 
 # Gen the doc
 ./node_modules/.bin/ts-node ./src/docs/doc_gen.ts
