@@ -102,14 +102,6 @@ if [[ "${UPLOAD_TO_TEST_PYPI}" == 1 && "${UPLOAD_TO_PROD_PYPI}" == 1 ]]; then
   exit 1
 fi
 
-if [[ "${UPLOAD_TO_PROD_PYPI}" == 1 || "${UPLOAD_TO_TEST_PYPI}" == 1 ]]; then
-  if [[ -z "$(which twine)" ]]; then
-    echo "ERROR: You intend to upload wheels to PyPI, but twine is not on path."
-    echo "  Do: pip install twine"
-    exit 1
-  fi
-fi
-
 if [[ -z "${DEST_DIR}" ]]; then
   print_usage
   exit 1
@@ -189,8 +181,6 @@ for VENV_PYTHON_BIN in ${VENV_PYTHON_BINS}; do
   TMP_VENV_DIR="$(mktemp -d)"
   virtualenv -p "${VENV_PYTHON_BIN}" "${TMP_VENV_DIR}"
   source "${TMP_VENV_DIR}/bin/activate"
-
-  pip install twine
 
   echo
   echo "Building wheel for ${VENV_PYTHON_BIN}: $(python --version 2>&1) ..."
@@ -287,7 +277,18 @@ if [[ "${UPLOAD_TO_PROD_PYPI}" == 1 || "${UPLOAD_TO_TEST_PYPI}" == 1 ]]; then
 
   if [[ "${TO_UPLOAD}" == 1 ]]; then
     echo "Proceeding with the upload ..."
+    echo
+
+    # Create a virtualenv and install twine in it for uploading.
+    TMP_VENV_DIR="$(mktemp -d)"
+    virtualenv -p "${VENV_PYTHON_BIN}" "${TMP_VENV_DIR}"
+    source "${TMP_VENV_DIR}/bin/activate"
+    pip install twine
+
     twine upload -r "${UPLOAD_DEST}" ./*.whl
+
+    deactivate
+    rm -rf "${TMP_VENV_DIR}"
   fi
 
   popd > /dev/null
