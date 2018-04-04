@@ -240,10 +240,6 @@ for VENV_PYTHON_BIN in ${VENV_PYTHON_BINS}; do
     echo "Successfully installed ${WHEEL_PATH} for $(python --version 2>&1)."
     echo
 
-    which pip  # DEBUG
-    which python  # DEBUG
-    pwd  # DEBUG
-    ls  # DEBUG
     python test_pip_package.py
 
     popd > /dev/null
