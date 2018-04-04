@@ -86,6 +86,14 @@ model.execute({input: tfc.fromPixels(cat)});
 
 Check out our working [MobileNet demo](./demo/README.md).
 
+If your server requests credentials for accessing the model files, you can provide the optional RequestOption params.
+
+```typesscript
+const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL, {credentials: 'include'});
+```
+
+please see [Request documentation](https://developer.mozilla.org/en-US/docs/Web/API/Request/Request) for details.
+
 ## Supported operations
 
 Currently TensorFlow.js only supports a limited set of TensorFlow Ops. See the
