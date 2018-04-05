@@ -139,8 +139,8 @@ export class GraphExecutor {
     return this.context.currentContextId;
   }
 
-  enterFrame() {
-    this.context.enterFrame();
+  enterFrame(frameId: string) {
+    this.context.enterFrame(frameId);
   }
 
   exitFrame() {

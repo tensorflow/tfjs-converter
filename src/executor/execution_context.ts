@@ -16,16 +16,16 @@
  */
 
 export interface ExecutionContextId {
-  frameId: number;
+  frameId: string;
   iterationId: number;
 }
 
 export class ExecutionContext {
-  private contexts: ExecutionContextId[] = [this.newFrame(0)];
+  private contexts: ExecutionContextId[] = [this.newFrame('')];
 
   constructor() {}
 
-  private newFrame(frameId: number) {
+  private newFrame(frameId: string) {
     return {frameId, iterationId: 0};
   }
 
@@ -34,18 +34,16 @@ export class ExecutionContext {
   }
 
   get currentContextId(): string {
-    return (this.currentContext.frameId === 0 &&
+    return (this.currentContext.frameId === '' &&
             this.currentContext.iterationId === 0) ?
         '' :
-        `${this.currentContext.frameId}-${this.currentContext.iterationId}`;
+        `__${this.currentContext.frameId}-${this.currentContext.iterationId}__`;
   }
 
-  enterFrame() {
-    let frameId = 0;
+  enterFrame(frameId: string) {
     if (this.currentContext) {
-      frameId = this.currentContext.frameId + 1;
+      this.contexts.push(this.newFrame(frameId));
     }
-    this.contexts.push(this.newFrame(frameId));
   }
 
   exitFrame(): ExecutionContextId {
@@ -62,6 +60,6 @@ export class ExecutionContext {
   }
 
   reset() {
-    this.contexts = [];
+    this.contexts = [this.newFrame('')];
   }
 }

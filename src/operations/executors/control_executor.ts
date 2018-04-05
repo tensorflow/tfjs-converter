@@ -44,9 +44,11 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
                          undefined;
 
     case 'enter':
+      const frameId =
+          getParamValue('frameName', node, tensorMap, executor) as string;
       const data =
           getParamValue('tensor', node, tensorMap, executor) as tfc.Tensor;
-      executor.enterFrame();
+      executor.enterFrame(frameId);
       return [data];
 
     case 'exit':

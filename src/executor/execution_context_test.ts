@@ -25,45 +25,45 @@ describe('ExecutionContext', () => {
   afterEach(() => {});
 
   it('should initialize', () => {
-    expect(context.currentContext).toEqual({frameId: 0, iterationId: 0});
+    expect(context.currentContext).toEqual({frameId: '', iterationId: 0});
     expect(context.currentContextId).toEqual('');
   });
 
   describe('enterFrame', () => {
     it('should add new Frame', () => {
-      context.enterFrame();
+      context.enterFrame('1');
       expect(context.currentContextId).toEqual('1-0');
-      expect(context.currentContext).toEqual({frameId: 1, iterationId: 0});
+      expect(context.currentContext).toEqual({frameId: '1', iterationId: 0});
     });
   });
 
   describe('exitFrame', () => {
     it('should remove Frame', () => {
-      context.enterFrame();
+      context.enterFrame('1');
       context.exitFrame();
 
       expect(context.currentContextId).toEqual('');
-      expect(context.currentContext).toEqual({frameId: 0, iterationId: 0});
+      expect(context.currentContext).toEqual({frameId: '0', iterationId: 0});
     });
 
     it('should remember previous Frame', () => {
-      context.enterFrame();
+      context.enterFrame('1');
       context.nextIteration();
-      context.enterFrame();
+      context.enterFrame('2');
       context.exitFrame();
 
       expect(context.currentContextId).toEqual('1-1');
-      expect(context.currentContext).toEqual({frameId: 1, iterationId: 1});
+      expect(context.currentContext).toEqual({frameId: '1', iterationId: 1});
     });
   });
 
   describe('nextIteration', () => {
     it('should increate iteration', () => {
-      context.enterFrame();
+      context.enterFrame('1');
       context.nextIteration();
 
       expect(context.currentContextId).toEqual('1-1');
-      expect(context.currentContext).toEqual({frameId: 1, iterationId: 1});
+      expect(context.currentContext).toEqual({frameId: '1', iterationId: 1});
     });
   });
 });
