@@ -13,7 +13,7 @@ matrix:
         - pip install -r python/requirements.txt
       script:
         - python/run-python-tests.sh
-        - deactivate && python/build-pip-package.sh --test /tmp/tfjs-pips
+        - deactivate && cd python && ./build-pip-package.sh --test /tmp/tfjs-pips
 
     - language: python
       python: 3.6
@@ -21,4 +21,4 @@ matrix:
         - pip install -r python/requirements.txt
       script:
         - python/run-python-tests.sh
-        - deactivate && python/build-pip-package.sh --test /tmp/tfjs-pips
+        - deactivate && cd python && ./build-pip-package.sh --test /tmp/tfjs-pips
