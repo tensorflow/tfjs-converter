@@ -60,4 +60,8 @@ export class ExecutionContext {
       this.currentContext.iterationId += 1;
     }
   }
+
+  reset() {
+    this.contexts = [];
+  }
 }

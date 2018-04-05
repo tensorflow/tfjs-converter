@@ -77,6 +77,7 @@ export class GraphExecutor {
    */
 
   execute(inputs: NamedTensorsMap, outputs?: string|string[]): NamedTensorMap {
+    this.context.reset();
     const result = tidy(() => {
       let tensors = {};
       if (this.graph.withControlFlow) {

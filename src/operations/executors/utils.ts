@@ -60,7 +60,9 @@ export function getTensor(
   } else {
     const [nodeName, index] = getNodeNameAndIndex(name);
     const weight = executor.getWeight(nodeName);
-    return weight ? weight[index] : undefined;
+    return weight ?
+        weight[index] :
+        tensorsMap[nodeName] ? tensorsMap[nodeName][index] : undefined;
   }
 }
 
