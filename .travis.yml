@@ -1,6 +1,15 @@
-language: node_js
-node_js: "8"
-script:
-  - yarn build
-  - yarn lint
-  - yarn test-travis
+matrix:
+  include:
+    - language: node_js
+      node_js: "8"
+      script:
+        - yarn build
+        - yarn lint
+        - yarn test-travis
+
+    - language: python
+      python: 2.7
+      before_script:
+        - cd && pip install -r requirements.txt
+      script:
+        - python/run-python-tests.py
