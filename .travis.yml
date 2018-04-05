@@ -12,11 +12,11 @@ matrix:
       before_script:
         - pip install -r python/requirements.txt
       script:
-        - python/run-python-tests.py
+        - python/run-python-tests.sh
 
     - language: python
       python: 3.6
       before_script:
         - pip install -r python/requirements.txt
       script:
-        - python/run-python-tests.py
+        - python/run-python-tests.sh
