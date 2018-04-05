@@ -12,6 +12,7 @@ matrix:
       before_script:
         - pip install -r python/requirements.txt
       script:
+        - cd python && pylint --rcfile=.pylintrc tensorflowjs
         - python/run-python-tests.sh
         - deactivate && cd python && ./build-pip-package.sh --test /tmp/tfjs-pips
 
@@ -20,6 +21,7 @@ matrix:
       before_script:
         - pip install -r python/requirements.txt
       script:
+        - cd python && pylint --rcfile=.pylintrc tensorflowjs
         - python/run-python-tests.sh
         # Note: Since the build-pip-package.sh script runs both py2 and py3,
         #   there is no need to run it again in this Python 3.6 environment.
