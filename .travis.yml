@@ -21,4 +21,5 @@ matrix:
         - pip install -r python/requirements.txt
       script:
         - python/run-python-tests.sh
-        - deactivate && cd python && ./build-pip-package.sh --test /tmp/tfjs-pips
+        # Note: Since the build-pip-package.sh script runs both py2 and py3,
+        #   there is no need to run it again in this Python 3.6 environment.
