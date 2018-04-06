@@ -92,7 +92,7 @@ class HDF5Converter(object):
     else:
       # This is *not* a leaf level in the namespace (e.g., 'foo' in
       # 'foo/bar/Dense').
-      for key in [as_text(key) for key in group.keys()]:
+      for key in group.keys():
         # Call this method recursively.
         group_out += self._convert_h5_group(group[key])
 
