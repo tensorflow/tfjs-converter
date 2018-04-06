@@ -89,7 +89,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     tfjs_path = os.path.join(self._tmp_dir, 'nested_layer_names_model')
     keras_h5_conversion.save_keras_model(model, tfjs_path)
 
-    # Check mode.json and weights manifest.
+    # Check model.json and weights manifest.
     with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
       model_json = json.load(f)
     self.assertTrue(model_json['modelTopology'])
