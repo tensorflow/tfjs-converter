@@ -94,15 +94,15 @@ class ConvertH5WeightsTest(unittest.TestCase):
       model_json = json.load(f)
     self.assertTrue(model_json['modelTopology'])
     weights_manifest = model_json['weightsManifest']
-    group1_weights = weights_manifest[0]['weights']
     weight_shapes = dict()
     for group in weights_manifest:
       for weight in group['weights']:
         weight_shapes[weight['name']] = weight['shape']
-    self.assertItemsEqual(
-        ['dense/kernel', 'dense/bias', 'foo/dense/kernel', 'foo/dense/bias',
-         'foo/bar/dense/kernel', 'foo/bar/dense/bias'],
-        list(weight_shapes.keys()))
+    self.assertEqual(
+        sorted(['dense/kernel', 'dense/bias', 'foo/dense/kernel',
+                'foo/dense/bias', 'foo/bar/dense/kernel',
+                'foo/bar/dense/bias']),
+        sorted(list(weight_shapes.keys())))
     self.assertEqual([12, 2], weight_shapes['dense/kernel'])
     self.assertEqual([2], weight_shapes['dense/bias'])
     self.assertEqual([2, 8], weight_shapes['foo/dense/kernel'])
