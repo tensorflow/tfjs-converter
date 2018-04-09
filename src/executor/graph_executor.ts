@@ -110,11 +110,22 @@ export class GraphExecutor {
   private checkInput(inputs: NamedTensorsMap) {
     const inputKeys = Object.keys(inputs);
     const missing: string[] = [];
+    const extra: string[] = [];
+
     this.placeholders.forEach(name => {
       if (inputKeys.indexOf(name) === -1) missing.push(name);
     });
+
+    inputKeys.forEach(name => {
+      if (this.placeholders.indexOf(name) === -1) extra.push(name);
+    });
+
     if (missing.length > 0) {
       throw new Error(`Missing input placeholders: ${missing}`);
+    }
+
+    if (extra.length > 0) {
+      throw new Error(`Extra input tensors: ${extra}`);
     }
   }
 }

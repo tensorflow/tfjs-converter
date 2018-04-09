@@ -100,6 +100,13 @@ describe('GraphExecutor', () => {
         expect(() => executor.execute({}))
             .toThrow(new Error('Missing input placeholders: input'));
       });
+
+      it('should throw exception if contains extra inputs', () => {
+        const inputTensor = tfc.scalar(1);
+        expect(
+            () => executor.execute({test: [inputTensor], input: [inputTensor]}))
+            .toThrow(new Error('Extra input tensors: test'));
+      });
     });
   });
 });
