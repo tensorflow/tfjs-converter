@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './slice_join_executor';
@@ -28,8 +28,7 @@ describe('slice join', () => {
   const input1 = [tfc.scalar(1)];
   const input2 = [tfc.scalar(2)];
   const input3 = [tfc.scalar(3)];
-  const executor = new GraphExecutor(
-      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
+  const context = new ExecutionContext({});
 
   describe('multi-tensor ops', () => {
     beforeEach(() => {
@@ -51,7 +50,7 @@ describe('slice join', () => {
         it('should call tfc.' + op, () => {
           const spy = spyOn(tfc, op as 'concat');
           node.op = op;
-          executeOp(node, {input1, input2, input3}, executor);
+          executeOp(node, {input1, input2, input3}, context);
 
           expect(spy).toHaveBeenCalledWith([input1[0], input2[0]], 3);
         });
@@ -76,7 +75,7 @@ describe('slice join', () => {
         node.op = 'reverse';
         node.params.axis = createNumberAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
-        executeOp(node, {input1, input2}, executor);
+        executeOp(node, {input1, input2}, context);
 
         expect(tfc.reverse).toHaveBeenCalledWith(input1[0], 2);
       });
@@ -86,7 +85,7 @@ describe('slice join', () => {
         node.op = 'tile';
         node.params.reps = createNumberAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
-        executeOp(node, {input1, input2}, executor);
+        executeOp(node, {input1, input2}, context);
 
         expect(tfc.tile).toHaveBeenCalledWith(input1[0], 2);
       });
@@ -96,7 +95,7 @@ describe('slice join', () => {
         node.op = 'slice';
         node.params.begin = createNumericArrayAttr([1]);
         node.params.size = createNumericArrayAttr([2]);
-        executeOp(node, {input1}, executor);
+        executeOp(node, {input1}, context);
 
         expect(tfc.slice).toHaveBeenCalledWith(input1[0], [1], [2]);
       });
@@ -107,7 +106,7 @@ describe('slice join', () => {
         node.params.axis = createNumberAttr(1);
         node.params.indices = createTensorAttr(1);
         node.inputNames = ['input1', 'input2'];
-        executeOp(node, {input1, input2}, executor);
+        executeOp(node, {input1, input2}, context);
 
         expect(tfc.gather).toHaveBeenCalledWith(input1[0], input2[0], 1);
       });

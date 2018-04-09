@@ -14,52 +14,82 @@
  * limitations under the License.
  * =============================================================================
  */
+import {Tensor} from '@tensorflow/tfjs-core';
+
+import {NamedTensorsMap} from '../data';
+import {Node} from '../operations';
 
 export interface ExecutionContextId {
-  frameId: string;
+  id: number;
+  frameName: string;
   iterationId: number;
 }
 
 export class ExecutionContext {
-  private contexts: ExecutionContextId[] = [this.newFrame('')];
+  private rootContext = {id: 0, frameName: '', iterationId: 0};
+  private contexts: ExecutionContextId[] = [this.rootContext];
+  private _currentId = 0;
+  private lastId = 0;
 
-  constructor() {}
+  contextIdMap: {[key: string]: ExecutionContextId[]} = {};
 
-  private newFrame(frameId: string) {
-    return {frameId, iterationId: 0};
+  constructor(public weightMap: NamedTensorsMap) {}
+
+  private newFrame(id: number, frameName: string) {
+    return {id, frameName, iterationId: 0};
   }
 
-  get currentContext(): ExecutionContextId {
-    return this.contexts[this.contexts.length - 1];
+  set currentContext(contexts: ExecutionContextId[]) {
+    this.contexts = contexts;
+  }
+  get currentId(): number {
+    return this._currentId;
+  }
+
+  get currentContext(): ExecutionContextId[] {
+    return this.contexts;
   }
 
   get currentContextId(): string {
-    return (this.currentContext.frameId === '' &&
-            this.currentContext.iterationId === 0) ?
-        '' :
-        `__${this.currentContext.frameId}-${this.currentContext.iterationId}__`;
+    return this.contexts
+        .map(
+            context => (context.id === 0 && context.iterationId === 0) ?
+                '' :
+                `${context.frameName}-${context.iterationId}`)
+        .join('/');
   }
 
+  initializeContext(inputs: Node[]) {
+    inputs.forEach(input => {
+      this.contextIdMap[input.name] = [this.rootContext];
+    });
+  }
   enterFrame(frameId: string) {
-    if (this.currentContext) {
-      this.contexts.push(this.newFrame(frameId));
+    if (this.contexts) {
+      this.lastId++;
+      this.contexts = this.contexts.slice();
+      this.contexts.push(this.newFrame(this.lastId, frameId));
     }
   }
 
-  exitFrame(): ExecutionContextId {
-    if (this.contexts.length <= 1) {
-      throw new Error('Cannot exit the root execution frame.');
+  exitFrame() {
+    if (this.contexts && this.contexts.length > 1) {
+      this.contexts.splice(-1);
+    } else {
+      throw new Error('Cannot exit frame, the context is empty');
     }
-    return this.contexts.pop();
   }
 
   nextIteration() {
-    if (this.currentContext) {
-      this.currentContext.iterationId += 1;
+    if (this.contexts && this.contexts.length > 0) {
+      const context = this.contexts[this.contexts.length - 1];
+      context.iterationId += 1;
+    } else {
+      throw new Error('Cannot increase frame iteration, the context is empty');
     }
   }
 
-  reset() {
-    this.contexts = [this.newFrame('')];
+  getWeight(name: string): Tensor[] {
+    return this.weightMap[name];
   }
 }

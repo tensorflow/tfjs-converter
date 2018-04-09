@@ -20,20 +20,25 @@ import {ExecutionContext} from './execution_context';
 let context: ExecutionContext;
 describe('ExecutionContext', () => {
   beforeEach(() => {
-    context = new ExecutionContext();
+    context = new ExecutionContext({});
   });
   afterEach(() => {});
 
   it('should initialize', () => {
-    expect(context.currentContext).toEqual({frameId: '', iterationId: 0});
+    expect(context.currentContext).toEqual([
+      {id: 0, frameName: '', iterationId: 0}
+    ]);
     expect(context.currentContextId).toEqual('');
   });
 
   describe('enterFrame', () => {
     it('should add new Frame', () => {
       context.enterFrame('1');
-      expect(context.currentContextId).toEqual('1-0');
-      expect(context.currentContext).toEqual({frameId: '1', iterationId: 0});
+      expect(context.currentContextId).toEqual('/1-0');
+      expect(context.currentContext).toEqual([
+        {id: 0, frameName: '', iterationId: 0},
+        {id: 1, frameName: '1', iterationId: 0}
+      ]);
     });
   });
 
@@ -43,7 +48,9 @@ describe('ExecutionContext', () => {
       context.exitFrame();
 
       expect(context.currentContextId).toEqual('');
-      expect(context.currentContext).toEqual({frameId: '0', iterationId: 0});
+      expect(context.currentContext).toEqual([
+        {id: 0, frameName: '', iterationId: 0}
+      ]);
     });
 
     it('should remember previous Frame', () => {
@@ -52,8 +59,11 @@ describe('ExecutionContext', () => {
       context.enterFrame('2');
       context.exitFrame();
 
-      expect(context.currentContextId).toEqual('1-1');
-      expect(context.currentContext).toEqual({frameId: '1', iterationId: 1});
+      expect(context.currentContextId).toEqual('/1-1');
+      expect(context.currentContext).toEqual([
+        {id: 0, frameName: '', iterationId: 0},
+        {id: 1, frameName: '1', iterationId: 1}
+      ]);
     });
   });
 
@@ -62,8 +72,11 @@ describe('ExecutionContext', () => {
       context.enterFrame('1');
       context.nextIteration();
 
-      expect(context.currentContextId).toEqual('1-1');
-      expect(context.currentContext).toEqual({frameId: '1', iterationId: 1});
+      expect(context.currentContextId).toEqual('/1-1');
+      expect(context.currentContext).toEqual([
+        {id: 0, frameName: '', iterationId: 0},
+        {id: 1, frameName: '1', iterationId: 1}
+      ]);
     });
   });
 });

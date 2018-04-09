@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './matrices_executor';
@@ -27,8 +27,7 @@ describe('matrices', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
   const input2 = [tfc.scalar(2)];
-  const executor = new GraphExecutor(
-      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
+  const context = new ExecutionContext({});
 
   beforeEach(() => {
     node = {
@@ -49,7 +48,7 @@ describe('matrices', () => {
         node.op = 'matMul';
         node.params.transposeA = createBoolAttr(true);
         node.params.transposeB = createBoolAttr(false);
-        executeOp(node, {input1, input2}, executor);
+        executeOp(node, {input1, input2}, context);
 
         expect(tfc.matMul)
             .toHaveBeenCalledWith(input1[0], input2[0], true, false);
@@ -65,7 +64,7 @@ describe('matrices', () => {
           x: createTensorAttr(0),
           perm: createNumericArrayAttr([1, 2])
         };
-        executeOp(node, {input1}, executor);
+        executeOp(node, {input1}, context);
 
         expect(tfc.transpose).toHaveBeenCalledWith(input1[0], [1, 2]);
       });

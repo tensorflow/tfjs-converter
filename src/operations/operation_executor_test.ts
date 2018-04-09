@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import {GraphExecutor} from '../executor';
+import {ExecutionContext} from '../executor';
 
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';
@@ -32,8 +32,7 @@ import {Node} from './types';
 
 describe('OperationExecutor', () => {
   let node: Node;
-  const executor = new GraphExecutor(
-      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
+  const context = new ExecutionContext({});
 
   beforeEach(() => {
     node = {
@@ -54,8 +53,8 @@ describe('OperationExecutor', () => {
           it('should call ' + category.CATEGORY + ' executor', () => {
             spyOn(category, 'executeOp');
             node.category = category.CATEGORY;
-            executeOp(node, {}, executor);
-            expect(category.executeOp).toHaveBeenCalledWith(node, {}, executor);
+            executeOp(node, {}, context);
+            expect(category.executeOp).toHaveBeenCalledWith(node, {}, context);
           });
         });
   });

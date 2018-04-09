@@ -18,88 +18,89 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    executor: GraphExecutor): tfc.Tensor[] => {
+                                    context: ExecutionContext):
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'abs':
       return [tfc.abs(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'acos':
       return [tfc.acos(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'asin':
       return [tfc.asin(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'atan':
       return [tfc.atan(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'ceil':
       return [tfc.ceil(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'cos':
       return [tfc.cos(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'cosh':
       return [tfc.cosh(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'elu':
       return [tfc.elu(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'exp':
       return [tfc.exp(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'floor':
       return [tfc.floor(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'log':
       return [tfc.log(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'relu':
       return [tfc.relu(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'selu':
       return [tfc.selu(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'sigmoid':
       return [tfc.sigmoid(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'sin':
       return [tfc.sin(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'sinh': {
       return [tfc.sinh(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     }
     case 'sqrt': {
       return [tfc.sqrt(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     }
     case 'square': {
       return [tfc.square(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     }
     case 'tanh': {
       return [tfc.tanh(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     }
     case 'tan':
       return [tfc.tan(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'clipByValue':
       return [tfc.clipByValue(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor,
-          getParamValue('clipValueMin', node, tensorMap, executor) as number,
-          getParamValue('clipValueMax', node, tensorMap, executor) as number)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor,
+          getParamValue('clipValueMin', node, tensorMap, context) as number,
+          getParamValue('clipValueMax', node, tensorMap, context) as number)];
     case 'rsqrt':
       return [tfc.div(
           tfc.scalar(1.0, 'float32'),
-          tfc.sqrt(getTensor(node.inputNames[0], tensorMap, executor)))];
+          tfc.sqrt(getTensor(node.inputNames[0], tensorMap, context)))];
 
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

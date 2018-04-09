@@ -18,49 +18,49 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    executor: GraphExecutor): tfc.Tensor[] => {
+                                    context: ExecutionContext):
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'loopCond':
-      return [getParamValue('pred', node, tensorMap, executor) as tfc.Tensor];
+      return [getParamValue('pred', node, tensorMap, context) as tfc.Tensor];
     case 'switch': {
       const pred =
-          getParamValue('pred', node, tensorMap, executor) as tfc.Tensor;
+          getParamValue('pred', node, tensorMap, context) as tfc.Tensor;
       const data =
-          getParamValue('data', node, tensorMap, executor) as tfc.Tensor;
+          getParamValue('data', node, tensorMap, context) as tfc.Tensor;
       // Outputs nodes :0 => false, :1 => true
       return pred.dataSync()[0] ? [undefined, data] : [data, undefined];
     }
     case 'merge':
       const inputName = node.inputNames.find(
-          name => getTensor(name, tensorMap, executor) !== undefined);
-      return inputName ? [getTensor(inputName, tensorMap, executor)] :
-                         undefined;
+          name => getTensor(name, tensorMap, context) !== undefined);
+      return inputName ? [getTensor(inputName, tensorMap, context)] : undefined;
 
     case 'enter':
       const frameId =
-          getParamValue('frameName', node, tensorMap, executor) as string;
+          getParamValue('frameName', node, tensorMap, context) as string;
       const data =
-          getParamValue('tensor', node, tensorMap, executor) as tfc.Tensor;
-      executor.enterFrame(frameId);
+          getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
+      context.enterFrame(frameId);
       return [data];
 
     case 'exit':
       const tensor =
-          getParamValue('tensor', node, tensorMap, executor) as tfc.Tensor;
-      executor.exitFrame();
+          getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
+      context.exitFrame();
       return [tensor];
 
     case 'nextIteration':
       const input =
-          getParamValue('tensor', node, tensorMap, executor) as tfc.Tensor;
-      executor.nextIteration();
+          getParamValue('tensor', node, tensorMap, context) as tfc.Tensor;
+      context.nextIteration();
       return [input];
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

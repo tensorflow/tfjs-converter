@@ -18,56 +18,57 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    executor: GraphExecutor): tfc.Tensor[] => {
+                                    context: ExecutionContext):
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'max': {
-      const axis = getParamValue('axis', node, tensorMap, executor) as number[];
+      const axis = getParamValue('axis', node, tensorMap, context) as number[];
       const keepDims =
-          getParamValue('keepDims', node, tensorMap, executor) as boolean;
+          getParamValue('keepDims', node, tensorMap, context) as boolean;
       return [tfc.max(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis,
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis,
           keepDims)];
     }
     case 'mean': {
-      const axis = getParamValue('axis', node, tensorMap, executor) as number[];
+      const axis = getParamValue('axis', node, tensorMap, context) as number[];
       const keepDims =
-          getParamValue('keepDims', node, tensorMap, executor) as boolean;
+          getParamValue('keepDims', node, tensorMap, context) as boolean;
       return [tfc.mean(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis,
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis,
           keepDims)];
     }
     case 'min': {
-      const axis = getParamValue('axis', node, tensorMap, executor) as number[];
+      const axis = getParamValue('axis', node, tensorMap, context) as number[];
       const keepDims =
-          getParamValue('keepDims', node, tensorMap, executor) as boolean;
+          getParamValue('keepDims', node, tensorMap, context) as boolean;
       return [tfc.min(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis,
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis,
           keepDims)];
     }
     case 'sum': {
-      const axis = getParamValue('axis', node, tensorMap, executor) as number[];
+      const axis = getParamValue('axis', node, tensorMap, context) as number[];
       const keepDims =
-          getParamValue('keepDims', node, tensorMap, executor) as boolean;
+          getParamValue('keepDims', node, tensorMap, context) as boolean;
       return [tfc.sum(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis,
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis,
           keepDims)];
     }
     case 'argMax': {
-      const axis = getParamValue('axis', node, tensorMap, executor) as number;
+      const axis = getParamValue('axis', node, tensorMap, context) as number;
       return [tfc.argMax(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis)];
     }
     case 'argMin': {
-      const axis = getParamValue('axis', node, tensorMap, executor) as number;
+      const axis = getParamValue('axis', node, tensorMap, context) as number;
       return [tfc.argMin(
-          getParamValue('x', node, tensorMap, executor) as tfc.Tensor, axis)];
+          getParamValue('x', node, tensorMap, context) as tfc.Tensor, axis)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

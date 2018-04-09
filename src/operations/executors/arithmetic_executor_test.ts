@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './arithmetic_executor';
@@ -26,8 +26,7 @@ describe('arithmetic', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
   const input2 = [tfc.scalar(1)];
-  const executor = new GraphExecutor(
-      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
+  const context = new ExecutionContext({});
 
   beforeEach(() => {
     node = {
@@ -46,7 +45,7 @@ describe('arithmetic', () => {
       it('should call tfc.' + op, () => {
         const spy = spyOn(tfc, op as 'add');
         node.op = op;
-        executeOp(node, {input1, input2}, executor);
+        executeOp(node, {input1, input2}, context);
 
         expect(spy).toHaveBeenCalledWith(input1[0], input2[0]);
       });

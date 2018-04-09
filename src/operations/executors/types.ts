@@ -18,7 +18,7 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 /**
@@ -28,5 +28,5 @@ import {Node} from '../index';
  */
 export interface OpExecutor {
   (node: Node, tensorMap: NamedTensorsMap,
-   executor: GraphExecutor): tfc.Tensor[];
+   context: ExecutionContext): tfc.Tensor[];
 }

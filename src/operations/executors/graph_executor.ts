@@ -18,38 +18,39 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
 export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    executor: GraphExecutor): tfc.Tensor[] => {
+                                    context: ExecutionContext):
+                                       tfc.Tensor[] => {
   switch (node.op) {
     case 'const': {
       return tensorMap[node.name];
     }
     case 'placeholder':
       const def =
-          getParamValue('default', node, tensorMap, executor) as tfc.Tensor;
-      return [getTensor(node.name, tensorMap, executor) || def];
+          getParamValue('default', node, tensorMap, context) as tfc.Tensor;
+      return [getTensor(node.name, tensorMap, context) || def];
     case 'identity':
-      return [getParamValue('x', node, tensorMap, executor) as tfc.Tensor];
+      return [getParamValue('x', node, tensorMap, context) as tfc.Tensor];
     case 'shape':
       return [tfc.tensor1d(
-          (getParamValue('x', node, tensorMap, executor) as tfc.Tensor).shape,
+          (getParamValue('x', node, tensorMap, context) as tfc.Tensor).shape,
           'int32')];
     case 'noop':
       return [];
     case 'print':
-      const input = getParamValue('x', node, tensorMap, executor) as tfc.Tensor;
+      const input = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
       const data =
-          getParamValue('data', node, tensorMap, executor) as tfc.Tensor[];
+          getParamValue('data', node, tensorMap, context) as tfc.Tensor[];
       const message =
-          getParamValue('message', node, tensorMap, executor) as string;
+          getParamValue('message', node, tensorMap, context) as string;
       const summarize =
-          getParamValue('summarize', node, tensorMap, executor) as number;
+          getParamValue('summarize', node, tensorMap, context) as number;
       console.warn(
           'The graph has a tf.print() operation,' +
           'usually used for debugging, which slows down performance.');

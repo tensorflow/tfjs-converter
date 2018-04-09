@@ -15,18 +15,23 @@
  * =============================================================================
  */
 
-import {Tensor, tidy} from '@tensorflow/tfjs-core';
+import {tidy} from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/index';
 import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
 import * as operations from '../operations/index';
+import {Node} from '../operations/index';
 
-import {ExecutionContext} from './execution_context';
+import {ExecutionContext, ExecutionContextId} from './execution_context';
+
+interface NodeWithContextId {
+  node: Node;
+  contexts: ExecutionContextId[];
+}
 
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
   private _weightMap: NamedTensorsMap = {};
-  private context: ExecutionContext = new ExecutionContext();
   get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }
@@ -57,7 +62,7 @@ export class GraphExecutor {
       this.compiledOrder.push(node);
       node.children.forEach((childNode) => {
         if (!visited[childNode.name] && childNode.inputNames.every(name => {
-              const [nodeName, ] = getNodeNameAndIndex(name, this);
+              const [nodeName, ] = getNodeNameAndIndex(name);
               return visited[nodeName];
             })) {
           stack.push(childNode);
@@ -75,16 +80,18 @@ export class GraphExecutor {
    * inspect intermediate nodes of the model by adding them to the outputs
    * array.
    */
-
   execute(inputs: NamedTensorsMap, outputs?: string|string[]): NamedTensorMap {
-    this.context.reset();
     const result = tidy(() => {
       let tensors = {};
+      const context = new ExecutionContext(this._weightMap);
+      // Graph with control flow op requires runtime evaluation of the execution
+      // order, while without control flow the execution order is pre-determined
+      // in the compile method.
       if (this.graph.withControlFlow) {
-        tensors = this.executeWithControlFlow(inputs);
+        tensors = this.executeWithControlFlow(inputs, context);
       } else {
         tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-          map[node.name] = operations.executeOp(node, map, this);
+          map[node.name] = operations.executeOp(node, map, context);
           return map;
         }, {...this.weightMap, ...inputs});
       }
@@ -96,37 +103,61 @@ export class GraphExecutor {
           (outputs || this.graph.outputs.map(node => node.name)) as string[];
 
       return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
-        map[name] = getTensor(name, tensors, this);
+        map[name] = getTensor(name, tensors, context);
         return map;
       }, {});
     });
     return result;
   }
 
-  private executeWithControlFlow(inputs: NamedTensorsMap): NamedTensorsMap {
-    const stack = [...this.graph.inputs];
+  /**
+   * When
+   * @param inputs
+   * @param context
+   */
+  private executeWithControlFlow(
+      inputs: NamedTensorsMap, context: ExecutionContext): NamedTensorsMap {
+    context.initializeContext(this.graph.inputs);
+    const stack: NodeWithContextId[] = this.graph.inputs.map(input => {
+      return {contexts: context.contextIdMap[input.name], node: input};
+    });
     const tensorMap = {...this.weightMap, ...inputs};
     const visited: {[key: string]: boolean} = {};
-
     while (stack.length > 0) {
-      const node = stack.pop();
-      const tensors = operations.executeOp(node, tensorMap, this);
-      const [nodeName, ] = getNodeNameAndIndex(node.name, this);
+      const item = stack.pop();
+      context.currentContext = item.contexts;
+
+      const tensors = operations.executeOp(item.node, tensorMap, context);
+
+      const [nodeName, ] = getNodeNameAndIndex(item.node.name, context);
       tensorMap[nodeName] = tensors;
       visited[nodeName] = true;
-      node.children.forEach((childNode) => {
-        const [nodeName, ] = getNodeNameAndIndex(childNode.name, this);
-        if (!visited[nodeName]) {
+
+      item.node.children.forEach((childNode) => {
+        // the child node always use the first input's context id
+        const index = childNode.inputs.findIndex(input => input === item.node);
+        if (index === 0) {
+          context.contextIdMap[childNode.name] = context.currentContext;
+        }
+
+        const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
+        if (childNode.op === 'nextIteration' || !visited[nodeName]) {
           // Merge op can be pushed if any of its inputs has value.
           if (childNode.op === 'merge') {
             if (childNode.inputNames.some(
-                    name => !!getTensor(name, tensorMap, this))) {
-              stack.push(childNode);
+                    name => !!getTensor(name, tensorMap, context))) {
+              stack.push({
+                contexts: context.contextIdMap[childNode.name],
+                node: childNode
+              });
             }
-            // Otherwise all inputs need to have value.
-          } else if (childNode.inputNames.every(
-                         name => !!getTensor(name, tensorMap, this))) {
-            stack.push(childNode);
+          } else  // Otherwise all inputs must to have value.
+              if (childNode.inputNames.every(
+                      name => !!getTensor(name, tensorMap, context))) {
+            stack.push({
+              contexts: context.contextIdMap[childNode.name],
+              node: childNode
+            });
           }
         }
       });
@@ -135,25 +166,6 @@ export class GraphExecutor {
     return tensorMap;
   }
 
-  get currentContextId(): string {
-    return this.context.currentContextId;
-  }
-
-  enterFrame(frameId: string) {
-    this.context.enterFrame(frameId);
-  }
-
-  exitFrame() {
-    this.context.exitFrame();
-  }
-
-  nextIteration() {
-    this.context.nextIteration();
-  }
-
-  getWeight(name: string): Tensor[] {
-    return this.weightMap[name];
-  }
   /**
    * Releases the memory used by the weight tensors.
    */

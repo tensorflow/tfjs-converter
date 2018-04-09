@@ -18,7 +18,7 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../data/index';
-import {GraphExecutor} from '../executor';
+import {ExecutionContext} from '../executor/execution_context';
 
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basicMath from './executors/basic_math_executor';
@@ -41,32 +41,32 @@ import {Node} from './index';
  */
 export function executeOp(
     node: Node, tensorMap: NamedTensorsMap,
-    executor: GraphExecutor): tfc.Tensor[] {
+    context: ExecutionContext): tfc.Tensor[] {
   switch (node.category) {
     case 'arithmetic':
-      return arithmetic.executeOp(node, tensorMap, executor);
+      return arithmetic.executeOp(node, tensorMap, context);
     case 'basic_math':
-      return basicMath.executeOp(node, tensorMap, executor);
+      return basicMath.executeOp(node, tensorMap, context);
     case 'control':
-      return control.executeOp(node, tensorMap, executor);
+      return control.executeOp(node, tensorMap, context);
     case 'convolution':
-      return convolution.executeOp(node, tensorMap, executor);
+      return convolution.executeOp(node, tensorMap, context);
     case 'creation':
-      return creation.executeOp(node, tensorMap, executor);
+      return creation.executeOp(node, tensorMap, context);
     case 'graph':
-      return graph.executeOp(node, tensorMap, executor);
+      return graph.executeOp(node, tensorMap, context);
     case 'logical':
-      return logical.executeOp(node, tensorMap, executor);
+      return logical.executeOp(node, tensorMap, context);
     case 'matrices':
-      return matrices.executeOp(node, tensorMap, executor);
+      return matrices.executeOp(node, tensorMap, context);
     case 'normalization':
-      return normalization.executeOp(node, tensorMap, executor);
+      return normalization.executeOp(node, tensorMap, context);
     case 'reduction':
-      return reduction.executeOp(node, tensorMap, executor);
+      return reduction.executeOp(node, tensorMap, context);
     case 'slice_join':
-      return sliceJoin.executeOp(node, tensorMap, executor);
+      return sliceJoin.executeOp(node, tensorMap, context);
     case 'transformation':
-      return transformation.executeOp(node, tensorMap, executor);
+      return transformation.executeOp(node, tensorMap, context);
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);
   }

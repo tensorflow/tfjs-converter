@@ -40,7 +40,11 @@ export class LoopModel {
   }
 
   predict(init, loops, inc) {
-    const dict = {'init': tfc.scalar(init), 'times': tfc.scalar(loops), 'inc': tfc.scalar(inc)};
+    const dict = {
+      'init': tfc.scalar(init, 'int32'),
+      'times': tfc.scalar(loops, 'int32'),
+      'inc': tfc.scalar(inc, 'int32')
+    };
     return this.model.execute(dict, OUTPUT_NODE_NAME);
   }
 }

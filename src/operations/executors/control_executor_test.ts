@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './control_executor';
@@ -25,8 +25,7 @@ import {createTensorAttr} from './test_helper';
 describe('control', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
-  const executor = new GraphExecutor(
-      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
+  const context = new ExecutionContext({});
 
   beforeEach(() => {
     node = {
@@ -48,7 +47,7 @@ describe('control', () => {
         node.params['data'] = createTensorAttr(1);
 
         const pred = [tfc.scalar(true)];
-        expect(executeOp(node, {pred, input1}, executor)).toEqual([
+        expect(executeOp(node, {pred, input1}, context)).toEqual([
           undefined, input1[0]
         ]);
       });
@@ -58,7 +57,7 @@ describe('control', () => {
         node.params['data'] = createTensorAttr(1);
 
         const pred = [tfc.scalar(false)];
-        expect(executeOp(node, {pred, input1}, executor)).toEqual([
+        expect(executeOp(node, {pred, input1}, context)).toEqual([
           input1[0], undefined
         ]);
       });
@@ -68,49 +67,49 @@ describe('control', () => {
         node.op = 'merge';
 
         const pred = [tfc.scalar(true)];
-        expect(executeOp(node, {pred: undefined, input1}, executor))
+        expect(executeOp(node, {pred: undefined, input1}, context))
             .toEqual(input1);
-        expect(executeOp(node, {pred, input1: undefined}, executor))
+        expect(executeOp(node, {pred, input1: undefined}, context))
             .toEqual(pred);
       });
       it('should return undefined if no inputs are available', () => {
         node.op = 'merge';
-        expect(executeOp(node, {pred: undefined, input1: undefined}, executor))
+        expect(executeOp(node, {pred: undefined, input1: undefined}, context))
             .toEqual(undefined);
       });
     });
 
     describe('enter', () => {
-      it('should call enterFrame on executor', () => {
-        spyOn(executor, 'enterFrame');
+      it('should call enterFrame on context', () => {
+        spyOn(context, 'enterFrame');
         node.op = 'enter';
         node.params['tensor'] = createTensorAttr(0);
         node.inputNames = ['input1'];
 
-        expect(executeOp(node, {input1}, executor)).toEqual(input1);
-        expect(executor.enterFrame).toHaveBeenCalled();
+        expect(executeOp(node, {input1}, context)).toEqual(input1);
+        expect(context.enterFrame).toHaveBeenCalled();
       });
     });
     describe('exit', () => {
-      it('should call existFrame on executor', () => {
-        spyOn(executor, 'exitFrame');
+      it('should call existFrame on context', () => {
+        spyOn(context, 'exitFrame');
         node.op = 'exit';
         node.params['tensor'] = createTensorAttr(0);
         node.inputNames = ['input1'];
 
-        expect(executeOp(node, {input1}, executor)).toEqual(input1);
-        expect(executor.exitFrame).toHaveBeenCalled();
+        expect(executeOp(node, {input1}, context)).toEqual(input1);
+        expect(context.exitFrame).toHaveBeenCalled();
       });
     });
     describe('nextIteration', () => {
-      it('should call nextIteration on executor', () => {
-        spyOn(executor, 'nextIteration');
+      it('should call nextIteration on context', () => {
+        spyOn(context, 'nextIteration');
         node.op = 'nextIteration';
         node.params['tensor'] = createTensorAttr(0);
         node.inputNames = ['input1'];
 
-        expect(executeOp(node, {input1}, executor)).toEqual(input1);
-        expect(executor.nextIteration).toHaveBeenCalled();
+        expect(executeOp(node, {input1}, context)).toEqual(input1);
+        expect(context.nextIteration).toHaveBeenCalled();
       });
     });
   });

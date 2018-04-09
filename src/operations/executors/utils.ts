@@ -18,27 +18,27 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/index';
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node, ValueType} from '../index';
 
 export function getParamValue(
     paramName: string, node: Node, tensorMap: NamedTensorsMap,
-    executor: GraphExecutor): ValueType {
+    context: ExecutionContext): ValueType {
   const param = node.params[paramName];
   if (param && param.inputIndex !== undefined) {
     if (param.type === 'tensor') {
-      return getTensor(node.inputNames[param.inputIndex], tensorMap, executor);
+      return getTensor(node.inputNames[param.inputIndex], tensorMap, context);
     }
     if (param.type === 'tensors') {
       const inputs = param.inputIndex === 0 ?
           node.inputNames.slice(param.inputIndex, -param.inputParamLength) :
           node.inputNames.splice(param.inputIndex);
 
-      return inputs.map(name => getTensor(name, tensorMap, executor));
+      return inputs.map(name => getTensor(name, tensorMap, context));
     }
     const data = Array.prototype.slice.call(
         getTensor(
-            node.inputNames.slice(param.inputIndex)[0], tensorMap, executor)
+            node.inputNames.slice(param.inputIndex)[0], tensorMap, context)
             .dataSync());
     return param.type === 'number' ? data[0] : data;
   }
@@ -53,13 +53,13 @@ export function getParamValue(
  */
 export function getTensor(
     name: string, tensorsMap: NamedTensorsMap,
-    executor: GraphExecutor): tfc.Tensor {
-  const [nodeName, index] = getNodeNameAndIndex(name, executor);
+    context: ExecutionContext): tfc.Tensor {
+  const [nodeName, index] = getNodeNameAndIndex(name, context);
   if (tensorsMap[nodeName]) {
     return tensorsMap[nodeName][index];
   } else {
     const [nodeName, index] = getNodeNameAndIndex(name);
-    const weight = executor.getWeight(nodeName);
+    const weight = context.getWeight(nodeName);
     return weight ?
         weight[index] :
         tensorsMap[nodeName] ? tensorsMap[nodeName][index] : undefined;
@@ -73,18 +73,18 @@ export function getTensor(
  * default to 0.
  */
 export function getNodeNameAndIndex(
-    inputName: string, executor?: GraphExecutor): [string, number] {
+    inputName: string, context?: ExecutionContext): [string, number] {
   const index = inputName.lastIndexOf(':');
-  if (index === -1) return [getNodeNameWithContextId(inputName, executor), 0];
+  if (index === -1) return [getNodeNameWithContextId(inputName, context), 0];
 
   const nodeName =
-      getNodeNameWithContextId(inputName.substring(0, index), executor);
+      getNodeNameWithContextId(inputName.substring(0, index), context);
   return [nodeName, Number(inputName.substring(index + 1))];
 }
 
 function getNodeNameWithContextId(
-    name: string, executor?: GraphExecutor): string {
-  return !!executor && !!executor.currentContextId ?
-      `${name}-${executor.currentContextId}` :
+    name: string, context?: ExecutionContext): string {
+  return !!context && !!context.currentContextId ?
+      `${name}-${context.currentContextId}` :
       name;
 }

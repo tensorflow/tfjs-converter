@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {GraphExecutor} from '../../executor';
+import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
 
 import {executeOp} from './reduction_executor';
@@ -26,8 +26,7 @@ import {createBoolAttr, createNumberAttr, createTensorAttr} from './test_helper'
 describe('reduction', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
-  const executor = new GraphExecutor(
-      {nodes: {}, inputs: [], outputs: [], withControlFlow: false});
+  const context = new ExecutionContext({});
 
   beforeEach(() => {
     node = {
@@ -50,7 +49,7 @@ describe('reduction', () => {
       it('should call tfc.' + op, () => {
         const spy = spyOn(tfc, op as 'max');
         node.op = op;
-        executeOp(node, {input1}, executor);
+        executeOp(node, {input1}, context);
 
         expect(spy).toHaveBeenCalledWith(input1[0], 1, true);
       });
@@ -59,7 +58,7 @@ describe('reduction', () => {
       it('should call tfc.argMax', () => {
         spyOn(tfc, 'argMax');
         node.op = 'argMax';
-        executeOp(node, {input1}, executor);
+        executeOp(node, {input1}, context);
 
         expect(tfc.argMax).toHaveBeenCalledWith(input1[0], 1);
       });
@@ -68,7 +67,7 @@ describe('reduction', () => {
       it('should call tfc.argMin', () => {
         spyOn(tfc, 'argMin');
         node.op = 'argMin';
-        executeOp(node, {input1}, executor);
+        executeOp(node, {input1}, context);
 
         expect(tfc.argMin).toHaveBeenCalledWith(input1[0], 1);
       });
