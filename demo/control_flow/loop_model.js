@@ -17,7 +17,6 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 import {NamedTensorMap, loadFrozenModel} from '@tensorflow/tfjs-converter';
-import {IMAGENET_CLASSES} from './imagenet_classes';
 const GOOGLE_CLOUD_STORAGE_DIR =
     'https://storage.googleapis.com/tfjs-models/savedmodel/';
 const MODEL_FILE_URL = 'control_flow/tensorflowjs_model.pb';
@@ -58,6 +57,7 @@ window.onload = async () => {
   console.time('Loading of model');
   await loopModel.load();
   console.timeEnd('Loading of model');
+  resultElement.innerText = 'Model loaded.';
 
   const runBtn = document.getElementById('run');
   runBtn.onclick = () => {
@@ -68,6 +68,6 @@ window.onload = async () => {
     const result = loopModel.predict(init, loop, inc);
     console.timeEnd('prediction');
 
-    resultElement.innerText = result;
+    resultElement.innerText = "oupput = " + result.dataSync()[0];
   };
 };

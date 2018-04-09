@@ -6,13 +6,14 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "@tensorflow/tfjs-converter": "../tensorflow-tfjs-converter-0.1.0.tgz",
+    "@tensorflow/tfjs-converter": "0.1.1",
     "@tensorflow/tfjs-core": "0.6.0"
   },
   "scripts": {
-    "mobilenet": "NODE_ENV=development parcel --no-hmr --open index.html ",
-    "control_flow": "NODE_ENV=development parcel --no-hmr --open loop.html ",
-    "build": "cp models/* dist/ && NODE_ENV=production parcel build loop.html  --no-minify --public-url /"
+    "mobilenet": "NODE_ENV=development parcel --no-hmr --open mobilenet/index.html ",
+    "control_flow": "NODE_ENV=development parcel --no-hmr --open control_flow/index.html ",
+    "build_mobilenet": "NODE_ENV=production parcel build mobilenet/index.html  --no-minify --public-url /",
+    "build_control_flow": "NODE_ENV=production parcel build control_flw/index.html  --no-minify --public-url /"
   },
   "devDependencies": {
     "babel-plugin-transform-runtime": "~6.23.0",
