@@ -1,1 +1,0 @@
-[{"weights": [{"dtype": "int32", "shape": [], "name": "while/Const"}, {"dtype": "int32", "shape": [], "name": "while/Add/y"}], "paths": ["group1-shard1of1"]}]
