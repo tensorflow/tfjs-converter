@@ -19,6 +19,7 @@ import * as tfc from '@tensorflow/tfjs-core';
 import {Node} from '../index';
 
 import {executeOp} from './image_executor';
+// tslint:disable-next-line:max-line-length
 import {createBoolAttr, createNumericArrayAttr, createTensorAttr} from './test_helper';
 
 describe('image', () => {
