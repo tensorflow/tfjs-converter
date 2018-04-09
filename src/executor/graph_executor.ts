@@ -111,9 +111,10 @@ export class GraphExecutor {
   }
 
   /**
-   * When
-   * @param inputs
-   * @param context
+   * When there are control flow nodes in the graph, the graph execution use
+   * ExecutionContext to keep track of the frames and loop iterators.
+   * @param inputs placeholder tensors for the graph.
+   * @param context the execution context object for current execution.
    */
   private executeWithControlFlow(
       inputs: NamedTensorsMap, context: ExecutionContext): NamedTensorsMap {
