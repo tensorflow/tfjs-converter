@@ -114,7 +114,7 @@ export class GraphExecutor {
       if (inputKeys.indexOf(name) === -1) missing.push(name);
     });
     if (missing.length > 0) {
-      throw new Error('Missing input placeholders: ' + missing);
+      throw new Error(`Missing input placeholders: ${missing}`);
     }
   }
 }
