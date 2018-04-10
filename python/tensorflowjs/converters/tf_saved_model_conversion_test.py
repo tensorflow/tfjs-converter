@@ -121,7 +121,7 @@ class ConvertTest(unittest.TestCase):
   def test_convert_checkpoint_model(self):
     self.create_checkpoint_model()
 
-    tf_saved_model_conversion.convert_checkpoint_model(
+    tf_saved_model_conversion.convert_tf_checkpoint_model(
         os.path.join(self._tmp_dir, CHECKPOINT_MODEL_DIR),
         'Softmax',
         os.path.join(self._tmp_dir, CHECKPOINT_MODEL_DIR)

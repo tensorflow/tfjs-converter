@@ -142,7 +142,7 @@ def extract_weights(graph_def, output_graph):
       os.path.abspath(output_graph), graph_def.SerializeToString())
 
 
-def convert_checkpoint_model(checkpoint_dir, output_node_names,
+def convert_tf_checkpoint_model(checkpoint_dir, output_node_names,
                              output_dir, saved_model_tags='serve'):
   """Freeze the checkpoint model and check the model compatibility with Tensorflow.js.
 
