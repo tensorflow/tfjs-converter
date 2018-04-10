@@ -118,6 +118,19 @@ If your model uses an unsupported ops, the `tensorflowjs_converter` script will 
 produce a list of the unsupported ops in your model. Please file issues to let us
 know what ops you need support with.
 
+## Loading the weights only
+
+If you prefer to load the weights only, you can use follow code snippet.
+
+```typescript
+import * as tfc from '@tensorflow/tfjs-core';
+
+const weightManifestUrl = "https://example.org/model/weights_manifest.json";
+const manifest = await fetch(weightManifestUrl);
+this.weightManifest = await manifest.clone().json();
+const weightMap = await tfc.loadWeights(
+        this.weightManifest, "https://example.org/model");
+```
 
 ## FAQ
 
