@@ -34,7 +34,7 @@ import * as sliceJoin from './op_list/slice_join.json';
 import * as transformation from './op_list/transformation.json';
 import {Graph, Node, OpMapper} from './types';
 
-const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'Next'];
+const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
 export class OperationMapper {
   private static _instance: OperationMapper;
 

@@ -73,8 +73,10 @@ describe('graph', () => {
         node.inputNames = ['input'];
         node.params.x = createTensorAttr(0);
         node.op = 'shape';
-        expect(Array.prototype.slice.call(
-                   executeOp(node, {input: input1}, context)[0].dataSync()))
+        expect(
+            Array.prototype.slice.call(
+                (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0]
+                    .dataSync()))
             .toEqual([1]);
       });
     });

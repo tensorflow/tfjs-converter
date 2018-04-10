@@ -28,5 +28,5 @@ import {Node} from '../index';
  */
 export interface OpExecutor {
   (node: Node, tensorMap: NamedTensorsMap,
-   context: ExecutionContext): tfc.Tensor[];
+   context: ExecutionContext): tfc.Tensor[]|Promise<tfc.Tensor[]>;
 }

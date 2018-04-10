@@ -38,13 +38,13 @@ export class LoopModel {
     }
   }
 
-  predict(init, loops, inc) {
+  async predict(init, loops, inc) {
     const dict = {
       'init': tfc.scalar(init, 'int32'),
       'times': tfc.scalar(loops, 'int32'),
       'inc': tfc.scalar(inc, 'int32')
     };
-    return this.model.execute(dict, OUTPUT_NODE_NAME);
+    return this.model.executeAsync(dict, OUTPUT_NODE_NAME);
   }
 }
 
@@ -60,12 +60,12 @@ window.onload = async () => {
   resultElement.innerText = 'Model loaded.';
 
   const runBtn = document.getElementById('run');
-  runBtn.onclick = () => {
+  runBtn.onclick = async () => {
     const init = document.getElementById('init').value;
     const loop = document.getElementById('loop').value;
     const inc = document.getElementById('inc').value;
     console.time('prediction');
-    const result = loopModel.predict(init, loop, inc);
+    const result = await loopModel.predict(init, loop, inc);
     console.timeEnd('prediction');
 
     resultElement.innerText = "oupput = " + result.dataSync()[0];

@@ -15,7 +15,7 @@
  * =============================================================================
  */
 
-import {tidy} from '@tensorflow/tfjs-core';
+import {Tensor, tidy} from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/index';
 import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
@@ -41,6 +41,10 @@ export class GraphExecutor {
 
   constructor(private graph: operations.Graph) {
     this.compile();
+  }
+
+  get isControlFlowModel(): boolean {
+    return this.graph.withControlFlow;
   }
 
   /**
@@ -91,23 +95,25 @@ export class GraphExecutor {
         tensors = this.executeWithControlFlow(inputs, context);
       } else {
         tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-          map[node.name] = operations.executeOp(node, map, context);
+          map[node.name] = operations.executeOp(node, map, context) as Tensor[];
           return map;
         }, {...this.weightMap, ...inputs});
       }
 
-      if (outputs && !(outputs instanceof Array)) {
-        outputs = [outputs];
-      }
-      const requestedOutputs =
-          (outputs || this.graph.outputs.map(node => node.name)) as string[];
-
-      return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
-        map[name] = getTensor(name, tensors, context);
-        return map;
-      }, {});
+      return this.findOutputs(tensors, context, outputs);
     });
     return result;
+  }
+
+  async executeAsync(inputs: NamedTensorsMap, outputs?: string|string[]):
+      Promise<NamedTensorMap> {
+    let tensors = {};
+    const context = new ExecutionContext(this._weightMap);
+    // Graph with control flow op requires runtime evaluation of the execution
+    // order, while without control flow the execution order is pre-determined
+    // in the compile method.
+    tensors = await this.executeWithControlFlow(inputs, context);
+    return this.findOutputs(tensors, context, outputs);
   }
 
   /**
@@ -116,8 +122,9 @@ export class GraphExecutor {
    * @param inputs placeholder tensors for the graph.
    * @param context the execution context object for current execution.
    */
-  private executeWithControlFlow(
-      inputs: NamedTensorsMap, context: ExecutionContext): NamedTensorsMap {
+  private async executeWithControlFlow(
+      inputs: NamedTensorsMap,
+      context: ExecutionContext): Promise<NamedTensorsMap> {
     context.initializeContext(this.graph.inputs);
     const stack: NodeWithContextId[] = this.graph.inputs.map(input => {
       return {contexts: context.contextIdMap[input.name], node: input};
@@ -131,7 +138,7 @@ export class GraphExecutor {
       const tensors = operations.executeOp(item.node, tensorMap, context);
 
       const [nodeName, ] = getNodeNameAndIndex(item.node.name, context);
-      tensorMap[nodeName] = tensors;
+      tensorMap[nodeName] = await tensors;
       visited[nodeName] = true;
 
       item.node.children.forEach((childNode) => {
@@ -167,6 +174,20 @@ export class GraphExecutor {
     return tensorMap;
   }
 
+  private findOutputs(
+      tensorMap: NamedTensorsMap, context: ExecutionContext,
+      outputs?: string|string[]): NamedTensorMap {
+    if (outputs && !(outputs instanceof Array)) {
+      outputs = [outputs];
+    }
+    const requestedOutputs =
+        (outputs || this.graph.outputs.map(node => node.name)) as string[];
+
+    return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
+      map[name] = getTensor(name, tensorMap, context);
+      return map;
+    }, {});
+  }
   /**
    * Releases the memory used by the weight tensors.
    */

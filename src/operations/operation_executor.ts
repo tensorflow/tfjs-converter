@@ -41,7 +41,7 @@ import {Node} from './index';
  */
 export function executeOp(
     node: Node, tensorMap: NamedTensorsMap,
-    context: ExecutionContext): tfc.Tensor[] {
+    context: ExecutionContext): tfc.Tensor[]|Promise<tfc.Tensor[]> {
   switch (node.category) {
     case 'arithmetic':
       return arithmetic.executeOp(node, tensorMap, context);

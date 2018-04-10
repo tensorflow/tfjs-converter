@@ -88,7 +88,7 @@ describe('GraphExecutor', () => {
       ]);
     });
 
-    it('should execute control flow graph', () => {
+    it('should execute control flow graph', (done) => {
       inputNode = {
         inputNames: [],
         inputs: [],
@@ -112,7 +112,7 @@ describe('GraphExecutor', () => {
         inputs: [inputNode, constNode],
         children: [],
         name: 'output',
-        op: 'merge',
+        op: 'switch',
         category: 'control',
         params: {}
       };
@@ -134,13 +134,14 @@ describe('GraphExecutor', () => {
                 return node.op === 'const' ? [constTensor] : [inputTensor];
               });
 
-      executor.execute({input: [inputTensor]});
-
-      expect(spy.calls.allArgs()).toEqual([
-        [inputNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
-        [outputNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
-        [constNode, jasmine.any(Object), jasmine.any(ExecutionContext)]
-      ]);
+      executor.executeAsync({input: [inputTensor]}).then(result => {
+        expect(spy.calls.allArgs()).toEqual([
+          [inputNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
+          [constNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
+          [outputNode, jasmine.any(Object), jasmine.any(ExecutionContext)]
+        ]);
+        done();
+      });
     });
   });
 });

@@ -24,9 +24,9 @@ import {Node} from '../index';
 import {OpExecutor} from './types';
 import {getParamValue, getTensor} from './utils';
 
-export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+export let executeOp: OpExecutor = async(
+    node: Node, tensorMap: NamedTensorsMap,
+    context: ExecutionContext): Promise<tfc.Tensor[]> => {
   switch (node.op) {
     case 'loopCond':
       return [getParamValue('pred', node, tensorMap, context) as tfc.Tensor];
@@ -36,7 +36,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
       const data =
           getParamValue('data', node, tensorMap, context) as tfc.Tensor;
       // Outputs nodes :0 => false, :1 => true
-      return pred.dataSync()[0] ? [undefined, data] : [data, undefined];
+      return (await pred.data())[0] ? [undefined, data] : [data, undefined];
     }
     case 'merge':
       const inputName = node.inputNames.find(
