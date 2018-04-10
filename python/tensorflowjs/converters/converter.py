@@ -78,7 +78,7 @@ def main():
       type=str,
       help='Path to the input file or directory. For input format "keras", '
       'an HDF5 (.h5) file is expected. For input format "tensorflow", '
-      'a SavedModel or checkpoint directory is expected.')
+      'a SavedModel or session bundle directory is expected.')
   parser.add_argument(
       '--input_format',
       type=str,
@@ -90,7 +90,7 @@ def main():
       '    `keras.model.save_model()` method).\n'
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
-      'For "tensorflow", a SavedModel or checkpoint model is expected.')
+      'For "tensorflow", a SavedModel or session bundle model is expected.')
   parser.add_argument(
       '--output_node_names',
       type=str,
