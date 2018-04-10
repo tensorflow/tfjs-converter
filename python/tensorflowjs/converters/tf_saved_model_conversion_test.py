@@ -26,7 +26,7 @@ import tensorflow as tf
 from tensorflowjs.converters import tf_saved_model_conversion
 
 SAVED_MODEL_DIR = 'saved_model'
-session_bundle_MODEL_DIR = 'session_bundle_model'
+SESSION_BUNDLE_MODEL_DIR = 'session_bundle_model'
 
 
 class ConvertTest(unittest.TestCase):
@@ -56,7 +56,7 @@ class ConvertTest(unittest.TestCase):
         sess.run(init_op)
         softmax.op.run()
         saver.save(sess, os.path.join(
-            self._tmp_dir, session_bundle_MODEL_DIR, 'model'))
+            self._tmp_dir, SESSION_BUNDLE_MODEL_DIR, 'model'))
 
   def create_saved_model(self):
     graph = tf.Graph()
@@ -85,7 +85,7 @@ class ConvertTest(unittest.TestCase):
   def test_convert_saved_model(self):
     self.create_saved_model()
     print(glob.glob(
-        os.path.join(self._tmp_dir, session_bundle_MODEL_DIR, '*')))
+        os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR, '*')))
 
     tf_saved_model_conversion.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
@@ -122,9 +122,9 @@ class ConvertTest(unittest.TestCase):
     self.create_session_bundle_model()
 
     tf_saved_model_conversion.convert_tf_session_bundle_model(
-        os.path.join(self._tmp_dir, session_bundle_MODEL_DIR),
+        os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR),
         'Softmax',
-        os.path.join(self._tmp_dir, session_bundle_MODEL_DIR)
+        os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR)
     )
 
     weights = [{
@@ -137,7 +137,7 @@ class ConvertTest(unittest.TestCase):
     }]
     # Load the saved weights as a JSON string.
     weights_manifest = open(
-        os.path.join(self._tmp_dir, session_bundle_MODEL_DIR,
+        os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR,
                      'weights_manifest.json'), 'rt')
     output_json = json.load(weights_manifest)
     weights_manifest.close()
@@ -145,11 +145,11 @@ class ConvertTest(unittest.TestCase):
     # Check the content of the output directory.
     self.assertTrue(
         glob.glob(
-            os.path.join(self._tmp_dir, session_bundle_MODEL_DIR,
+            os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR,
                          'tensorflowjs_model.pb')))
     self.assertTrue(
         glob.glob(
-            os.path.join(self._tmp_dir, session_bundle_MODEL_DIR, 'group*-*')))
+            os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR, 'group*-*')))
 
 
 if __name__ == '__main__':
