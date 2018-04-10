@@ -7,7 +7,7 @@ TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model
 or [Session Bundle Model](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
-(Note: TensorFlow has deprecated checkpoint model format, please switch to SavedModel immediately.)
+(Note: TensorFlow has deprecated checkpoint model format, please switch to SavedModel.)
 
 A 2-step process to import your model:
 
@@ -88,7 +88,7 @@ following location:
 2. Instantiate the [FrozenModel class](./src/executor/frozen_model.ts) and run inference.
 
 ```typescript
-import * as tfc from '@tensorflow/tfjs-core';
+import * as tf from '@tensorflow/tfjs';
 import {loadFrozenModel} from '@tensorflow/tfjs-converter';
 
 const MODEL_URL = 'https://.../mobilenet/web_model.pb';
@@ -96,7 +96,7 @@ const WEIGHTS_URL = 'https://.../mobilenet/weights_manifest.json';
 
 const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 const cat = document.getElementById('cat');
-model.execute({input: tfc.fromPixels(cat)});
+model.execute({input: tf.fromPixels(cat)});
 ```
 
 Check out our working [MobileNet demo](./demo/README.md).
@@ -123,13 +123,13 @@ know what ops you need support with.
 If you prefer to load the weights only, you can use follow code snippet.
 
 ```typescript
-import * as tfc from '@tensorflow/tfjs-core';
+import * as tf from '@tensorflow/tfjs';
 
 const weightManifestUrl = "https://example.org/model/weights_manifest.json";
 
 const manifest = await fetch(weightManifestUrl);
 this.weightManifest = await manifest.json();
-const weightMap = await tfc.loadWeights(
+const weightMap = await tf.loadWeights(
         this.weightManifest, "https://example.org/model");
 ```
 

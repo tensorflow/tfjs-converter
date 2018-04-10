@@ -161,7 +161,7 @@ def convert_tf_session_bundle_model(session_bundle_dir,
   """
 
   print("Tensorflow has deprecated the Session Bundle format, \
-        please migrate to SavedModel immediately.")
+        please migrate to SavedModel.")
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
