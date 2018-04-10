@@ -83,7 +83,7 @@ def main():
       '--input_format',
       type=str,
       required=True,
-      choices=set(['keras', 'tf_saved_model', 'tf_checkpoint_model']),
+      choices=set(['keras', 'tf_saved_model', 'tf_session_bundle_model']),
       help='Input format. '
       'For "keras", the input path can be one of the two following formats:\n'
       '  - A topology+weights combined HDF5 (e.g., generated with'
@@ -96,7 +96,7 @@ def main():
       type=str,
       help='The names of the output nodes, separated by commas. E.g., '
       '"logits,activations". Applicable only if input format is '
-      '"tf_saved_model" or "tf_checkpoint_model".')
+      '"tf_saved_model" or "tf_session_bundle_model".')
   parser.add_argument(
       '--saved_model_tags',
       type=str,
@@ -123,8 +123,8 @@ def main():
     tf_saved_model_conversion.convert_tf_saved_model(
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_dir, saved_model_tags=FLAGS.saved_model_tags)
-  elif FLAGS.input_format == 'tf_checkpoint_model':
-    tf_saved_model_conversion.convert_tf_checkpoint_model(
+  elif FLAGS.input_format == 'tf_session_bundle_model':
+    tf_saved_model_conversion.convert_tf_session_bundle_model(
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_dir)
   else:

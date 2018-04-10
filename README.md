@@ -4,7 +4,7 @@
 
 **TensorFlow.js converter** is an open source library to load a pretrained
 TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models)
-or [Checkpoint Model](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md)
+or [Session Bundle Model](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
 (Note: TensorFlow has deprecated checkpoint model format, please switch to SavedModel immediately.)
@@ -14,7 +14,7 @@ A 2-step process to import your model:
 1. A python pip package to convert a TensorFlow SavedModel/Checkpoint Model to a web friendly format. If you already have a converted model, or are using an already hosted model (e.g. MobileNet), skip this step.
 2. [Javascript API](./src/executor/tf_model.ts), for loading and running inference.
 
-## Step 1: Converting a [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) or [Checkpoint Model](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md) to a web-friendly format
+## Step 1: Converting a [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md) or [Session Bundle Model](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md) to a web-friendly format
 
 1. Install the TensorFlow.js pip package:
 
@@ -37,25 +37,25 @@ $ tensorflowjs_converter \
     /mobilenet/web_model
 ```
 
-Checkpoint model example:
+Session bundle model example:
 
 ```bash
 $ tensorflowjs_converter \
-    --input_format=tf_checkpoint_model \
+    --input_format=tf_session_bundle_model \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
-    /mobilenet/checkpoint_model \
+    /mobilenet/session_bundle_model \
     /mobilenet/web_model
 ```
 
 |Positional Arguments | Description |
 |---|---|
-|`input_path`  | Full path of the saved model or checkpoint model directory.|
+|`input_path`  | Full path of the saved model or session bundle model directory.|
 |`output_dir`  | Path for all output artifacts.|
 
 
 | Options | Description
 |---|---|
-|`--input_format`     | The format of input model, use tf_saved_model for SavedModel and tf_checkpoint_model for checkpoint model. |
+|`--input_format`     | The format of input model, use tf_saved_model for SavedModel and tf_session_bundle_model for session bundle model. |
 |`--output_node_names`| The names of the output nodes, separated by commas.|
 |`--saved_model_tags` | Only applicable to SavedModel conversion, Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
 
@@ -126,8 +126,9 @@ If you prefer to load the weights only, you can use follow code snippet.
 import * as tfc from '@tensorflow/tfjs-core';
 
 const weightManifestUrl = "https://example.org/model/weights_manifest.json";
+
 const manifest = await fetch(weightManifestUrl);
-this.weightManifest = await manifest.clone().json();
+this.weightManifest = await manifest.json();
 const weightMap = await tfc.loadWeights(
         this.weightManifest, "https://example.org/model");
 ```

@@ -142,15 +142,16 @@ def extract_weights(graph_def, output_graph):
       os.path.abspath(output_graph), graph_def.SerializeToString())
 
 
-def convert_tf_checkpoint_model(checkpoint_dir, output_node_names,
-                             output_dir, saved_model_tags='serve'):
-  """Freeze the checkpoint model and check the model compatibility with Tensorflow.js.
+def convert_tf_session_bundle_model(session_bundle_dir,
+                                output_node_names, output_dir):
+  """Freeze the Session Bundle model and check the model compatibility with
+  Tensorflow.js.
 
   Optimize and convert the model to Tensorflow.js format, when the model passes
   the compatiblity check.
 
   Args:
-    checkpoint_dir: string The checkpoint model directory.
+    session_bundle_dir: string The session bundle model directory.
     output_node_names: string The names of the output nodes, comma separated.
     output_dir: string The name of the output directory. The directory
       will consist of
@@ -165,7 +166,7 @@ def convert_tf_checkpoint_model(checkpoint_dir, output_node_names,
     os.makedirs(output_dir)
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
 
-  checkpoint = tf.train.get_checkpoint_state(checkpoint_dir)
+  checkpoint = tf.train.get_checkpoint_state(session_bundle_dir)
   input_checkpoint = checkpoint.model_checkpoint_path
   frozen_file = output_graph + '.frozen'
   freeze_graph.freeze_graph(
