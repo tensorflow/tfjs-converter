@@ -143,7 +143,7 @@ def extract_weights(graph_def, output_graph):
 
 
 def convert_tf_session_bundle_model(session_bundle_dir,
-                                output_node_names, output_dir):
+                                    output_node_names, output_dir):
   """Freeze the Session Bundle model and check the model compatibility with
   Tensorflow.js.
 
@@ -158,10 +158,10 @@ def convert_tf_session_bundle_model(session_bundle_dir,
       - a file named 'tensorflowjs_model.pb'
       - a JSON weights manifest file named 'weights_manifest.json'
       - possibly sharded binary weight files.
-    saved_model_tags: string Tagset of the MetaGraphDef to load, in comma
-      separated string format. Defaulted to 'serve'
   """
 
+  print("Tensorflow has deprecated the Session Bundle format, \
+        please migrate to SavedModel immediately.")
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
