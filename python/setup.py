@@ -17,13 +17,10 @@
 import setuptools
 from tensorflowjs import version
 
-REQUIRED_PACKAGES = [
-    'h5py >= 2.7.1',
-    'keras >= 2.1.4',
-    'numpy >= 1.14.1',
-    'six >= 1.11.0',
-    'tensorflow >= 1.6.0'
-]
+def get_requirements(file):
+    "Reads the requirements file and returns the packages"
+    with open(file, 'r') as requirements:
+        return requirements.readlines()
 
 CONSOLE_SCRIPTS = [
     'tensorflowjs_converter = tensorflowjs.converters.converter:main',
@@ -66,7 +63,7 @@ setuptools.setup(
     package_data={
         'tensorflowjs/op_list': ['*.json']
     },
-    install_requires=REQUIRED_PACKAGES,
+    install_requires=get_requirements('requirements.txt'),
     entry_points={
         'console_scripts': CONSOLE_SCRIPTS,
     },
