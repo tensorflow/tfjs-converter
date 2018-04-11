@@ -32,10 +32,14 @@ interface NodeWithContextId {
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
   private _weightMap: NamedTensorsMap = {};
+  private weightIds: number[];
   get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }
   set weightMap(weightMap: NamedTensorsMap) {
+    const weightIds = Object.keys(weightMap).map(
+        key => weightMap[key].map(tensor => tensor.id));
+    this.weightIds = [].concat.apply([], weightIds);
     this._weightMap = weightMap;
   }
 
@@ -107,12 +111,17 @@ export class GraphExecutor {
     const tensors = await this.executeWithControlFlow(inputs, context);
     const results = this.findOutputs(tensors, context, outputs);
 
-    // dispose all tensors that are not part of the outputs
-    const ids = Object.keys(results).map(key => results[key].id);
+    // dispose all tensors that are not part of the outputs and weights
+    const outputIds = Object.keys(results).map(key => results[key].id);
+    const inputIdArray =
+        Object.keys(inputs).map(key => inputs[key].map(input => input.id));
+    const inputIds = [].concat.apply([], inputIdArray);
     Object.keys(tensors).forEach(key => {
       const tensorArray = tensors[key];
       tensorArray.forEach(tensor => {
-        if (tensor && ids.indexOf(tensor.id) === -1) {
+        if (tensor && outputIds.indexOf(tensor.id) === -1 &&
+            inputIds.indexOf(tensor.id) === -1 &&
+            this.weightIds.indexOf(tensor.id) === -1) {
           tensor.dispose();
         }
       });
@@ -137,7 +146,7 @@ export class GraphExecutor {
     const tensorMap = {...this.weightMap, ...inputs};
     const visited: {[key: string]: boolean} = {};
     while (stack.length > 0) {
-      const item = stack.pop();
+      const item = stack.shift();
       context.currentContext = item.contexts;
 
       const tensors = operations.executeOp(item.node, tensorMap, context);

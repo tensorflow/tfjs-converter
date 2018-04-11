@@ -36,9 +36,10 @@ limitations under the License.
         <code class="javascript">
         var output = 0; <br>
         <label>for (i = </label><input id="init" type="text" value="0" size="3">; <label>i &lt; </label><input id="loop" type="text" value="10" size="5">; i++) {<br>
-        <label>output += </label><input id="inc" type="text" value="1" size="3">;<br>
+          <label>for (j = 0; j &lt; </label><input id="loop2" type="text" value="10" size="5">; j++) {<br>
+            <label>output += </label><input id="inc" type="text" value="1" size="3">;<br>
         }<br>
-        console.log(output);<br>
+        console.log(output+1);<br>
     </code></pre>
   <button id="run">Run</button>
   <div id="result"></div>

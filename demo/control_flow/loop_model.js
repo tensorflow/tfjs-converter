@@ -19,9 +19,9 @@ import * as tfc from '@tensorflow/tfjs-core';
 import {NamedTensorMap, loadFrozenModel} from '@tensorflow/tfjs-converter';
 const GOOGLE_CLOUD_STORAGE_DIR =
     'https://storage.googleapis.com/tfjs-models/savedmodel/';
-const MODEL_FILE_URL = 'control_flow/tensorflowjs_model.pb';
-const WEIGHT_MANIFEST_FILE_URL = 'control_flow/weights_manifest.json';
-const OUTPUT_NODE_NAME = 'while/Exit_3';
+const MODEL_FILE_URL = 'nested_loop/tensorflowjs_model.pb';
+const WEIGHT_MANIFEST_FILE_URL = 'nested_loop/weights_manifest.json';
+const OUTPUT_NODE_NAME = 'Add';
 
 export class LoopModel {
   constructor() {}
@@ -38,10 +38,11 @@ export class LoopModel {
     }
   }
 
-  async predict(init, loops, inc) {
+  async predict(init, loop, loop2, inc) {
     const dict = {
       'init': tfc.scalar(init, 'int32'),
-      'times': tfc.scalar(loops, 'int32'),
+      'times': tfc.scalar(loop, 'int32'),
+      'times2': tfc.scalar(loop2, 'int32'),
       'inc': tfc.scalar(inc, 'int32')
     };
     return this.model.executeAsync(dict, OUTPUT_NODE_NAME);
@@ -63,9 +64,10 @@ window.onload = async () => {
   runBtn.onclick = async () => {
     const init = document.getElementById('init').value;
     const loop = document.getElementById('loop').value;
+    const loop2 = document.getElementById('loop2').value;
     const inc = document.getElementById('inc').value;
     console.time('prediction');
-    const result = await loopModel.predict(init, loop, inc);
+    const result = await loopModel.predict(init, loop, loop2, inc);
     console.timeEnd('prediction');
 
     resultElement.innerText = "oupput = " + result.dataSync()[0];
