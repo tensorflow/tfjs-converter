@@ -86,20 +86,13 @@ export class GraphExecutor {
    */
   execute(inputs: NamedTensorsMap, outputs?: string|string[]): NamedTensorMap {
     const result = tidy(() => {
-      let tensors = {};
       const context = new ExecutionContext(this._weightMap);
-      // Graph with control flow op requires runtime evaluation of the execution
-      // order, while without control flow the execution order is pre-determined
-      // in the compile method.
-      if (this.graph.withControlFlow) {
-        tensors = this.executeWithControlFlow(inputs, context);
-      } else {
-        tensors = this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
-          map[node.name] = operations.executeOp(node, map, context) as Tensor[];
-          return map;
-        }, {...this.weightMap, ...inputs});
-      }
-
+      const tensors =
+          this.compiledOrder.reduce<NamedTensorsMap>((map, node) => {
+            map[node.name] =
+                operations.executeOp(node, map, context) as Tensor[];
+            return map;
+          }, {...this.weightMap, ...inputs});
       return this.findOutputs(tensors, context, outputs);
     });
     return result;
@@ -107,13 +100,25 @@ export class GraphExecutor {
 
   async executeAsync(inputs: NamedTensorsMap, outputs?: string|string[]):
       Promise<NamedTensorMap> {
-    let tensors = {};
     const context = new ExecutionContext(this._weightMap);
     // Graph with control flow op requires runtime evaluation of the execution
     // order, while without control flow the execution order is pre-determined
     // in the compile method.
-    tensors = await this.executeWithControlFlow(inputs, context);
-    return this.findOutputs(tensors, context, outputs);
+    const tensors = await this.executeWithControlFlow(inputs, context);
+    const results = this.findOutputs(tensors, context, outputs);
+
+    // dispose all tensors that are not part of the outputs
+    const ids = Object.keys(results).map(key => results[key].id);
+    Object.keys(tensors).forEach(key => {
+      const tensorArray = tensors[key];
+      tensorArray.forEach(tensor => {
+        if (tensor && ids.indexOf(tensor.id) === -1) {
+          tensor.dispose();
+        }
+      });
+    });
+
+    return results;
   }
 
   /**
