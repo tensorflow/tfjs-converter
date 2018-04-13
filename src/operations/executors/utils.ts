@@ -74,17 +74,22 @@ export function getTensor(
  */
 export function getNodeNameAndIndex(
     inputName: string, context?: ExecutionContext): [string, number] {
-  const index = inputName.lastIndexOf(':');
-  if (index === -1) return [getNodeNameWithContextId(inputName, context), 0];
+  const [nodeName, index] = parseNodeName(inputName);
 
-  const nodeName =
-      getNodeNameWithContextId(inputName.substring(0, index), context);
-  return [nodeName, Number(inputName.substring(index + 1))];
+  return [getNodeNameWithContextId(nodeName, context), index];
 }
 
 function getNodeNameWithContextId(
     name: string, context?: ExecutionContext): string {
-  return !!context && !!context.currentContextId ?
-      `${name}-${context.currentContextId}` :
+  return !!context && context.contextIdForName(name) !== '' ?
+      `${name}-${context.contextIdForName(name)}` :
       name;
+}
+
+export function parseNodeName(name: string): [string, number] {
+  const index = name.lastIndexOf(':');
+  if (index === -1) return [name, 0];
+
+  const nodeName = name.substring(0, index);
+  return [nodeName, Number(name.substring(index + 1))];
 }

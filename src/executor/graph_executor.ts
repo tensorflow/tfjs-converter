@@ -18,16 +18,11 @@
 import {Tensor, tidy} from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/index';
-import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
+import {getNodeNameAndIndex, getTensor, parseNodeName} from '../operations/executors/utils';
 import * as operations from '../operations/index';
 import {Node} from '../operations/index';
 
-import {ExecutionContext, ExecutionContextId} from './execution_context';
-
-interface NodeWithContextId {
-  node: Node;
-  contexts: ExecutionContextId[];
-}
+import {ExecutionContext, LATEST} from './execution_context';
 
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
@@ -140,73 +135,55 @@ export class GraphExecutor {
       inputs: NamedTensorsMap,
       context: ExecutionContext): Promise<NamedTensorsMap> {
     context.initializeContext(this.graph.inputs);
-    const stack: NodeWithContextId[] = this.graph.inputs.map(input => {
-      return {
-        contexts: context.contextIdMap[input.name]['__root__'],
-        node: input
-      };
-    });
+    const stack: Node[] = this.graph.inputs.slice();
     const tensorMap = {...this.weightMap, ...inputs};
     const visited: {[key: string]: boolean} = {};
     while (stack.length > 0) {
-      const item = stack.pop();
-      context.currentContext = item.contexts;
-      console.log(item);
+      const node = stack.pop();
+      context.currentNode = node;
+      console.log(node);
       console.log(context.currentContext);
-      const tensors = operations.executeOp(item.node, tensorMap, context);
+      const [nodeName, ] = getNodeNameAndIndex(node.name, context);
+      const tensors = operations.executeOp(node, tensorMap, context);
 
-      const [nodeName, ] = getNodeNameAndIndex(item.node.name, context);
       tensorMap[nodeName] = await tensors;
       visited[nodeName] = true;
 
-      item.node.children.forEach((childNode) => {
+      const originalContext = context.currentContext;
+      node.children.forEach((childNode) => {
+        context.currentContext = originalContext;
         if (!context.contextIdMap[childNode.name]) {
           context.contextIdMap[childNode.name] = {};
         }
-        context.contextIdMap[childNode.name][item.node.name] =
+        context.contextIdMap[childNode.name][node.name] =
             context.currentContext;
+        if (childNode.op === 'merge') {
+          context.contextIdMap[childNode.name][LATEST] = context.currentContext;
+        }
 
         const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
-        if (childNode.op === 'nextIteration' || !visited[nodeName]) {
+        if (!visited[nodeName]) {
+          context.currentNode = childNode;
           // Merge op can be pushed if any of its inputs has value.
           if (childNode.op === 'merge') {
             if (childNode.inputNames.some(name => {
-                  const index = name.lastIndexOf(':');
-                  const nodeName =
-                      index !== -1 ? name.substring(0, index) : name;
+                  const [nodeName, ] = parseNodeName(name);
                   if (context.contextIdMap[childNode.name][nodeName]) {
-                    const inputContext = new ExecutionContext(this.weightMap);
-                    inputContext.currentContext =
-                        context.contextIdMap[childNode.name][nodeName];
-                    return !!getTensor(name, tensorMap, inputContext);
+                    return !!getTensor(name, tensorMap, context);
                   }
                   return false;
                 })) {
-              stack.push({
-                contexts: context.contextIdMap[childNode.name]
-                                              [childNode.inputNames[0]],
-                node: childNode
-              });
+              stack.push(childNode);
             }
           } else  // Otherwise all inputs must to have value.
               if (childNode.inputNames.every(name => {
-                    const index = name.lastIndexOf(':');
-                    const nodeName =
-                        index !== -1 ? name.substring(0, index) : name;
-
+                    const [nodeName, ] = parseNodeName(name);
                     if (context.contextIdMap[childNode.name][nodeName]) {
-                      const inputContext = new ExecutionContext(this.weightMap);
-                      inputContext.currentContext =
-                          context.contextIdMap[childNode.name][nodeName];
-                      return !!getTensor(name, tensorMap, inputContext);
+                      return !!getTensor(name, tensorMap, context);
                     }
                     return false;
                   })) {
-            stack.push({
-              contexts:
-                  context.contextIdMap[childNode.name][childNode.inputNames[0]],
-              node: childNode
-            });
+            stack.push(childNode);
           }
         }
       });
