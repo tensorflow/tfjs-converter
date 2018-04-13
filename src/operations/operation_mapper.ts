@@ -107,7 +107,9 @@ export class OperationMapper {
       name: node.name,
       op: mapper.dlOpName,
       category: mapper.category,
-      inputNames: node.input || [],
+      inputNames:
+          (node.input ||
+           []).map(input => input.startsWith('^') ? input.substr(1) : input),
       inputs: [],
       children: [],
       params: {}

@@ -141,14 +141,18 @@ export class GraphExecutor {
       context: ExecutionContext): Promise<NamedTensorsMap> {
     context.initializeContext(this.graph.inputs);
     const stack: NodeWithContextId[] = this.graph.inputs.map(input => {
-      return {contexts: context.contextIdMap[input.name], node: input};
+      return {
+        contexts: context.contextIdMap[input.name]['__root__'],
+        node: input
+      };
     });
     const tensorMap = {...this.weightMap, ...inputs};
     const visited: {[key: string]: boolean} = {};
     while (stack.length > 0) {
-      const item = stack.shift();
+      const item = stack.pop();
       context.currentContext = item.contexts;
-
+      console.log(item);
+      console.log(context.currentContext);
       const tensors = operations.executeOp(item.node, tensorMap, context);
 
       const [nodeName, ] = getNodeNameAndIndex(item.node.name, context);
@@ -156,28 +160,51 @@ export class GraphExecutor {
       visited[nodeName] = true;
 
       item.node.children.forEach((childNode) => {
-        // the child node always use the first input's context id
-        const index = childNode.inputs.findIndex(input => input === item.node);
-        if (index === 0) {
-          context.contextIdMap[childNode.name] = context.currentContext;
+        if (!context.contextIdMap[childNode.name]) {
+          context.contextIdMap[childNode.name] = {};
         }
+        context.contextIdMap[childNode.name][item.node.name] =
+            context.currentContext;
 
         const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
         if (childNode.op === 'nextIteration' || !visited[nodeName]) {
           // Merge op can be pushed if any of its inputs has value.
           if (childNode.op === 'merge') {
-            if (childNode.inputNames.some(
-                    name => !!getTensor(name, tensorMap, context))) {
+            if (childNode.inputNames.some(name => {
+                  const index = name.lastIndexOf(':');
+                  const nodeName =
+                      index !== -1 ? name.substring(0, index) : name;
+                  if (context.contextIdMap[childNode.name][nodeName]) {
+                    const inputContext = new ExecutionContext(this.weightMap);
+                    inputContext.currentContext =
+                        context.contextIdMap[childNode.name][nodeName];
+                    return !!getTensor(name, tensorMap, inputContext);
+                  }
+                  return false;
+                })) {
               stack.push({
-                contexts: context.contextIdMap[childNode.name],
+                contexts: context.contextIdMap[childNode.name]
+                                              [childNode.inputNames[0]],
                 node: childNode
               });
             }
           } else  // Otherwise all inputs must to have value.
-              if (childNode.inputNames.every(
-                      name => !!getTensor(name, tensorMap, context))) {
+              if (childNode.inputNames.every(name => {
+                    const index = name.lastIndexOf(':');
+                    const nodeName =
+                        index !== -1 ? name.substring(0, index) : name;
+
+                    if (context.contextIdMap[childNode.name][nodeName]) {
+                      const inputContext = new ExecutionContext(this.weightMap);
+                      inputContext.currentContext =
+                          context.contextIdMap[childNode.name][nodeName];
+                      return !!getTensor(name, tensorMap, inputContext);
+                    }
+                    return false;
+                  })) {
             stack.push({
-              contexts: context.contextIdMap[childNode.name],
+              contexts:
+                  context.contextIdMap[childNode.name][childNode.inputNames[0]],
               node: childNode
             });
           }

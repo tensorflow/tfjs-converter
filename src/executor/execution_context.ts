@@ -31,7 +31,7 @@ export class ExecutionContext {
   private _currentId = 0;
   private lastId = 0;
 
-  contextIdMap: {[key: string]: ExecutionContextId[]} = {};
+  contextIdMap: {[key: string]: {[key: string]: ExecutionContextId[]}} = {};
 
   constructor(public weightMap: NamedTensorsMap) {}
 
@@ -61,7 +61,7 @@ export class ExecutionContext {
 
   initializeContext(inputs: Node[]) {
     inputs.forEach(input => {
-      this.contextIdMap[input.name] = [this.rootContext];
+      this.contextIdMap[input.name] = {'__root__': [this.rootContext]};
     });
   }
   enterFrame(frameId: string) {
@@ -74,6 +74,7 @@ export class ExecutionContext {
 
   exitFrame() {
     if (this.contexts && this.contexts.length > 1) {
+      this.contexts = this.contexts.slice();
       this.contexts.splice(-1);
     } else {
       throw new Error('Cannot exit frame, the context is empty');
@@ -82,8 +83,12 @@ export class ExecutionContext {
 
   nextIteration() {
     if (this.contexts && this.contexts.length > 0) {
-      const context = this.contexts[this.contexts.length - 1];
+      this.contexts = this.contexts.slice();
+      const context =
+          Object.assign({}, this.contexts[this.contexts.length - 1]) as
+          ExecutionContextId;
       context.iterationId += 1;
+      this.contexts.splice(-1, 1, context);
     } else {
       throw new Error('Cannot increase frame iteration, the context is empty');
     }
