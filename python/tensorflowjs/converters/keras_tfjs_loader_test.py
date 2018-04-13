@@ -56,8 +56,7 @@ class LoadKerasModelTest(tf.test.TestCase):
 
   def testLoadKerasModelAndWeights(self):
     """Test loading of model and its weights."""
-    # Use separate tf.Graph and tf.Session contexts for the original and
-    # reloaded models to prevent op name duplication.
+    # Use separate tf.Graph and tf.Session contexts to prevent name collision.
     with tf.Graph().as_default(), tf.Session():
       tfjs_path = os.path.join(self._tmp_dir, 'model_for_test')
       model1 = self._saveKerasModelForTest(tfjs_path)

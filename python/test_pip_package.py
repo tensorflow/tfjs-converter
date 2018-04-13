@@ -167,6 +167,7 @@ class APIAndShellTest(tf.test.TestCase):
       self.assertEqual(weight_dtypes['MergedDense2/kernel'], 'float32')
 
   def testLoadKerasModel(self):
+    # Use separate tf.Graph and tf.Session contexts to prevent name collision.
     with tf.Graph().as_default(), tf.Session():
       # First create a toy keras model.
       model1 = _createKerasModel('MergedDense')

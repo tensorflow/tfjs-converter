@@ -30,12 +30,12 @@ def read_weights(weights_manifest, base_path, flatten=False):
     weights_manifest: A TensorFlow.js-format weights manifest (a JSON array).
     base_path: Base path prefix for the weights files.
     flatten: Whether all the weight groups in the return value are to be
-      flattened as a single weight groups. Default: `False`.
+      flattened as a single weights group. Default: `False`.
 
   Returns:
-    A `list` of weight groups. Each group is an array of weight
-        entries. Each entry is a dict that maps a unique name to a numpy array,
-        for example:
+    If `flatten` is `False`, a `list` of weight groups. Each group is an array
+    of weight entries. Each entry is a dict that maps a unique name to a numpy
+    array, for example:
         entry = {
           'name': 'weight1',
           'data': np.array([1, 2, 3], 'float32')
@@ -46,6 +46,7 @@ def read_weights(weights_manifest, base_path, flatten=False):
           [group_0_entry1, group_0_entry2],
           [group_1_entry1, group_1_entry2],
         ]
+    If `flatten` is `True`, returns a single weight group.
   """
   data_buffers = []
   for group in weights_manifest:
@@ -72,9 +73,9 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
       flattened as a single weight groups. Default: `False`.
 
   Returns:
-    A `list` of weight groups. Each group is an array of weight
-        entries. Each entry is a dict that maps a unique name to a numpy array,
-        for example:
+    If `flatten` is `False`, a `list` of weight groups. Each group is an array
+    of weight entries. Each entry is a dict that maps a unique name to a numpy
+    array, for example:
         entry = {
           'name': 'weight1',
           'data': np.array([1, 2, 3], 'float32')
@@ -85,6 +86,7 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
           [group_0_entry1, group_0_entry2],
           [group_1_entry1, group_1_entry2],
         ]
+    If `flatten` is `True`, returns a single weight group.
 
   Raises:
     ValueError: if the lengths of `weights_manifest` and `data_buffers` do not
