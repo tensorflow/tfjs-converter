@@ -14,10 +14,13 @@
 # ==============================================================================
 """Build pip wheel for model_converter."""
 
+import os
 import setuptools
 from tensorflowjs import version
 
-def get_requirements(file):
+DIR_NAME = os.path.dirname(__file__)
+
+def _get_requirements(file):
     "Reads the requirements file and returns the packages"
     with open(file, 'r') as requirements:
         return requirements.readlines()
@@ -63,7 +66,7 @@ setuptools.setup(
     package_data={
         'tensorflowjs/op_list': ['*.json']
     },
-    install_requires=get_requirements('requirements.txt'),
+    install_requires=_get_requirements('requirements.txt'),
     entry_points={
         'console_scripts': CONSOLE_SCRIPTS,
     },
