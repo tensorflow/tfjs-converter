@@ -18,10 +18,9 @@ import {Tensor} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../data';
 import {Node} from '../operations';
-import {parseNodeName} from '../operations/executors/utils';
+// import {parseNodeName} from '../operations/executors/utils';
 
 const ROOT = '__ROOT__';
-export const LATEST = '__LATEST__';
 export interface ExecutionContextId {
   id: number;
   frameName: string;
@@ -45,13 +44,15 @@ export class ExecutionContext {
 
   set currentNode(node: Node) {
     this.node = node;
-    if (node.op === 'merge') {
-      this.currentContext = this.contextIdMap[node.name][LATEST];
-    } else {
-      const [input, ] = parseNodeName(node.inputNames[0] || '');
-      this.currentContext =
-          this.contextIdMap[node.name][input] || [this.rootContext];
-    }
+    this.currentContext =
+        this.contextIdMap[node.name]['last'] || [this.rootContext];
+    // this.currentContext = node.inputNames.reduce((pre, curr) => {
+    //   const [input, ] = parseNodeName(curr || '');
+    //   const preId = this.contextIdforContexts(pre);
+    //   const currId =
+    //       this.contextIdforContexts(this.contextIdMap[node.name][input]);
+    //   return preId > currId ? pre : this.contextIdMap[node.name][input];
+    // }, [this.rootContext]);
   }
 
   set currentContext(contexts: ExecutionContextId[]) {
@@ -69,21 +70,27 @@ export class ExecutionContext {
     return this.contextIdforContexts(this.contexts);
   }
 
-  contextIdForName(name: string): string {
+  get currentContextIds(): string[] {
+    const names = [];
     if (this.node) {
-      return this.contextIdforContexts(
-          this.contextIdMap[this.node.name][name] || this.contexts);
+      for (let i = 0; i < this.contexts.length - 1; i++) {
+        const contexts = this.contexts.slice(0, this.contexts.length - i);
+        names.push(this.contextIdforContexts(contexts));
+      }
     }
-    return this.currentContextId;
+    names.push('');
+    return names;
   }
 
   private contextIdforContexts(contexts: ExecutionContextId[]) {
-    return contexts
-        .map(
-            context => (context.id === 0 && context.iterationId === 0) ?
-                '' :
-                `${context.frameName}-${context.iterationId}`)
-        .join('/');
+    return contexts ?
+        contexts
+            .map(
+                context => (context.id === 0 && context.iterationId === 0) ?
+                    '' :
+                    `${context.frameName}-${context.iterationId}`)
+            .join('/') :
+        '';
   }
 
   initializeContext(inputs: Node[]) {
@@ -111,13 +118,14 @@ export class ExecutionContext {
 
   nextIteration() {
     if (this.contexts && this.contexts.length > 0) {
-      // this.contexts = this.contexts.slice();
-      // const context =
-      //     Object.assign({}, this.contexts[this.contexts.length - 1]) as
-      //     ExecutionContextId;
-      // context.iterationId += 1;
-      // this.contexts.splice(-1, 1, context);
-      this.contexts[this.contexts.length - 1].iterationId++;
+      this.contexts = this.contexts.slice();
+      this.lastId++;
+      const context =
+          Object.assign({}, this.contexts[this.contexts.length - 1]) as
+          ExecutionContextId;
+      context.iterationId += 1;
+      context.id = this.lastId;
+      this.contexts.splice(-1, 1, context);
     } else {
       throw new Error('Cannot increase frame iteration, the context is empty');
     }

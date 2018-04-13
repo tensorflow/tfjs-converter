@@ -54,16 +54,14 @@ export function getParamValue(
 export function getTensor(
     name: string, tensorsMap: NamedTensorsMap,
     context: ExecutionContext): tfc.Tensor {
-  const [nodeName, index] = getNodeNameAndIndex(name, context);
-  if (tensorsMap[nodeName]) {
-    return tensorsMap[nodeName][index];
-  } else {
-    const [nodeName, index] = getNodeNameAndIndex(name);
-    const weight = context.getWeight(nodeName);
-    return weight ?
-        weight[index] :
-        tensorsMap[nodeName] ? tensorsMap[nodeName][index] : undefined;
-  }
+  const [nodeName, index] = parseNodeName(name);
+  const contextId = context.currentContextIds.find(contextId => {
+    return !!tensorsMap[getNodeNameWithContextId(nodeName, contextId)];
+  });
+
+  return contextId !== undefined ?
+      tensorsMap[getNodeNameWithContextId(nodeName, contextId)][index] :
+      undefined;
 }
 
 /**
@@ -76,14 +74,14 @@ export function getNodeNameAndIndex(
     inputName: string, context?: ExecutionContext): [string, number] {
   const [nodeName, index] = parseNodeName(inputName);
 
-  return [getNodeNameWithContextId(nodeName, context), index];
+  return [
+    getNodeNameWithContextId(nodeName, context && context.currentContextId),
+    index
+  ];
 }
 
-function getNodeNameWithContextId(
-    name: string, context?: ExecutionContext): string {
-  return !!context && context.contextIdForName(name) !== '' ?
-      `${name}-${context.contextIdForName(name)}` :
-      name;
+function getNodeNameWithContextId(name: string, contextId?: string): string {
+  return !!contextId ? `${name}-${contextId}` : name;
 }
 
 export function parseNodeName(name: string): [string, number] {
