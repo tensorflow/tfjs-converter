@@ -59,7 +59,7 @@ def read_weights(weights_manifest, base_path, flatten=False):
 
 
 def decode_weights(weights_manifest, data_buffers, flatten=False):
-  """Load weight values from a buffer according to a weights manifest.
+  """Load weight values from buffer(s) according to a weights manifest.
 
   Args:
     weights_manifest: A TensorFlow.js-format weights manifest (a JSON array).
