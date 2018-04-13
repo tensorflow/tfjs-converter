@@ -22,7 +22,7 @@ DIR_NAME = os.path.dirname(__file__)
 
 def _get_requirements(file):
     "Reads the requirements file and returns the packages"
-    with open(file, 'r') as requirements:
+    with open(os.path.join(DIR_NAME, file), 'r') as requirements:
         return requirements.readlines()
 
 CONSOLE_SCRIPTS = [
