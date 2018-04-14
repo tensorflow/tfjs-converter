@@ -25,6 +25,7 @@ py_library(
     name = "keras_tfjs_loader",
     srcs = ["keras_tfjs_loader.py"],
     deps = [
+        ":keras_h5_conversion",
         "//tensorflowjs:expect_keras_installed",
         "//tensorflowjs:expect_numpy_installed",
         "//tensorflowjs:read_weights",

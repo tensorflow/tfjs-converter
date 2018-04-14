@@ -48,8 +48,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(
-        groups, self._tmp_dir, shard_size_bytes=4 * 4)
+    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
     manifest = json.loads(manifest_json)
 
     # Read the weights using `read_weights`.
@@ -68,8 +67,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(
-        groups, self._tmp_dir, shard_size_bytes=4 * 4)
+    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
     manifest = json.loads(manifest_json)
 
     # Read the weights using `read_weights`.
@@ -134,8 +132,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(
-        groups, self._tmp_dir, shard_size_bytes=4 * 4)
+    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
     manifest = json.loads(manifest_json)
 
     # Read the weights using `read_weights`.

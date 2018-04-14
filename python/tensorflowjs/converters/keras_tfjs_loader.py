@@ -26,7 +26,7 @@ import keras
 import tensorflow as tf
 
 from tensorflowjs import read_weights
-
+from tensorflowjs.converters import keras_h5_conversion
 
 def load_keras_model(config_json_path,
                      weights_path_prefix=None,
@@ -78,8 +78,10 @@ def load_keras_model(config_json_path,
                                                    flatten=True)
     else:
       weight_names = [
-          w.name[len(unique_name_scope) + 1:-2] if use_unique_name_scope
-          else w.name[:-2] for w in model.weights]
+          keras_h5_conversion.normalize_weight_name(
+              w.name[len(unique_name_scope) + 1:]) if use_unique_name_scope
+          else keras_h5_conversion.normalize_weight_name(w.name[:-2])
+          for w in model.weights]
 
       if not weights_path_prefix:
         weights_path_prefix = os.path.dirname(config_json_path)

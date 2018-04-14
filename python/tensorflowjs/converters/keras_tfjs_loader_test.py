@@ -100,7 +100,7 @@ class LoadKerasModelTest(tf.test.TestCase):
 
       self.assertEqual(model1.to_json(), model2.to_json())
 
-  def testLoadKrasModelFromNonDefaultWeightsPathWorks(self):
+  def testLoadKerasModelFromNonDefaultWeightsPathWorks(self):
     with tf.Graph().as_default(), tf.Session():
       tfjs_path = os.path.join(self._tmp_dir, 'model_for_test')
       model1 = self._saveKerasModelForTest(tfjs_path)
@@ -126,7 +126,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       self.assertEqual(model1.to_json(), model2.to_json())
 
   def testLoadKerasModelWithUniqueNameScopeInTheSameGraphContext(self):
-    """Test disabling unique name scop during model loading."""
+    """Test enabling unique name scope during model loading."""
     with tf.Graph().as_default(), tf.Session():
       tfjs_path = os.path.join(self._tmp_dir, 'model_for_test')
       model1 = self._saveKerasModelForTest(tfjs_path)
@@ -140,6 +140,13 @@ class LoadKerasModelTest(tf.test.TestCase):
       for model1_weight_value, model2_weight_value in zip(
           model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
+
+      # Verify that model1's weight names are suffixes of model2's weight names.
+      model1_weight_names = [w.name for w in model1.weights]
+      model2_weight_names = [w.name for w in model2.weights]
+      self.assertEqual(len(model1_weight_names), len(model2_weight_names))
+      for name1, name2 in zip(model1_weight_names, model2_weight_names):
+        self.assertTrue(name2.endswith(name1))
 
   def testLoadKerasModelFromDataBuffers(self):
     with tf.Graph().as_default(), tf.Session():
