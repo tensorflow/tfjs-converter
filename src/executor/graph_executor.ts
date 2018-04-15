@@ -22,7 +22,12 @@ import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
 import * as operations from '../operations/index';
 import {Node} from '../operations/index';
 
-import {ExecutionContext} from './execution_context';
+import {ExecutionContext, ExecutionContextId} from './execution_context';
+
+interface NodeWithContexts {
+  contexts: ExecutionContextId[];
+  node: Node;
+}
 
 export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
@@ -97,6 +102,15 @@ export class GraphExecutor {
     return result;
   }
 
+  /**
+   * Executes the inference for given input tensors in Async fashion.
+   * @param inputs Tensor map for the model inputs, keyed by the input node
+   * names.
+   * @param outputs output node name from the Tensorflow model, if no outputs
+   * are specified, the default outputs of the model would be used. You can
+   * inspect intermediate nodes of the model by adding them to the outputs
+   * array.
+   */
   async executeAsync(inputs: NamedTensorsMap, outputs?: string|string[]):
       Promise<NamedTensorMap> {
     const context = new ExecutionContext(this._weightMap);
@@ -106,7 +120,7 @@ export class GraphExecutor {
     const tensors = await this.executeWithControlFlow(inputs, context);
     const results = this.findOutputs(tensors, context, outputs);
 
-    // dispose all tensors that are not part of the outputs and weights
+    // dispose all the intermediate tensors
     const outputIds = Object.keys(results).map(key => results[key].id);
     const inputIdArray =
         Object.keys(inputs).map(key => inputs[key].map(input => input.id));
@@ -121,7 +135,6 @@ export class GraphExecutor {
         }
       });
     });
-
     return results;
   }
 
@@ -134,47 +147,37 @@ export class GraphExecutor {
   private async executeWithControlFlow(
       inputs: NamedTensorsMap,
       context: ExecutionContext): Promise<NamedTensorsMap> {
-    context.initializeContext(this.graph.inputs);
-    const stack: Node[] = this.graph.inputs.slice();
+    const stack: NodeWithContexts[] = this.graph.inputs.map(node => {
+      return {node, contexts: context.currentContext};
+    });
     const tensorMap = {...this.weightMap, ...inputs};
-    const visited: {[key: string]: boolean} = {};
+    const added: {[key: string]: boolean} = {};
+
     while (stack.length > 0) {
-      const node = stack.shift();
-      context.currentNode = node;
-      const tensors = operations.executeOp(node, tensorMap, context);
+      const item = stack.pop();
+      context.currentContext = item.contexts;
 
-      const [nodeName, ] = getNodeNameAndIndex(node.name, context);
+      const tensors = operations.executeOp(item.node, tensorMap, context);
+
+      const [nodeName, ] = getNodeNameAndIndex(item.node.name, context);
       tensorMap[nodeName] = await tensors;
-      visited[nodeName] = true;
-
-      const originalContext = context.currentContext;
-      node.children.forEach((childNode) => {
-        context.currentContext = originalContext;
-        if (!context.contextIdMap[childNode.name]) {
-          context.contextIdMap[childNode.name] = {};
-        }
-        context.contextIdMap[childNode.name][node.name] =
-            context.currentContext;
-
+      item.node.children.forEach((childNode) => {
         const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
-        if (childNode.op === 'nextIteration' || !visited[nodeName]) {
-          // context.currentNode = childNode;
+        if (!added[nodeName]) {
           // Merge op can be pushed if any of its inputs has value.
           if (childNode.op === 'merge') {
             if (childNode.inputNames.some(name => {
                   return !!getTensor(name, tensorMap, context);
                 })) {
-              context.contextIdMap[childNode.name]['last'] =
-                  context.currentContext;
-              stack.push(childNode);
+              added[nodeName] = true;
+              stack.push({contexts: context.currentContext, node: childNode});
             }
           } else  // Otherwise all inputs must to have value.
               if (childNode.inputNames.every(name => {
                     return !!getTensor(name, tensorMap, context);
                   })) {
-            context.contextIdMap[childNode.name]['last'] =
-                context.currentContext;
-            stack.push(childNode);
+            added[nodeName] = true;
+            stack.push({contexts: context.currentContext, node: childNode});
           }
         }
       });

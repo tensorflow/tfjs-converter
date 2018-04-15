@@ -62,7 +62,7 @@ describe('ExecutionContext', () => {
       expect(context.currentContextId).toEqual('/1-1');
       expect(context.currentContext).toEqual([
         {id: 0, frameName: '', iterationId: 0},
-        {id: 1, frameName: '1', iterationId: 1}
+        {id: 2, frameName: '1', iterationId: 1}
       ]);
     });
   });
@@ -75,7 +75,7 @@ describe('ExecutionContext', () => {
       expect(context.currentContextId).toEqual('/1-1');
       expect(context.currentContext).toEqual([
         {id: 0, frameName: '', iterationId: 0},
-        {id: 1, frameName: '1', iterationId: 1}
+        {id: 2, frameName: '1', iterationId: 1}
       ]);
     });
   });

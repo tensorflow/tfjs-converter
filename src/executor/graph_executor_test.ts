@@ -88,7 +88,7 @@ describe('GraphExecutor', () => {
       ]);
     });
 
-    it('should execute control flow graph', (done) => {
+    it('should execute control flow graph', async (done) => {
       inputNode = {
         inputNames: [],
         inputs: [],
@@ -128,17 +128,18 @@ describe('GraphExecutor', () => {
       executor = new GraphExecutor(graphWithControlFlow);
       const inputTensor = tfc.scalar(1);
       const constTensor = tfc.scalar(2);
+      executor.weightMap = {const : [constTensor]};
       const spy =
           spyOn(operations, 'executeOp')
               .and.callFake((node: operations.Node) => {
                 return node.op === 'const' ? [constTensor] : [inputTensor];
               });
 
-      executor.executeAsync({input: [inputTensor]}).then(result => {
+      await executor.executeAsync({input: [inputTensor]}).then(result => {
         expect(spy.calls.allArgs()).toEqual([
           [inputNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
+          [outputNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
           [constNode, jasmine.any(Object), jasmine.any(ExecutionContext)],
-          [outputNode, jasmine.any(Object), jasmine.any(ExecutionContext)]
         ]);
         done();
       });
