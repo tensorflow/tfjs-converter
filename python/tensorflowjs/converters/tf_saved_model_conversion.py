@@ -142,7 +142,7 @@ def extract_weights(graph_def, output_graph):
       os.path.abspath(output_graph), graph_def.SerializeToString())
 
 
-def convert_tf_session_bundle_model(session_bundle_dir,
+def convert_tf_session_bundle(session_bundle_dir,
                                     output_node_names, output_dir):
   """Freeze the Session Bundle model and check the model compatibility with
   Tensorflow.js.
@@ -160,8 +160,8 @@ def convert_tf_session_bundle_model(session_bundle_dir,
       - possibly sharded binary weight files.
   """
 
-  print("Tensorflow has deprecated the Session Bundle format, \
-        please migrate to SavedModel.")
+  print("Tensorflow has deprecated the Session Bundle format, ",
+        "please migrate to SavedModel.")
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)

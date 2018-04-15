@@ -26,7 +26,7 @@ import tensorflow as tf
 from tensorflowjs.converters import tf_saved_model_conversion
 
 SAVED_MODEL_DIR = 'saved_model'
-SESSION_BUNDLE_MODEL_DIR = 'session_bundle_model'
+SESSION_BUNDLE_MODEL_DIR = 'session_bundle'
 
 
 class ConvertTest(unittest.TestCase):
@@ -39,7 +39,7 @@ class ConvertTest(unittest.TestCase):
       shutil.rmtree(self._tmp_dir)
     super(ConvertTest, self).tearDown()
 
-  def create_session_bundle_model(self):
+  def create_session_bundle(self):
     graph = tf.Graph()
     with graph.as_default():
       x = tf.constant([[37.0, -23.0], [1.0, 4.0]])
@@ -118,10 +118,10 @@ class ConvertTest(unittest.TestCase):
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
-  def test_convert_session_bundle_model(self):
-    self.create_session_bundle_model()
+  def test_convert_session_bundle(self):
+    self.create_session_bundle()
 
-    tf_saved_model_conversion.convert_tf_session_bundle_model(
+    tf_saved_model_conversion.convert_tf_session_bundle(
         os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR),
         'Softmax',
         os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR)
