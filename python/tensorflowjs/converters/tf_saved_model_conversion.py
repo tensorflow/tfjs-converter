@@ -143,7 +143,8 @@ def extract_weights(graph_def, output_graph):
 
 
 def convert_tf_session_bundle(session_bundle_dir,
-                              output_node_names, output_dir):
+                              output_node_names,
+                              output_dir):
   """Freeze the Session Bundle model and check the model compatibility with
   Tensorflow.js.
 
