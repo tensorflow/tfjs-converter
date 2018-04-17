@@ -21,43 +21,43 @@ import {NamedTensorsMap} from '../../data/index';
 import {Node} from '../index';
 
 import {OpExecutor} from './types';
-import {getParamValue} from './utils';
+import {getParamValue, reshape} from './utils';
 
-export let executeOp: OpExecutor =
-    (node: Node, tensorMap: NamedTensorsMap): tfc.Tensor[] => {
-      switch (node.op) {
-        case 'cast': {
-          return [tfc.cast(
-              getParamValue('x', node, tensorMap) as tfc.Tensor,
-              getParamValue('dtype', node, tensorMap) as 'int32' | 'float32' |
-                  'bool')];
-        }
-        case 'expandDims': {
-          const axis = node.params['axis'].value as number;
-          return [tfc.expandDims(
-              getParamValue('x', node, tensorMap) as tfc.Tensor, axis)];
-        }
-        case 'squeeze': {
-          const axis = node.params['axis'].value as number[];
-          return [tfc.squeeze(
-              getParamValue('x', node, tensorMap) as tfc.Tensor, axis)];
-        }
+export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap):
+                                       tfc.Tensor[] => {
+  switch (node.op) {
+    case 'cast': {
+      return [tfc.cast(
+          getParamValue('x', node, tensorMap) as tfc.Tensor,
+          getParamValue('dtype', node, tensorMap) as 'int32' | 'float32' |
+              'bool')];
+    }
+    case 'expandDims': {
+      const axis = node.params['axis'].value as number;
+      return [tfc.expandDims(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis)];
+    }
+    case 'squeeze': {
+      const axis = node.params['axis'].value as number[];
+      return [tfc.squeeze(
+          getParamValue('x', node, tensorMap) as tfc.Tensor, axis)];
+    }
 
-        case 'reshape': {
-          return [tfc.reshape(
-              getParamValue('x', node, tensorMap) as tfc.Tensor,
-              getParamValue('shape', node, tensorMap) as number[])];
-        }
-        case 'pad': {
-          return [tfc.pad(
-              getParamValue('x', node, tensorMap) as tfc.Tensor,
-              // tslint:disable-next-line:no-any
-              getParamValue('padding', node, tensorMap) as any,
-              getParamValue('constantValue', node, tensorMap) as number)];
-        }
-        default:
-          throw TypeError(`Node type ${node.op} is not implemented`);
-      }
-    };
+    case 'reshape': {
+      return [tfc.reshape(
+          getParamValue('x', node, tensorMap) as tfc.Tensor,
+          getParamValue('shape', node, tensorMap) as number[])];
+    }
+    case 'pad': {
+      return [tfc.pad(
+          getParamValue('x', node, tensorMap) as tfc.Tensor,
+          reshape(getParamValue('padding', node, tensorMap) as number[], 2) as
+              Array<[number, number]>,
+          getParamValue('constantValue', node, tensorMap) as number)];
+    }
+    default:
+      throw TypeError(`Node type ${node.op} is not implemented`);
+  }
+};
 
 export const CATEGORY = 'transformation';
