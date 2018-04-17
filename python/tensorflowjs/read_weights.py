@@ -18,6 +18,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import io
 import os
 
 import numpy as np
@@ -50,11 +51,14 @@ def read_weights(weights_manifest, base_path, flatten=False):
   """
   data_buffers = []
   for group in weights_manifest:
-    buff = b''
+    buff = io.BytesIO()
+    buff_writer = io.BufferedWriter(buff)
     for path in group['paths']:
       with open(os.path.join(base_path, path), 'rb') as f:
-        buff += f.read()
-    data_buffers.append(buff)
+        buff_writer.write(f.read())
+    buff_writer.flush()
+    buff_writer.seek(0)
+    data_buffers.append(buff.read())
   return decode_weights(weights_manifest, data_buffers, flatten=flatten)
 
 
