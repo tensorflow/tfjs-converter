@@ -38,6 +38,9 @@ def write_weights(
     evenly into shards, there will be a leftover shard that is smaller than the
     shard size.
 
+    Weights are optionally quantized to either 8 or 16 bits for compression,
+    which is enabled via the `quantization_dtype` argument.
+
     Args:
       weight_groups: An list of groups. Each group is an array of weight
         entries. Each entry is a dict that maps a unique name to a numpy array,
@@ -60,8 +63,8 @@ def write_weights(
         the max file size for caching for all major browsers.
       write_manifest: Whether to write the manifest JSON to disk. Defaults to
         True.
-      quantization_dtype: An optional numpy dtype to quantize 'float32' weights
-        to. Only np.uint8 and np.uint16 are supported.
+      quantization_dtype: An optional numpy dtype to quantize weights to for
+        compression. Only np.uint8 and np.uint16 are supported.
     Returns:
       The weights manifest JSON string.
 
@@ -117,16 +120,40 @@ def write_weights(
   return manifest_json
 
 def _quantize_group(group, quantization_dtype):
+  """Quantizes the weights in the group, returning a new group.
+
+  The weights are quantized by dividing the full range of the group into
+  uniformly-spaced bins and storing the weight as its bin number along with the
+  group range.
+
+  Args:
+    group: A list of weight entries to quantize.
+    quantization_dtype: An numpy dtype to quantize weights to. Only np.uint8 and
+      np.uint16 are supported.
+
+  Returns:
+    A new group entry with the quantized data and additional quantization info,
+    for example:
+        entry = {
+          'name': 'weight1',
+          'data': np.array([1, 0, 255], 'float32')
+          'quantization': {'min': -0.1, 'max': 1.2, dtype: 'uint8'}
+        }
+  """
   if quantization_dtype not in QUANTIZATION_DTYPES:
     raise ValueError('Invalid `quantization_dtype`: ' + quantization_dtype)
   data = group['data']
+
+  # Compute the min and max for the group.
   m = data.min().astype(np.float64)
   M = data.max().astype(np.float64)
   if M == m:
+    # If there is only a single value, we can represent everything as zeros.
     quantized_data = np.zeros_like(data, dtype=quantization_dtype)
   else:
-    quantized_data = (
-      (data - m) / (M - m) * np.iinfo(quantization_dtype).max).astype(
+    # Quantize data into bins.
+    number_of_bins = np.iinfo(quantization_dtype).max
+    quantized_data = ((data - m) / (M - m) * number_of_bins).astype(
         quantization_dtype)
 
   quantized_group = group.copy()
