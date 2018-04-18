@@ -61,8 +61,8 @@ def write_weights(
         the max file size for caching for all major browsers.
       write_manifest: Whether to write the manifest JSON to disk. Defaults to
         True.
-      quantization_dtype: An optional numpy dtype to quantize the weights to.
-        Only np.uint8 and np.uint16 are supported.
+      quantization_dtype: An optional numpy dtype to quantize 'float32' weights
+        to. Only np.uint8 and np.uint16 are supported.
     Returns:
       The weights manifest JSON string.
 
@@ -125,7 +125,6 @@ def _quantize_group(group, quantization_dtype):
     raise ValueError('Cannot quantize weight with dtype ' + data.dtype)
   m = data.min().astype(np.float64)
   M = data.max().astype(np.float64)
-  quant_info = {'bytes': self.quant_bytes, 'min': m, 'max': M}
   if M == m:
     quantized_data = np.zeros_like(data, dtype=quantization_dtype)
   else:
