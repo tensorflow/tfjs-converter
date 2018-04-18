@@ -24,11 +24,11 @@ import numpy as np
 FILENAME_CHARS = string.ascii_letters + string.digits + '_'
 # TODO(nsthorat): Support more than just float32 and int32 for weight dumping.
 DTYPE_BYTES = {'float32': 4, 'int32': 4}
-
+QUANTIZATION_DTYPES = [np.uint8, np.uint16]
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
-    write_manifest=True):
+    write_manifest=True, quantizaton_dtype=None):
   """Writes weights to a binary format on disk for ingestion by JavaScript.
 
     Weights are organized into groups. When writing to disk, the bytes from all
@@ -60,6 +60,8 @@ def write_weights(
         the max file size for caching for all major browsers.
       write_manifest: Whether to write the manifest JSON to disk. Defaults to
         True.
+      quantization_dtype: An optional numpy dtype to quantize the weights to.
+        Only np.uint8 and np.uint16 are supported.
     Returns:
       The weights manifest JSON string.
 
@@ -90,7 +92,10 @@ def write_weights(
   manifest = []
 
   for group_index, group in enumerate(weight_groups):
+    if quantizaton_dtype:
+      group = _quantize_group(group, quantization_dtype)
     group_bytes, total_bytes, _ = _stack_group_bytes(group)
+
 
     shard_filenames = _shard_group_bytes_to_disk(
         write_dir, group_index, group_bytes, total_bytes, shard_size_bytes)
@@ -110,6 +115,27 @@ def write_weights(
       f.write(manifest_json.encode())
 
   return manifest_json
+
+def _quantize_group(group, quantization_dtype):
+  if quantization_dtype not in QUANTIZATION_DTYPES:
+    raise ValueError('Invalid `quantization_dtype`: ' + quantization_dtype)
+
+  data = group['data']
+  m = data.min().astype(np.float64)
+  M = data.max().astype(np.float64)
+  quant_info = {'bytes': self.quant_bytes, 'min': m, 'max': M}
+  if M == m:
+    quantized_data = np.zeros_like(data, dtype=quantization_dtype)
+  else:
+    quantized_data = (
+      (data - m) / (M - m) * np.iinfo(quantization_dtype).max).astype(
+        quantization_dtype)
+
+  quantized_group = group.copy()
+  quantized_group['data'] = quantized_data
+  quantized_group['quantization'] = {
+    'min': m, 'max': M, 'dtype': quantization_dtype.name}
+  return quantized_group
 
 
 def _stack_group_bytes(group):
@@ -195,6 +221,8 @@ def _get_weights_manifest_for_group(group):
         'shape': list(entry['data'].shape),
         'dtype': entry['data'].dtype.name
     }
+    if 'quantization' in entry:
+      var_manifest['quantization'] = entry['quantization']
     weights_entries.append(var_manifest)
   return weights_entries
 
