@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Library for converting model and weights in TensorFlow.js format."""
+"""Library for loading a Keras model from TensorFlow.js format."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -41,7 +41,7 @@ def load_keras_model(config_json_path,
     weights_path_prefix: Optional path prefix for the weights files.
       If not specified (`None`), will assume the prefix is the same directory
       as the dirname of `config_json_path`.
-    weights_data_buffers: A buffer os a `list` of buffers containing the weight
+    weights_data_buffers: A buffer of a `list` of buffers containing the weight
       values concatenated and sharded in the order as specified by the
       weights manifest at `config_json_path`. This argument is mutually
       exclusive with `weights_path_prefix`.
@@ -53,9 +53,26 @@ def load_keras_model(config_json_path,
 
   Returns:
     The loaded instance of `keras.Model`.
+
+  Raises:
+    TypeError, if the format of the JSON content of `config_json_path` has an
+      invalid format.
+    KeyError, if required keys do not exist in the JSON content of
+      `config_json_path`.
+    ValueError, if both `weights_data_buffers` and `weights_path_prefix` are
+      provided.
   """
   with open(config_json_path, 'rt') as f:
     model_and_weights_manifest = json.load(f)
+
+  if not isinstance(model_and_weights_manifest, dict):
+    raise TypeError(
+        'The JSON content of %s is required to be a `dict`, but found %s' %
+        (config_json_path, type(model_and_weights_manifest)))
+  if 'modelTopology' not in model_and_weights_manifest:
+    raise KeyError(
+        'Field "modelTopology" is missing from the JSON content in %s' %
+        config_json_path)
 
   model_json = model_and_weights_manifest['modelTopology']
 
@@ -66,6 +83,10 @@ def load_keras_model(config_json_path,
     model = keras.models.model_from_json(json.dumps(model_json))
 
   if load_weights:
+    if 'weightsManifest' not in model_and_weights_manifest:
+      raise KeyError(
+          'Field "weightsManifest" is missing from the JSON content in %s' %
+          config_json_path)
     weights_manifest = model_and_weights_manifest['weightsManifest']
 
     if weights_data_buffers:

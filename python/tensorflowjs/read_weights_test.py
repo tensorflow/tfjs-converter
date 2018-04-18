@@ -143,6 +143,19 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertTrue(
         np.allclose(groups[0][0]['data'], read_output[0][0]['data']))
 
+  def testReadWeightsWithIncorrectTypeInWeightsManifestRaisesError(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.random.rand(1, 100).astype(np.float32)
+        }]
+    ]
+
+    write_weights.write_weights(groups, self._tmp_dir)
+
+    with self.assertRaises(ValueError):
+      read_weights.read_weights(groups[0][0], self._tmp_dir)
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -49,6 +49,11 @@ def read_weights(weights_manifest, base_path, flatten=False):
         ]
     If `flatten` is `True`, returns a single weight group.
   """
+  if not isinstance(weights_manifest, list):
+    raise ValueError(
+        'weights_manifest should be a `list`, but received %s' %
+        type(weights_manifest))
+
   data_buffers = []
   for group in weights_manifest:
     buff = io.BytesIO()

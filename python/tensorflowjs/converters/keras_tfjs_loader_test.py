@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Unite tests for keras_tfjs_loader."""
+"""Unit tests for keras_tfjs_loader."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -195,6 +195,24 @@ class LoadKerasModelTest(tf.test.TestCase):
       with self.assertRaises(ValueError):
         keras_tfjs_loader.load_keras_model(
             os.path.join(tfjs_path, 'model.json'),
+            weights_data_buffers=[b'foo'], weights_path_prefix='bar')
+
+  def testInvalidJSONRaisesError(self):
+    with tf.Graph().as_default(), tf.Session():
+      tfjs_path = os.path.join(self._tmp_dir, 'model_for_test')
+      self._saveKerasModelForTest(tfjs_path)
+
+      # Make some changes to the model.json file content to create an invalid
+      # file content.
+      model_json_path = os.path.join(tfjs_path, 'model.json')
+      with open(model_json_path, 'rt') as f:
+        model_json_content = f.read()
+      with open(model_json_path, 'wt') as f:
+        f.write('[' + model_json_content + ']')
+
+      with self.assertRaises(TypeError):
+        keras_tfjs_loader.load_keras_model(
+            model_json_path,
             weights_data_buffers=[b'foo'], weights_path_prefix='bar')
 
 
