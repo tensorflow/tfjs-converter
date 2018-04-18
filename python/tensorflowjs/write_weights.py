@@ -96,7 +96,6 @@ def write_weights(
       group = _quantize_group(group, quantization_dtype)
     group_bytes, total_bytes, _ = _stack_group_bytes(group)
 
-
     shard_filenames = _shard_group_bytes_to_disk(
         write_dir, group_index, group_bytes, total_bytes, shard_size_bytes)
 
