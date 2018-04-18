@@ -25,6 +25,7 @@ FILENAME_CHARS = string.ascii_letters + string.digits + '_'
 # TODO(nsthorat): Support more than just float32 and int32 for weight dumping.
 DTYPE_BYTES = {'float32': 4, 'int32': 4}
 QUANTIZATION_DTYPES = [np.uint8, np.uint16]
+QUANTIZABLE_DTYPES = [np.float32]
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
@@ -88,11 +89,12 @@ def write_weights(
   _assert_weight_groups_valid(weight_groups)
   _assert_shard_size_bytes_valid(shard_size_bytes)
   _assert_no_duplicate_weight_names(weight_groups)
+  _assert_valid_quantization(weight_groups, quantizaton_dtype)
 
   manifest = []
 
   for group_index, group in enumerate(weight_groups):
-    if quantizaton_dtype:
+    if quantizaton_dtype and group['data'].dtype in QUANTIZABLE_DTYPES:
       group = _quantize_group(group, quantization_dtype)
     group_bytes, total_bytes, _ = _stack_group_bytes(group)
 
@@ -118,8 +120,9 @@ def write_weights(
 def _quantize_group(group, quantization_dtype):
   if quantization_dtype not in QUANTIZATION_DTYPES:
     raise ValueError('Invalid `quantization_dtype`: ' + quantization_dtype)
-
   data = group['data']
+  if data.dtype not in QUANTIZABLE_DTYPES:
+    raise ValueError('Cannot quantize weight with dtype ' + data.dtype)
   m = data.min().astype(np.float64)
   M = data.max().astype(np.float64)
   quant_info = {'bytes': self.quant_bytes, 'min': m, 'max': M}
