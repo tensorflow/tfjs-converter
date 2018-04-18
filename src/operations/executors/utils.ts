@@ -54,9 +54,8 @@ export function getTensor(
   }
 }
 
-export function reshape(arr: number[], size: number) {
+export function split(arr: number[], size: number) {
   const res = [];
-  for (let i = 0; i < arr.length; i += size)
-    res.push(arr.slice(i, i + size));
+  for (let i = 0; i < arr.length; i += size) res.push(arr.slice(i, i + size));
   return res;
 }
