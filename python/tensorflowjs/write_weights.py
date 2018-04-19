@@ -47,7 +47,7 @@ def write_weights(
         for example:
         entry = {
           'name': 'weight1',
-          'data': np.array([1, 2, 3], 'float32')
+          'data': np.array([1, 2, 3], 'int32')
         }
 
         Weights groups would then look like:
@@ -85,6 +85,24 @@ def write_weights(
           'name': 'weight2',
           'shape': [2000, 2000],
           'dtype': 'float32'
+        }]
+      }]
+      or, if quantization is used:
+      [{
+        'paths': ['group1-shard1of2', 'group1-shard2of2'],
+        'weights': [{
+          'name': 'weight1',
+          'shape': [1000, 1000],
+          'dtype': 'float32'
+          'quantization': {'min': -0.1, 'max': 1.2, 'dtype': 'uint8'}
+        }]
+      }, {
+        'paths': ['group2-shard1of2', 'group2-shard2of2'],
+        'weights': [{
+          'name': 'weight2',
+          'shape': [2000, 2000],
+          'dtype': 'float32',
+          'quantization': {'min': -2.4, 'max': 4.8, 'dtype': 'uint8'}
         }]
       }]
   """
@@ -134,10 +152,14 @@ def _quantize_group(group, quantization_dtype):
   Returns:
     A new group entry with the quantized data and additional quantization info,
     for example:
-        entry = {
+        original_entry = {
           'name': 'weight1',
-          'data': np.array([1, 0, 255], 'float32')
-          'quantization': {'min': -0.1, 'max': 1.2, dtype: 'uint8'}
+          'data': np.array([0.4125, -0.1, 1.2], 'float32')
+        }
+        quantized_entry = {
+          'name': 'weight1',
+          'data': np.array([48, 0, 255], 'uint8')
+          'quantization': {'min': -0.1, 'max': 1.2, original_dtype: 'float32'}
         }
   """
   if quantization_dtype not in QUANTIZATION_DTYPES:
@@ -159,7 +181,7 @@ def _quantize_group(group, quantization_dtype):
   quantized_group = group.copy()
   quantized_group['data'] = quantized_data
   quantized_group['quantization'] = {
-    'min': m, 'max': M, 'dtype': quantization_dtype.name}
+    'min': m, 'max': M, 'original_dtype': data.dtype.name}
   return quantized_group
 
 
@@ -241,13 +263,20 @@ def _get_weights_manifest_for_group(group):
   """
   weights_entries = []
   for entry in group:
+    is_quantized = 'quantization' in entry
+    dtype = (entry['quantization'].original_dtype
+             if is_quantized else entry['data'].dtype.name)
     var_manifest = {
         'name': entry['name'],
         'shape': list(entry['data'].shape),
-        'dtype': entry['data'].dtype.name
+        'dtype': dtype
     }
-    if 'quantization' in entry:
-      var_manifest['quantization'] = entry['quantization']
+    if is_quantized:
+      var_manifest['quantization'] = {
+        'min': entry['quantization']['min'],
+        'max': entry['quantization']['max'],
+        'dtype': entry['data'].dtype.name
+      }
     weights_entries.append(var_manifest)
   return weights_entries
 
