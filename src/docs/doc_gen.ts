@@ -22,6 +22,7 @@ import * as control from '../operations/op_list/control.json';
 import * as convolution from '../operations/op_list/convolution.json';
 import * as creation from '../operations/op_list/creation.json';
 import * as graph from '../operations/op_list/graph.json';
+import * as image from '../operations/op_list/image.json';
 import * as logical from '../operations/op_list/logical.json';
 import * as matrices from '../operations/op_list/matrices.json';
 import * as normalization from '../operations/op_list/normalization.json';
@@ -37,9 +38,10 @@ const opMappers = [
   ...(arithmetic as {}) as OpMapper[], ...(basicMath as {}) as OpMapper[],
   ...(control as {}) as OpMapper[], ...(convolution as {}) as OpMapper[],
   ...(creation as {}) as OpMapper[], ...(logical as {}) as OpMapper[],
-  ...(graph as {}) as OpMapper[], ...(matrices as {}) as OpMapper[],
-  ...(normalization as {}) as OpMapper[], ...(reduction as {}) as OpMapper[],
-  ...(sliceJoin as {}) as OpMapper[], ...(transformation as {}) as OpMapper[]
+  ...(image as {}) as OpMapper[], ...(graph as {}) as OpMapper[],
+  ...(matrices as {}) as OpMapper[], ...(normalization as {}) as OpMapper[],
+  ...(reduction as {}) as OpMapper[], ...(sliceJoin as {}) as OpMapper[],
+  ...(transformation as {}) as OpMapper[]
 ];
 
 const output: string[] = [];
@@ -55,6 +57,7 @@ generateTable('Tensorflow Graph', (graph as {}) as OpMapper[], output);
 generateTable('Logical', (logical as {}) as OpMapper[], output);
 generateTable('Matrices', (matrices as {}) as OpMapper[], output);
 generateTable('Normalization', (normalization as {}) as OpMapper[], output);
+generateTable('Image', (image as {}) as OpMapper[], output);
 generateTable('Reduction', (reduction as {}) as OpMapper[], output);
 generateTable('Slice and Join', (sliceJoin as {}) as OpMapper[], output);
 generateTable('Transformation', (transformation as {}) as OpMapper[], output);

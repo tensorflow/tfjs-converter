@@ -33,6 +33,8 @@ export class GraphExecutor {
   private compiledOrder: operations.Node[] = [];
   private _weightMap: NamedTensorsMap = {};
   private weightIds: number[];
+  private placeholders: string[];
+  private outputs: string[];
   get weightMap(): NamedTensorsMap {
     return this._weightMap;
   }
@@ -43,7 +45,17 @@ export class GraphExecutor {
     this._weightMap = weightMap;
   }
 
+  get inputNodes(): string[] {
+    return this.placeholders;
+  }
+
+  get outputNodes(): string[] {
+    return this.outputs;
+  }
+
   constructor(private graph: operations.Graph) {
+    this.placeholders = graph.placeholders.map(node => node.name);
+    this.outputs = graph.outputs.map(node => node.name);
     this.compile();
   }
 
@@ -89,6 +101,7 @@ export class GraphExecutor {
    * array.
    */
   execute(inputs: NamedTensorsMap, outputs?: string|string[]): NamedTensorMap {
+    this.checkInput(inputs);
     const result = tidy(() => {
       const context = new ExecutionContext(this._weightMap);
       const tensors =
@@ -207,5 +220,27 @@ export class GraphExecutor {
     Object.keys(this.weightMap)
         .forEach(
             key => this.weightMap[key].forEach(tensor => tensor.dispose()));
+  }
+
+  private checkInput(inputs: NamedTensorsMap) {
+    const inputKeys = Object.keys(inputs);
+    const missing: string[] = [];
+    const extra: string[] = [];
+
+    this.placeholders.forEach(name => {
+      if (inputKeys.indexOf(name) === -1) missing.push(name);
+    });
+
+    inputKeys.forEach(name => {
+      if (this.placeholders.indexOf(name) === -1) extra.push(name);
+    });
+
+    if (missing.length > 0) {
+      throw new Error(`Missing input placeholders: ${missing}`);
+    }
+
+    if (extra.length > 0) {
+      throw new Error(`Extra input tensors: ${extra}`);
+    }
   }
 }

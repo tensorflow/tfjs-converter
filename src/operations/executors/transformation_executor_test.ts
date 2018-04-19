@@ -68,11 +68,11 @@ describe('transformation', () => {
         node.op = 'pad';
         node.params.padding = createNumericArrayAttrFromIndex(1);
         node.params.constantValue = createNumberAttr(1);
-        node.inputNames = ['input1', 'input2'];
+        node.inputNames = ['input1', 'input3'];
+        const input3 = [tfc.tensor2d([1, 1, 2, 2], [2, 2])];
+        executeOp(node, {input1, input3}, context);
 
-        executeOp(node, {input1, input2}, context);
-
-        expect(tfc.pad).toHaveBeenCalledWith(input1[0], [1, 1], 1);
+        expect(tfc.pad).toHaveBeenCalledWith(input1[0], [[1, 1], [2, 2]], 1);
       });
     });
     describe('reshape', () => {

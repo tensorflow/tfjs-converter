@@ -26,6 +26,7 @@ import * as control from './executors/control_executor';
 import * as convolution from './executors/convolution_executor';
 import * as creation from './executors/creation_executor';
 import * as graph from './executors/graph_executor';
+import * as image from './executors/image_executor';
 import * as logical from './executors/logical_executor';
 import * as matrices from './executors/matrices_executor';
 import * as normalization from './executors/normalization_executor';
@@ -53,6 +54,8 @@ export function executeOp(
       return convolution.executeOp(node, tensorMap, context);
     case 'creation':
       return creation.executeOp(node, tensorMap, context);
+    case 'image':
+      return image.executeOp(node, tensorMap, context);
     case 'graph':
       return graph.executeOp(node, tensorMap, context);
     case 'logical':

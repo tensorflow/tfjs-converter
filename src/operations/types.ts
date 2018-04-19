@@ -18,7 +18,7 @@ import {Tensor} from '@tensorflow/tfjs-core';
 export type ParamTypes =
     'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
 export type Category = 'arithmetic'|'basic_math'|'control'|'convolution'|
-    'creation'|'graph'|'logical'|'matrices'|'normalization'|'reduction'|
+    'image'|'creation'|'graph'|'logical'|'matrices'|'normalization'|'reduction'|
     'slice_join'|'transformation';
 export interface ParamMapper {
   tfParamName?: string;
@@ -52,6 +52,7 @@ export interface Node {
 
 export interface Graph {
   nodes: {[key: string]: Node};
+  placeholders: Node[];
   inputs: Node[];
   outputs: Node[];
   withControlFlow: boolean;
