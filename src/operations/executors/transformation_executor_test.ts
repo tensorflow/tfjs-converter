@@ -66,7 +66,7 @@ describe('transformation', () => {
         node.params.padding = createNumericArrayAttrFromIndex(1);
         node.params.constantValue = createNumberAttr(1);
         node.inputNames = ['input1', 'input3'];
-        const input3 = [tfc.tensor2d([1, 1, 2, 2])];
+        const input3 = [tfc.tensor2d([1, 1, 2, 2], [2, 2])];
         executeOp(node, {input1, input3});
 
         expect(tfc.pad).toHaveBeenCalledWith(input1[0], [[1, 1], [2, 2]], 1);
