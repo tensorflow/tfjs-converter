@@ -12,8 +12,6 @@
   "scripts": {
     "mobilenet": "NODE_ENV=development parcel --no-hmr --open mobilenet/index.html ",
     "control_flow": "NODE_ENV=development parcel --no-hmr --open control_flow/index.html ",
-    "build_mobilenet": "NODE_ENV=production parcel build mobilenet/index.html  --no-minify --public-url /",
-    "build_control_flow": "NODE_ENV=production parcel build control_flw/index.html  --no-minify --public-url /"
   },
   "devDependencies": {
     "babel-plugin-transform-runtime": "~6.23.0",

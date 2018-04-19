@@ -18,19 +18,25 @@ import {Tensor} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../data';
 
-export interface ExecutionContextId {
-  id: number;
-  frameName: string;
-  iterationId: number;
+export interface ExecutionContextInfo {
+  id: number;           // the unique id of the context info
+  frameName: string;    // The frame name of the loop, this comes from
+                        // the TensorFlow NodeDef.
+  iterationId: number;  // The iteration id of the loop
 }
 
 /**
  * ExecutionContext captures the runtime environment of the node. It keeps
  * track of the current frame and iteration for the control flow ops.
+ *
+ * For example, typical Dynamic RNN model may contain loops, for which
+ * TensorFlow will generate graphs with Enter/Exit nodes to control the
+ * current execution frame, and NextIteration Nodes for iteration id increment.
+ * For model with branch logic, TensorFLow will generate Switch/Merge ops.
  */
 export class ExecutionContext {
   private rootContext = {id: 0, frameName: '', iterationId: 0};
-  private contexts: ExecutionContextId[] = [this.rootContext];
+  private contexts: ExecutionContextInfo[] = [this.rootContext];
   private lastId = 0;
   private _currentContextIds: string[];
 
@@ -44,16 +50,17 @@ export class ExecutionContext {
 
   /**
    * Set the current context
-   * @param contexts: ExecutionContextId[] the current path of execution frames
+   * @param contexts: ExecutionContextInfo[] the current path of execution
+   * frames
    */
-  set currentContext(contexts: ExecutionContextId[]) {
+  set currentContext(contexts: ExecutionContextInfo[]) {
     if (this.contexts !== contexts) {
       this.contexts = contexts;
       this.generateCurrentContextIds();
     }
   }
 
-  get currentContext(): ExecutionContextId[] {
+  get currentContext(): ExecutionContextInfo[] {
     return this.contexts;
   }
 
@@ -82,7 +89,7 @@ export class ExecutionContext {
     this._currentContextIds = names;
   }
 
-  private contextIdforContexts(contexts: ExecutionContextId[]) {
+  private contextIdforContexts(contexts: ExecutionContextInfo[]) {
     return contexts ?
         contexts
             .map(
@@ -130,7 +137,7 @@ export class ExecutionContext {
       this.lastId++;
       const context =
           Object.assign({}, this.contexts[this.contexts.length - 1]) as
-          ExecutionContextId;
+          ExecutionContextInfo;
       context.iterationId += 1;
       context.id = this.lastId;
       this.contexts.splice(-1, 1, context);

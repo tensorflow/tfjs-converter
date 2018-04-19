@@ -22,10 +22,10 @@ import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
 import * as operations from '../operations/index';
 import {Node} from '../operations/index';
 
-import {ExecutionContext, ExecutionContextId} from './execution_context';
+import {ExecutionContext, ExecutionContextInfo} from './execution_context';
 
 interface NodeWithContexts {
-  contexts: ExecutionContextId[];
+  contexts: ExecutionContextInfo[];
   node: Node;
 }
 
