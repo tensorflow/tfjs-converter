@@ -131,7 +131,7 @@ export class FrozenModel {
   }
 
   /**
-   * Executes infrerence for the model for given input tensors in async fashion,
+   * Executes inference for the model for given input tensors in async fashion,
    * use this method when your model contains control flow ops.
    * @param inputs tensor map of the inputs for the model, keyed by the input
    * node names.
