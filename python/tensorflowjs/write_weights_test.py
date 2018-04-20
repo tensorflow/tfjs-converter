@@ -390,8 +390,8 @@ class TestWriteWeights(unittest.TestCase):
         os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
         'weights_manifest.json does not exist')
     q, s, m = zip(
-      quantization_util.quantize_weights(groups[0][0]['data'], np.uint8),
-      quantization_util.quantize_weights(groups[0][1]['data'], np.uint8))
+        quantization_util.quantize_weights(groups[0][0]['data'], np.uint8),
+        quantization_util.quantize_weights(groups[0][1]['data'], np.uint8))
     self.assertEqual(
         manifest,
         [{
@@ -401,14 +401,14 @@ class TestWriteWeights(unittest.TestCase):
                 'shape': [3],
                 'dtype': 'float32',
                 'quantization': {
-                  'min': m[0], 'scale': s[0], 'dtype': 'uint8'
+                    'min': m[0], 'scale': s[0], 'dtype': 'uint8'
                 }
             }, {
                 'name': 'weight2',
                 'shape': [2],
                 'dtype': 'int32',
                 'quantization': {
-                  'min': m[1], 'scale': s[1], 'dtype': 'uint8'
+                    'min': m[1], 'scale': s[1], 'dtype': 'uint8'
                 }
             }]
         }])

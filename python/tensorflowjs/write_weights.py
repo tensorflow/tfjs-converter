@@ -20,7 +20,7 @@ import os
 import string
 
 import numpy as np
-from tensorflowjs.quantization_util import quantize_weights
+from tensorflowjs import quantization_util
 
 FILENAME_CHARS = string.ascii_letters + string.digits + '_'
 # TODO(nsthorat): Support more than just float32 and int32 for weight dumping.
@@ -169,11 +169,12 @@ def _quantize_group(group, quantization_dtype):
   quantized_group = []
   for entry in group:
     data = entry['data']
-    quantized_data, scale, min_val = quantize_weights(data, quantization_dtype)
+    quantized_data, scale, min_val = quantization_util.quantize_weights(
+        data, quantization_dtype)
     quantized_entry = entry.copy()
     quantized_entry['data'] = quantized_data
     quantized_entry['quantization'] = {
-      'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
+        'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
     quantized_group.append(quantized_entry)
   return quantized_group
 
@@ -265,9 +266,9 @@ def _get_weights_manifest_for_group(group):
     }
     if is_quantized:
       var_manifest['quantization'] = {
-        'min': entry['quantization']['min'],
-        'scale': entry['quantization']['scale'],
-        'dtype': entry['data'].dtype.name
+          'min': entry['quantization']['min'],
+          'scale': entry['quantization']['scale'],
+          'dtype': entry['data'].dtype.name
       }
     weights_entries.append(var_manifest)
   return weights_entries

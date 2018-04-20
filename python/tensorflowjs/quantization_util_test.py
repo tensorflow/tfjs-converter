@@ -23,7 +23,7 @@ class TestQuantizationUtil(unittest.TestCase):
 
   def _runQuantizeTest(
       self, range_min, range_max, data_dtype, quantization_dtype,
-       allow_for_min_error=None):
+      allow_for_min_error=None):
     d = np.arange(range_min, range_max + 1, dtype=data_dtype)
     q, s, m = quantization_util.quantize_weights(d, quantization_dtype)
     self.assertEqual(q.dtype, quantization_dtype)
@@ -39,7 +39,7 @@ class TestQuantizationUtil(unittest.TestCase):
     d_0 = np.zeros(1, data_dtype)
     q_0 = (d_0 - m) / s
     self.assertEqual(
-      quantization_util.dequantize_weights(q_0, s, m, data_dtype), d_0)
+        quantization_util.dequantize_weights(q_0, s, m, data_dtype), d_0)
 
   def testQuantizeNegativeFloats(self):
     # This case is not well-covered by the nudging algorithm from TF-Lite

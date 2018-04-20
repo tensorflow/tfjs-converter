@@ -22,7 +22,7 @@ import io
 import os
 
 import numpy as np
-from tensorflowjs.quantization_util import dequantize_weights
+from tensorflowjs import quantization_util
 
 DTYPE_BYTES = {'float32': 4, 'int32': 4, 'uint8': 2, 'uint16': 4}
 
@@ -133,9 +133,9 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
           data_buffer, dtype=dtype, count=weight_numel,
           offset=offset).reshape(shape)
       if quantization:
-        value = dequantize_weights(
-          value, quantization['scale'], quantization['min'],
-          np.dtype(weight['dtype']))
+        value = quantization_util.dequantize_weights(
+            value, quantization['scale'], quantization['min'],
+            np.dtype(weight['dtype']))
       offset += weight_bytes
       out_group.append({'name': name, 'data': value})
 

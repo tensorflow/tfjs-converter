@@ -91,7 +91,7 @@ def _get_quantization_range(min_val, max_val, quantization_dtype):
 
   quant_max = np.iinfo(quantization_dtype).max
   scale = (max_val - min_val) / quant_max
-  quantized_zero_point =  (0 - min_val) / scale
+  quantized_zero_point = (0 - min_val) / scale
   if quantized_zero_point < 0:
     nudged_zero_point = 0.0
   elif quantized_zero_point > quant_max:
