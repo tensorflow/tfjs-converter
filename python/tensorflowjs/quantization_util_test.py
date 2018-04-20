@@ -49,32 +49,41 @@ class TestQuantizationUtil(unittest.TestCase):
 
   def testQuantizeNegativeAndZeroFloats(self):
     self._runQuantizeTest(-3, 0, np.float32, np.uint8)
+    self._runQuantizeTest(-3, 0, np.float32, np.uint16)
 
   def testQuantizeNegativeAndPositiveFloats(self):
     self._runQuantizeTest(-3, 3, np.float32, np.uint8)
+    self._runQuantizeTest(-3, 3, np.float32, np.uint16)
 
   def testQuantizeZeroAndPositiveFloats(self):
     self._runQuantizeTest(0, 3, np.float32, np.uint8)
+    self._runQuantizeTest(0, 3, np.float32, np.uint16)
 
   def testQuantizePositiveFloats(self):
     self._runQuantizeTest(0, 3, np.float32, np.uint8)
+    self._runQuantizeTest(0, 3, np.float32, np.uint16)
 
   def testQuantizeNegativeInts(self):
     # This case is not well-covered by the nudging algorithm from TF-Lite
     # so we have to give the min value a larger error.
     self._runQuantizeTest(-3, -1, np.int32, np.uint8, allow_for_min_error=1.0)
+    self._runQuantizeTest(-3, -1, np.int32, np.uint16, allow_for_min_error=1.0)
 
   def testQuantizeNegativeAndZeroInts(self):
     self._runQuantizeTest(-3, 0, np.int32, np.uint8)
+    self._runQuantizeTest(-3, 0, np.int32, np.uint16)
 
   def testQuantizeNegativeAndPositiveInts(self):
     self._runQuantizeTest(-3, 3, np.int32, np.uint8)
+    self._runQuantizeTest(-3, 3, np.int32, np.uint16)
 
   def testQuantizeZeroAndPositiveInts(self):
     self._runQuantizeTest(0, 3, np.int32, np.uint8)
+    self._runQuantizeTest(0, 3, np.int32, np.uint16)
 
   def testQuantizePositiveInts(self):
     self._runQuantizeTest(0, 3, np.int32, np.uint8)
+    self._runQuantizeTest(0, 3, np.int32, np.uint16)
 
 
 if __name__ == '__main__':
