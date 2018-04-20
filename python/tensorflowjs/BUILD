@@ -33,11 +33,21 @@ py_library(
 )
 
 py_library(
+    name = "quantization_util",
+    srcs = ["quantization_util.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":expect_numpy_installed",
+    ],
+)
+
+py_library(
     name = "write_weights",
     srcs = ["write_weights.py"],
     srcs_version = "PY2AND3",
     deps = [
         ":expect_numpy_installed",
+        ":quantization_util",
     ],
 )
 
@@ -46,6 +56,16 @@ py_library(
     srcs = ["version.py"],
     srcs_version = "PY2AND3",
     deps = [],
+)
+
+py_test(
+    name = "quantization_util_test",
+    srcs = ["quantization_util_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":expect_numpy_installed",
+        ":quantization_util",
+    ],
 )
 
 py_test(

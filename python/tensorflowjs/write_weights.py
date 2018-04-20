@@ -20,15 +20,16 @@ import os
 import string
 
 import numpy as np
+from tensorflowjs.quantization_util import quantize_weights
 
 FILENAME_CHARS = string.ascii_letters + string.digits + '_'
 # TODO(nsthorat): Support more than just float32 and int32 for weight dumping.
-DTYPE_BYTES = {'float32': 4, 'int32': 4}
+DTYPE_BYTES = {'float32': 4, 'int32': 4, 'uint8': 2, 'uint16': 4}
 QUANTIZATION_DTYPES = [np.uint8, np.uint16]
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
-    write_manifest=True, quantizaton_dtype=None):
+    write_manifest=True, quantization_dtype=None):
   """Writes weights to a binary format on disk for ingestion by JavaScript.
 
     Weights are organized into groups. When writing to disk, the bytes from all
@@ -109,12 +110,11 @@ def write_weights(
   _assert_weight_groups_valid(weight_groups)
   _assert_shard_size_bytes_valid(shard_size_bytes)
   _assert_no_duplicate_weight_names(weight_groups)
-  _assert_valid_quantization(weight_groups, quantizaton_dtype)
 
   manifest = []
 
   for group_index, group in enumerate(weight_groups):
-    if quantizaton_dtype:
+    if quantization_dtype:
       group = _quantize_group(group, quantization_dtype)
     group_bytes, total_bytes, _ = _stack_group_bytes(group)
 
@@ -153,8 +153,8 @@ def _quantize_group(group, quantization_dtype):
       np.uint16 are supported.
 
   Returns:
-    A new group entry with the quantized data and additional quantization info,
-    for example:
+    A new group with entries containing the quantized data and additional
+    quantization info, for example:
         original_entry = {
           'name': 'weight1',
           'data': np.array([0, -0.1, 1.2], 'float32')
@@ -166,53 +166,16 @@ def _quantize_group(group, quantization_dtype):
                            'original_dtype': 'float32'}
         }
   """
-  if quantization_dtype not in QUANTIZATION_DTYPES:
-    raise ValueError('Invalid `quantization_dtype`: ' + quantization_dtype)
-  data = group['data']
-
-  # Compute the min and max for the group.
-  min_val = data.min().astype(np.float64)
-  max_val = data.max().astype(np.float64)
-  if min_val == max_val:
-    # If there is only a single value, we can represent everything as zeros.
-    quantized_data = np.zeros_like(data, dtype=quantization_dtype)
-  else:
-    # Quantize data.
-    scale, min_val, max_val = _get_quantization_range(
-      min_val, max_val, quantization_dtype)
-    quantized_data = (
-      (data.clip(min_val, max_val) - min_val) / scale).astype(
-        quantization_dtype)
-
-  quantized_group = group.copy()
-  quantized_group['data'] = quantized_data
-  quantized_group['quantization'] = {
-    'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
+  quantized_group = []
+  for entry in group:
+    data = entry['data']
+    quantized_data, scale, min_val = quantize_weights(data, quantization_dtype)
+    quantized_entry = entry.copy()
+    quantized_entry['data'] = quantized_data
+    quantized_entry['quantization'] = {
+      'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
+    quantized_group.append(quantized_entry)
   return quantized_group
-
-
-def _get_quantization_range(min_val, max_val, quantization_dtype=np.uint8):
-  """Computes the quantization range to ensure that zero is represented.
-
-  Based on `NudgeQuantizationRange` in
-  tensorflow/contrib/lite/kernels/internal/quantization_util.h.
-
-  """
-  quant_max = np.iinfo(quantization_dtype).max
-  scale = (max_val - min_val) / quant_max
-  quantized_zero_point =  (0 - min_val) / scale
-  if quantized_zero_point < 0:
-    nudged_zero_point = 0.0
-  elif quantized_zero_point > quant_max:
-    nudged_zero_point = quant_max
-  else:
-    nudged_zero_point = np.round(quantized_zero_point)
-
-  # Solve `0 = (0 - nudged_zero_point) * scale + nudged_min`` for `nudged_min`.
-  nudged_min = -nudged_zero_point * scale
-  nudged_max = quant_max * scale + nudged_min
-  return scale, nudged_min, nudged_max
-
 
 def _stack_group_bytes(group):
   """Stacks the bytes for a weight group into a flat byte array.
@@ -293,7 +256,7 @@ def _get_weights_manifest_for_group(group):
   weights_entries = []
   for entry in group:
     is_quantized = 'quantization' in entry
-    dtype = (entry['quantization'].original_dtype
+    dtype = (entry['quantization']['original_dtype']
              if is_quantized else entry['data'].dtype.name)
     var_manifest = {
         'name': entry['name'],
@@ -331,8 +294,8 @@ def _assert_valid_weight_entry(entry):
   data = entry['data']
 
   if not data.dtype.name in DTYPE_BYTES:
-    raise ValueError('Error dumping weight ' + name + ' dtype ' +
-                     data.dtype.name + ' from not supported.')
+    raise ValueError('Error dumping weight ' + name + ', dtype ' +
+                     data.dtype.name + ' not supported.')
 
   if not isinstance(data, np.ndarray):
     raise ValueError('Error dumping weight ' + name + ', data ' +
