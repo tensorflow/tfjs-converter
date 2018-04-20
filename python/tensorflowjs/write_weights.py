@@ -140,9 +140,12 @@ def write_weights(
 def _quantize_group(group, quantization_dtype):
   """Quantizes the weights in the group, returning a new group.
 
-  The weights are quantized by dividing the full range of the group into
-  uniformly-spaced bins and storing the weight as its bin number along with the
-  group range.
+  The weights are quantized by linearly re-scaling the values between the
+  minimum and maximum value, and representing them with the number of bits
+  provided by the `quantization_dtype`.
+
+  In order to guarantee that 0 is perfectly represented by one of the quanzitzed
+  values, the range is "nudged" in the same manner as in TF-Lite.
 
   Args:
     group: A list of weight entries to quantize.
@@ -154,12 +157,13 @@ def _quantize_group(group, quantization_dtype):
     for example:
         original_entry = {
           'name': 'weight1',
-          'data': np.array([0.4125, -0.1, 1.2], 'float32')
+          'data': np.array([0, -0.1, 1.2], 'float32')
         }
         quantized_entry = {
           'name': 'weight1',
-          'data': np.array([48, 0, 255], 'uint8')
-          'quantization': {'min': -0.1, 'max': 1.2, original_dtype: 'float32'}
+          'data': np.array([20, 0, 255], 'uint8')
+          'quantization': {'min': -0.10196078817, 'scale': 0.00509803940852,
+                           'original_dtype': 'float32'}
         }
   """
   if quantization_dtype not in QUANTIZATION_DTYPES:
@@ -167,22 +171,47 @@ def _quantize_group(group, quantization_dtype):
   data = group['data']
 
   # Compute the min and max for the group.
-  m = data.min().astype(np.float64)
-  M = data.max().astype(np.float64)
-  if M == m:
+  min_val = data.min().astype(np.float64)
+  max_val = data.max().astype(np.float64)
+  if min_val == max_val:
     # If there is only a single value, we can represent everything as zeros.
     quantized_data = np.zeros_like(data, dtype=quantization_dtype)
   else:
-    # Quantize data into bins.
-    number_of_bins = np.iinfo(quantization_dtype).max
-    quantized_data = ((data - m) / (M - m) * number_of_bins).astype(
+    # Quantize data.
+    scale, min_val, max_val = _get_quantization_range(
+      min_val, max_val, quantization_dtype)
+    quantized_data = (
+      (data.clip(min_val, max_val) - min_val) / scale).astype(
         quantization_dtype)
 
   quantized_group = group.copy()
   quantized_group['data'] = quantized_data
   quantized_group['quantization'] = {
-    'min': m, 'max': M, 'original_dtype': data.dtype.name}
+    'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
   return quantized_group
+
+
+def _get_quantization_range(min_val, max_val, quantization_dtype=np.uint8):
+  """Computes the quantization range to ensure that zero is represented.
+
+  Based on `NudgeQuantizationRange` in
+  tensorflow/contrib/lite/kernels/internal/quantization_util.h.
+
+  """
+  quant_max = np.iinfo(quantization_dtype).max
+  scale = (max_val - min_val) / quant_max
+  quantized_zero_point =  (0 - min_val) / scale
+  if quantized_zero_point < 0:
+    nudged_zero_point = 0.0
+  elif quantized_zero_point > quant_max:
+    nudged_zero_point = quant_max
+  else:
+    nudged_zero_point = np.round(quantized_zero_point)
+
+  # Solve 0 = (0 - nudged_zero_point) * scale + nudged_min
+  nudged_min = -nudged_zero_point * scale
+  nudged_max = quant_max * scale + nudged_min
+  return scale, nudged_min, nudged_max
 
 
 def _stack_group_bytes(group):
@@ -274,7 +303,7 @@ def _get_weights_manifest_for_group(group):
     if is_quantized:
       var_manifest['quantization'] = {
         'min': entry['quantization']['min'],
-        'max': entry['quantization']['max'],
+        'scale': entry['quantization']['scale'],
         'dtype': entry['data'].dtype.name
       }
     weights_entries.append(var_manifest)
