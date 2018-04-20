@@ -48,7 +48,7 @@ def write_weights(
         for example:
         entry = {
           'name': 'weight1',
-          'data': np.array([1, 2, 3], 'int32')
+          'data': np.array([1, 2, 3], 'float32')
         }
 
         Weights groups would then look like:
@@ -95,7 +95,7 @@ def write_weights(
           'name': 'weight1',
           'shape': [1000, 1000],
           'dtype': 'float32'
-          'quantization': {'min': -0.1, 'max': 1.2, 'dtype': 'uint8'}
+          'quantization': {'min': -0.1, 'scale': 0.01, 'dtype': 'uint8'}
         }]
       }, {
         'paths': ['group2-shard1of2', 'group2-shard2of2'],
@@ -103,7 +103,7 @@ def write_weights(
           'name': 'weight2',
           'shape': [2000, 2000],
           'dtype': 'float32',
-          'quantization': {'min': -2.4, 'max': 4.8, 'dtype': 'uint8'}
+          'quantization': {'min': -2.4, 'scale': 0.08, 'dtype': 'uint8'}
         }]
       }]
   """
