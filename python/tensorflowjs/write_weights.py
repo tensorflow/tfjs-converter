@@ -208,7 +208,7 @@ def _get_quantization_range(min_val, max_val, quantization_dtype=np.uint8):
   else:
     nudged_zero_point = np.round(quantized_zero_point)
 
-  # Solve 0 = (0 - nudged_zero_point) * scale + nudged_min
+  # Solve `0 = (0 - nudged_zero_point) * scale + nudged_min`` for `nudged_min`.
   nudged_min = -nudged_zero_point * scale
   nudged_max = quant_max * scale + nudged_min
   return scale, nudged_min, nudged_max
