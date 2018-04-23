@@ -51,6 +51,7 @@ def quantize_weights(data, quantization_dtype):
   if min_val == max_val:
     # If there is only a single value, we can represent everything as zeros.
     quantized_data = np.zeros_like(data, dtype=quantization_dtype)
+    scale = 1.0
   else:
     # Quantize data.
     scale, min_val, max_val = _get_quantization_range(

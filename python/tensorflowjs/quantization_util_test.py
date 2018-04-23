@@ -41,6 +41,14 @@ class TestQuantizationUtil(unittest.TestCase):
     self.assertEqual(
         quantization_util.dequantize_weights(q_0, s, m, data_dtype), d_0)
 
+  def testAllEqual(self):
+    d = np.ones(5, dtype=np.float32)
+    q, s, m = quantization_util.quantize_weights(d, np.uint8)
+    self.assertEqual(q.dtype, np.uint8)
+
+    de_q = quantization_util.dequantize_weights(q, s, m, np.float32)
+    np.testing.assert_array_equal(de_q, d)
+
   def testQuantizeNegativeFloats(self):
     # This case is not well-covered by the nudging algorithm from TF-Lite
     # so we have to give the min value a larger error.
