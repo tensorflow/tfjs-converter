@@ -17,14 +17,11 @@ import io
 import json
 import math
 import os
-import string
 
 import numpy as np
-from tensorflowjs import quantization_util
+from tensorflowjs import quantization
 
-FILENAME_CHARS = string.ascii_letters + string.digits + '_'
-OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
-QUANTIZATION_DTYPES = [np.uint8, np.uint16]
+_OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
@@ -168,7 +165,7 @@ def _quantize_group(group, quantization_dtype):
   quantized_group = []
   for entry in group:
     data = entry['data']
-    quantized_data, scale, min_val = quantization_util.quantize_weights(
+    quantized_data, scale, min_val = quantization.quantize_weights(
         data, quantization_dtype)
     quantized_entry = entry.copy()
     quantized_entry['data'] = quantized_data
@@ -293,7 +290,7 @@ def _assert_valid_weight_entry(entry):
   name = entry['name']
   data = entry['data']
 
-  if not data.dtype in OUTPUT_DTYPES:
+  if not data.dtype in _OUTPUT_DTYPES:
     raise ValueError('Error dumping weight ' + name + ', dtype ' +
                      data.dtype.name + ' not supported.')
 

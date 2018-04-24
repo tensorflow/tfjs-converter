@@ -22,9 +22,9 @@ import io
 import os
 
 import numpy as np
-from tensorflowjs import quantization_util
+from tensorflowjs import quantization
 
-INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
+_INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
 
 
 def read_weights(weights_manifest, base_path, flatten=False):
@@ -117,12 +117,12 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
     out_group = []
 
     for weight in group['weights']:
-      quantization = weight.get('quantization', None)
+      quantization_info = weight.get('quantization', None)
       name = weight['name']
       dtype = np.dtype(
-          quantization['dtype'] if quantization else weight['dtype'])
+          quantization_info['dtype'] if quantization_info else weight['dtype'])
       shape = weight['shape']
-      if dtype not in INPUT_DTYPES:
+      if dtype not in _INPUT_DTYPES:
         raise NotImplementedError('Unsupported data type: %s' % dtype)
       unit_bytes = dtype.itemsize
 
@@ -133,9 +133,9 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
       value = np.frombuffer(
           data_buffer, dtype=dtype, count=weight_numel,
           offset=offset).reshape(shape)
-      if quantization:
-        value = quantization_util.dequantize_weights(
-            value, quantization['scale'], quantization['min'],
+      if quantization_info:
+        value = quantization.dequantize_weights(
+            value, quantization_info['scale'], quantization_info['min'],
             np.dtype(weight['dtype']))
       offset += weight_bytes
       out_group.append({'name': name, 'data': value})

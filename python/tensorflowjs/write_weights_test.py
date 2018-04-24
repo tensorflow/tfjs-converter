@@ -20,7 +20,7 @@ import unittest
 
 import numpy as np
 
-from tensorflowjs import quantization_util
+from tensorflowjs import quantization
 from tensorflowjs import write_weights
 
 TMP_DIR = '/tmp/write_weights_test/'
@@ -390,8 +390,8 @@ class TestWriteWeights(unittest.TestCase):
         os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
         'weights_manifest.json does not exist')
     q, s, m = zip(
-        quantization_util.quantize_weights(groups[0][0]['data'], np.uint8),
-        quantization_util.quantize_weights(groups[0][1]['data'], np.uint8))
+        quantization.quantize_weights(groups[0][0]['data'], np.uint8),
+        quantization.quantize_weights(groups[0][1]['data'], np.uint8))
     self.assertEqual(
         manifest,
         [{
