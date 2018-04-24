@@ -32,10 +32,11 @@ class TestQuantizationUtil(unittest.TestCase):
     de_q = quantization.dequantize_weights(q, s, m, data_dtype)
     np.testing.assert_allclose(de_q, d)
 
-    d_0 = np.zeros(1, data_dtype)
-    q_0 = (d_0 - m) / s
-    self.assertEqual(
-        quantization.dequantize_weights(q_0, s, m, data_dtype), d_0)
+    if range_min <= 0 <= range_max:
+      d_0 = np.zeros(1, data_dtype)
+      q_0 = np.round((d_0 - m) / s).astype(quantization_dtype)
+      self.assertEqual(
+          quantization.dequantize_weights(q_0, s, m, data_dtype), d_0)
 
   def testAllEqual(self):
     d = np.ones(5, dtype=np.float32)

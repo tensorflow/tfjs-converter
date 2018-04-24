@@ -111,7 +111,7 @@ def write_weights(
 
   for group_index, group in enumerate(weight_groups):
     if quantization_dtype:
-      group = _quantize_group(group, quantization_dtype)
+      group = [_quantize_entry(e, quantization_dtype) for e in group]
     group_bytes, total_bytes, _ = _stack_group_bytes(group)
 
     shard_filenames = _shard_group_bytes_to_disk(
@@ -133,8 +133,8 @@ def write_weights(
 
   return manifest_json
 
-def _quantize_group(group, quantization_dtype):
-  """Quantizes the weights in the group, returning a new group.
+def _quantize_entry(entry, quantization_dtype):
+  """Quantizes the weights in the entry, returning a new entry.
 
   The weights are quantized by linearly re-scaling the values between the
   minimum and maximum value, and representing them with the number of bits
@@ -144,13 +144,13 @@ def _quantize_group(group, quantization_dtype):
   values, the range is "nudged" in the same manner as in TF-Lite.
 
   Args:
-    group: A list of weight entries to quantize.
+    entry: A weight entries to quantize.
     quantization_dtype: An numpy dtype to quantize weights to. Only np.uint8 and
       np.uint16 are supported.
 
   Returns:
-    A new group with entries containing the quantized data and additional
-    quantization info, for example:
+    A new entry containing the quantized data and additional quantization info,
+    for example:
         original_entry = {
           'name': 'weight1',
           'data': np.array([0, -0.1, 1.2], 'float32')
@@ -162,17 +162,14 @@ def _quantize_group(group, quantization_dtype):
                            'original_dtype': 'float32'}
         }
   """
-  quantized_group = []
-  for entry in group:
-    data = entry['data']
-    quantized_data, scale, min_val = quantization.quantize_weights(
-        data, quantization_dtype)
-    quantized_entry = entry.copy()
-    quantized_entry['data'] = quantized_data
-    quantized_entry['quantization'] = {
-        'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
-    quantized_group.append(quantized_entry)
-  return quantized_group
+  data = entry['data']
+  quantized_data, scale, min_val = quantization.quantize_weights(
+      data, quantization_dtype)
+  quantized_entry = entry.copy()
+  quantized_entry['data'] = quantized_data
+  quantized_entry['quantization'] = {
+      'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
+  return quantized_entry
 
 def _stack_group_bytes(group):
   """Stacks the bytes for a weight group into a flat byte array.
