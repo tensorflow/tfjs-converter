@@ -23,8 +23,7 @@ import numpy as np
 from tensorflowjs import quantization_util
 
 FILENAME_CHARS = string.ascii_letters + string.digits + '_'
-# TODO(nsthorat): Support more than just float32 and int32 for weight dumping.
-DTYPE_BYTES = {'float32': 4, 'int32': 4, 'uint8': 2, 'uint16': 4}
+OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
 QUANTIZATION_DTYPES = [np.uint8, np.uint16]
 
 def write_weights(
@@ -294,7 +293,7 @@ def _assert_valid_weight_entry(entry):
   name = entry['name']
   data = entry['data']
 
-  if not data.dtype.name in DTYPE_BYTES:
+  if not data.dtype in OUTPUT_DTYPES:
     raise ValueError('Error dumping weight ' + name + ', dtype ' +
                      data.dtype.name + ' not supported.')
 

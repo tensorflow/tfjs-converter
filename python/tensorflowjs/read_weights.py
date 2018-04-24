@@ -24,7 +24,7 @@ import os
 import numpy as np
 from tensorflowjs import quantization_util
 
-DTYPE_BYTES = {'float32': 4, 'int32': 4, 'uint8': 2, 'uint16': 4}
+INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
 
 
 def read_weights(weights_manifest, base_path, flatten=False):
@@ -119,11 +119,12 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
     for weight in group['weights']:
       quantization = weight.get('quantization', None)
       name = weight['name']
-      dtype = quantization['dtype'] if quantization else weight['dtype']
+      dtype = np.dtype(
+          quantization['dtype'] if quantization else weight['dtype'])
       shape = weight['shape']
-      if dtype not in DTYPE_BYTES:
+      if dtype not in INPUT_DTYPES:
         raise NotImplementedError('Unsupported data type: %s' % dtype)
-      unit_bytes = DTYPE_BYTES[dtype]
+      unit_bytes = dtype.itemsize
 
       weight_numel = 1
       for dim in shape:

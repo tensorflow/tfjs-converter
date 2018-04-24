@@ -25,7 +25,7 @@ def quantize_weights(data, quantization_dtype):
   minimum and maximum value, and representing them with the number of bits
   provided by the `quantization_dtype`.
 
-  In order to guarantee that 0 is perfectly represented by one of the quanzitzed
+  In order to guarantee that 0 is perfectly represented by one of the quantized
   values, the range is "nudged" in the same manner as in TF-Lite.
 
   Weights can be de-quantized by multiplying by the returned `scale` and adding
@@ -68,39 +68,47 @@ def dequantize_weights(
   return np.round(quantized_data * scale + min_val).astype(original_dtype)
 
 def _get_quantization_range(min_val, max_val, quantization_dtype):
-  """Computes the quantization range to ensure that zero is represented.
+  """Computes quantization range to ensure that zero is represented if covered.
 
   Gymnastics with nudged zero point is to ensure that real zero maps to an
   integer, which is required for e.g. zero-padding in convolutional layers.
 
   Based on `NudgeQuantizationRange` in
-  tensorflow/contrib/lite/kernels/internal/quantization_util.h.
+  tensorflow/contrib/lite/kernels/internal/quantization_util.h, except we do not
+  nudge if 0 is not in the range.
 
   Args:
     min_val: The actual minimum value of the data.
-    max_val: Thea actual maximum value of the data.
+    max_val: The actual maximum value of the data.
     quantization_dtype: A numpy dtype to quantize weights to. Only np.uint8 and
       np.uint16 are supported.
 
   Returns:
-    scale: The linearly scaling constant used for quantization.
-    nudged_min: The adjusted minimum value to ensure zero is represented.
-    nudged_max: The adjusted maximum value to ensure zero is represented.
+    scale: The linear scaling constant used for quantization.
+    nudged_min: The adjusted minimum value to ensure zero is represented, if
+      covered.
+    nudged_max: The adjusted maximum value to ensure zero is represented, if
+      covered.
   """
   if quantization_dtype not in QUANTIZATION_DTYPES:
     raise ValueError('Invalid `quantization_dtype`: %r' % quantization_dtype)
 
   quant_max = np.iinfo(quantization_dtype).max
   scale = (max_val - min_val) / quant_max
-  quantized_zero_point = (0 - min_val) / scale
-  if quantized_zero_point < 0:
-    nudged_zero_point = 0.0
-  elif quantized_zero_point > quant_max:
-    nudged_zero_point = quant_max
-  else:
-    nudged_zero_point = np.round(quantized_zero_point)
 
-  # Solve `0 = (0 - nudged_zero_point) * scale + nudged_min`` for `nudged_min`.
-  nudged_min = -nudged_zero_point * scale
-  nudged_max = quant_max * scale + nudged_min
+  if min_val <= 0 <= max_val:
+    quantized_zero_point = (0 - min_val) / scale
+    if quantized_zero_point < 0:
+      nudged_zero_point = 0.0
+    elif quantized_zero_point > quant_max:
+      nudged_zero_point = quant_max
+    else:
+      nudged_zero_point = np.round(quantized_zero_point)
+
+    # Solve `0 = nudged_zero_point * scale + nudged_min` for `nudged_min`.
+    nudged_min = -nudged_zero_point * scale
+    nudged_max = quant_max * scale + nudged_min
+  else:
+    nudged_min, nudged_max = min_val, max_val
+
   return scale, nudged_min, nudged_max
