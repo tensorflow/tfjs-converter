@@ -98,12 +98,7 @@ def _get_quantization_range(min_val, max_val, quantization_dtype):
 
   if min_val <= 0 <= max_val:
     quantized_zero_point = (0 - min_val) / scale
-    if quantized_zero_point < 0:
-      nudged_zero_point = 0.0
-    elif quantized_zero_point > quant_max:
-      nudged_zero_point = quant_max
-    else:
-      nudged_zero_point = np.round(quantized_zero_point)
+    nudged_zero_point = np.round(quantized_zero_point)
 
     # Solve `0 = nudged_zero_point * scale + nudged_min` for `nudged_min`.
     nudged_min = -nudged_zero_point * scale
