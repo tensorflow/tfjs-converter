@@ -26,6 +26,7 @@ import * as control from './op_list/control.json';
 import * as convolution from './op_list/convolution.json';
 import * as creation from './op_list/creation.json';
 import * as graph from './op_list/graph.json';
+import * as image from './op_list/image.json';
 import * as logical from './op_list/logical.json';
 import * as matrices from './op_list/matrices.json';
 import * as normalization from './op_list/normalization.json';
@@ -51,8 +52,8 @@ export class OperationMapper {
       ...(arithmetic as {}) as OpMapper[], ...(basicMath as {}) as OpMapper[],
       ...(control as {}) as OpMapper[], ...(convolution as {}) as OpMapper[],
       ...(creation as {}) as OpMapper[], ...(logical as {}) as OpMapper[],
-      ...(graph as {}) as OpMapper[], ...(matrices as {}) as OpMapper[],
-      ...(normalization as {}) as OpMapper[],
+      ...(image as {}) as OpMapper[], ...(graph as {}) as OpMapper[],
+      ...(matrices as {}) as OpMapper[], ...(normalization as {}) as OpMapper[],
       ...(reduction as {}) as OpMapper[], ...(sliceJoin as {}) as OpMapper[],
       ...(transformation as {}) as OpMapper[]
     ];
@@ -129,26 +130,57 @@ export class OperationMapper {
             case 'string':
               value = this.getStringParam(
                   node.attr, param.tfParamName, param.defaultValue as string);
+
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getStringParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as string);
+              }
               break;
             case 'number':
               value = this.getNumberParam(
                   node.attr, param.tfParamName, param.defaultValue as number);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getNumberParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number);
+              }
               break;
             case 'number[]':
               value = this.getNumericArrayParam(
                   node.attr, param.tfParamName, param.defaultValue as number[]);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getNumericArrayParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number[]);
+              }
               break;
             case 'bool':
               value = this.getBoolParam(
                   node.attr, param.tfParamName, param.defaultValue as boolean);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getBoolParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as boolean);
+              }
               break;
             case 'shape':
               value = this.getTensorShapeParam(
                   node.attr, param.tfParamName, param.defaultValue as number[]);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getTensorShapeParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number[]);
+              }
               break;
             case 'dtype':
               value = this.getDtypeParam(
                   node.attr, param.tfParamName, param.defaultValue as DataType);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getDtypeParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as DataType);
+              }
               break;
             case 'tensor':
             case 'tensors':
@@ -223,7 +255,8 @@ export class OperationMapper {
       def: number[]): number[] {
     const param = attrs[name];
     if (param) {
-      return (param.list.f.length ? param.list.f : param.list.i) as number[];
+      return (param.list.f && param.list.f.length ? param.list.f :
+                                                    param.list.i) as number[];
     }
     return def;
   }
