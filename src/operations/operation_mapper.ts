@@ -133,7 +133,8 @@ export class OperationMapper {
 
               if (value === undefined && !!param.tfParamNameDeprecated) {
                 value = this.getStringParam(
-                    node.attr, param.tfParamName, param.defaultValue as string);
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as string);
               }
               break;
             case 'number':
