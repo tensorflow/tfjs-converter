@@ -113,8 +113,9 @@ def main():
       '--quantization_bytes',
       type=int,
       choices=quantization.QUANTIZATION_BYTES_TO_DTYPES.keys(),
-      help='How many bytes to optionally quantize/compress the weights to. The '
-      'default (unquantized) size is 4 bytes.')
+      help='How many bytes to optionally quantize/compress the weights to. 1- '
+      'and 2-byte quantizaton is supported. The default (unquantized) size is '
+      '4 bytes.')
 
   FLAGS = parser.parse_args()
 
