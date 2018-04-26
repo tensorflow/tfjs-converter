@@ -18,11 +18,7 @@ from __future__ import print_function
 
 import numpy as np
 
-<<<<<<< HEAD
 QUANTIZATION_BYTES_TO_DTYPES = {1: np.uint8, 2: np.uint16}
-=======
-_QUANTIZATION_DTYPES = [np.uint8, np.uint16]
->>>>>>> upstream/master
 
 
 def quantize_weights(data, quantization_dtype):
@@ -51,11 +47,7 @@ def quantize_weights(data, quantization_dtype):
   Raises:
     ValueError: if `quantization_dtype` is not a valid type.
   """
-<<<<<<< HEAD
   if quantization_dtype not in QUANTIZATION_BYTES_TO_DTYPES.values():
-=======
-  if quantization_dtype not in _QUANTIZATION_DTYPES:
->>>>>>> upstream/master
     raise ValueError('Invalid `quantization_dtype`: %r' % quantization_dtype)
 
   # Compute the min and max for the group.
@@ -105,11 +97,7 @@ def _get_quantization_range(min_val, max_val, quantization_dtype):
   Raises:
     ValueError: if `quantization_dtype` is not a valid type.
   """
-<<<<<<< HEAD
   if quantization_dtype not in QUANTIZATION_BYTES_TO_DTYPES.values():
-=======
-  if quantization_dtype not in _QUANTIZATION_DTYPES:
->>>>>>> upstream/master
     raise ValueError('Invalid `quantization_dtype`: %r' % quantization_dtype)
 
   quant_max = np.iinfo(quantization_dtype).max
