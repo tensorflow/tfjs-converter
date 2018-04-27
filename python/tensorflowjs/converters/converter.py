@@ -86,14 +86,16 @@ def main():
       '--input_format',
       type=str,
       required=True,
-      choices=set(['keras', 'tf_saved_model', 'tf_session_bundle', 'tf_frozen_model']),
+      choices=set(['keras', 'tf_saved_model', 'tf_session_bundle',
+                   'tf_frozen_model']),
       help='Input format. '
       'For "keras", the input path can be one of the two following formats:\n'
       '  - A topology+weights combined HDF5 (e.g., generated with'
       '    `keras.model.save_model()` method).\n'
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
-      'For "tensorflow", a SavedModel, frozen model (without quantization) or session bundle model is expected.')
+      'For "tensorflow", a SavedModel, frozen model (without quantization)'
+      ' or session bundle model is expected.')
   parser.add_argument(
       '--output_node_names',
       type=str,

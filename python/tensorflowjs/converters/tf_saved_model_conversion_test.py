@@ -110,18 +110,18 @@ class ConvertTest(unittest.TestCase):
 
     frozen_file = os.path.join(self._tmp_dir, FROZEN_MODEL_DIR, 'model.frozen')
     freeze_graph.freeze_graph(
-      '',
-      '',
-      True,
-      '',
-      "Softmax",
-      '',
-      '',
-      frozen_file,
-      True,
-      '',
-      saved_model_tags=tf.saved_model.tag_constants.SERVING,
-      input_saved_model_dir=saved_model_dir)
+        '',
+        '',
+        True,
+        '',
+        "Softmax",
+        '',
+        '',
+        frozen_file,
+        True,
+        '',
+        saved_model_tags=tf.saved_model.tag_constants.SERVING,
+        input_saved_model_dir=saved_model_dir)
 
   def test_convert_saved_model(self):
     self.create_saved_model()

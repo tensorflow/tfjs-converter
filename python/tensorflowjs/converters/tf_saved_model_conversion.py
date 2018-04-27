@@ -260,7 +260,7 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
 
 def convert_tf_frozen_model(frozen_model_path, output_node_names,
                             output_dir, quantization_dtype=None):
-  """Convert the frozen model and check the model compatibility with Tensorflow.js.
+  """Convert frozen model and check the model compatibility with Tensorflow.js.
 
   Optimize and convert the model to Tensorflow.js format, when the model passes
   the compatiblity check.
