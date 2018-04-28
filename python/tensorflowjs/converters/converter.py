@@ -94,7 +94,7 @@ def main():
       '    `keras.model.save_model()` method).\n'
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
-      'For "tensorflow", a SavedModel, frozen model (without quantization)'
+      'For "tensorflow", a SavedModel, frozen model '
       ' or session bundle model is expected.')
   parser.add_argument(
       '--output_node_names',
