@@ -81,7 +81,8 @@ def main():
       type=str,
       help='Path to the input file or directory. For input format "keras", '
       'an HDF5 (.h5) file is expected. For input format "tensorflow", '
-      'a SavedModel or session bundle directory is expected.')
+      'a SavedModel directory, session bundle directory '
+      'or frozen model file is expected.')
   parser.add_argument(
       '--input_format',
       type=str,
