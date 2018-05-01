@@ -78,7 +78,17 @@ def dispatch_pykeras_to_tensorflowjs_conversion(
 
 
 def dispatch_tensorflowjs_to_h5_conversion(config_json_path, h5_path):
-  """Converts a Keras Model from tensorflowjs format to H5."""
+  """Converts a Keras Model from tensorflowjs format to H5.
+
+  Args:
+    config_json_path: Path to the JSON file that includes the model's
+      topology and weights manifest, in tensorflowjs format.
+    h5_path: Path for the to-be-created Keras HDF5 model file.
+
+  Raises:
+    ValueError, if `config_json_path` is not a path to a valid JSON
+      file, or if h5_path points to an existing directory.
+  """
   if os.path.isdir(config_json_path):
     raise ValueError(
         'For input_type=tensorflowjs & output_format=keras, '
@@ -91,18 +101,17 @@ def dispatch_tensorflowjs_to_h5_conversion(config_json_path, h5_path):
         'but received an existing directory (%s).' % h5_path)
 
   # Verify that config_json_path points to a JSON file.
-  try:
-    with open(config_json_path, 'rt') as f:
+  with open(config_json_path, 'rt') as f:
+    try:
       json.load(f)
-  except (ValueError, IOError):
-    raise ValueError(
-        'For input_type=tensorflowjs & output_format=keras, '
-        'the input path is expected to contain valid JSON content, '
-        'but cannot read valid JSON content from %s.' % config_json_path)
+    except (ValueError, IOError):
+      raise ValueError(
+          'For input_type=tensorflowjs & output_format=keras, '
+          'the input path is expected to contain valid JSON content, '
+          'but cannot read valid JSON content from %s.' % config_json_path)
 
   with tf.Graph().as_default(), tf.Session():
     model = keras_tfjs_loader.load_keras_model(config_json_path)
-    print('model = %s' % model)  # DEBUG
     model.save(h5_path)
     print('Saved Keras model to HDF5 file: %s' % h5_path)
 
