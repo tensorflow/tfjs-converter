@@ -40,7 +40,7 @@
       {
         "tfInputIndex": 1,
         "dlParamName": "size",
-        "type": "number[]"
+        "type": "tensor"
       },
       {
         "tfParamName": "align_corners",
