@@ -139,7 +139,7 @@ const weightManifestUrl = "https://example.org/model/weights_manifest.json";
 
 const manifest = await fetch(weightManifestUrl);
 this.weightManifest = await manifest.json();
-const weightMap = await tf.loadWeights(
+const weightMap = await tf.io.loadWeights(
         this.weightManifest, "https://example.org/model");
 ```
 
@@ -204,4 +204,18 @@ To run the tests once and exit the karma process (helpful on Windows):
 
 ```bash
 $ yarn test --single-run
+```
+
+To generate the static js file for GraphDef proto, run following steps:
+
+1. Generate static js file with comment first, in order to generate typescript definition.
+```bash
+$ node_modules/protobufjs/bin/pbjs -t static-module -w commonjs -o src/data/compiled_api.js --no-create --no-encode --no-verify --no-convert --no-delimited --no-beautify src/data/api.proto
+
+$ node_modules/protobufjs/bin/pbts -o src/data/compiled_api.d.ts src/data/compiled_api.js
+```
+
+2. Replace the static js file with the version without comments.
+```bash
+$ node_modules/protobufjs/bin/pbjs -t static-module -w commonjs -o src/data/compiled_api.js --no-create --no-encode --no-verify --no-convert --no-delimited --no-beautify --no-comments src/data/api.proto
 ```
