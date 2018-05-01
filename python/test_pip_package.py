@@ -381,7 +381,7 @@ class APIAndShellTest(tf.test.TestCase):
       model_2 = tfjs.converters.load_keras_model(
           os.path.join(self._tmp_dir, 'model.json'))
       model_2_json = model_2.to_json()
-      self.assertEqual(model_2_json, model_json)
+      self.assertEqual(model_json, model_2_json)
 
 
 if __name__ == '__main__':
