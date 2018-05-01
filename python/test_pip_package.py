@@ -357,7 +357,7 @@ class APIAndShellTest(tf.test.TestCase):
       model_2 = keras.models.load_model(new_h5_path)
       model_2.summary()
       model_2_json = model_2.to_json()
-      self.assertEqual(model_2_json, model_json)
+      self.assertEqual(model_json, model_2_json)
 
   def testLoadTensorflowjsArtifactsAsKerasModel(self):
     # 1. Create a toy keras model and save it as an HDF5 file.
