@@ -3,7 +3,7 @@
 # Getting started
 
 **TensorFlow.js converter** is an open source library to load a pretrained
-TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models), [Frozen Model](https://www.tensorflow.org/extend/tool_developers/#freezing) or [Session Bundle](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md)
+TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models), [Frozen Model](https://www.tensorflow.org/mobile/prepare_models#how_do_you_get_a_model_you_can_use_on_mobile) or [Session Bundle](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/contrib/session_bundle/README.md)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
 (Note: TensorFlow has deprecated session bundle format, please switch to SavedModel.)
@@ -31,7 +31,7 @@ SavedModel example:
 $ tensorflowjs_converter \
     --input_format=tf_saved_model \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
-    --saved_model_tags=serve
+    --saved_model_tags=serve \
     /mobilenet/saved_model \
     /mobilenet/web_model
 ```
@@ -42,7 +42,7 @@ Frozen model example:
 $ tensorflowjs_converter \
     --input_format=tf_frozen_model \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
-    --saved_model_tags=serve
+    --saved_model_tags=serve \
     /mobilenet/frozen_model.pb \
     /mobilenet/web_model
 ```
