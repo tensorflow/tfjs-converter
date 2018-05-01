@@ -59,7 +59,7 @@ $ tensorflowjs_converter \
 
 |Positional Arguments | Description |
 |---|---|
-|`input_path`  | Full path of the saved model, frozen model or session bundle directory.|
+|`input_path`  | Full path of the saved model directory, session bundle directory or frozen model file.|
 |`output_dir`  | Path for all output artifacts.|
 
 
