@@ -22,15 +22,16 @@ import tempfile
 import unittest
 
 import tensorflow as tf
-import tensorflow_hub as hub
-
 from tensorflow.python.tools import freeze_graph
+
+import tensorflow_hub as hub
 from tensorflowjs.converters import tf_saved_model_conversion
 
 SAVED_MODEL_DIR = 'saved_model'
 SESSION_BUNDLE_MODEL_DIR = 'session_bundle'
 FROZEN_MODEL_DIR = 'frozen_model'
 HUB_MODULE_DIR = 'hub_module'
+
 
 class ConvertTest(unittest.TestCase):
   def setUp(self):

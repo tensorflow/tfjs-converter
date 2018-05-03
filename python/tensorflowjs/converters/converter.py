@@ -27,6 +27,7 @@ from tensorflowjs import quantization
 from tensorflowjs.converters import keras_h5_conversion
 from tensorflowjs.converters import tf_saved_model_conversion
 
+
 def dispatch_pykeras_conversion(
     h5_path, output_dir=None, quantization_dtype=None):
   """Converts a Keras HDF5 saved-model file to TensorFlow.js format.

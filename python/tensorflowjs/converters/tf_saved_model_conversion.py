@@ -23,7 +23,6 @@ import json
 import numpy as np
 
 import tensorflow as tf
-import tensorflow_hub as hub
 from tensorflow.core.protobuf import device_properties_pb2
 from tensorflow.core.protobuf import rewriter_config_pb2
 from tensorflow.python.framework import graph_util
@@ -31,6 +30,8 @@ from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
 from tensorflow.python.lib.io import file_io
 from tensorflow.python.tools import freeze_graph
+
+import tensorflow_hub as hub
 
 from tensorflowjs import write_weights
 
@@ -306,7 +307,7 @@ def load_and_initialize_hub_module(module_path):
   graph = tf.Graph()
   with graph.as_default():
     tf.logging.info('Importing %s', module_path)
-    module = hub.Module(module_path)
+    hub.Module(module_path)
 
     session = tf.Session(graph=graph)
     session.run(tf.global_variables_initializer())
