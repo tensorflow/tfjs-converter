@@ -343,9 +343,9 @@ def convert_tf_hub_module(module_path, output_dir):
   input_node_names = []
   output_node_names = []
   # Take all inputs and outputs of the default signature.
-  for input_node in meta_graph.signature_def['default'].inputs.itervalues():
+  for _, input_node in meta_graph.signature_def['default'].inputs.items():
     input_node_names.append('module/' + input_node.name.split(':')[0])
-  for output_node in meta_graph.signature_def['default'].outputs.itervalues():
+  for _, output_node in meta_graph.signature_def['default'].outputs.items():
     output_node_names.append('module/' + output_node.name.split(':')[0])
 
   frozen_graph_def = graph_util.convert_variables_to_constants(
