@@ -339,10 +339,13 @@ def convert_tf_hub_module(module_path, output_dir):
   ).get_module_path(module_path)
   meta_graph = hub.saved_model_lib.load(local_module_path).get_meta_graph_copy()
 
+  input_node_names = []
   output_node_names = []
-  # Take all outputs of the default signature.
-  for output in meta_graph.signature_def['default'].outputs.itervalues():
-    output_node_names.append('module/' + output.name.split(':')[0])
+  # Take all inputs and outputs of the default signature.
+  for input_node in meta_graph.signature_def['default'].inputs.itervalues():
+    input_node_names.append('module/' + input_node.name.split(':')[0])
+  for output_node in meta_graph.signature_def['default'].outputs.itervalues():
+    output_node_names.append('module/' + output_node.name.split(':')[0])
 
   frozen_graph_def = graph_util.convert_variables_to_constants(
       sess, graph.as_graph_def(), output_node_names)
@@ -359,6 +362,9 @@ def convert_tf_hub_module(module_path, output_dir):
 
     graph = load_graph(frozen_file, ','.join(output_node_names))
     optimize_graph(graph, output_graph)
+
+    print('Created a model with inputs %s and outputs %s.' %
+          (input_node_names, output_node_names))
 
   # Clean up the temp files.
   if os.path.exists(frozen_file):
