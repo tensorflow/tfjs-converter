@@ -57,8 +57,9 @@ class ConvertH5WeightsTest(unittest.TestCase):
       model.save_weights(h5_path)
 
     # Load the saved weights as a JSON string.
-    model_json, groups = converter.dispatch_pykeras_to_tensorflowjs_conversion(
-        h5_path, output_dir=self._tmp_dir)
+    model_json, groups = (
+        converter.dispatch_keras_h5_to_tensorflowjs_conversion(
+            h5_path, output_dir=self._tmp_dir))
     self.assertIsNone(model_json)
 
     # Check the loaded weights.
@@ -87,8 +88,9 @@ class ConvertH5WeightsTest(unittest.TestCase):
       model.save(h5_path)
 
     # Load the saved weights as a JSON string.
-    model_json, groups = converter.dispatch_pykeras_to_tensorflowjs_conversion(
-        h5_path, output_dir=self._tmp_dir)
+    model_json, groups = (
+        converter.dispatch_keras_h5_to_tensorflowjs_conversion(
+            h5_path, output_dir=self._tmp_dir))
     # check the model topology was stored
     self.assertIsInstance(model_json['model_config'], dict)
     self.assertIsInstance(model_json['model_config']['config'], dict)
@@ -120,8 +122,9 @@ class ConvertH5WeightsTest(unittest.TestCase):
       sequential_model.save_weights(h5_path)
 
     # Load the saved weights as a JSON string.
-    model_json, groups = converter.dispatch_pykeras_to_tensorflowjs_conversion(
-        h5_path, output_dir=self._tmp_dir)
+    model_json, groups = (
+        converter.dispatch_keras_h5_to_tensorflowjs_conversion(
+            h5_path, output_dir=self._tmp_dir))
     self.assertIsNone(model_json)
 
     # Check the loaded weights.
@@ -145,7 +148,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
               name='Dense1')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
       sequential_model.save_weights(h5_path)
-      converter.dispatch_pykeras_to_tensorflowjs_conversion(
+      converter.dispatch_keras_h5_to_tensorflowjs_conversion(
           h5_path, output_dir=output_dir)
 
     # Check the content of the output directory.
@@ -170,7 +173,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'already exists as a file'):
-      converter.dispatch_pykeras_to_tensorflowjs_conversion(
+      converter.dispatch_keras_h5_to_tensorflowjs_conversion(
           h5_path, output_dir=output_path)
 
   def testTensorflowjsToKerasConversionSucceeds(self):
@@ -183,13 +186,13 @@ class ConvertH5WeightsTest(unittest.TestCase):
               1, use_bias=False, kernel_initializer='ones', name='Dense2')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
       sequential_model.save(h5_path)
-      converter.dispatch_pykeras_to_tensorflowjs_conversion(
+      converter.dispatch_keras_h5_to_tensorflowjs_conversion(
           h5_path, output_dir=self._tmp_dir)
       old_model_json = sequential_model.to_json()
 
     # Convert the tensorflowjs artifacts to a new H5 file.
     new_h5_path = os.path.join(self._tmp_dir, 'new.h5')
-    converter.dispatch_tensorflowjs_to_h5_conversion(
+    converter.dispatch_tensorflowjs_to_keras_h5_conversion(
         os.path.join(self._tmp_dir, 'model.json'), new_h5_path)
 
     # Load the new H5 and compare the model JSONs.
@@ -200,7 +203,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
   def testTensorflowjsToKerasConversionFailsOnDirInputPath(self):
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'input path should be a model\.json file'):
-      converter.dispatch_tensorflowjs_to_h5_conversion(
+      converter.dispatch_tensorflowjs_to_keras_h5_conversion(
           self._tmp_dir, os.path.join(self._tmp_dir, 'new.h5'))
 
   def testTensorflowjsToKerasConversionFailsOnExistingDirOutputPath(self):
@@ -213,12 +216,12 @@ class ConvertH5WeightsTest(unittest.TestCase):
               1, use_bias=False, kernel_initializer='ones', name='Dense2')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
       sequential_model.save(h5_path)
-      converter.dispatch_pykeras_to_tensorflowjs_conversion(
+      converter.dispatch_keras_h5_to_tensorflowjs_conversion(
           h5_path, output_dir=self._tmp_dir)
 
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'but received an existing directory'):
-      converter.dispatch_tensorflowjs_to_h5_conversion(
+      converter.dispatch_tensorflowjs_to_keras_h5_conversion(
           os.path.join(self._tmp_dir, 'model.json'), self._tmp_dir)
 
   def testTensorflowjsToKerasConversionFailsOnInvalidJsonFile(self):
@@ -228,7 +231,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'cannot read valid JSON content from'):
-      converter.dispatch_tensorflowjs_to_h5_conversion(
+      converter.dispatch_tensorflowjs_to_keras_h5_conversion(
           fake_json_path, os.path.join(self._tmp_dir, 'model.h5'))
 
 

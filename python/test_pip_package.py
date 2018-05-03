@@ -331,7 +331,6 @@ class APIAndShellTest(tf.test.TestCase):
     h5_path = os.path.join(self._tmp_dir, 'keras_h5', 'model.h5')
     with tf.Graph().as_default(), tf.Session():
       model = _createKerasModel('MergedDenseForCLI', h5_path)
-      model.summary()
       model_json = model.to_json()
 
     # 2. Convert the HDF5 file to tensorflowjs format.
@@ -355,7 +354,6 @@ class APIAndShellTest(tf.test.TestCase):
     #    original model.
     with tf.Graph().as_default(), tf.Session():
       model_2 = keras.models.load_model(new_h5_path)
-      model_2.summary()
       model_2_json = model_2.to_json()
       self.assertEqual(model_json, model_2_json)
 
@@ -365,7 +363,6 @@ class APIAndShellTest(tf.test.TestCase):
     h5_path = os.path.join(self._tmp_dir, 'keras_h5', 'model.h5')
     with tf.Graph().as_default(), tf.Session():
       model = _createKerasModel('MergedDenseForCLI', h5_path)
-      model.summary()
       model_json = model.to_json()
 
     # 2. Convert the HDF5 file to tensorflowjs format.

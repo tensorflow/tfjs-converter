@@ -31,7 +31,7 @@ from tensorflowjs.converters import keras_tfjs_loader
 from tensorflowjs.converters import tf_saved_model_conversion
 
 
-def dispatch_pykeras_to_tensorflowjs_conversion(
+def dispatch_keras_h5_to_tensorflowjs_conversion(
     h5_path, output_dir=None, quantization_dtype=None):
   """Converts a Keras HDF5 saved-model file to TensorFlow.js format.
 
@@ -77,7 +77,7 @@ def dispatch_pykeras_to_tensorflowjs_conversion(
   return model_json, groups
 
 
-def dispatch_tensorflowjs_to_h5_conversion(config_json_path, h5_path):
+def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
   """Converts a Keras Model from tensorflowjs format to H5.
 
   Args:
@@ -186,7 +186,7 @@ def main():
   # TODO(cais, piyu): More conversion logics can be added as additional
   #   branches below.
   if FLAGS.input_format == 'keras' and FLAGS.output_format == 'tensorflowjs':
-    dispatch_pykeras_to_tensorflowjs_conversion(
+    dispatch_keras_h5_to_tensorflowjs_conversion(
         FLAGS.input_path, output_dir=FLAGS.output_path,
         quantization_dtype=quantization_dtype)
 
@@ -211,8 +211,8 @@ def main():
 
   elif (FLAGS.input_format == 'tensorflowjs' and
         FLAGS.output_format == 'keras'):
-    dispatch_tensorflowjs_to_h5_conversion(FLAGS.input_path,
-                                           FLAGS.output_path)
+    dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
+                                                 FLAGS.output_path)
 
   else:
     raise ValueError(
