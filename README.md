@@ -77,6 +77,7 @@ $ tensorflowjs_converter \
 |`--input_format`     | The format of input model, use tf_saved_model for SavedModel, tf_frozen_model for frozen model and tf_session_bundle for session bundle. |
 |`--output_node_names`| The names of the output nodes, separated by commas.|
 |`--saved_model_tags` | Only applicable to SavedModel conversion, Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
+|`--tf_hub_signature` | Only applicable to Tensorflow Hub module conversion, signature to load. Defaults to `default`. See https://www.tensorflow.org/hub/common_signatures/.|
 
 
 ### Web-friendly format
