@@ -201,7 +201,6 @@ def main():
         FLAGS.output_format == 'tensorflowjs'):
     tf_saved_model_conversion.convert_tf_session_bundle(
         FLAGS.input_path, FLAGS.output_node_names,
-<<<<<<< HEAD
         FLAGS.output_path, quantization_dtype=quantization_dtype)
 
   elif (FLAGS.input_format == 'tf_frozen_model' and
@@ -210,21 +209,16 @@ def main():
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_path, quantization_dtype=quantization_dtype)
 
+  elif (FLAGS.input_format == 'tf_hub' and
+        FLAGS.output_format == 'tensorflowjs'):
+    tf_saved_model_conversion.convert_tf_hub_module(FLAGS.input_path,
+                                                    FLAGS.output_dir)
+
   elif (FLAGS.input_format == 'tensorflowjs' and
         FLAGS.output_format == 'keras'):
     dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
                                                  FLAGS.output_path)
 
-=======
-        FLAGS.output_dir, quantization_dtype=quantization_dtype)
-  elif FLAGS.input_format == 'tf_frozen_model':
-    tf_saved_model_conversion.convert_tf_frozen_model(
-        FLAGS.input_path, FLAGS.output_node_names,
-        FLAGS.output_dir, quantization_dtype=quantization_dtype)
-  elif FLAGS.input_format == 'tf_hub':
-    tf_saved_model_conversion.convert_tf_hub_module(FLAGS.input_path,
-                                                    FLAGS.output_dir)
->>>>>>> 378af8ca57cff89f820d79c281fd3ce49beb30fc
   else:
     raise ValueError(
         'Unsupported input_format - output_format pair: %s - %s' %
