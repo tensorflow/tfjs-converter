@@ -123,22 +123,22 @@ def main():
       type=str,
       help='Path to the input file or directory. For input format "keras", '
       'an HDF5 (.h5) file is expected. For input format "tensorflow", '
-      'a SavedModel directory, session bundle directory '
-      'or frozen model file is expected.')
+      'a SavedModel directory, session bundle directory, frozen model file, '
+      'or TF-Hub module is expected.')
   parser.add_argument(
       '--input_format',
       type=str,
       required=True,
       choices=set(['keras', 'tf_saved_model', 'tf_session_bundle',
-                   'tf_frozen_model', 'tensorflowjs']),
+                   'tf_frozen_model', 'tf_hub', 'tensorflowjs']),
       help='Input format. '
       'For "keras", the input path can be one of the two following formats:\n'
       '  - A topology+weights combined HDF5 (e.g., generated with'
       '    `keras.model.save_model()` method).\n'
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
-      'For "tensorflow", a SavedModel, frozen model '
-      ' or session bundle model is expected.')
+      'For "tf" formats, a SavedModel, frozen model, session bundle model, '
+      ' or TF-Hub module is expected.')
   parser.add_argument(
       '--output_format',
       type=str,
@@ -201,6 +201,7 @@ def main():
         FLAGS.output_format == 'tensorflowjs'):
     tf_saved_model_conversion.convert_tf_session_bundle(
         FLAGS.input_path, FLAGS.output_node_names,
+<<<<<<< HEAD
         FLAGS.output_path, quantization_dtype=quantization_dtype)
 
   elif (FLAGS.input_format == 'tf_frozen_model' and
@@ -214,6 +215,16 @@ def main():
     dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
                                                  FLAGS.output_path)
 
+=======
+        FLAGS.output_dir, quantization_dtype=quantization_dtype)
+  elif FLAGS.input_format == 'tf_frozen_model':
+    tf_saved_model_conversion.convert_tf_frozen_model(
+        FLAGS.input_path, FLAGS.output_node_names,
+        FLAGS.output_dir, quantization_dtype=quantization_dtype)
+  elif FLAGS.input_format == 'tf_hub':
+    tf_saved_model_conversion.convert_tf_hub_module(FLAGS.input_path,
+                                                    FLAGS.output_dir)
+>>>>>>> 378af8ca57cff89f820d79c281fd3ce49beb30fc
   else:
     raise ValueError(
         'Unsupported input_format - output_format pair: %s - %s' %
