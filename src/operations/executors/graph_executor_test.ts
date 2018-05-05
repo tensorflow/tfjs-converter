@@ -16,12 +16,12 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {ExecutionContext} from '../../executor';
-import {Node} from '../index';
+import { ExecutionContext } from '../../executor';
+import { Node } from '../index';
 
-import {executeOp} from './graph_executor';
+import { executeOp } from './graph_executor';
 // tslint:disable-next-line:max-line-length
-import {createNumberAttr, createStrAttr, createTensorAttr, createTensorsAttr} from './test_helper';
+import { createNumberAttr, createStrAttr, createTensorAttr, createTensorsAttr } from './test_helper';
 
 describe('graph', () => {
   let node: Node;
@@ -45,19 +45,19 @@ describe('graph', () => {
     describe('const', () => {
       it('should return input', () => {
         node.op = 'const';
-        expect(executeOp(node, {input1}, context)).toEqual(input1);
+        expect(executeOp(node, { input1 }, context)).toEqual(input1);
       });
     });
     describe('placeholder', () => {
       it('should return input', () => {
         node.op = 'placeholder';
-        expect(executeOp(node, {input1}, context)).toEqual(input1);
+        expect(executeOp(node, { input1 }, context)).toEqual(input1);
       });
       it('should return default if input not set', () => {
         node.inputNames = ['input2'];
         node.op = 'placeholder';
         node.params.default = createTensorAttr(0);
-        expect(executeOp(node, {input2}, context)).toEqual(input2);
+        expect(executeOp(node, { input2 }, context)).toEqual(input2);
       });
     });
     describe('identity', () => {
@@ -65,7 +65,15 @@ describe('graph', () => {
         node.inputNames = ['input'];
         node.params.x = createTensorAttr(0);
         node.op = 'identity';
-        expect(executeOp(node, {input: input1}, context)).toEqual(input1);
+        expect(executeOp(node, { input: input1 }, context)).toEqual(input1);
+      });
+    });
+    describe('snapshot', () => {
+      it('should return input', () => {
+        node.inputNames = ['input'];
+        node.params.x = createTensorAttr(0);
+        node.op = 'snapshot';
+        expect(executeOp(node, { input: input1 }, context)).toEqual(input1);
       });
     });
     describe('shape', () => {
@@ -74,10 +82,10 @@ describe('graph', () => {
         node.params.x = createTensorAttr(0);
         node.op = 'shape';
         expect(
-            Array.prototype.slice.call(
-                (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0]
-                    .dataSync()))
-            .toEqual([1]);
+          Array.prototype.slice.call(
+            (executeOp(node, { input: input1 }, context) as tfc.Tensor[])[0]
+              .dataSync()))
+          .toEqual([1]);
       });
     });
     describe('noop', () => {
@@ -98,7 +106,7 @@ describe('graph', () => {
       spyOn(console, 'log');
       spyOn(console, 'warn');
 
-      expect(executeOp(node, {input1, input2}, context)).toEqual(input1);
+      expect(executeOp(node, { input1, input2 }, context)).toEqual(input1);
       expect(console.warn).toHaveBeenCalled();
       expect(console.log).toHaveBeenCalledWith('message');
       expect(console.log).toHaveBeenCalledWith([1]);
@@ -109,7 +117,7 @@ describe('graph', () => {
       node.inputNames = ['input'];
       node.params.x = createTensorAttr(0);
       node.op = 'stopGradient';
-      expect(executeOp(node, {input: input1}, context)).toEqual(input1);
+      expect(executeOp(node, { input: input1 }, context)).toEqual(input1);
     });
   });
 });
