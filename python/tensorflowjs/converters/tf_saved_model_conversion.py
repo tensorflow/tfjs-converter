@@ -294,7 +294,7 @@ def convert_tf_frozen_model(frozen_model_path, output_node_names,
     optimize_graph(graph, output_graph, quantization_dtype)
 
 
-def load_and_initialize_hub_module(module_path, signature):
+def load_and_initialize_hub_module(module_path, signature='default'):
   """Loads graph of a TF-Hub module and initializes it into a session.
 
   Args:
@@ -318,11 +318,12 @@ def load_and_initialize_hub_module(module_path, signature):
     signature_inputs = module.get_input_info_dict(signature)
     signature_outputs = module.get_output_info_dict(signature)
     # First check there are no SparseTensors in input or output.
-    for key, info in signature_inputs.items() + signature_outputs.items():
+    for key, info in list(signature_inputs.items()) + list(
+        signature_outputs.items()):
       if info.is_sparse:
         raise ValueError(
-            'Signature "%s" has a SparseTensor on input "%s". SparseTensors are'
-            ' not supported.' % (signature, key))
+            'Signature "%s" has a SparseTensor on input/output "%s".'
+            ' SparseTensors are not supported.' % (signature, key))
 
     # Create placeholders to represent the input of the provided signature.
     inputs = {}
@@ -339,7 +340,7 @@ def load_and_initialize_hub_module(module_path, signature):
   return graph, session, inputs, outputs
 
 
-def convert_tf_hub_module(module_path, output_dir, signature):
+def convert_tf_hub_module(module_path, output_dir, signature='default'):
   """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
 
   Optimize and convert the TF-Hub module to Tensorflow.js format, if it passes

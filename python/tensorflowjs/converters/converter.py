@@ -104,7 +104,7 @@ def main():
       '"logits,activations". Applicable only if input format is '
       '"tf_saved_model" or "tf_session_bundle".')
   parser.add_argument(
-      '--tf_hub_signature',
+      '--signature_name',
       type=str,
       default='default',
       help='Signature of the TF-Hub module to load. Defaults to "default". '
@@ -159,7 +159,7 @@ def main():
   elif FLAGS.input_format == 'tf_hub':
     tf_saved_model_conversion.convert_tf_hub_module(FLAGS.input_path,
                                                     FLAGS.output_dir,
-                                                    FLAGS.tf_hub_signature)
+                                                    FLAGS.signature_name)
   else:
     raise ValueError('Invalid input format: \'%s\'' % FLAGS.input_format)
 
