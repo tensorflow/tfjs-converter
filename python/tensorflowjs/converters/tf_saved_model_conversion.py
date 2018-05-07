@@ -366,7 +366,3 @@ def convert_tf_hub_module(module_path, output_dir):
 
     print('Created a model with inputs %s and outputs %s.' %
           (input_node_names, output_node_names))
-
-  # Clean up the temp files.
-  if os.path.exists(frozen_file):
-    os.remove(frozen_file)
