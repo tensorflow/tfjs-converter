@@ -69,7 +69,7 @@ $ tensorflowjs_converter \
 |Positional Arguments | Description |
 |---|---|
 |`input_path`  | Full path of the saved model directory, session bundle directory, frozen model file or TensorFlow Hub module handle or path.|
-|`output_dir`  | Path for all output artifacts.|
+|`output_path` | Path for all output artifacts.|
 
 
 | Options | Description
