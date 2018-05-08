@@ -214,15 +214,6 @@ class APIAndShellTest(tf.test.TestCase):
         glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
     self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
-  def testUsageWithoutInputFormatErrors(self):
-    process = subprocess.Popen(
-        ['tensorflowjs_converter', self._tmp_dir, self._tmp_dir],
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE)
-    _, stderr = process.communicate()
-    self.assertGreater(process.returncode, 0)
-    self.assertIn(b'--input_format', tf.compat.as_bytes(stderr))
-
   def testInvalidInputFormatRaisesError(self):
     process = subprocess.Popen(
         [
@@ -379,6 +370,12 @@ class APIAndShellTest(tf.test.TestCase):
           os.path.join(self._tmp_dir, 'model.json'))
       model_2_json = model_2.to_json()
       self.assertEqual(model_json, model_2_json)
+
+  def testVersion(self):
+    process = subprocess.Popen(['tensorflowjs_converter', '--version'])
+    stdout, _ = process.communicate()
+    self.assertEqual(0, process.returncode)
+    self.assertIn('tensorflowjs %s' % tfjs.__version__, stdout)
 
 
 if __name__ == '__main__':
