@@ -372,15 +372,25 @@ class APIAndShellTest(tf.test.TestCase):
       self.assertEqual(model_json, model_2_json)
 
   def testVersion(self):
-    process = subprocess.Popen(['tensorflowjs_converter', '--version'])
+    process = subprocess.Popen(
+        ['tensorflowjs_converter', '--version'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
     stdout, _ = process.communicate()
     self.assertEqual(0, process.returncode)
-    self.assertIn('tensorflowjs %s' % tfjs.__version__, stdout)
+    self.assertIn(
+        tf.compat.as_bytes('tensorflowjs %s' % tfjs.__version__),
+        tf.compat.as_bytes(stdout))
 
-    process = subprocess.Popen(['tensorflowjs_converter', '-v'])
+    process = subprocess.Popen(
+        ['tensorflowjs_converter', '-v'],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE)
     stdout, _ = process.communicate()
     self.assertEqual(0, process.returncode)
-    self.assertIn('tensorflowjs %s' % tfjs.__version__, stdout)
+    self.assertIn(
+        tf.compat.as_bytes('tensorflowjs %s' % tfjs.__version__),
+        tf.compat.as_bytes(stdout))
 
 
 if __name__ == '__main__':
