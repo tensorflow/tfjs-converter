@@ -377,6 +377,11 @@ class APIAndShellTest(tf.test.TestCase):
     self.assertEqual(0, process.returncode)
     self.assertIn('tensorflowjs %s' % tfjs.__version__, stdout)
 
+    process = subprocess.Popen(['tensorflowjs_converter', '-v'])
+    stdout, _ = process.communicate()
+    self.assertEqual(0, process.returncode)
+    self.assertIn('tensorflowjs %s' % tfjs.__version__, stdout)
+
 
 if __name__ == '__main__':
   unittest.main()
