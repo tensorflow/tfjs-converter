@@ -218,7 +218,7 @@ def main():
   elif (FLAGS.input_format == 'tf_hub' and
         FLAGS.output_format == 'tensorflowjs'):
     tf_saved_model_conversion.convert_tf_hub_module(FLAGS.input_path,
-                                                    FLAGS.output_dir,
+                                                    FLAGS.output_path,
                                                     FLAGS.signature_name)
 
   elif (FLAGS.input_format == 'tensorflowjs' and
