@@ -23,9 +23,11 @@ import json
 import os
 
 import h5py
+import keras
 import tensorflow as tf
 
 from tensorflowjs import quantization
+from tensorflowjs import version
 from tensorflowjs.converters import keras_h5_conversion
 from tensorflowjs.converters import keras_tfjs_loader
 from tensorflowjs.converters import tf_saved_model_conversion
@@ -120,15 +122,19 @@ def main():
   parser = argparse.ArgumentParser('TensorFlow.js model converters.')
   parser.add_argument(
       'input_path',
+      nargs='?',
       type=str,
       help='Path to the input file or directory. For input format "keras", '
       'an HDF5 (.h5) file is expected. For input format "tensorflow", '
       'a SavedModel directory, session bundle directory, frozen model file, '
       'or TF-Hub module is expected.')
   parser.add_argument(
+      'output_path', nargs='?', type=str, help='Path for all output artifacts.')
+  parser.add_argument(
       '--input_format',
       type=str,
-      required=True,
+      required=False,
+      default='tf_saved_model',
       choices=set(['keras', 'tf_saved_model', 'tf_session_bundle',
                    'tf_frozen_model', 'tf_hub', 'tensorflowjs']),
       help='Input format. '
@@ -166,16 +172,27 @@ def main():
       'format. Defaults to "serve". Applicable only if input format is '
       '"tf_saved_model".')
   parser.add_argument(
-      'output_path', type=str, help='Path for all output artifacts.')
-  parser.add_argument(
       '--quantization_bytes',
       type=int,
       choices=set(quantization.QUANTIZATION_BYTES_TO_DTYPES.keys()),
       help='How many bytes to optionally quantize/compress the weights to. 1- '
       'and 2-byte quantizaton is supported. The default (unquantized) size is '
       '4 bytes.')
+  parser.add_argument(
+      '--version',
+      '-v',
+      dest='show_version',
+      action='store_true',
+      help='Show versions of tensorflowjs and its dependencies')
 
   FLAGS = parser.parse_args()
+
+  if FLAGS.show_version:
+    print('\ntensorflowjs %s\n' % version.version)
+    print('Dependency versions:')
+    print('  keras %s' % keras.__version__)
+    print('  tensorflow %s' % tf.__version__)
+    return
 
   quantization_dtype = (
       quantization.QUANTIZATION_BYTES_TO_DTYPES[FLAGS.quantization_bytes]
