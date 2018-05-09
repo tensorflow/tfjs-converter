@@ -48,7 +48,7 @@ def _deserialize_keras_model(model_topology_json,
       model. This may facilitate loading of multiple Keras models in the
       same TensorFlow Graph or Session context. Default: `False`.
   """
-  if isinstance(model_topology_json, six.string_types):
+  if isinstance(model_topology_json, (six.string_types, bytes)):
     model_topology_json = json.loads(tf.compat.as_text(model_topology_json))
   elif not isinstance(model_topology_json, dict):
     model_topology_json = json.load(model_topology_json)
@@ -115,7 +115,7 @@ def deserialize_keras_model(config_json,
       model. This may facilitate loading of multiple Keras models in the
       same TensorFlow Graph or Session context. Default: `False`.
   """
-  if isinstance(config_json, six.string_types):
+  if isinstance(config_json, (six.string_types, bytes)):
     config_json = json.loads(tf.compat.as_text(config_json))
   elif not isinstance(config_json, dict):
     config_json = json.load(config_json)
