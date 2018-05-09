@@ -84,7 +84,7 @@ describe('Model', () => {
   describe('getPathPrefix', () => {
     it('should set pathPrefix', async () => {
       model = new FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
-      expect(model.pathPrefix).toEqual("http://example.org/");
+      expect(model.getPathPrefix()).toEqual("http://example.org/");
     });
   });
 
