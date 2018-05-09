@@ -47,7 +47,10 @@ export class FrozenModel {
 
   private getPathPrefix() {
     const isAbsolute = /^[a-z][a-z0-9+.-]*:/.test(this.weightManifestUrl);
-    if (isAbsolute) {
+    var isURLSupported = true;
+    try { new URL(this.weightManifestUrl); } catch(e) { isURLSupported = false; }
+
+    if (isAbsolute && isURLSupported) {
       const url = new URL(this.weightManifestUrl);
       const segments = url.pathname.split('/');
       segments.splice(-1);
