@@ -205,7 +205,7 @@ def main():
         '"tf_saved_model", "tf_session_bundle" and "tf_frozen_model", '
         'but the current input format is "%s".' % FLAGS.input_format)
 
-  if (FLAGS.signature_name and FLAGS.input_format != 'tf_hub'):
+  if FLAGS.signature_name and FLAGS.input_format != 'tf_hub':
     raise ValueError(
         'The --signature_name is applicable only to "tf_hub" input format, '
         'but the current input format is "%s".' % FLAGS.input_format)
