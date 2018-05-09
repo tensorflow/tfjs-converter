@@ -23,6 +23,7 @@ import os
 import uuid
 
 import keras
+import six
 import tensorflow as tf
 
 from tensorflowjs import read_weights
@@ -47,8 +48,8 @@ def _deserialize_keras_model(model_topology_json,
       model. This may facilitate loading of multiple Keras models in the
       same TensorFlow Graph or Session context. Default: `False`.
   """
-  if isinstance(model_topology_json, (str, buffer)):
-    model_topology_json = json.loads(model_topology_json)
+  if isinstance(model_topology_json, six.string_types):
+    model_topology_json = json.loads(tf.compat.as_text(model_topology_json))
   elif not isinstance(model_topology_json, dict):
     model_topology_json = json.load(model_topology_json)
 
@@ -95,7 +96,7 @@ def _get_weights_manifest_from_config_json(config_json):
 def deserialize_keras_model(config_json,
                             weight_data=None,
                             use_unique_name_scope=False):
-  """Deserialize a Keras Model from files or buffers.
+  """Deserialize a Keras Model from buffers or file-like objects.
 
   Args:
     config: content of the JSON containing model topology and weights manifest,
@@ -114,7 +115,7 @@ def deserialize_keras_model(config_json,
       model. This may facilitate loading of multiple Keras models in the
       same TensorFlow Graph or Session context. Default: `False`.
   """
-  if isinstance(config_json, (str, buffer)):
+  if isinstance(config_json, six.string_types):
     config_json = json.loads(tf.compat.as_text(config_json))
   elif not isinstance(config_json, dict):
     config_json = json.load(config_json)
