@@ -21,12 +21,13 @@ import {NamedTensorMap, NamedTensorsMap, tensorflow} from '../data/index';
 import {OperationMapper} from '../operations/index';
 
 import {GraphExecutor} from './graph_executor';
+import * as Url from 'url';
 
 export class FrozenModel {
   private executor: GraphExecutor;
   private version = 'n/a';
   private weightManifest: tfc.io.WeightsManifestConfig;
-  private pathPrefix: string;
+  public pathPrefix: string;
   // Returns the version information for the tensorflow model GraphDef.
   get modelVersion(): string {
     return this.version;
@@ -42,25 +43,18 @@ export class FrozenModel {
   constructor(
       private modelUrl: string, private weightManifestUrl: string,
       private requestOption?: RequestInit) {
-    this.getPathPrefix();
+    this.pathPrefix = this.getPathPrefix();
   }
 
-  private getPathPrefix() {
-    const isAbsolute = /^[a-z][a-z0-9+.-]*:/.test(this.weightManifestUrl);
-    let isURLSupported = true;
-    try { new URL(this.weightManifestUrl); } catch(e) { isURLSupported = false; }
-
-    if (isAbsolute && isURLSupported) {
-      const url = new URL(this.weightManifestUrl);
-      const segments = url.pathname.split('/');
-      segments.splice(-1);
-      url.pathname = segments.join('/');
-      this.pathPrefix = url.toString();
-    } else {
-      const segments = this.weightManifestUrl.split('/');
-      segments.splice(-1);
-      this.pathPrefix = segments.join('/');
-    }
+  /**
+   * Returns the path prefix for this.weightManifestUrl.
+   */
+  getPathPrefix() {
+    const url = Url.parse(this.weightManifestUrl);
+    const segments = url.pathname.split('/');
+    segments.splice(-1);
+    url.pathname = segments.join('/');
+    return Url.format(url) + '/';
   }
 
   /**

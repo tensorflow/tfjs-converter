@@ -81,6 +81,13 @@ describe('Model', () => {
     expect(loaded).toBe(true);
   });
 
+  describe('getPathPrefix', () => {
+    it('should set pathPrefix', async () => {
+      model = new FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+      expect(model.pathPrefix).toEqual("http://example.org/");
+    });
+  });
+
   describe('eval', () => {
     it('should generate the output', async () => {
       await model.load();
