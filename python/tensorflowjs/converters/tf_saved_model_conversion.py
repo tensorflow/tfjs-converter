@@ -356,9 +356,6 @@ def convert_tf_hub_module(module_path, output_dir, signature='default'):
     signature: string Signature to load.
   """
 
-  if signature is None:
-    signature = 'default'
-
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
 

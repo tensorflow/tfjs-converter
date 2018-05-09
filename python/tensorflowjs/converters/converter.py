@@ -238,8 +238,12 @@ def main():
 
   elif (FLAGS.input_format == 'tf_hub' and
         FLAGS.output_format == 'tensorflowjs'):
-    tf_saved_model_conversion.convert_tf_hub_module(
-        FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name)
+    if FLAGS.signature_name:
+      tf_saved_model_conversion.convert_tf_hub_module(
+          FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name)
+    else:
+      tf_saved_model_conversion.convert_tf_hub_module(FLAGS.input_path,
+                                                      FLAGS.output_path)
 
   elif (FLAGS.input_format == 'tensorflowjs' and
         FLAGS.output_format == 'keras'):
