@@ -47,7 +47,7 @@ export class FrozenModel {
 
   private getPathPrefix() {
     const isAbsolute = /^[a-z][a-z0-9+.-]*:/.test(this.weightManifestUrl);
-    var isURLSupported = true;
+    let isURLSupported = true;
     try { new URL(this.weightManifestUrl); } catch(e) { isURLSupported = false; }
 
     if (isAbsolute && isURLSupported) {
