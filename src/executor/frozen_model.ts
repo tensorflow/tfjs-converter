@@ -27,7 +27,7 @@ export class FrozenModel {
   private executor: GraphExecutor;
   private version = 'n/a';
   private weightManifest: tfc.io.WeightsManifestConfig;
-  public pathPrefix: string;
+  private pathPrefix: string;
   // Returns the version information for the tensorflow model GraphDef.
   get modelVersion(): string {
     return this.version;
