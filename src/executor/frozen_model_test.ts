@@ -82,9 +82,14 @@ describe('Model', () => {
   });
 
   describe('getPathPrefix', () => {
-    it('should set pathPrefix', async () => {
+    it('should set pathPrefix (absolute path)', async () => {
       model = new FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
       expect(model.getPathPrefix()).toEqual("http://example.org/");
+    });
+
+    it('should set pathPrefix (relative path)', async () => {
+      model = new FrozenModel(RELATIVE_MODEL_URL, RELATIVE_WEIGHT_MANIFEST_URL);
+      expect(model.getPathPrefix()).toEqual("/path/");
     });
   });
 
