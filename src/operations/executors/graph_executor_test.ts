@@ -15,6 +15,7 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
+import {test_util} from '@tensorflow/tfjs-core';
 
 import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
@@ -76,7 +77,7 @@ describe('graph', () => {
         const result =
             (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0];
         expect(result.rank).toEqual(input1[0].rank);
-        expect(result).toEqual(input1[0]);
+        test_util.expectArraysClose(result, [1]);
       });
     });
     describe('shape', () => {
