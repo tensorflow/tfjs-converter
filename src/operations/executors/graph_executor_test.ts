@@ -15,6 +15,7 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
+import {exp} from '@tensorflow/tfjs-core';
 
 import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
@@ -73,7 +74,10 @@ describe('graph', () => {
         node.inputNames = ['input'];
         node.params.x = createTensorAttr(0);
         node.op = 'snapshot';
-        expect(executeOp(node, {input: input1}, context)).toEqual(input1);
+        const result =
+            (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0];
+        expect(result.rank).toEqual(input1[0].rank);
+        expect(result).toEqual(input1[0]);
       });
     });
     describe('shape', () => {
