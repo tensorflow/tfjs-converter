@@ -65,7 +65,7 @@ async function genDoc() {
       'Operations', 'Arithmetic', (arithmetic as {}) as OpMapper[], output,
       coreApis);
   generateTable(
-      'Operations', 'Basic Math', (basicMath as {}) as OpMapper[], output,
+      'Operations', 'Basic math', (basicMath as {}) as OpMapper[], output,
       coreApis);
   generateTable(
       'Operations', 'Control Flow', (control as {}) as OpMapper[], output,

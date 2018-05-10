@@ -17,7 +17,7 @@
 |Not mapped|mod|
 
 
-## Operations - Basic Math
+## Operations - Basic math
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -45,6 +45,20 @@
 |Square|square|
 |Tan|tan|
 |Tanh|tanh|
+|Not mapped|sign|
+|Not mapped|round|
+|Not mapped|expm1|
+|Not mapped|log1p|
+|Not mapped|reciprocal|
+|Not mapped|leakyRelu|
+|Not mapped|prelu|
+|Not mapped|logSigmoid|
+|Not mapped|softplus|
+|Not mapped|asinh|
+|Not mapped|acosh|
+|Not mapped|atanh|
+|Not mapped|erf|
+|Not mapped|step|
 
 
 ## Operations - Control Flow
