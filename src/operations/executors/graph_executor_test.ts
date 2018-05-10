@@ -15,7 +15,6 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-import {exp} from '@tensorflow/tfjs-core';
 
 import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
