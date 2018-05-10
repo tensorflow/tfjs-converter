@@ -115,7 +115,7 @@ function generateTable(
     heading: string, subHeading: string, ops: OpMapper[], output: string[],
     coreApis: {}) {
   const coreOps = findCoreOps(heading, subHeading, coreApis);
-  output.push(`## ${heading} - ${subHeading} Ops\n\n`);
+  output.push(`## ${heading} - ${subHeading}\n\n`);
   output.push('|Tensorflow Op Name|Tensorflow.js Op Name|\n');
   output.push('|---|---|\n');
   ops.forEach(element => {

@@ -1,6 +1,6 @@
 # Supported Tensorflow Ops
 
-## Operations - Arithmetic Ops
+## Operations - Arithmetic
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -17,7 +17,7 @@
 |Not mapped|mod|
 
 
-## Operations - Basic Math Ops
+## Operations - Basic Math
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -47,7 +47,7 @@
 |Tanh|tanh|
 
 
-## Operations - Control Flow Ops
+## Operations - Control Flow
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -59,7 +59,7 @@
 |NextIteration|nextIteration|
 
 
-## Operations - Convolution Ops
+## Operations - Convolution
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -73,7 +73,7 @@
 |Not mapped|separableConv2d|
 
 
-## Tensors - Creation Ops
+## Tensors - Creation
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -101,7 +101,7 @@
 |Not mapped|variable|
 
 
-## Tensorflow - Graph Ops
+## Tensorflow - Graph
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -115,7 +115,7 @@
 |StopGradient|stopGradient|
 
 
-## Operations - Logical Ops
+## Operations - Logical
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -132,7 +132,7 @@
 |Not mapped|logicalXor|
 
 
-## Operations - Matrices Ops
+## Operations - Matrices
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -142,7 +142,7 @@
 |Not mapped|norm|
 
 
-## Operations - Normalization Ops
+## Operations - Normalization
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -153,7 +153,7 @@
 |Not mapped|moments|
 
 
-## Operations - Images Ops
+## Operations - Images
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -161,7 +161,7 @@
 |Not mapped|resizeNearestNeighbor|
 
 
-## Operations - Reduction Ops
+## Operations - Reduction
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -174,7 +174,7 @@
 |Not mapped|logSumExp|
 
 
-## Tensors - Slicing and Joining Ops
+## Tensors - Slicing and Joining
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
@@ -190,7 +190,7 @@
 |Not mapped|split|
 
 
-## Tensors - Transformations Ops
+## Tensors - Transformations
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
