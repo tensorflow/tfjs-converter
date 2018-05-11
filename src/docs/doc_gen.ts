@@ -16,7 +16,7 @@
  */
 import * as tfc from '@tensorflow/tfjs-core';
 import * as fs from 'fs';
-import * as fetch from 'node-fetch';
+import fetch from 'node-fetch';
 
 import * as arithmetic from '../operations/op_list/arithmetic.json';
 import * as basicMath from '../operations/op_list/basic_math.json';
@@ -52,10 +52,15 @@ const CORE_API_PREFIX =
 async function genDoc() {
   const response = await fetch(GITHUB_URL_PREFIX + CORE_API_PREFIX);
   const json = await response.json();
-  const coreApis = json.docs.headings.reduce((list, h) => {
-    return h.subheadings ? list.concat(h.subheadings.reduce((sublist, sub) => {
-      return sublist.concat(sub.symbols);
-    }, [])) : list;
+  // tslint:disable-next-line:no-any
+  const coreApis = json.docs.headings.reduce((list: Array<{}>, h: any) => {
+    return h.subheadings ? list.concat(h.subheadings.reduce(
+                               // tslint:disable-next-line:no-any
+                               (sublist: Array<{}>, sub: any) => {
+                                 return sublist.concat(sub.symbols);
+                               },
+                               [])) :
+                           list;
   }, []);
   const output: string[] = [];
 
@@ -105,15 +110,16 @@ async function genDoc() {
       `Found ${opMappers.length} ops\n`);
 }
 
-function findCoreOps(heading: string, subHeading: string, coreApis: {}) {
+function findCoreOps(heading: string, subHeading: string, coreApis: Array<{}>) {
   return coreApis.filter(
-      op => op.docInfo.heading === heading &&
+      // tslint:disable-next-line:no-any
+      (op: any) => op.docInfo.heading === heading &&
           op.docInfo.subheading === subHeading);
 }
 
 function generateTable(
     heading: string, subHeading: string, ops: OpMapper[], output: string[],
-    coreApis: {}) {
+    coreApis: Array<{}>) {
   const coreOps = findCoreOps(heading, subHeading, coreApis);
   output.push(`## ${heading} - ${subHeading}\n\n`);
   output.push('|Tensorflow Op Name|Tensorflow.js Op Name|\n');
@@ -122,7 +128,8 @@ function generateTable(
     output.push(`|${element.tfOpName}|${element.dlOpName}|\n`);
   });
 
-  coreOps.forEach(element => {
+  // tslint:disable-next-line:no-any
+  coreOps.forEach((element: any) => {
     if (!ops.find(op => op.dlOpName === element.symbolName)) {
       output.push(`|Not mapped|${element.symbolName}|\n`);
     }
