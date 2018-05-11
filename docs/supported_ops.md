@@ -14,7 +14,7 @@
 |Minimum|minimum|
 |Pow|pow|
 |SquaredDifference|squaredDifference|
-|Not mapped|mod|
+|Mod|mod|
 
 
 ## Operations - Basic math
@@ -45,19 +45,20 @@
 |Square|square|
 |Tan|tan|
 |Tanh|tanh|
-|Not mapped|sign|
-|Not mapped|round|
-|Not mapped|expm1|
-|Not mapped|log1p|
-|Not mapped|reciprocal|
+|Sign|sign|
+|Round|round|
+|Expm1|expm1|
+|Log1p|log1p|
+|Reciprocal|reciprocal|
+|Reciprocal|reciprocal|
+|Softplus|softplus|
+|Asinh|asinh|
+|Acosh|acosh|
+|Atanh|atanh|
+|Erf|erf|
 |Not mapped|leakyRelu|
 |Not mapped|prelu|
 |Not mapped|logSigmoid|
-|Not mapped|softplus|
-|Not mapped|asinh|
-|Not mapped|acosh|
-|Not mapped|atanh|
-|Not mapped|erf|
 |Not mapped|step|
 
 
@@ -135,6 +136,7 @@
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
 |Equal|equal|
+|NotEqual|notEqual|
 |Greater|greater|
 |GreaterEqual|greaterEqual|
 |Less|less|
@@ -143,7 +145,6 @@
 |LogicalNot|logicalNot|
 |LogicalOr|logicalOr|
 |Select|where|
-|Not mapped|notEqual|
 |Not mapped|logicalXor|
 
 
@@ -202,7 +203,7 @@
 |Slice|slice|
 |Pack|stack|
 |Tile|tile|
-|Not mapped|split|
+|Split|split|
 
 
 ## Tensors - Transformations
