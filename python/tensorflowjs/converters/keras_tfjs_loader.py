@@ -174,6 +174,11 @@ def load_keras_model(config_json_path,
     ValueError, if both `weights_data_buffers` and `weights_path_prefix` are
       provided.
   """
+  if weights_data_buffers and weights_path_prefix:
+    raise ValueError(
+        'The arguments weights_data_buffers and weights_path_prefix are '
+        'mutually exclusive and should not be both specified.')
+
   with open(config_json_path, 'rt') as f:
     config_json = json.load(f)
     _check_config_json(config_json)
@@ -182,10 +187,6 @@ def load_keras_model(config_json_path,
   if load_weights:
     weights_manifest = _get_weights_manifest_from_config_json(config_json)
 
-    if weights_data_buffers and weights_path_prefix:
-      raise ValueError(
-          'The arguments weights_data_buffers and weights_path_prefix are '
-          'mutually exclusive and should not be both specified.')
     if not weights_data_buffers and not weights_path_prefix:
       weights_path_prefix = os.path.dirname(
           os.path.realpath(config_json_path))

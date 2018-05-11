@@ -156,7 +156,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model1 = self._saveKerasModelForTest(tfjs_path)
       model1_weight_values = model1.get_weights()
 
-    # Read the content of model.json into a BytesIO object.
+    # Read the content of model.json into a file object.
     json_file = open(os.path.join(tfjs_path, 'model.json'), 'rb')
 
     weight_paths = sorted(glob.glob(os.path.join(tfjs_path, 'group*')))
@@ -335,7 +335,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       with open(model_json_path, 'wt') as f:
         f.write('[' + model_json_content + ']')
 
-      with self.assertRaises(TypeError):
+      with self.assertRaises(ValueError):
         keras_tfjs_loader.load_keras_model(
             model_json_path,
             weights_data_buffers=[b'foo'], weights_path_prefix='bar')
