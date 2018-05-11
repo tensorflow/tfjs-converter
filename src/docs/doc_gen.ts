@@ -124,16 +124,19 @@ function generateTable(
   output.push(`## ${heading} - ${subHeading}\n\n`);
   output.push('|Tensorflow Op Name|Tensorflow.js Op Name|\n');
   output.push('|---|---|\n');
-  ops.forEach(element => {
+  ops.sort((a, b) => a.tfOpName.localeCompare(b.tfOpName)).forEach(element => {
     output.push(`|${element.tfOpName}|${element.dlOpName}|\n`);
   });
 
-  // tslint:disable-next-line:no-any
-  coreOps.forEach((element: any) => {
-    if (!ops.find(op => op.dlOpName === element.symbolName)) {
-      output.push(`|Not mapped|${element.symbolName}|\n`);
-    }
-  });
+  coreOps
+      // tslint:disable-next-line:no-any
+      .sort((a: any, b: any) => a.symbolName.localeCompare(b.symbolName))
+      // tslint:disable-next-line:no-any
+      .forEach((element: any) => {
+        if (!ops.find(op => op.dlOpName === element.symbolName)) {
+          output.push(`|Not mapped|${element.symbolName}|\n`);
+        }
+      });
   output.push('\n\n');
 }
 

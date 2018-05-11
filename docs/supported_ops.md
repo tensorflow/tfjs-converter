@@ -6,15 +6,15 @@
 |---|---|
 |Add|add|
 |BiasAdd|add|
-|Sub|sub|
-|RealDiv|div|
 |Div|div|
-|Mul|mul|
 |Maximum|maximum|
 |Minimum|minimum|
-|Pow|pow|
-|SquaredDifference|squaredDifference|
 |Mod|mod|
+|Mul|mul|
+|Pow|pow|
+|RealDiv|div|
+|SquaredDifference|squaredDifference|
+|Sub|sub|
 
 
 ## Operations - Basic math
@@ -23,42 +23,42 @@
 |---|---|
 |Abs|abs|
 |Acos|acos|
+|Acosh|acosh|
 |Asin|asin|
+|Asinh|asinh|
 |atan|atan|
+|Atanh|atanh|
 |Ceil|ceil|
 |ClipByValue|clipByValue|
 |Cos|cos|
 |Cosh|cosh|
 |Elu|elu|
+|Erf|erf|
 |Exp|exp|
+|Expm1|expm1|
 |Floor|floor|
 |Log|log|
+|Log1p|log1p|
 |Neg|neg|
+|Reciprocal|reciprocal|
+|Reciprocal|reciprocal|
 |Relu|relu|
 |Relu6|clipByValue|
+|Round|round|
+|Rsqrt|rsqrt|
 |Selu|selu|
 |Sigmoid|sigmoid|
+|Sign|sign|
 |Sin|sin|
 |Sinh|sinh|
+|Softplus|softplus|
 |Sqrt|sqrt|
-|Rsqrt|rsqrt|
 |Square|square|
 |Tan|tan|
 |Tanh|tanh|
-|Sign|sign|
-|Round|round|
-|Expm1|expm1|
-|Log1p|log1p|
-|Reciprocal|reciprocal|
-|Reciprocal|reciprocal|
-|Softplus|softplus|
-|Asinh|asinh|
-|Acosh|acosh|
-|Atanh|atanh|
-|Erf|erf|
 |Not mapped|leakyRelu|
-|Not mapped|prelu|
 |Not mapped|logSigmoid|
+|Not mapped|prelu|
 |Not mapped|step|
 
 
@@ -66,12 +66,12 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
-|LoopCond|loopCond|
-|Switch|switch|
-|Merge|merge|
 |Enter|enter|
 |Exit|exit|
+|LoopCond|loopCond|
+|Merge|merge|
 |NextIteration|nextIteration|
+|Switch|switch|
 
 
 ## Operations - Convolution
@@ -79,12 +79,12 @@
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
 |AvgPool|avgPool|
-|MaxPool|maxPool|
 |Conv1D|conv1d|
 |Conv2D|conv2d|
 |Conv2DBackpropInput|conv2dTranspose|
 |DepthwiseConv2d|depthwiseConv2d|
 |DepthwiseConv2dNative|depthwiseConv2d|
+|MaxPool|maxPool|
 |Not mapped|separableConv2d|
 
 
@@ -102,17 +102,17 @@
 |truncatedNormal|truncatedNormal|
 |Zeros|zeros|
 |ZerosLike|zerosLike|
-|Not mapped|tensor|
+|Not mapped|buffer|
+|Not mapped|clone|
+|Not mapped|fromPixels|
+|Not mapped|print|
+|Not mapped|randomNormal|
 |Not mapped|scalar|
+|Not mapped|tensor|
 |Not mapped|tensor1d|
 |Not mapped|tensor2d|
 |Not mapped|tensor3d|
 |Not mapped|tensor4d|
-|Not mapped|clone|
-|Not mapped|randomNormal|
-|Not mapped|fromPixels|
-|Not mapped|buffer|
-|Not mapped|print|
 |Not mapped|variable|
 
 
@@ -120,14 +120,14 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
-|PlaceholderWithDefault|placeholder|
-|Placeholder|placeholder|
 |Const|const|
 |Identity|identity|
-|Snapshot|snapshot|
-|Shape|shape|
-|Print|print|
 |NoOp|noop|
+|Placeholder|placeholder|
+|PlaceholderWithDefault|placeholder|
+|Print|print|
+|Shape|shape|
+|Snapshot|snapshot|
 |StopGradient|stopGradient|
 
 
@@ -136,7 +136,6 @@
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
 |Equal|equal|
-|NotEqual|notEqual|
 |Greater|greater|
 |GreaterEqual|greaterEqual|
 |Less|less|
@@ -144,6 +143,7 @@
 |LogicalAnd|logicalAnd|
 |LogicalNot|logicalNot|
 |LogicalOr|logicalOr|
+|NotEqual|notEqual|
 |Select|where|
 |Not mapped|logicalXor|
 
@@ -154,8 +154,8 @@
 |---|---|
 |MatMul|matMul|
 |Transpose|transpose|
-|Not mapped|outerProduct|
 |Not mapped|norm|
+|Not mapped|outerProduct|
 
 
 ## Operations - Normalization
@@ -181,12 +181,12 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
+|ArgMax|argMax|
+|ArgMin|argMin|
 |Max|max|
 |Mean|mean|
 |Min|min|
 |Sum|sum|
-|ArgMax|argMax|
-|ArgMin|argMin|
 |Not mapped|logSumExp|
 
 
@@ -194,16 +194,16 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
-|ConcatV2|concat|
 |Concat|concat|
-|GatherV2|gather|
+|ConcatV2|concat|
 |Gather|gather|
+|GatherV2|gather|
+|Pack|stack|
 |Reverse|reverse|
 |ReverseV2|reverse|
 |Slice|slice|
-|Pack|stack|
-|Tile|tile|
 |Split|split|
+|Tile|tile|
 
 
 ## Tensors - Transformations
