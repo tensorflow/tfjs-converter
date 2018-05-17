@@ -34,6 +34,18 @@
     ]
   },
   {
+    "tfOpName": "Snapshot",
+    "dlOpName": "snapshot",
+    "category": "graph",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "x",
+        "type": "tensor"
+      }
+    ]
+  },
+  {
     "tfOpName": "Shape",
     "dlOpName": "shape",
     "category": "graph",
@@ -95,6 +107,28 @@
         "tfInputIndex": 0,
         "dlParamName": "x",
         "type": "tensor"
+      }
+    ]
+  },
+  {
+    "tfOpName": "FakeQuantWithMinMaxVars",
+    "dlOpName": "fakeQuantWithMinMaxVars",
+    "category": "graph",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "x",
+        "type": "tensor"
+      },
+      {
+        "tfParamName": "min",
+        "dlParamName": "min",
+        "type": "number"
+      },
+      {
+        "tfParamName": "max",
+        "dlParamName": "max",
+        "type": "number"
       }
     ]
   }

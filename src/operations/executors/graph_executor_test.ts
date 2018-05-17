@@ -15,6 +15,7 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
+import {test_util} from '@tensorflow/tfjs-core';
 
 import {ExecutionContext} from '../../executor';
 import {Node} from '../index';
@@ -68,6 +69,17 @@ describe('graph', () => {
         expect(executeOp(node, {input: input1}, context)).toEqual(input1);
       });
     });
+    describe('snapshot', () => {
+      it('should return input', () => {
+        node.inputNames = ['input'];
+        node.params.x = createTensorAttr(0);
+        node.op = 'snapshot';
+        const result =
+            (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0];
+        expect(result.rank).toEqual(input1[0].rank);
+        test_util.expectArraysClose(result, [1]);
+      });
+    });
     describe('shape', () => {
       it('should return shape', () => {
         node.inputNames = ['input'];
@@ -109,6 +121,14 @@ describe('graph', () => {
       node.inputNames = ['input'];
       node.params.x = createTensorAttr(0);
       node.op = 'stopGradient';
+      expect(executeOp(node, {input: input1}, context)).toEqual(input1);
+    });
+  });
+  describe('fakeQuantWithMinMaxVars', () => {
+    it('should return input', () => {
+      node.inputNames = ['input'];
+      node.params.x = createTensorAttr(0);
+      node.op = 'fakeQuantWithMinMaxVars';
       expect(executeOp(node, {input: input1}, context)).toEqual(input1);
     });
   });

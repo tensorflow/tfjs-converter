@@ -1,7 +1,12 @@
+git:
+  depth: 5
+cache: yarn
 matrix:
   include:
     - language: node_js
-      node_js: "8"
+      node_js:
+        - "8"
+        - "10"
       script:
         - yarn build
         - yarn lint
@@ -15,6 +20,13 @@ matrix:
       script:
         - pylint --rcfile=.pylintrc tensorflowjs
         - ./run-python-tests.sh
+
+    - language: python
+      python: 2.7
+      before_script:
+        - cd python
+        - pip install -r requirements-dev.txt
+      script:
         - deactivate && ./build-pip-package.sh --test /tmp/tfjs-pips
 
     - language: python
