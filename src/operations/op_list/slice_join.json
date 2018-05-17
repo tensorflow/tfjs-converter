@@ -165,14 +165,12 @@
         "type": "number[]"
       },
       {
-        "tfInputIndex": 4,
         "tfParamName": "begin_mask",
         "dlParamName": "beginMask",
         "type": "number",
         "defaultValue": 0
       },
       {
-        "tfInputIndex": 5,
         "tfParamName": "end_mask",
         "dlParamName": "endMask",
         "type": "number",
