@@ -17,10 +17,10 @@
 import {DataType} from '@tensorflow/tfjs-core/dist/types';
 import * as Long from 'long';
 
-import {tensorflow} from '../data/index';
+import {tensorflow} from '../data/compiled_api';
 
 import {getNodeNameAndIndex} from './executors/utils';
-import {ParamValue} from './index';
+
 import * as arithmetic from './op_list/arithmetic.json';
 import * as basicMath from './op_list/basic_math.json';
 import * as control from './op_list/control.json';
@@ -34,7 +34,7 @@ import * as normalization from './op_list/normalization.json';
 import * as reduction from './op_list/reduction.json';
 import * as sliceJoin from './op_list/slice_join.json';
 import * as transformation from './op_list/transformation.json';
-import {Graph, Node, OpMapper} from './types';
+import {Graph, Node, OpMapper, ParamValue} from './types';
 
 const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
 export class OperationMapper {
