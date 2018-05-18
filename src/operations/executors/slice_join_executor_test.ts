@@ -110,7 +110,8 @@ describe('slice join', () => {
         node.params.endMask = createNumberAttr(5);
         executeOp(node, {input1}, context);
 
-        expect(tfc.stridedSlice).toHaveBeenCalledWith(input1[0], [1], [2], [3], 4, 5);
+        expect(tfc.stridedSlice).toHaveBeenCalledWith(
+          input1[0], [1], [2], [3], 4, 5);
       });
 
       it('should call tfc.gather', () => {
