@@ -18,8 +18,8 @@
 import {Tensor, tidy} from '@tensorflow/tfjs-core';
 
 import {NamedTensorMap, NamedTensorsMap} from '../data/types';
-import {executeOp} from '../operations/executors/creation_executor';
 import {getNodeNameAndIndex, getTensor} from '../operations/executors/utils';
+import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
