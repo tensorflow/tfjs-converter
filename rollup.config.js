@@ -27,9 +27,8 @@ export default {
     node(),
     // Polyfill require() from dependencies.
     commonjs({
-      include: 'node_modules/**',
       namedExports: {
-        './node_modules/seedrandom/index.js': ['alea'],
+        './src/data/compiled_api.js': ['tensorflow'],
         './node_modules/protobufjs/minimal.js': ['roots', 'Reader', 'util']
       },
     })
