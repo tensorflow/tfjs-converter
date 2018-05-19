@@ -15,8 +15,6 @@
  * =============================================================================
  */
 import {DataType} from '@tensorflow/tfjs-core/dist/types';
-import * as Long from 'long';
-
 import * as proto from '../data/compiled_api';
 
 import {getNodeNameAndIndex} from './executors/utils';
@@ -49,15 +47,19 @@ export class OperationMapper {
 
   // Loads the op mapping from the JSON file.
   private constructor() {
-    const mappersJson = [
-      ...(arithmetic as {}) as OpMapper[], ...(basicMath as {}) as OpMapper[],
-      ...(control as {}) as OpMapper[], ...(convolution as {}) as OpMapper[],
-      ...(creation as {}) as OpMapper[], ...(logical as {}) as OpMapper[],
-      ...(image as {}) as OpMapper[], ...(graph as {}) as OpMapper[],
-      ...(matrices as {}) as OpMapper[], ...(normalization as {}) as OpMapper[],
-      ...(reduction as {}) as OpMapper[], ...(sliceJoin as {}) as OpMapper[],
-      ...(transformation as {}) as OpMapper[]
+    const ops = [
+      arithmetic, basicMath, control, convolution, creation, logical, image,
+      graph, matrices, normalization, reduction, sliceJoin, transformation
     ];
+
+    let mappersJson: OpMapper[] = [];
+    if (arithmetic instanceof Object) {
+      mappersJson = [].concat(...(ops.map(
+          (x: {[key: string]: OpMapper}) =>
+              Object.keys(x).map(key => x[key]))));
+    } else {
+      mappersJson = [].concat(...ops);
+    }
     this.opMappers = mappersJson.reduce<{[key: string]: OpMapper}>(
         (map, mapper: OpMapper) => {
           map[mapper.tfOpName] = mapper;
@@ -221,7 +223,7 @@ export class OperationMapper {
       def: number): number {
     const param = attrs[name];
     const value = (param ? ((param.f !== undefined) ? param.f : param.i) : def);
-    return value instanceof Long ? value.toInt() : value;
+    return (typeof value === 'number') ? value : value['toInt']();
   }
   private getDtypeParam(
       attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
@@ -258,7 +260,8 @@ export class OperationMapper {
     if (param) {
       return ((param.list.f && param.list.f.length ? param.list.f :
                                                      param.list.i))
-                 .map(v => v instanceof Long ? v.toInt() : v) as number[];
+                 .map(v => (typeof v === 'number') ? v : v['toInt']()) as
+          number[];
     }
     return def;
   }
