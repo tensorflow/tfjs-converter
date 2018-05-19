@@ -15,8 +15,8 @@
  * =============================================================================
  */
 
-import async from 'rollup-plugin-async';
 import babel from 'rollup-plugin-babel';
+import json from 'rollup-plugin-json';
 import node from 'rollup-plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import commonjs from 'rollup-plugin-commonjs';
@@ -25,6 +25,7 @@ import resolve from 'rollup-plugin-node-resolve';
 export default {
   input: 'src/index.ts',
   plugins: [
+    //json().
     typescript(),
     node(),
     // Polyfill require() from dependencies.
@@ -32,13 +33,24 @@ export default {
       namedExports: {
         './src/data/compiled_api.js': ['tensorflow'],
         './node_modules/protobufjs/minimal.js': ['roots', 'Reader', 'util']
-      },
+      }
     }),
-    async(),
+    json(),
+    // {
+    //   transform ( code, id ) {
+    //     //console.log( id );
+    //     if (id.endsWith('.json')) {
+    //       console.log(id);
+    //       console.log(code);
+    //       return {code:'export default ' + code};
+    //     }
+
+    //     //console.log( code );
+    //     // not returning anything, so doesn't affect bundle
+    //   }
+    // },
     // We need babel to compile the compiled_api.js generated proto file from es6 to es5.
-    babel({
-      exclude: 'node_modules/**'
-    })
+    babel()
   ],
   output: {
     extend: true,

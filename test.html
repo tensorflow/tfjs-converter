@@ -1,0 +1,16 @@
+<script src="https://unpkg.com/@tensorflow/tfjs-core"></script>
+<script src="dist/tf-converter.js"></script>
+
+
+<script>
+  const MODEL_URL = 'https://storage-direct.y8.com/eddie/html5/canvas-friends/detail_js/tensorflowjs_model.pb';
+  const WEIGHTS_URL = 'https://storage-direct.y8.com/eddie/html5/canvas-friends/detail_js/weights_manifest.json';
+
+  async function loadModal() {
+    const model = await tf.loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+    console.log(model);
+  }
+  loadModal();
+  //const cat = document.getElementById('cat');
+  //model.execute({input: tf.fromPixels(cat)});
+</script>
