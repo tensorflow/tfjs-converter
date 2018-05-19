@@ -1,15 +1,13 @@
 /*eslint-disable block-scoped-var, no-redeclare, no-control-regex, no-prototype-builtins*/
-"use strict";
+import * as $protobuf from "protobufjs/minimal";
 
-var $protobuf = require("protobufjs/minimal");
+const $Reader = $protobuf.Reader, $util = $protobuf.util;
 
-var $Reader = $protobuf.Reader, $util = $protobuf.util;
+const $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
 
-var $root = $protobuf.roots["default"] || ($protobuf.roots["default"] = {});
+export const tensorflow = $root.tensorflow = (() => {
 
-$root.tensorflow = (function() {
-
-    var tensorflow = {};
+    const tensorflow = {};
 
     tensorflow.Any = (function() {
 
@@ -48,7 +46,7 @@ $root.tensorflow = (function() {
     })();
 
     tensorflow.DataType = (function() {
-        var valuesById = {}, values = Object.create(valuesById);
+        const valuesById = {}, values = Object.create(valuesById);
         values[valuesById[0] = "DT_INVALID"] = 0;
         values[valuesById[1] = "DT_FLOAT"] = 1;
         values[valuesById[2] = "DT_DOUBLE"] = 2;
@@ -323,7 +321,7 @@ $root.tensorflow = (function() {
         AttrValue.prototype.placeholder = "";
         AttrValue.prototype.func = null;
 
-        var $oneOfFields;
+        let $oneOfFields;
 
         Object.defineProperty(AttrValue.prototype, "value", {
             get: $util.oneOfGetter($oneOfFields = ["list", "s", "i", "f", "b", "type", "shape", "tensor", "placeholder", "func"]),
@@ -687,7 +685,7 @@ $root.tensorflow = (function() {
         CollectionDef.prototype.floatList = null;
         CollectionDef.prototype.anyList = null;
 
-        var $oneOfFields;
+        let $oneOfFields;
 
         Object.defineProperty(CollectionDef.prototype, "kind", {
             get: $util.oneOfGetter($oneOfFields = ["nodeList", "bytesList", "int64List", "floatList", "anyList"]),
@@ -966,7 +964,7 @@ $root.tensorflow = (function() {
         };
 
         SaverDef.CheckpointFormatVersion = (function() {
-            var valuesById = {}, values = Object.create(valuesById);
+            const valuesById = {}, values = Object.create(valuesById);
             values[valuesById[0] = "LEGACY"] = 0;
             values[valuesById[1] = "V1"] = 1;
             values[valuesById[2] = "V2"] = 2;
@@ -990,7 +988,7 @@ $root.tensorflow = (function() {
         TensorInfo.prototype.dtype = 0;
         TensorInfo.prototype.tensorShape = null;
 
-        var $oneOfFields;
+        let $oneOfFields;
 
         Object.defineProperty(TensorInfo.prototype, "encoding", {
             get: $util.oneOfGetter($oneOfFields = ["name", "cooSparse"]),
@@ -1720,4 +1718,4 @@ $root.tensorflow = (function() {
     return tensorflow;
 })();
 
-module.exports = $root;
+export { $root as default };
