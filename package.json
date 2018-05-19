@@ -56,7 +56,7 @@
     "watchify": "~3.9.0"
   },
   "scripts": {
-    "build": "tsc --project tsconfig-es5.json && tsc && copyfiles -f src/data/compiled_api.d.ts src/data/es5/compiled_api.js dist/data && copyfiles -f src/operations/op_list/*.json dist/operations/op_list && copyfiles -f src/operations/typings.d.ts dist/operations && copyfiles -f src/data/compiled_api.d.ts src/data/es6/compiled_api.js dist-es6/data && copyfiles -f src/operations/op_list/*.json dist-es6/operations/op_list && copyfiles -f src/operations/typings.d.ts dist-es6/operations",
+    "build": "tsc --project tsconfig-es5.json && tsc && copyfiles -f src/data/compiled_api.* dist/data && copyfiles -f src/operations/op_list/*.json dist/operations/op_list && copyfiles -f src/operations/typings.d.ts dist/operations && copyfiles -f src/data/compiled_api.d.ts src/data/es6/compiled_api.js dist-es6/data && copyfiles -f src/operations/op_list/*.json dist-es6/operations/op_list && copyfiles -f src/operations/typings.d.ts dist-es6/operations",
     "build-npm": "./scripts/build-npm.sh",
     "test": "karma start",
     "test-travis": "karma start --browsers='bs_firefox_mac,bs_chrome_mac' --singleRun",
