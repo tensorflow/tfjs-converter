@@ -17,7 +17,7 @@
 import {DataType} from '@tensorflow/tfjs-core/dist/types';
 import * as Long from 'long';
 
-import * as proto from '../data/compiled_api';
+import {tensorflow} from '../data/compiled_api';
 
 import {getNodeNameAndIndex} from './executors/utils';
 
@@ -66,13 +66,13 @@ export class OperationMapper {
         {});
   }
 
-  private isControlFlow(node: proto.tensorflow.INodeDef) {
+  private isControlFlow(node: tensorflow.INodeDef) {
     return CONTROL_FLOW_OPS.some(op => op === node.op);
   }
 
   // Converts the model from Tensorflow GraphDef to local representation for
   // deeplearn.js API
-  transformGraph(graph: proto.tensorflow.IGraphDef): Graph {
+  transformGraph(graph: tensorflow.IGraphDef): Graph {
     const tfNodes = graph.node;
     let withControlFlow = false;
     const placeholders: Node[] = [];
@@ -102,7 +102,7 @@ export class OperationMapper {
     return {nodes, inputs, outputs, placeholders, withControlFlow};
   }
 
-  private mapNode(node: proto.tensorflow.INodeDef): Node {
+  private mapNode(node: tensorflow.INodeDef): Node {
     const mapper = this.opMappers[node.op];
     if (mapper === undefined) {
       throw new Error('Tensorflow Op is not supported: ' + node.op);
@@ -199,8 +199,8 @@ export class OperationMapper {
   }
 
   private getStringParam(
-      attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
-      def: string, keepCase = false): string {
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string, def: string,
+      keepCase = false): string {
     const param = attrs[name];
     if (param !== undefined) {
       const value = String.fromCharCode.apply(null, param.s);
@@ -210,30 +210,30 @@ export class OperationMapper {
   }
 
   private getBoolParam(
-      attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: boolean): boolean {
     const param = attrs[name];
     return param ? param.b : def;
   }
 
   private getNumberParam(
-      attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: number): number {
     const param = attrs[name];
     const value = (param ? ((param.f !== undefined) ? param.f : param.i) : def);
     return value instanceof Long ? value.toInt() : value;
   }
   private getDtypeParam(
-      attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: DataType): DataType {
     const param = attrs[name];
     if (param && param.type) {
       switch (param.type) {
-        case proto.tensorflow.DataType.DT_FLOAT:
+        case tensorflow.DataType.DT_FLOAT:
           return 'float32';
-        case proto.tensorflow.DataType.DT_INT32:
+        case tensorflow.DataType.DT_INT32:
           return 'int32';
-        case proto.tensorflow.DataType.DT_BOOL:
+        case tensorflow.DataType.DT_BOOL:
           return 'bool';
         default:
           return def;
@@ -242,7 +242,7 @@ export class OperationMapper {
     return def;
   }
   private getTensorShapeParam(
-      attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def?: number[]): number[]|undefined {
     const param = attrs[name];
     if (param && param.shape) {
@@ -252,7 +252,7 @@ export class OperationMapper {
   }
 
   private getNumericArrayParam(
-      attrs: {[key: string]: proto.tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: number[]): number[] {
     const param = attrs[name];
     if (param) {
