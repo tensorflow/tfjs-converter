@@ -14,13 +14,27 @@
  * limitations under the License.
  * =============================================================================
  */
-import {DataType} from '@tensorflow/tfjs-core/dist/types';
+import {DataType} from '@tensorflow/tfjs-core';
 import * as Long from 'long';
 
 import {tensorflow} from '../data/compiled_api';
 
 import {getNodeNameAndIndex} from './executors/utils';
 
+// tslint:disable:no-require-imports
+// const arithmetic = require('./op_list/arithmetic.json');
+// const basicMath = require('./op_list/basic_math.json');
+// const control = require('./op_list/control.json');
+// const convolution = require('./op_list/convolution.json');
+// const creation = require('./op_list/creation.json');
+// const graph = require('./op_list/graph.json');
+// const image = require('./op_list/image.json');
+// const logical = require('./op_list/logical.json');
+// const matrices = require('./op_list/matrices.json');
+// const normalization = require('./op_list/normalization.json');
+// const reduction = require('./op_list/reduction.json');
+// const sliceJoin = require('./op_list/slice_join.json');
+// const transformation = require('./op_list/transformation.json');
 import * as arithmetic from './op_list/arithmetic.json';
 import * as basicMath from './op_list/basic_math.json';
 import * as control from './op_list/control.json';
@@ -34,6 +48,7 @@ import * as normalization from './op_list/normalization.json';
 import * as reduction from './op_list/reduction.json';
 import * as sliceJoin from './op_list/slice_join.json';
 import * as transformation from './op_list/transformation.json';
+// tslint:enable
 import {Graph, Node, OpMapper, ParamValue} from './types';
 
 const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
@@ -49,6 +64,8 @@ export class OperationMapper {
 
   // Loads the op mapping from the JSON file.
   private constructor() {
+    console.log(arithmetic);
+    const mappersJson = arithmetic;
     const mappersJson = [
       ...(arithmetic as {}) as OpMapper[], ...(basicMath as {}) as OpMapper[],
       ...(control as {}) as OpMapper[], ...(convolution as {}) as OpMapper[],
