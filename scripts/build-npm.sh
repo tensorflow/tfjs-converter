@@ -21,6 +21,7 @@ rimraf dist/
 yarn
 yarn build
 rollup -c
+echo "Uglifying..."
 uglifyjs dist/tf-converter.js -c -m -o dist/tf-converter.min.js
 echo "Stored standalone library at dist/tf-converter(.min).js"
 npm pack

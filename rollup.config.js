@@ -15,6 +15,8 @@
  * =============================================================================
  */
 
+import async from 'rollup-plugin-async';
+import babel from 'rollup-plugin-babel';
 import node from 'rollup-plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import commonjs from 'rollup-plugin-commonjs';
@@ -27,11 +29,15 @@ export default {
     node(),
     // Polyfill require() from dependencies.
     commonjs({
-      include: 'node_modules/**',
       namedExports: {
-        './node_modules/seedrandom/index.js': ['alea'],
+        './src/data/compiled_api.js': ['tensorflow'],
         './node_modules/protobufjs/minimal.js': ['roots', 'Reader', 'util']
       },
+    }),
+    async(),
+    // We need babel to compile the compiled_api.js generated proto file from es6 to es5.
+    babel({
+      exclude: 'node_modules/**'
     })
   ],
   output: {
@@ -46,9 +52,10 @@ export default {
   onwarn: warning => {
     let {code} = warning;
     if (code === 'CIRCULAR_DEPENDENCY' ||
-        code === 'CIRCULAR') {
+        code === 'CIRCULAR' ||
+        code === 'EVAL') {
       return;
     }
-    console.warn('WARNING: ', warning.toString());
+    console.warn('WARNING: ', code, warning.toString());
   }
 };
