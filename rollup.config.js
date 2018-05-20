@@ -36,19 +36,6 @@ export default {
       }
     }),
     json(),
-    // {
-    //   transform ( code, id ) {
-    //     //console.log( id );
-    //     if (id.endsWith('.json')) {
-    //       console.log(id);
-    //       console.log(code);
-    //       return {code:'export default ' + code};
-    //     }
-
-    //     //console.log( code );
-    //     // not returning anything, so doesn't affect bundle
-    //   }
-    // },
     // We need babel to compile the compiled_api.js generated proto file from es6 to es5.
     babel()
   ],
