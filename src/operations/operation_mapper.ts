@@ -19,34 +19,32 @@ import * as proto from '../data/compiled_api';
 
 import {getNodeNameAndIndex} from './executors/utils';
 
-// tslint:disable:no-require-imports
-// const arithmetic = require('./op_list/arithmetic.json');
-// const basicMath = require('./op_list/basic_math.json');
-// const control = require('./op_list/control.json');
-// const convolution = require('./op_list/convolution.json');
-// const creation = require('./op_list/creation.json');
-// const graph = require('./op_list/graph.json');
-// const image = require('./op_list/image.json');
-// const logical = require('./op_list/logical.json');
-// const matrices = require('./op_list/matrices.json');
-// const normalization = require('./op_list/normalization.json');
-// const reduction = require('./op_list/reduction.json');
-// const sliceJoin = require('./op_list/slice_join.json');
-// const transformation = require('./op_list/transformation.json');
-import * as arithmetic from './op_list/arithmetic.json';
-import * as basicMath from './op_list/basic_math.json';
-import * as control from './op_list/control.json';
-import * as convolution from './op_list/convolution.json';
-import * as creation from './op_list/creation.json';
-import * as graph from './op_list/graph.json';
-import * as image from './op_list/image.json';
-import * as logical from './op_list/logical.json';
-import * as matrices from './op_list/matrices.json';
-import * as normalization from './op_list/normalization.json';
-import * as reduction from './op_list/reduction.json';
-import * as sliceJoin from './op_list/slice_join.json';
-import * as transformation from './op_list/transformation.json';
-// tslint:enable
+import arithmetic from './op_list/arithmetic.json';
+import basicMath from './op_list/basic_math.json';
+import control from './op_list/control.json';
+import convolution from './op_list/convolution.json';
+import creation from './op_list/creation.json';
+import graph from './op_list/graph.json';
+import image from './op_list/image.json';
+import logical from './op_list/logical.json';
+import matrices from './op_list/matrices.json';
+import normalization from './op_list/normalization.json';
+import reduction from './op_list/reduction.json';
+import sliceJoin from './op_list/slice_join.json';
+import transformation from './op_list/transformation.json';
+// import * as arithmetic from './op_list/arithmetic.json';
+// import * as basicMath from './op_list/basic_math.json';
+// import * as control from './op_list/control.json';
+// import * as convolution from './op_list/convolution.json';
+// import * as creation from './op_list/creation.json';
+// import * as graph from './op_list/graph.json';
+// import * as image from './op_list/image.json';
+// import * as logical from './op_list/logical.json';
+// import * as matrices from './op_list/matrices.json';
+// import * as normalization from './op_list/normalization.json';
+// import * as reduction from './op_list/reduction.json';
+// import * as sliceJoin from './op_list/slice_join.json';
+// import * as transformation from './op_list/transformation.json';
 import {Graph, Node, OpMapper, ParamValue} from './types';
 
 const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
@@ -62,19 +60,35 @@ export class OperationMapper {
 
   // Loads the op mapping from the JSON file.
   private constructor() {
-    const ops = [
+    const opConfigs = [
       arithmetic, basicMath, control, convolution, creation, logical, image,
       graph, matrices, normalization, reduction, sliceJoin, transformation
     ];
-
-    let mappersJson: OpMapper[] = [];
-    if (arithmetic instanceof Object) {
-      mappersJson = [].concat(...(ops.map(
-          (x: {[key: string]: OpMapper}) =>
-              Object.keys(x).map(key => x[key]))));
-    } else {
-      mappersJson = [].concat(...ops);
+    const mappersJson = [
+      ...(arithmetic as {}) as OpMapper[], ...(basicMath as {}) as OpMapper[],
+      ...(control as {}) as OpMapper[], ...(convolution as {}) as OpMapper[],
+      ...(creation as {}) as OpMapper[], ...(logical as {}) as OpMapper[],
+      ...(image as {}) as OpMapper[], ...(graph as {}) as OpMapper[],
+      ...(matrices as {}) as OpMapper[], ...(normalization as {}) as OpMapper[],
+      ...(reduction as {}) as OpMapper[], ...(sliceJoin as {}) as OpMapper[],
+      ...(transformation as {}) as OpMapper[]
+    ];
+    // console.log('tmp', tmp);
+    // tslint:disable-next-line:no-any
+    const ops: any[] = [];
+    for (let i = 0; i < opConfigs.length; i++) {
+      ops.concat(opConfigs[i]);
     }
+    console.log(ops);
+
+    // let mappersJson: OpMapper[] = [];
+    // if (arithmetic instanceof Object) {
+    //   mappersJson = [].concat(...(ops.map(
+    //       (x: {[key: string]: OpMapper}) =>
+    //           Object.keys(x).map(key => x[key]))));
+    // } else {
+    //   mappersJson = [].concat(...ops);
+    // }
     this.opMappers = mappersJson.reduce<{[key: string]: OpMapper}>(
         (map, mapper: OpMapper) => {
           map[mapper.tfOpName] = mapper;
