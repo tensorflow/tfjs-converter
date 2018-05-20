@@ -17,7 +17,7 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 
-import * as operations from '../operations/executors/creation_executor';
+import * as operations from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext} from './execution_context';
