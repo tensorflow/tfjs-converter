@@ -94,7 +94,7 @@ describe('Model', () => {
   });
 
   describe('eval', () => {
-    fit('should generate the output', async () => {
+    it('should generate the output', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
       const output = model.execute({'Input': input}, 'Add');
