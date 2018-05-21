@@ -25,7 +25,6 @@ import resolve from 'rollup-plugin-node-resolve';
 export default {
   input: 'src/index.ts',
   plugins: [
-    //json().
     typescript(),
     node(),
     // Polyfill require() from dependencies.

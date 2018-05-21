@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "@tensorflow/tfjs-converter": "../tensorflow-tfjs-converter-0.3.1.tgz",
+    "@tensorflow/tfjs-converter": "0.3.1",
     "@tensorflow/tfjs-core": "0.10.0"
   },
   "scripts": {

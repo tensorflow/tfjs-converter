@@ -18,7 +18,7 @@
 import * as tfc from '@tensorflow/tfjs-core';
 import * as Url from 'url';
 
-import * as proto from '../data/compiled_api';
+import {tensorflow} from '../data/compiled_api';
 import {NamedTensorMap, NamedTensorsMap} from '../data/types';
 import {OperationMapper} from '../operations/operation_mapper';
 
@@ -61,10 +61,10 @@ export class FrozenModel {
   /**
    * Loads the model topology file and build the in memory graph of the model.
    */
-  private async loadRemoteProtoFile(): Promise<proto.tensorflow.GraphDef> {
+  private async loadRemoteProtoFile(): Promise<tensorflow.GraphDef> {
     try {
       const response = await fetch(this.modelUrl, this.requestOption);
-      return proto.tensorflow.GraphDef.decode(
+      return tensorflow.GraphDef.decode(
           new Uint8Array(await response.arrayBuffer()));
     } catch (error) {
       throw new Error(`${this.modelUrl} not found. ${error}`);
