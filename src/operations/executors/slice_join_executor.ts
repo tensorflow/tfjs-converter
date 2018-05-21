@@ -70,21 +70,23 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           end, strides, beginMask, endMask)];
     }
     case 'stack': {
-      const axis = getParamValue('axis', node, tensorMap, context) as number;
-      const tensors =
-          getParamValue('tensors', node, tensorMap, context) as tfc.Tensor[];
-      // Reshape the tensors to the first tensor's shape if they don't match.
-      const shape = tensors[0].shape;
-      const squeezedShape = tensors[0].squeeze().shape;
-      const mapped = tensors.map(tensor => {
-        const sameShape = tfc.util.arraysEqual(tensor.shape, shape);
-        if (!sameShape &&
-            !tfc.util.arraysEqual(tensor.squeeze().shape, squeezedShape)) {
-          throw new Error('the input tensors shape does not match');
-        }
-        return sameShape ? tensor : tensor.reshape(shape);
+      return tfc.tidy(() => {
+        const axis = getParamValue('axis', node, tensorMap, context) as number;
+        const tensors =
+            getParamValue('tensors', node, tensorMap, context) as tfc.Tensor[];
+        // Reshape the tensors to the first tensor's shape if they don't match.
+        const shape = tensors[0].shape;
+        const squeezedShape = tensors[0].squeeze().shape;
+        const mapped = tensors.map(tensor => {
+          const sameShape = tfc.util.arraysEqual(tensor.shape, shape);
+          if (!sameShape &&
+              !tfc.util.arraysEqual(tensor.squeeze().shape, squeezedShape)) {
+            throw new Error('the input tensors shape does not match');
+          }
+          return sameShape ? tensor : tensor.reshape(shape);
+        });
+        return [tfc.stack(mapped, axis)];
       });
-      return [tfc.stack(mapped, axis)];
     }
     case 'tile': {
       const reps = getParamValue('reps', node, tensorMap, context) as number[];
