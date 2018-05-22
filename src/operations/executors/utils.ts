@@ -17,9 +17,9 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {NamedTensorsMap} from '../../data/index';
-import {ExecutionContext} from '../../executor';
-import {Node, ValueType} from '../index';
+import {NamedTensorsMap} from '../../data/types';
+import {ExecutionContext} from '../../executor/execution_context';
+import {Node, ValueType} from '../types';
 
 export function getParamValue(
     paramName: string, node: Node, tensorMap: NamedTensorsMap,
@@ -31,7 +31,10 @@ export function getParamValue(
     }
     if (param.type === 'tensors') {
       const inputs = param.inputIndex === 0 ?
-          node.inputNames.slice(param.inputIndex, -param.inputParamLength) :
+          (param.inputParamLength === 0 ?
+               node.inputNames :
+               node.inputNames.slice(
+                   param.inputIndex, -param.inputParamLength)) :
           node.inputNames.splice(param.inputIndex);
 
       return inputs.map(name => getTensor(name, tensorMap, context));
