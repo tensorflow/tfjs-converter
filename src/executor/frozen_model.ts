@@ -117,6 +117,11 @@ export class FrozenModel implements tfc.InferenceModel {
    * inputs param should be a Tensor. For models with mutliple inputs, inputs
    * params should be in either Tensor[] if the input order is fixed, or
    * otherwise NamedTensorMap format.
+   *
+   * For model with multiple inputs, we recommend you use NamedTensorMap as the
+   * input type, if you use Tensor[], the order of the array needs to follow the
+   * order of inputNodes array. @see {@link FrozenModel.inputNodes}
+   *
    * For batch inference execution, the tensors for each input need to be
    * concatenated together. For example with mobilenet, the required input shape
    * is [1, 244, 244, 3], which represents the [batch, height, width, channel].
