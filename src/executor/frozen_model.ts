@@ -140,12 +140,7 @@ export class FrozenModel implements tfc.InferenceModel {
       inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
       config: tfc.ModelPredictConfig): tfc.Tensor
       |tfc.Tensor[]|tfc.NamedTensorMap {
-    inputs = inputs instanceof tfc.Tensor ? [inputs] : inputs;
-    if (inputs instanceof Array) {
-      inputs = this.constructTensorMap(inputs as tfc.Tensor[]);
-    }
-
-    return this.execute(inputs, config.outputs);
+    return this.execute(inputs, this.outputNodes);
   }
 
   private constructTensorMap(inputs: tfc.Tensor[]) {
@@ -171,10 +166,17 @@ export class FrozenModel implements tfc.InferenceModel {
    *
    * @returns A single tensor if provided with a single output or no outputs
    * are provided and there is only one default output, otherwise return a
-   * tensor map.
+   * tensor array. The order of the tensor array is the same as the outputs
+   * if provided, otherwise the order of outputNodes attribute of the model.
    */
-  execute(inputs: tfc.NamedTensorMap, outputs?: string|string[]): tfc.Tensor
-      |tfc.NamedTensorMap {
+  execute(
+      inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
+      outputs?: string|string[]): tfc.Tensor|tfc.Tensor[] {
+    inputs = inputs instanceof tfc.Tensor ? [inputs] : inputs;
+    outputs = outputs || this.outputNodes;
+    if (inputs instanceof Array) {
+      inputs = this.constructTensorMap(inputs as tfc.Tensor[]);
+    }
     if (this.executor.isControlFlowModel) {
       throw new Error(
           'The model contains control flow ops, ' +
@@ -183,7 +185,9 @@ export class FrozenModel implements tfc.InferenceModel {
     const result = this.executor.execute(
         this.convertTensorMapToTensorsMap(inputs), outputs);
     const keys = Object.keys(result);
-    return (keys.length === 1) ? result[keys[0]] : result;
+    return (outputs instanceof Array && outputs.length > 1) ?
+        outputs.map(node => result[node]) :
+        result[keys[0]];
   }
 
   /**
