@@ -121,7 +121,7 @@ describe('Model', () => {
     });
   });
 
-  describe('eval', () => {
+  describe('execute', () => {
     it('should generate the default output', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');

@@ -205,16 +205,19 @@ export class FrozenModel implements tfc.InferenceModel {
    * return a tensor map.
    */
   async executeAsync(inputs: tfc.NamedTensorMap, outputs?: string|string[]):
-      Promise<tfc.Tensor|tfc.NamedTensorMap> {
+      Promise<tfc.Tensor|tfc.Tensor[]> {
     if (!this.executor.isControlFlowModel) {
       throw new Error(
           'The model does not contain control flow ops, ' +
           'please use execute method for better performance.');
     }
+    outputs = outputs || this.outputNodes;
     const result = await this.executor.executeAsync(
         this.convertTensorMapToTensorsMap(inputs), outputs);
     const keys = Object.keys(result);
-    return (keys.length === 1) ? result[keys[0]] : result;
+    return (outputs instanceof Array && outputs.length > 1) ?
+        outputs.map(node => result[node]) :
+        result[keys[0]];
   }
 
   private convertTensorMapToTensorsMap(map: tfc.NamedTensorMap):
