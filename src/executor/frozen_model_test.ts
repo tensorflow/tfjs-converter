@@ -122,11 +122,19 @@ describe('Model', () => {
   });
 
   describe('eval', () => {
-    it('should generate the output', async () => {
+    it('should generate the default output', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
-      const output = model.execute({'Input': input}, 'Add');
+      const output = model.execute({'Input': input});
       expect((output as tfc.Tensor).dataSync()[0]).toEqual(2);
+    });
+    it('should generate the output array', async () => {
+      await model.load();
+      const input = tfc.tensor1d([1], 'int32');
+      const output = model.execute({'Input': input}, ['Add', 'Const']);
+      expect(output instanceof Array).toBeTruthy();
+      expect((output as tfc.Tensor[])[0].dataSync()[0]).toEqual(2);
+      expect((output as tfc.Tensor[])[1].dataSync()[0]).toEqual(1);
     });
   });
 
