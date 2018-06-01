@@ -96,28 +96,28 @@ describe('Model', () => {
     it('should generate the output for single tensor', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
-      const output = model.predict(input, {});
+      const output = model.predict(input);
       expect((output as tfc.Tensor).dataSync()[0]).toEqual(2);
     });
 
     it('should generate the output for tensor array', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
-      const output = model.predict([input], {});
+      const output = model.predict([input]);
       expect((output as tfc.Tensor).dataSync()[0]).toEqual(2);
     });
 
     it('should generate the output for tensor map', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
-      const output = model.predict({'Input': input}, {});
+      const output = model.predict({'Input': input});
       expect((output as tfc.Tensor).dataSync()[0]).toEqual(2);
     });
 
     it('should throw error if input size mismatch', async () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
-      expect(() => model.predict([input, input], {})).toThrow();
+      expect(() => model.predict([input, input])).toThrow();
     });
   });
 
@@ -132,7 +132,7 @@ describe('Model', () => {
       await model.load();
       const input = tfc.tensor1d([1], 'int32');
       const output = model.execute({'Input': input}, ['Add', 'Const']);
-      expect(output instanceof Array).toBeTruthy();
+      expect(Array.isArray(output)).toBeTruthy();
       expect((output as tfc.Tensor[])[0].dataSync()[0]).toEqual(2);
       expect((output as tfc.Tensor[])[1].dataSync()[0]).toEqual(1);
     });
