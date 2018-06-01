@@ -220,7 +220,7 @@ export class FrozenModel implements tfc.InferenceModel {
     const result = await this.executor.executeAsync(
         this.convertTensorMapToTensorsMap(inputs), outputs);
     const keys = Object.keys(result);
-    return (Array.isArray(outputs) && outputs.length > 1) ?
+    return Array.isArray(outputs) && outputs.length > 1 ?
         outputs.map(node => result[node]) :
         result[keys[0]];
   }
