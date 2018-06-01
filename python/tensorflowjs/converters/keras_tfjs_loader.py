@@ -70,8 +70,14 @@ def _deserialize_keras_model(model_topology_json,
         else keras_h5_conversion.normalize_weight_name(w.name[:-2])
         for w in model.weights]
     weights_list = []
-    for weight_name in weight_names:
-      weights_list.append(weights_dict[weight_name])
+    try:
+      for weight_name in weight_names:
+        weights_list.append(weights_dict[weight_name])
+    except KeyError as e:
+      print('Deserializing a keras model which re-uses a taken variable name ' +
+            'is a common error case. You may need to set ' +
+            'use_unique_name_scope to True.')
+      raise e
     model.set_weights(weights_list)
 
   return model

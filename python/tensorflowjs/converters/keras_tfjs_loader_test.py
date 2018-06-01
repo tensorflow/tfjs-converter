@@ -56,6 +56,24 @@ class LoadKerasModelTest(tf.test.TestCase):
     keras_h5_conversion.save_keras_model(model, path)
     return model
 
+  def testLoadKerasModelAndWeightsWithoutExplicitGraph(self):
+    """Tests loading api without any explicit calls to tf."""
+    tfjs_path = os.path.join(self._tmp_dir, 'model_for_test')
+    model1 = self._saveKerasModelForTest(tfjs_path)
+    model1_weight_values = model1.get_weights()
+    model2 = keras_tfjs_loader.load_keras_model(
+        os.path.join(tfjs_path, 'model.json'), use_unique_name_scope=True)
+
+    # Verify the equality of all the weight values.
+    model2_weight_values = model2.get_weights()
+    self.assertEqual(len(model1_weight_values), len(model2_weight_values))
+    for model1_weight_value, model2_weight_value in zip(
+            model1_weight_values, model2_weight_values):
+      self.assertAllClose(model1_weight_value, model2_weight_value)
+
+    # The two model JSONs should match exactly.
+    self.assertEqual(model1.to_json(), model2.to_json())
+
   def testLoadKerasModelAndWeights(self):
     """Test loading of model and its weights."""
     # Use separate tf.Graph and tf.Session contexts to prevent name collision.
@@ -72,7 +90,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       # The two model JSONs should match exactly.
@@ -142,7 +160,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       # The two model JSONs should match exactly.
@@ -170,7 +188,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       # The two model JSONs should match exactly.
@@ -195,7 +213,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       # The two model JSONs should match exactly.
@@ -214,7 +232,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertEqual(model1_weight_value.dtype,
                          model2_weight_value.dtype)
         self.assertEqual(model1_weight_value.shape,
@@ -245,7 +263,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       self.assertEqual(model1.to_json(), model2.to_json())
@@ -263,7 +281,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       # Verify that model1's weight names are suffixes of model2's weight names.
@@ -298,7 +316,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model2_weight_values = model2.get_weights()
       self.assertEqual(len(model1_weight_values), len(model2_weight_values))
       for model1_weight_value, model2_weight_value in zip(
-          model1_weight_values, model2_weight_values):
+              model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
       self.assertEqual(model1.to_json(), model2.to_json())
@@ -339,7 +357,6 @@ class LoadKerasModelTest(tf.test.TestCase):
         keras_tfjs_loader.load_keras_model(
             model_json_path,
             weights_data_buffers=[b'foo'], weights_path_prefix='bar')
-
 
 
 if __name__ == '__main__':
