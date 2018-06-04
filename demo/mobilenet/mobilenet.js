@@ -56,10 +56,14 @@ export class MobileNet {
     const reshapedInput =
         preprocessedInput.reshape([1, ...preprocessedInput.shape]);
     return this.model.execute(
-        {[INPUT_NODE_NAME]:reshapedInput}, OUTPUT_NODE_NAME);
+        {[INPUT_NODE_NAME]: reshapedInput}, OUTPUT_NODE_NAME);
   }
 
-  getTopKClasses(predictions, topK) {
+  getTopKClasses(logits, topK) {
+    const predictions = tf.tidy(() => {
+      return tf.softmax(logits);
+    });
+
     const values = predictions.dataSync();
     predictions.dispose();
 
