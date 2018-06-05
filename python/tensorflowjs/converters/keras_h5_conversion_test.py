@@ -240,6 +240,30 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertEqual(1, len(weights_manifest))
     self.assertIn('paths', weights_manifest[0])
 
+  def testSaveModelSucceedsForTfKerasSequentialModel(self):
+    model = tf.keras.Sequential([tf.keras.layers.Dense(1, input_shape=[2])])
+
+    # `tf.keras.Model`s must be compiled before they can be saved.
+    model.compile(loss='mean_squared_error', optimizer='sgd')
+
+    keras_h5_conversion.save_keras_model(model, self._tmp_dir)
+
+    # Verify the content of the artifacts output directory.
+    self.assertTrue(
+        os.path.isfile(os.path.join(self._tmp_dir, 'group1-shard1of1')))
+    model_json = json.load(
+        open(os.path.join(self._tmp_dir, 'model.json'), 'rt'))
+
+    topology_json = model_json['modelTopology']
+    self.assertIn('keras_version', topology_json)
+    self.assertIn('backend', topology_json)
+    self.assertIn('model_config', topology_json)
+
+    weights_manifest = model_json['weightsManifest']
+    self.assertTrue(isinstance(weights_manifest, list))
+    self.assertEqual(1, len(weights_manifest))
+    self.assertIn('paths', weights_manifest[0])
+
   def testSavedModelSucceedsForExistingDirAndSequential(self):
     artifacts_dir = os.path.join(self._tmp_dir, 'artifacts')
     os.makedirs(artifacts_dir)
