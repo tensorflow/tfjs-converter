@@ -262,8 +262,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertIn('model_config', topology_json)
 
     # Verify that all the layers' weights are present.
-    self.assertTrue(isinstance(weights_manifest, list))
     weights_manifest = model_json['weightsManifest']
+    self.assertTrue(isinstance(weights_manifest, list))
     weight_entries = []
     for group in weights_manifest:
       weight_entries.extend(group['weights'])
