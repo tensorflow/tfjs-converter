@@ -321,7 +321,7 @@ class LoadKerasModelTest(tf.test.TestCase):
 
     with tf.Graph().as_default(), tf.Session():
       model2 = keras_tfjs_loader.load_keras_model(
-          os.path.join(save_dir, 'model.json'))
+          os.path.join(save_dir, 'model.json'), use_unique_name_scope=True)
       self.assertAllClose(predict_out, model2.predict(x))
 
   def testLoadNestedTfKerasModel(self):
@@ -342,7 +342,7 @@ class LoadKerasModelTest(tf.test.TestCase):
 
     with tf.Graph().as_default(), tf.Session():
       model2 = keras_tfjs_loader.load_keras_model(
-          os.path.join(save_dir, 'model.json'))
+          os.path.join(save_dir, 'model.json'), use_unique_name_scope=True)
       self.assertAllClose(predict_out, model2.predict(x))
 
   def testLoadKerasModeFromNonexistentWeightsPathRaisesError(self):
