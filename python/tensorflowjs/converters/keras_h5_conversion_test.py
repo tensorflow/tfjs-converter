@@ -27,6 +27,7 @@ import unittest
 import h5py
 import keras
 import numpy as np
+import tensorflow as tf
 
 from tensorflowjs.converters import keras_h5_conversion
 
@@ -194,6 +195,86 @@ class ConvertH5WeightsTest(unittest.TestCase):
     dense_layer = keras.layers.Dense(3)
     t_output = dense_layer(t_input)
     model = keras.Model(t_input, t_output)
+    keras_h5_conversion.save_keras_model(model, self._tmp_dir)
+
+    # Verify the content of the artifacts output directory.
+    self.assertTrue(
+        os.path.isfile(os.path.join(self._tmp_dir, 'group1-shard1of1')))
+    model_json = json.load(
+        open(os.path.join(self._tmp_dir, 'model.json'), 'rt'))
+
+    topology_json = model_json['modelTopology']
+    self.assertIn('keras_version', topology_json)
+    self.assertIn('backend', topology_json)
+    self.assertIn('model_config', topology_json)
+
+    weights_manifest = model_json['weightsManifest']
+    self.assertTrue(isinstance(weights_manifest, list))
+    self.assertEqual(1, len(weights_manifest))
+    self.assertIn('paths', weights_manifest[0])
+
+  def testSaveModelSucceedsForTfKerasNonSequentialModel(self):
+    t_input = tf.keras.Input([2])
+    dense_layer = tf.keras.layers.Dense(3)
+    t_output = dense_layer(t_input)
+    model = tf.keras.Model(t_input, t_output)
+
+    # `tf.keras.Model`s must be compiled before they can be saved.
+    model.compile(loss='mean_squared_error', optimizer='sgd')
+
+    keras_h5_conversion.save_keras_model(model, self._tmp_dir)
+
+    # Verify the content of the artifacts output directory.
+    self.assertTrue(
+        os.path.isfile(os.path.join(self._tmp_dir, 'group1-shard1of1')))
+    model_json = json.load(
+        open(os.path.join(self._tmp_dir, 'model.json'), 'rt'))
+
+    topology_json = model_json['modelTopology']
+    self.assertIn('keras_version', topology_json)
+    self.assertIn('backend', topology_json)
+    self.assertIn('model_config', topology_json)
+
+    weights_manifest = model_json['weightsManifest']
+    self.assertTrue(isinstance(weights_manifest, list))
+    self.assertEqual(1, len(weights_manifest))
+    self.assertIn('paths', weights_manifest[0])
+
+  def testSaveModelSucceedsForNestedKerasModel(self):
+    inner_model = keras.Sequential([
+        keras.layers.Dense(4, input_shape=[3], activation='relu'),
+        keras.layers.Dense(3, activation='tanh')])
+    outer_model = keras.Sequential()
+    outer_model.add(inner_model)
+    outer_model.add(keras.layers.Dense(1, activation='sigmoid'))
+
+    keras_h5_conversion.save_keras_model(outer_model, self._tmp_dir)
+
+    # Verify the content of the artifacts output directory.
+    self.assertTrue(
+        os.path.isfile(os.path.join(self._tmp_dir, 'group1-shard1of1')))
+    model_json = json.load(
+        open(os.path.join(self._tmp_dir, 'model.json'), 'rt'))
+
+    topology_json = model_json['modelTopology']
+    self.assertIn('keras_version', topology_json)
+    self.assertIn('backend', topology_json)
+    self.assertIn('model_config', topology_json)
+
+    # Verify that all the layers' weights are present.
+    weights_manifest = model_json['weightsManifest']
+    self.assertTrue(isinstance(weights_manifest, list))
+    weight_entries = []
+    for group in weights_manifest:
+      weight_entries.extend(group['weights'])
+    self.assertEqual(6, len(weight_entries))
+
+  def testSaveModelSucceedsForTfKerasSequentialModel(self):
+    model = tf.keras.Sequential([tf.keras.layers.Dense(1, input_shape=[2])])
+
+    # `tf.keras.Model`s must be compiled before they can be saved.
+    model.compile(loss='mean_squared_error', optimizer='sgd')
+
     keras_h5_conversion.save_keras_model(model, self._tmp_dir)
 
     # Verify the content of the artifacts output directory.
