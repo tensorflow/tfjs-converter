@@ -115,7 +115,7 @@ describe('GraphExecutor', () => {
         const inputTensor = tfc.tensor1d([1], 'float32');
         expect(() => executor.execute({input: [inputTensor]}))
             .toThrow(new Error(
-                'The dtypes of the input(float32) and must be int32'));
+                'The dtype of the input is float32 but int32 was expected'));
       });
       it('should execute control flow graph', async (done) => {
         inputNode = {

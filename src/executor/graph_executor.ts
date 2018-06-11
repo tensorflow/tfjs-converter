@@ -238,8 +238,8 @@ export class GraphExecutor {
       if (node.params['dtype'] && node.params['dtype'].value) {
         util.assert(
             input.dtype === node.params['dtype'].value as string,
-            `The dtypes of the ${node.name}(${input.dtype}) and` +
-                ` must be ${node.params['dtype'].value}`);
+            `The dtype of the ${node.name} is ${input.dtype} but` +
+                ` ${node.params['dtype'].value} was expected`);
       }
     });
   }
