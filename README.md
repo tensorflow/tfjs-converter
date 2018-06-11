@@ -247,11 +247,9 @@ For ES6
 
 ```bash
 $ node_modules/protobufjs/bin/pbjs -t static-module -w es6 -o src/data/es6/compiled_api.js --no-create --no-encode --no-verify --no-convert --no-delimited --no-beautify --no-comments src/data/api.proto
+
+$ sed -i 's/() =>/function()/g' src/data/es6/compiled_api.js
 ```
 
 Note:
-Unfortunately the generated es6 compiled_api.js has arrow function on line 8, manually update it to
-
-```typescript
-export const tensorflow = $root.tensorflow = (function() {
-```
+Unfortunately the generated es6 compiled_api.js has arrow function on line 8, the sed command is to replace that with 'function()'
