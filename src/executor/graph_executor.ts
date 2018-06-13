@@ -271,7 +271,7 @@ export class GraphExecutor {
       throw new Error(
           `The dict provided in model.execute(dict) has ` +
           `unused keys: [${extra}]. Please provide only the following keys: ` +
-          `[${this.placeholders}].`);
+          `[${this.inputNodes}].`);
     }
   }
 }

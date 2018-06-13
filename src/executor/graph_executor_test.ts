@@ -87,16 +87,21 @@ describe('GraphExecutor', () => {
       describe('execute', () => {
         it('should throw exception if missing inputs', () => {
           expect(() => executor.execute({}))
-              .toThrow(new Error('Missing input placeholders: input'));
+              .toThrow(new Error(
+                  'The dict provided in model.execute(dict) has the keys [], ' +
+                  'but is missing the required keys: [input].'));
         });
 
         it('should throw exception if contains extra inputs', () => {
           const inputTensor = tfc.scalar(1);
-          expect(() => executor.execute({
-            test: [inputTensor],
-            input: [inputTensor]
-          })).toThrow(new Error('Extra input tensors: test'));
+          expect(
+              () =>
+                  executor.execute({test: [inputTensor], input: [inputTensor]}))
+              .toThrow(new Error(
+                  'The dict provided in model.execute(dict) has unused keys: ' +
+                  '[test]. Please provide only the following keys: [input].'));
         });
+
         it('should execute the op', () => {
           executor = new GraphExecutor(graph);
           const inputTensor = tfc.scalar(1);
