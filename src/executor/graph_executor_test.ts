@@ -105,9 +105,10 @@ describe('GraphExecutor', () => {
       it('should throw exception if inputs shapes do not match graph', () => {
         inputNode.params['shape'] = {value: [1, 1], type: 'shape'};
         const inputTensor = tfc.tensor1d([1], 'float32');
-        expect(() => executor.execute({
-          input: [inputTensor]
-        })).toThrow(new Error('input shape(1) must be 1,1'));
+        expect(() => executor.execute({input: [inputTensor]}))
+            .toThrow(new Error(
+                'The shape of dict[\'input\'] ' +
+                'provided in model.execute(dict) must be [1,1], but was [1]'));
       });
 
       it('should throw exception if inputs dtype do not match graph', () => {
@@ -115,7 +116,8 @@ describe('GraphExecutor', () => {
         const inputTensor = tfc.tensor1d([1], 'float32');
         expect(() => executor.execute({input: [inputTensor]}))
             .toThrow(new Error(
-                'The dtype of the input is float32 but int32 was expected'));
+                'The dtype of dict[\'input\'] provided' +
+                ' in model.execute(dict) must be int32, but was float32'));
       });
       it('should execute control flow graph', async (done) => {
         inputNode = {

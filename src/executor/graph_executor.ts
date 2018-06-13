@@ -233,13 +233,17 @@ export class GraphExecutor {
             input.shape.every(
                 (dim, index) => shape[index] === -1 || shape[index] === dim);
         util.assert(
-            match, `${node.name} shape(${input.shape}) must be ${shape}`);
+            match,
+            `The shape of dict['${
+                node.name}'] provided in model.execute(dict) must be [${
+                shape}], but was [${input.shape}]`);
       }
       if (node.params['dtype'] && node.params['dtype'].value) {
         util.assert(
             input.dtype === node.params['dtype'].value as string,
-            `The dtype of the ${node.name} is ${input.dtype} but` +
-                ` ${node.params['dtype'].value} was expected`);
+            `The dtype of dict['${
+                node.name}'] provided in model.execute(dict) must be ${
+                node.params['dtype'].value}, but was ${input.dtype}`);
       }
     });
   }
