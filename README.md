@@ -85,8 +85,9 @@ $ tensorflowjs_converter \
 | Options | Description
 |---|---|
 |`--input_format`     | The format of input model, use tf_saved_model for SavedModel, tf_frozen_model for frozen model, tf_session_bundle for session bundle, tf_hub for TensorFlow Hub module and keras for Keras HDF5. |
-|`--output_node_names`| The names of the output nodes, separated by commas.|
-|`--saved_model_tags` | Only applicable to SavedModel conversion, Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
+|<nobr>`--output_node_names`</nobr>| The names of the output nodes, separated by commas.|
+|`--output_format`| The desired output format.  Must be `tensorflowjs` (the default) or `keras`.  |
+|<nobr>`--saved_model_tags`</nobr> | Only applicable to SavedModel conversion, Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
 |`--signature_name`   | Only applicable to TensorFlow Hub module conversion, signature to load. Defaults to `default`. See https://www.tensorflow.org/hub/common_signatures/.|
 
 
