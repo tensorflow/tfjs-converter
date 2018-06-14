@@ -95,12 +95,12 @@ $ tensorflowjs_converter \
 
 | input format | output `tensorflowjs` | output `keras` |
 |---|---|---|
-|`tensorflowjs`| :x: | :heavy_check_mark: |
-|`tf_saved_model`| :heavy_check_mark: | :x: |
-|`tf_frozen_model`| :heavy_check_mark: | :x: |
-|`tf_session_bundle`| :heavy_check_mark: | :x: |
-|`tf_hub`| :heavy_check_mark: | :x: |
 |`keras`| :heavy_check_mark: | :x: |
+|`tensorflowjs`| :x: | :heavy_check_mark: |
+|`tf_frozen_model`| :heavy_check_mark: | :x: |
+|`tf_hub`| :heavy_check_mark: | :x: |
+|`tf_saved_model`| :heavy_check_mark: | :x: |
+|`tf_session_bundle`| :heavy_check_mark: | :x: |
 
 ### Web-friendly format
 
