@@ -130,7 +130,9 @@
 |Placeholder|placeholder|
 |PlaceholderWithDefault|placeholder|
 |Print|print|
+|Rank|rank|
 |Shape|shape|
+|Size|size|
 |Snapshot|snapshot|
 |StopGradient|stopGradient|
 
