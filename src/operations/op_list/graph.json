@@ -8,13 +8,35 @@
         "tfInputIndex": 0,
         "dlParamName": "default",
         "type": "tensor"
+      },
+      {
+        "tfParamName": "shape",
+        "dlParamName": "shape",
+        "type": "shape"
+      },
+      {
+        "tfParamName": "dtype",
+        "dlParamName": "dtype",
+        "type": "dtype"
       }
     ]
   },
   {
     "tfOpName": "Placeholder",
     "dlOpName": "placeholder",
-    "category": "graph"
+    "category": "graph",
+    "params": [
+      {
+        "tfParamName": "shape",
+        "dlParamName": "shape",
+        "type": "shape"
+      },
+      {
+        "tfParamName": "dtype",
+        "dlParamName": "dtype",
+        "type": "dtype"
+      }
+    ]
   },
   {
     "tfOpName": "Const",
@@ -36,6 +58,30 @@
   {
     "tfOpName": "Snapshot",
     "dlOpName": "snapshot",
+    "category": "graph",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "x",
+        "type": "tensor"
+      }
+    ]
+  },
+  {
+    "tfOpName": "Rank",
+    "dlOpName": "rank",
+    "category": "graph",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "x",
+        "type": "tensor"
+      }
+    ]
+  },
+  {
+    "tfOpName": "Size",
+    "dlOpName": "size",
     "category": "graph",
     "params": [
       {
