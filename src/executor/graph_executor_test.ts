@@ -82,7 +82,7 @@ describe('GraphExecutor', () => {
         expect(executor.outputNodes).toEqual(['output']);
       });
 
-      it('should expose placehoders', () => {
+      it('should expose placeholders', () => {
         inputNode.params['shape'] = {value: [1], type: 'shape'};
         inputNode.params['dtype'] = {value: 'float32', type: 'dtype'};
         expect(executor.inputs).toEqual([
