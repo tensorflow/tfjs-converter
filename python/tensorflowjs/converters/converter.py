@@ -233,7 +233,8 @@ def main():
     tf_saved_model_conversion.convert_tf_saved_model(
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_path, saved_model_tags=FLAGS.saved_model_tags,
-        quantization_dtype=quantization_dtype, no_op_check=FLAGS.no_op_check)
+        quantization_dtype=quantization_dtype,
+        no_op_check=FLAGS.no_op_check)
 
   elif (FLAGS.input_format == 'tf_session_bundle' and
         FLAGS.output_format == 'tensorflowjs'):
