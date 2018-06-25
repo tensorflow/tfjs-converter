@@ -74,7 +74,7 @@ def validate(nodes, skip_op_check):
 
   Args:
     nodes: tf.NodeDef TensorFlow NodeDef objects from GraphDef.
-    skip_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to skip the op check.
   """
   if skip_op_check:
     return set()
@@ -179,7 +179,7 @@ def convert_tf_session_bundle(session_bundle_dir,
       - possibly sharded binary weight files.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
-    skip_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to skip the op check.
   """
 
   print("Tensorflow has deprecated the Session Bundle format, ",
@@ -236,7 +236,7 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
       separated string format. Defaulted to 'serve'
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
-    skip_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to skip the op check.
   """
 
   if not os.path.exists(output_dir):
@@ -288,7 +288,7 @@ def convert_tf_frozen_model(frozen_model_path, output_node_names,
       - possibly sharded binary weight files.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
-    skip_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to skip the op check.
   """
 
   if not os.path.exists(output_dir):
@@ -365,7 +365,7 @@ def convert_tf_hub_module(module_path, output_dir,
       - a JSON weights manifest file named 'weights_manifest.json'
       - possibly sharded binary weight files.
     signature: string Signature to load.
-    skip_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to skip the op check.
   """
 
   if not os.path.exists(output_dir):
