@@ -69,14 +69,14 @@ def load_graph(graph_filename, output_node_names):
   return graph
 
 
-def validate(nodes, no_op_check):
+def validate(nodes, skip_op_check):
   """Validate if the node's op is compatible with TensorFlow.js.
 
   Args:
     nodes: tf.NodeDef TensorFlow NodeDef objects from GraphDef.
-    no_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to perform the op check.
   """
-  if no_op_check:
+  if skip_op_check:
     return set()
 
   ops = []
@@ -162,7 +162,7 @@ def convert_tf_session_bundle(session_bundle_dir,
                               output_node_names,
                               output_dir,
                               quantization_dtype=None,
-                              no_op_check=False):
+                              skip_op_check=False):
   """Freeze the Session Bundle model and check the model compatibility with
   Tensorflow.js.
 
@@ -179,7 +179,7 @@ def convert_tf_session_bundle(session_bundle_dir,
       - possibly sharded binary weight files.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
-    no_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to perform the op check.
   """
 
   print("Tensorflow has deprecated the Session Bundle format, ",
@@ -204,7 +204,7 @@ def convert_tf_session_bundle(session_bundle_dir,
       '',
       input_meta_graph=input_checkpoint + '.meta')
   graph = load_graph(output_graph + '.frozen', output_node_names)
-  unsupported = validate(graph.as_graph_def().node, no_op_check)
+  unsupported = validate(graph.as_graph_def().node, skip_op_check)
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
   else:
@@ -218,7 +218,7 @@ def convert_tf_session_bundle(session_bundle_dir,
 def convert_tf_saved_model(saved_model_dir, output_node_names,
                            output_dir, saved_model_tags='serve',
                            quantization_dtype=None,
-                           no_op_check=False):
+                           skip_op_check=False):
   """Freeze the SavedModel and check the model compatibility with Tensorflow.js.
 
   Optimize and convert the model to Tensorflow.js format, when the model passes
@@ -236,7 +236,7 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
       separated string format. Defaulted to 'serve'
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
-    no_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to perform the op check.
   """
 
   if not os.path.exists(output_dir):
@@ -259,7 +259,7 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
       input_saved_model_dir=saved_model_dir)
 
   graph = load_graph(output_graph + '.frozen', output_node_names)
-  unsupported = validate(graph.as_graph_def().node, no_op_check)
+  unsupported = validate(graph.as_graph_def().node, skip_op_check)
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
   else:
@@ -272,7 +272,7 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
 
 def convert_tf_frozen_model(frozen_model_path, output_node_names,
                             output_dir, quantization_dtype=None,
-                            no_op_check=False):
+                            skip_op_check=False):
   """Convert frozen model and check the model compatibility with Tensorflow.js.
 
   Optimize and convert the model to Tensorflow.js format, when the model passes
@@ -288,7 +288,7 @@ def convert_tf_frozen_model(frozen_model_path, output_node_names,
       - possibly sharded binary weight files.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
-    no_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to perform the op check.
   """
 
   if not os.path.exists(output_dir):
@@ -296,7 +296,7 @@ def convert_tf_frozen_model(frozen_model_path, output_node_names,
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
 
   graph = load_graph(frozen_model_path, output_node_names)
-  unsupported = validate(graph.as_graph_def().node, no_op_check)
+  unsupported = validate(graph.as_graph_def().node, skip_op_check)
 
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
@@ -351,7 +351,7 @@ def load_and_initialize_hub_module(module_path, signature='default'):
 
 
 def convert_tf_hub_module(module_path, output_dir,
-                          signature='default', no_op_check=False):
+                          signature='default', skip_op_check=False):
   """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
 
   Optimize and convert the TF-Hub module to Tensorflow.js format, if it passes
@@ -365,7 +365,7 @@ def convert_tf_hub_module(module_path, output_dir,
       - a JSON weights manifest file named 'weights_manifest.json'
       - possibly sharded binary weight files.
     signature: string Signature to load.
-    no_op_check: Bool whether to perform the op check.
+    skip_op_check: Bool whether to perform the op check.
   """
 
   if not os.path.exists(output_dir):
@@ -388,7 +388,7 @@ def convert_tf_hub_module(module_path, output_dir,
   frozen_graph_def = graph_util.convert_variables_to_constants(
       sess, graph.as_graph_def(), output_node_names)
 
-  unsupported = validate(frozen_graph_def.node, no_op_check)
+  unsupported = validate(frozen_graph_def.node, skip_op_check)
 
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
   frozen_file = output_graph + '.frozen'

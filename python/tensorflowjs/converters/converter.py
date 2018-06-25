@@ -184,7 +184,7 @@ def main():
       action='store_true',
       help='Show versions of tensorflowjs and its dependencies')
   parser.add_argument(
-      '--no_op_check',
+      '--skip_op_check',
       '-v',
       type=bool,
       default=False,
@@ -241,26 +241,26 @@ def main():
     tf_saved_model_conversion.convert_tf_session_bundle(
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_path, quantization_dtype=quantization_dtype,
-        no_op_check=FLAGS.no_op_check)
+        skip_op_check=FLAGS.skip_op_check)
 
   elif (FLAGS.input_format == 'tf_frozen_model' and
         FLAGS.output_format == 'tensorflowjs'):
     tf_saved_model_conversion.convert_tf_frozen_model(
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_path, quantization_dtype=quantization_dtype,
-        no_op_check=FLAGS.no_op_check)
+        skip_op_check=FLAGS.skip_op_check)
 
   elif (FLAGS.input_format == 'tf_hub' and
         FLAGS.output_format == 'tensorflowjs'):
     if FLAGS.signature_name:
       tf_saved_model_conversion.convert_tf_hub_module(
           FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
-          no_op_check=FLAGS.no_op_check)
+          skip_op_check=FLAGS.skip_op_check)
     else:
       tf_saved_model_conversion.convert_tf_hub_module(
           FLAGS.input_path,
           FLAGS.output_path,
-          no_op_check=FLAGS.no_op_check)
+          skip_op_check=FLAGS.skip_op_check)
 
   elif (FLAGS.input_format == 'tensorflowjs' and
         FLAGS.output_format == 'keras'):

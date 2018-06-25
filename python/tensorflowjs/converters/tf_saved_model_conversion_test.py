@@ -92,6 +92,7 @@ class ConvertTest(unittest.TestCase):
       x = tf.constant([[37.0, -23.0], [1.0, 4.0]])
       w = tf.Variable(tf.random_uniform([2, 2]))
       y = tf.matmul(x, w)
+      # unsupported op: matrix_diag
       z = tf.matrix_diag(y)
       tf.nn.softmax(z)
       init_op = w.initializer
@@ -201,7 +202,7 @@ class ConvertTest(unittest.TestCase):
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
-  def test_convert_saved_model_no_op_check(self):
+  def test_convert_saved_model_skip_op_check(self):
     self.create_unsupported_saved_model()
     print(glob.glob(
         os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR, '*')))
@@ -209,7 +210,7 @@ class ConvertTest(unittest.TestCase):
     tf_saved_model_conversion.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
         'Softmax',
-        os.path.join(self._tmp_dir, SAVED_MODEL_DIR), no_op_check=True
+        os.path.join(self._tmp_dir, SAVED_MODEL_DIR), skip_op_check=True
     )
 
     weights = [{
@@ -220,7 +221,7 @@ class ConvertTest(unittest.TestCase):
             'dtype': 'float32'
         }]
     }]
-    # Load the saved weights as a JSON string.
+    # Load the saved weight manifest as a JSON string.
     weights_manifest = open(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR,
                      'weights_manifest.json'), 'rt')
