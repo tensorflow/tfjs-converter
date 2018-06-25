@@ -234,7 +234,7 @@ def main():
         FLAGS.input_path, FLAGS.output_node_names,
         FLAGS.output_path, saved_model_tags=FLAGS.saved_model_tags,
         quantization_dtype=quantization_dtype,
-        no_op_check=FLAGS.no_op_check)
+        skip_op_check=FLAGS.skip_op_check)
 
   elif (FLAGS.input_format == 'tf_session_bundle' and
         FLAGS.output_format == 'tensorflowjs'):
