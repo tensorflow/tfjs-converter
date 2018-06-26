@@ -14,8 +14,9 @@
  * limitations under the License.
  * =============================================================================
  */
-import {concat, stack, Tensor, tensor, unstack} from '@tensorflow/tfjs-core';
-import {DType} from '@tensorflow/tfjs-core/dist/types';
+// tslint:disable-next-line:max-line-length
+import {concat, slice, stack, Tensor, tensor, unstack} from '@tensorflow/tfjs-core';
+import {DataType} from '@tensorflow/tfjs-core/dist/types';
 import {assertShapesMatch} from '@tensorflow/tfjs-core/dist/util';
 
 export interface TensorWithState {
@@ -30,19 +31,21 @@ export interface TensorWithState {
  */
 export class TensorArray {
   private tensors: TensorWithState[] = [];
-  private closed = false;
+  private closed_ = false;
   constructor(
-      public readonly name: string, public readonly dtype: DType,
-      initSize: number, private elementShape: number[],
+      public readonly name: string, public readonly dtype: DataType,
+      private maxSize: number, private elementShape: number[],
       public readonly identicalElementShapes: boolean,
       public readonly dynamicSize: boolean,
-      public readonly clearAfterRead: boolean) {
-    this.tensors.length = initSize;
+      public readonly clearAfterRead: boolean) {}
+
+  get closed() {
+    return this.closed_;
   }
 
   clearAndClosed() {
     this.tensors = [];
-    this.closed = true;
+    this.closed_ = true;
   }
 
   size(): number {
@@ -50,7 +53,7 @@ export class TensorArray {
   }
 
   read(index: number): Tensor {
-    if (this.closed) {
+    if (this.closed_) {
       throw new Error(`TensorArray ${this.name} has already been closed.`);
     }
 
@@ -80,14 +83,13 @@ export class TensorArray {
   }
 
   write(index: number, tensor: Tensor) {
-    if (this.closed) {
+    if (this.closed_) {
       throw new Error(`TensorArray ${this.name} has already been closed.`);
     }
 
-    if (index < 0 || !this.dynamicSize && index >= this.tensors.length) {
+    if (index < 0 || !this.dynamicSize && index >= this.maxSize) {
       throw new Error(`Tried to write to index ${
-          index}, but array is not resizeable and size is: ${
-          this.tensors.length}`);
+          index}, but array is not resizeable and size is: ${this.maxSize}`);
     }
 
     const t = this.tensors[index] || {};
@@ -133,13 +135,13 @@ export class TensorArray {
     indices.map((i, index) => this.write(i, tensors[index]));
   }
 
-  gather(indices: number[]|undefined, dtype: DType): Tensor {
-    if (dtype !== this.dtype) {
+  gather(indices?: number[], dtype?: DataType): Tensor {
+    if (!!dtype && dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
           this.dtype} but gather requested dtype ${dtype}`);
     }
 
-    if (indices === undefined) {
+    if (!indices) {
       indices = [];
       for (let i = 0; i < this.size(); i++) {
         indices.push(i);
@@ -160,8 +162,8 @@ export class TensorArray {
     return stack(tensors, 0);
   }
 
-  concat(dtype: DType): Tensor {
-    if (dtype !== this.dtype) {
+  concat(dtype?: DataType): Tensor {
+    if (!!dtype && dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
           this.dtype} but concat requested dtype ${dtype}`);
     }
@@ -187,7 +189,7 @@ export class TensorArray {
   scatter(indices: number[], tensor: Tensor) {
     if (tensor.dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
-          this.dtype} but scatter tensor has dtype ${tensor.dtype}`);
+          this.dtype} but tensor has dtype ${tensor.dtype}`);
     }
 
     if (indices.length !== tensor.shape[0]) {
@@ -195,45 +197,53 @@ export class TensorArray {
           indices.length} vs. ${tensor.shape[0]}`);
     }
 
-    if (!this.dynamicSize && this.size() !== tensor.shape[0]) {
-      throw new Error(`Expected len(indices) == tensor.shape[0], but saw: ${
-          indices.length} vs. ${tensor.shape[0]}`);
-    }
-
     const maxIndex = Math.max(...indices);
 
-    if (!this.dynamicSize && maxIndex >= this.size()) {
-      throw new Error(`Max scatter index must be < array size (${
-          maxIndex}  vs. ${this.size()})`);
+    if (!this.dynamicSize && maxIndex >= this.maxSize) {
+      throw new Error(
+          `Max index must be < array size (${maxIndex}  vs. ${this.maxSize})`);
     }
 
     this.writeMany(indices, unstack(tensor, 0));
   }
 
-  split(tensor: Tensor) {
+  split(length: number[], tensor: Tensor) {
     if (tensor.dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
-          this.dtype} but scatter tensor has dtype ${tensor.dtype}`);
+          this.dtype} but tensor has dtype ${tensor.dtype}`);
+    }
+    let totalLength = 0;
+    const cumulativeLengths = length.map(len => {
+      totalLength += len;
+      return totalLength;
+    });
+
+    if (totalLength !== tensor.shape[0]) {
+      throw new Error(`Expected sum of lengths to be equal to
+          tensor.shape[0], but sum of lengths is
+        ${totalLength}, and tensor's shape is: ${tensor.shape}`);
     }
 
-    const indices: number[] = [];
+    if (!this.dynamicSize && length.length !== this.maxSize) {
+      throw new Error(
+          `TensorArray's size is not equal to the size of lengths (${
+              this.maxSize} vs. ${length.length}), ` +
+          'and the TensorArray is not marked as dynamically resizeable');
+    }
 
-    for (let i = 0; i < tensor.shape[0]; i++) {
+    const elementPerRow = totalLength === 0 ? 0 : tensor.size / totalLength;
+    const tensors = [];
+    tensor = tensor.reshape([1, totalLength, elementPerRow]);
+    for (let i = 0; i < length.length; ++i) {
+      const previousLength = (i === 0) ? 0 : cumulativeLengths[i - 1];
+      const indices = [0, previousLength, 0];
+      const sizes = [1, length[i], elementPerRow];
+      tensors[i] = slice(tensor, indices, sizes).reshape(this.elementShape);
+    }
+    const indices = [];
+    for (let i = 0; i < length.length; i++) {
       indices[i] = i;
     }
-
-    if (!this.dynamicSize && this.size() !== tensor.shape[0]) {
-      throw new Error(`Expected len(indices) == tensor.shape[0], but saw: ${
-          indices.length} vs. ${tensor.shape[0]}`);
-    }
-
-    const maxIndex = Math.max(...indices);
-
-    if (!this.dynamicSize && maxIndex >= this.size()) {
-      throw new Error(`Max scatter index must be < array size (${
-          maxIndex}  vs. ${this.size()})`);
-    }
-
-    this.writeMany(indices, unstack(tensor, 0));
+    this.writeMany(indices, tensors);
   }
 }
