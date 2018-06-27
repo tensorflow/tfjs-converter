@@ -15,20 +15,31 @@
  * =============================================================================
  */
 
-import {tensor2d, tensor3d} from '@tensorflow/tfjs-core';
-import {expectArraysClose} from '@tensorflow/tfjs-core/dist/test_util';
+import {memory, Tensor, tensor2d, tensor3d} from '@tensorflow/tfjs-core';
+import {test_util} from '@tensorflow/tfjs-core';
 
 import {TensorArray} from './tensor_array';
 
 let tensorArray: TensorArray;
-const tensor = tensor2d([1], [1, 1], 'int32');
-const tensor2 = tensor2d([2], [1, 1], 'int32');
-describe('ExecutionContext', () => {
+let tensor: Tensor;
+let tensor2: Tensor;
+const NAME = 'TA1';
+const DTYPE = 'int32';
+const SIZE = 10;
+const SHAPE = [1, 1];
+const IDENTICAL_SHAPE = true;
+const DYNAMIC_SIZE = false;
+const CLEAR_AFTER_READ = false;
+
+describe('TensorArray', () => {
   beforeEach(() => {
-    tensorArray =
-        new TensorArray('TA1', 'int32', 10, [1, 1], true, false, false);
+    tensorArray = new TensorArray(
+        NAME, DTYPE, SIZE, SHAPE, IDENTICAL_SHAPE, DYNAMIC_SIZE,
+        CLEAR_AFTER_READ);
+    tensor = tensor2d([1], [1, 1], 'int32');
+    tensor2 = tensor2d([2], [1, 1], 'int32');
   });
-  afterEach(() => {});
+  afterEach(() => tensorArray.clearAndClose());
 
   it('should initialize', () => {
     expect(tensorArray.size()).toEqual(0);
@@ -38,9 +49,12 @@ describe('ExecutionContext', () => {
   });
 
   it('should close', () => {
-    tensorArray.clearAndClosed();
+    const numOfTensors = memory().numTensors;
+    const size = tensorArray.size();
+    tensorArray.clearAndClose();
     expect(tensorArray.size()).toBe(0);
     expect(tensorArray.closed).toBeTruthy();
+    expect(memory().numTensors).toEqual(numOfTensors - size);
   });
 
   describe('write', () => {
@@ -68,8 +82,13 @@ describe('ExecutionContext', () => {
       expect(() => tensorArray.write(11, tensor)).toThrow();
     });
     it('should fail if the array is closed', () => {
-      tensorArray.clearAndClosed();
+      tensorArray.clearAndClose();
       expect(() => tensorArray.write(0, tensor)).toThrow();
+    });
+    it('should create no new tensors', () => {
+      const numTensors = memory().numTensors;
+      tensorArray.write(0, tensor);
+      expect(memory().numTensors).toEqual(numTensors);
     });
   });
 
@@ -90,8 +109,14 @@ describe('ExecutionContext', () => {
       expect(() => tensorArray.read(-1)).toThrow();
     });
     it('should failed if array is closed', () => {
-      tensorArray.clearAndClosed();
+      tensorArray.clearAndClose();
       expect(() => tensorArray.read(0)).toThrow();
+    });
+    it('should create no new tensors', () => {
+      const numTensors = memory().numTensors;
+      tensorArray.read(0);
+      tensorArray.read(1);
+      expect(memory().numTensors).toEqual(numTensors);
     });
   });
 
@@ -103,16 +128,21 @@ describe('ExecutionContext', () => {
     it('should return default packed tensors', () => {
       const gathered = tensorArray.gather();
       expect(gathered.shape).toEqual([2, 1, 1]);
-      expectArraysClose(gathered, [1, 2]);
+      test_util.expectArraysClose(gathered, [1, 2]);
     });
 
     it('should return packed tensors when indices is specified', () => {
       const gathered = tensorArray.gather([1, 0]);
       expect(gathered.shape).toEqual([2, 1, 1]);
-      expectArraysClose(gathered, [2, 1]);
+      test_util.expectArraysClose(gathered, [2, 1]);
     });
     it('should fail if dtype is not matched', () => {
       expect(() => tensorArray.gather([0, 1], 'float32')).toThrow();
+    });
+    it('should create one new tensor', () => {
+      const numTensors = memory().numTensors;
+      tensorArray.gather();
+      expect(memory().numTensors).toEqual(numTensors + 1);
     });
   });
 
@@ -124,17 +154,21 @@ describe('ExecutionContext', () => {
     it('should return default concat tensors', () => {
       const concat = tensorArray.concat();
       expect(concat.shape).toEqual([2, 1]);
-      expectArraysClose(concat, [1, 2]);
+      test_util.expectArraysClose(concat, [1, 2]);
     });
 
     it('should fail if dtype is not matched', () => {
       expect(() => tensorArray.concat('float32')).toThrow();
     });
+
+    it('should create one new tensor', () => {
+      const numTensors = memory().numTensors;
+      tensorArray.concat();
+      expect(memory().numTensors).toEqual(numTensors + 1);
+    });
   });
 
   describe('scatter', () => {
-    beforeEach(() => {});
-
     it('should scatter the input tensor', () => {
       const input = tensor3d([1, 2, 3], [3, 1, 1], 'int32');
       tensorArray.scatter([0, 1, 2], input);
@@ -155,12 +189,19 @@ describe('ExecutionContext', () => {
       const input = tensor3d([1, 2, 3], [3, 1, 1], 'float32');
       expect(() => tensorArray.scatter([0, 1, 2], input)).toThrow();
     });
+    it('should create three new tensors', () => {
+      const input = tensor3d([1, 2, 3], [3, 1, 1], 'int32');
+      const numTensors = memory().numTensors;
+      tensorArray.scatter([0, 1, 2], input);
+      expect(memory().numTensors).toEqual(numTensors + 3);
+    });
   });
 
   describe('split', () => {
     beforeEach(() => {
-      tensorArray =
-          new TensorArray('TA1', 'int32', 3, [2, 2], true, false, false);
+      tensorArray = new TensorArray(
+          NAME, DTYPE, 3, [2, 2], IDENTICAL_SHAPE, DYNAMIC_SIZE,
+          CLEAR_AFTER_READ);
     });
 
     it('should split the input tensor', () => {
@@ -183,6 +224,14 @@ describe('ExecutionContext', () => {
     it('should fail if dtype is not matched', () => {
       const input = tensor3d([1, 2, 3], [3, 1, 1], 'float32');
       expect(() => tensorArray.split([1, 1, 1], input)).toThrow();
+    });
+
+    it('should create three new tensors', () => {
+      const input =
+          tensor3d([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [3, 2, 2], 'int32');
+      const numTensors = memory().numTensors;
+      tensorArray.split([1, 1, 1], input);
+      expect(memory().numTensors).toEqual(numTensors + 3);
     });
   });
 });

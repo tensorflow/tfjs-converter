@@ -16,6 +16,7 @@
  */
 // tslint:disable-next-line:max-line-length
 import {concat, slice, stack, Tensor, tensor, unstack} from '@tensorflow/tfjs-core';
+import {tidy} from '@tensorflow/tfjs-core';
 import {DataType} from '@tensorflow/tfjs-core/dist/types';
 import {assertShapesMatch} from '@tensorflow/tfjs-core/dist/util';
 
@@ -43,7 +44,11 @@ export class TensorArray {
     return this.closed_;
   }
 
-  clearAndClosed() {
+  /**
+   * Close the current TensorArray.
+   */
+  clearAndClose() {
+    this.tensors.forEach(tensor => tensor.tensor.dispose());
     this.tensors = [];
     this.closed_ = true;
   }
@@ -52,6 +57,10 @@ export class TensorArray {
     return this.tensors.length;
   }
 
+  /**
+   * Read the value at location index in the TensorArray.
+   * @param index Number the index to read from.
+   */
   read(index: number): Tensor {
     if (this.closed_) {
       throw new Error(`TensorArray ${this.name} has already been closed.`);
@@ -78,10 +87,18 @@ export class TensorArray {
     return tensorWithState.tensor;
   }
 
+  /**
+   * Helper method to read multiple tensors from the specified indices.
+   */
   readMany(indices: number[]): Tensor[] {
     return indices.map(index => this.read(index));
   }
 
+  /**
+   * Write value into the index of the TensorArray.
+   * @param index number the index to write to.
+   * @param tensor
+   */
   write(index: number, tensor: Tensor) {
     if (this.closed_) {
       throw new Error(`TensorArray ${this.name} has already been closed.`);
@@ -105,13 +122,13 @@ export class TensorArray {
         `TensorArray ${this.name}: Could not write to TensorArray index ${
             index}.`);
 
-    if (t.read) {
+    if (t && t.read) {
       throw new Error(
           `TensorArray ${this.name}: Could not write to TensorArray index ${
               index}, because it has already been read.`);
     }
 
-    if (t.written) {
+    if (t && t.written) {
       throw new Error(
           `TensorArray ${this.name}: Could not write to TensorArray index ${
               index}, because it has already been written.`);
@@ -123,6 +140,9 @@ export class TensorArray {
     this.tensors[index] = t;
   }
 
+  /**
+   * Helper method to write multiple tensors to the specified indices.
+   */
   writeMany(indices: number[], tensors: Tensor[]) {
     if (indices.length !== tensors.length) {
       throw new Error(
@@ -135,6 +155,14 @@ export class TensorArray {
     indices.map((i, index) => this.write(i, tensors[index]));
   }
 
+  /**
+   * Return selected values in the TensorArray as a packed Tensor. All of
+   * selected values must have been written and their shapes must all match.
+   * @param [indices] number[] Optional. Taking values in [0, max_value). If the
+   *    TensorArray is not dynamic, max_value=size(). If not specified returns
+   *    all tensors in the original order.
+   * @param [dtype]
+   */
   gather(indices?: number[], dtype?: DataType): Tensor {
     if (!!dtype && dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
@@ -162,6 +190,9 @@ export class TensorArray {
     return stack(tensors, 0);
   }
 
+  /**
+   * Return the values in the TensorArray as a concatenated Tensor.
+   */
   concat(dtype?: DataType): Tensor {
     if (!!dtype && dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
@@ -176,16 +207,23 @@ export class TensorArray {
     for (let i = 0; i < this.size(); i++) {
       indices.push(i);
     }
-    // Read all the PersistentTensors into a vector to keep track of
-    // their memory.
+    // Collect all the tensors from the tensors array.
     const tensors = this.readMany(indices);
 
     assertShapesMatch(
-        this.elementShape, tensors[0].shape, 'TensorArray shape mismatch: ');
+        this.elementShape, tensors[0].shape,
+        `TensorArray shape mismatch: tensor array shape (${
+            this.elementShape}) vs first tensor shape (${tensors[0].shape})`);
 
     return concat(tensors, 0);
   }
 
+  /**
+   * Scatter the values of a Tensor in specific indices of a TensorArray.
+   * @param indices nummber[] values in [0, max_value). If the
+   *    TensorArray is not dynamic, max_value=size().
+   * @param tensor Tensor input tensor.
+   */
   scatter(indices: number[], tensor: Tensor) {
     if (tensor.dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
@@ -207,6 +245,12 @@ export class TensorArray {
     this.writeMany(indices, unstack(tensor, 0));
   }
 
+  /**
+   * Split the values of a Tensor into the TensorArray.
+   * @param length number[] with the lengths to use when splitting value along
+   *    its first dimension.
+   * @param tensor Tensor, the tensor to split.
+   */
   split(length: number[], tensor: Tensor) {
     if (tensor.dtype !== this.dtype) {
       throw new Error(`TensorArray dtype is ${
@@ -232,14 +276,17 @@ export class TensorArray {
     }
 
     const elementPerRow = totalLength === 0 ? 0 : tensor.size / totalLength;
-    const tensors = [];
-    tensor = tensor.reshape([1, totalLength, elementPerRow]);
-    for (let i = 0; i < length.length; ++i) {
-      const previousLength = (i === 0) ? 0 : cumulativeLengths[i - 1];
-      const indices = [0, previousLength, 0];
-      const sizes = [1, length[i], elementPerRow];
-      tensors[i] = slice(tensor, indices, sizes).reshape(this.elementShape);
-    }
+    const tensors: Tensor[] = [];
+    tidy(() => {
+      tensor = tensor.reshape([1, totalLength, elementPerRow]);
+      for (let i = 0; i < length.length; ++i) {
+        const previousLength = (i === 0) ? 0 : cumulativeLengths[i - 1];
+        const indices = [0, previousLength, 0];
+        const sizes = [1, length[i], elementPerRow];
+        tensors[i] = slice(tensor, indices, sizes).reshape(this.elementShape);
+      }
+      return tensors;
+    });
     const indices = [];
     for (let i = 0; i < length.length; i++) {
       indices[i] = i;
