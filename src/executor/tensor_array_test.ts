@@ -140,7 +140,7 @@ describe('TensorArray', () => {
       expect(() => tensorArray.gather([0, 1], 'float32')).toThrow();
     });
     it('should create one new tensor', () => {
-      const numTensors = memory().numTensors;
+      const numTensors: number = memory().numTensors;
       tensorArray.gather();
       expect(memory().numTensors).toEqual(numTensors + 1);
     });
@@ -162,7 +162,7 @@ describe('TensorArray', () => {
     });
 
     it('should create one new tensor', () => {
-      const numTensors = memory().numTensors;
+      const numTensors: number = memory().numTensors;
       tensorArray.concat();
       expect(memory().numTensors).toEqual(numTensors + 1);
     });
@@ -191,7 +191,7 @@ describe('TensorArray', () => {
     });
     it('should create three new tensors', () => {
       const input = tensor3d([1, 2, 3], [3, 1, 1], 'int32');
-      const numTensors = memory().numTensors;
+      const numTensors: number = memory().numTensors;
       tensorArray.scatter([0, 1, 2], input);
       expect(memory().numTensors).toEqual(numTensors + 3);
     });
@@ -229,7 +229,7 @@ describe('TensorArray', () => {
     it('should create three new tensors', () => {
       const input =
           tensor3d([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12], [3, 2, 2], 'int32');
-      const numTensors = memory().numTensors;
+      const numTensors: number = memory().numTensors;
       tensorArray.split([1, 1, 1], input);
       expect(memory().numTensors).toEqual(numTensors + 3);
     });
