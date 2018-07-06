@@ -260,6 +260,7 @@ For ES6
 ```bash
 # Generate es6 code.
 $ node_modules/protobufjs/bin/pbjs -t static-module -w es6 -o compiled_api.js --no-create --no-encode --no-verify --no-convert --no-delimited --no-beautify --no-comments src/data/api.proto
+
 # And convert it to es5, while still using es6 modules.
 $ node_modules/.bin/tsc --lib es2015,dom --allowJs -t es5 -m es2015 compiled_api.js --outDir src/data/es6/
 ```
