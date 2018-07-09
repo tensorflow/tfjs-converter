@@ -185,7 +185,6 @@ def main():
       help='Show versions of tensorflowjs and its dependencies')
   parser.add_argument(
       '--skip_op_check',
-      '-v',
       type=bool,
       default=False,
       help='Skip op validation for TensorFlow model conversion.')
