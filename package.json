@@ -56,7 +56,8 @@
     "test": "karma start",
     "test-travis": "karma start --browsers='bs_firefox_mac,bs_chrome_mac' --singleRun",
     "lint": "tslint -p . -t verbose",
-    "make-version": "sh -c ./scripts/make-version"
+    "make-version": "sh -c ./scripts/make-version",
+    "gen-doc": "ts-node ./src/docs/doc_gen.ts"
   },
   "dependencies": {
     "@types/long": "~3.0.32",

@@ -60,8 +60,6 @@ function config({plugins = [], output = {}}) {
         }
       }),
       json(),
-      // We need babel to compile the compiled_api.js generated proto file from es6 to es5.
-      //babel(),
       ...plugins
     ],
     output: {
