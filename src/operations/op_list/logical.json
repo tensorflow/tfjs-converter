@@ -228,5 +228,33 @@
         "notSupported": true
       }
     ]
+  },
+  {
+    "tfOpName": "Where",
+    "dlOpName": "where",
+    "category": "logical",
+    "params": [
+      {
+        "tfInputIndex": 0,
+        "dlParamName": "condition",
+        "type": "tensor"
+      },
+      {
+        "tfInputIndex": 1,
+        "dlParamName": "a",
+        "type": "tensor"
+      },
+      {
+        "tfInputIndex": 2,
+        "dlParamName": "b",
+        "type": "tensor"
+      },
+      {
+        "tfParamName": "T",
+        "dlParamName": "dtype",
+        "type": "dtype",
+        "notSupported": true
+      }
+    ]
   }
 ]
