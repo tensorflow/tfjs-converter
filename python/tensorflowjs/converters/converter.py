@@ -191,7 +191,7 @@ def main():
   parser.add_argument(
       '--strip_debug_ops',
       type=bool,
-      default=False,
+      default=True,
       help='Strip debug ops (Assert, CheckNumerics, Print) from graph.')
 
   FLAGS = parser.parse_args()
