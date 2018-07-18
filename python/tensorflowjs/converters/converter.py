@@ -192,7 +192,7 @@ def main():
       '--strip_debug_ops',
       type=bool,
       default=True,
-      help='Strip debug ops (Assert, CheckNumerics, Print) from graph.')
+      help='Strip debug ops (Print, Assert, CheckNumerics) from graph.')
 
   FLAGS = parser.parse_args()
 
