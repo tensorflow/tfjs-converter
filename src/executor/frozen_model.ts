@@ -24,6 +24,12 @@ import {OperationMapper} from '../operations/operation_mapper';
 
 import {GraphExecutor} from './graph_executor';
 
+/**
+ * A `FrozenModel` is a directed, acyclic graph of built from
+ * SavedModel GraphDef and allows inference exeuction.
+ */
+
+/** @doc {heading: 'Models', subheading: 'Classes'} */
 export class FrozenModel implements tfc.InferenceModel {
   private executor: GraphExecutor;
   private version = 'n/a';
@@ -261,6 +267,7 @@ export class FrozenModel implements tfc.InferenceModel {
  * @param requestOption options for Request, which allows to send credentials
  * and custom headers.
  */
+/** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadFrozenModel(
     modelUrl: string, weightsManifestUrl: string,
     requestOption?: RequestInit): Promise<FrozenModel> {
