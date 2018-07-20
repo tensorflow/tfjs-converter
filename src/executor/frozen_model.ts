@@ -24,6 +24,15 @@ import {OperationMapper} from '../operations/operation_mapper';
 
 import {GraphExecutor} from './graph_executor';
 
+// If fetch is not defined, assume the environment is Node
+let fsReadFile: any, fsWriteFile: any, isNode: boolean = false;
+if(typeof fetch === 'undefined') {
+  isNode = true;
+  const fs = require('fs');
+  const { promisify } = require('util');
+  [ fsReadFile, fsWriteFile ] = [ fs.readFile, fs.writeFile ].map(promisify)
+}
+
 export class FrozenModel implements tfc.InferenceModel {
   private executor: GraphExecutor;
   private version = 'n/a';
@@ -84,9 +93,13 @@ export class FrozenModel implements tfc.InferenceModel {
    */
   private async loadRemoteProtoFile(): Promise<tensorflow.GraphDef> {
     try {
-      const response = await fetch(this.modelUrl, this.requestOption);
-      return tensorflow.GraphDef.decode(
-          new Uint8Array(await response.arrayBuffer()));
+      let response;
+      if(isNode) {
+        response = await fsReadFile(this.modelUrl)
+      } else {
+        response = await (await fetch(this.modelUrl, this.requestOption)).arrayBuffer();
+      }
+      return tensorflow.GraphDef.decode(new Uint8Array(response));
     } catch (error) {
       throw new Error(`${this.modelUrl} not found. ${error}`);
     }
@@ -98,8 +111,13 @@ export class FrozenModel implements tfc.InferenceModel {
    */
   private async loadWeightManifest(): Promise<void> {
     try {
-      const manifest = await fetch(this.weightManifestUrl, this.requestOption);
-      this.weightManifest = await manifest.clone().json();
+      if(isNode) {
+        const manifest = await fsReadFile(this.weightManifestUrl);
+        this.weightManifest = JSON.parse(manifest.toString());
+      } else {
+        const manifest = await fetch(this.weightManifestUrl, this.requestOption);
+        this.weightManifest = await manifest.clone().json();
+      }
     } catch (error) {
       throw new Error(`${this.weightManifestUrl} not found. ${error}`);
     }
