@@ -21,7 +21,7 @@ import {Node} from '../types';
 
 import {executeOp} from './evaluation_executor';
 // tslint:disable-next-line:max-line-length
-import {createBoolAttr, createNumberAttrFromIndex, createNumericArrayAttr, createTensorAttr} from './test_helper';
+import {createBoolAttr, createNumberAttrFromIndex, createTensorAttr} from './test_helper';
 
 describe('evaluation', () => {
   let node: Node;
@@ -48,9 +48,9 @@ describe('evaluation', () => {
         node.params['x'] = createTensorAttr(0);
         node.params['k'] = createNumberAttrFromIndex(1);
         node.params['sorted'] = createBoolAttr(true);
-        spyOn(tfc, 'topK');
+        spyOn(tfc, 'topk');
         executeOp(node, {input1, input2}, context);
-        expect(tfc.topK).toHaveBeenCalledWith(input1[0], 2, true);
+        expect(tfc.topk).toHaveBeenCalledWith(input1[0], 2, true);
       });
     });
   });

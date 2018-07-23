@@ -33,7 +33,8 @@ export let executeOp: OpExecutor =
           const k = getParamValue('k', node, tensorMap, context) as number;
           const sorted =
               getParamValue('sorted', node, tensorMap, context) as boolean;
-          return [tfc.topK(x, k, sorted)];
+          const result = tfc.topk(x, k, sorted);
+          return [result.values, result.indices];
         }
         default:
           throw TypeError(`Node type ${node.op} is not implemented`);
