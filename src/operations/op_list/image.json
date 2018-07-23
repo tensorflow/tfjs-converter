@@ -73,7 +73,7 @@
       {
         "tfInputIndex": 2,
         "dlParamName": "maxOutputSize",
-        "type": "tensor"
+        "type": "number"
       },
       {
         "tfInputIndex": 3,
@@ -100,7 +100,7 @@
       {
         "tfInputIndex": 2,
         "dlParamName": "maxOutputSize",
-        "type": "tensor"
+        "type": "number"
       },
       {
         "tfInputIndex": 3,

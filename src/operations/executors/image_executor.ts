@@ -54,14 +54,14 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
       const scores =
           getParamValue('scores', node, tensorMap, context) as tfc.Tensor;
       const maxOutputSize =
-          getParamValue('maxOutputSize', node, tensorMap, context) as
-          tfc.Tensor;
+          getParamValue('maxOutputSize', node, tensorMap, context) as number;
       const iouThreshold =
           getParamValue('iouThreshold', node, tensorMap, context) as number;
       const scoreThreshold =
           getParamValue('scoreThreshold', node, tensorMap, context) as number;
       return [tfc.image.nonMaxSuppression(
-          boxes, scores, maxOutputSize, iouThreshold, scoreThreshold)];
+          boxes as tfc.Tensor2D, scores as tfc.Tensor1D, maxOutputSize,
+          iouThreshold, scoreThreshold)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

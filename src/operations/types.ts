@@ -56,6 +56,7 @@ export interface Graph {
   inputs: Node[];
   outputs: Node[];
   withControlFlow: boolean;
+  withDynamicShape: boolean;
 }
 
 export type ValueType =
