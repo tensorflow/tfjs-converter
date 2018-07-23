@@ -15,13 +15,13 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-import {ExecutionContext} from '../../executor/execution_context';
 
+import {ExecutionContext} from '../../executor/execution_context';
 import {Node} from '../types';
 
 import {executeOp} from './image_executor';
 // tslint:disable-next-line:max-line-length
-import {createBoolAttr, createNumericArrayAttr, createTensorAttr} from './test_helper';
+import {createBoolAttr, createNumberAttr, createNumericArrayAttr, createTensorAttr} from './test_helper';
 
 describe('image', () => {
   let node: Node;
@@ -63,6 +63,25 @@ describe('image', () => {
         executeOp(node, {input1}, context);
         expect(tfc.image.resizeNearestNeighbor)
             .toHaveBeenCalledWith(input1[0], [1, 2], true);
+      });
+    });
+    describe('nonMaxSuppression', () => {
+      it('should return input', () => {
+        node.op = 'nonMaxSuppression';
+        node.params['boxes'] = createTensorAttr(0);
+        node.params['scores'] = createTensorAttr(1);
+        node.params['maxOutputSize'] = createTensorAttr(2);
+        node.params['iouThreshold'] = createTensorAttr(3);
+        node.params['scoreThreshold'] = createNumberAttr(1);
+        node.inputNames = ['input1', 'input2', 'input3', 'input4'];
+        const input2 = [tfc.tensor1d([1])];
+        const input3 = [tfc.tensor1d([1])];
+        const input4 = [tfc.tensor1d([1])];
+        spyOn(tfc.image, 'nonMaxSuppression');
+        executeOp(node, {input1, input2, input3, input4}, context);
+        expect(tfc.image.nonMaxSuppression)
+            .toHaveBeenCalledWith(
+                input1[0], input2[0], input3[0], input4[0], 1);
       });
     });
   });
