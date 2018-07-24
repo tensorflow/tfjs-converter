@@ -152,7 +152,7 @@
 |LogicalOr|logicalOr|
 |NotEqual|notEqual|
 |Select|where|
-|Where|where|
+|Where|whereAsync|
 |Not mapped|logicalXor|
 
 

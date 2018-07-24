@@ -24,9 +24,9 @@ import {Node} from '../types';
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
-export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+export let executeOp: OpExecutor = async(
+    node: Node, tensorMap: NamedTensorsMap,
+    context: ExecutionContext): Promise<tfc.Tensor[]> => {
   switch (node.op) {
     case 'equal': {
       return [tfc.equal(
@@ -77,6 +77,10 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('condition', node, tensorMap, context) as tfc.Tensor,
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
+    }
+    case 'whereAsync': {
+      return [await tfc.whereAsync(
+          getParamValue('condition', node, tensorMap, context) as tfc.Tensor)];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

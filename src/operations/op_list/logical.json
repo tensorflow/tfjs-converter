@@ -231,22 +231,12 @@
   },
   {
     "tfOpName": "Where",
-    "dlOpName": "where",
+    "dlOpName": "whereAsync",
     "category": "logical",
     "params": [
       {
         "tfInputIndex": 0,
         "dlParamName": "condition",
-        "type": "tensor"
-      },
-      {
-        "tfInputIndex": 1,
-        "dlParamName": "a",
-        "type": "tensor"
-      },
-      {
-        "tfInputIndex": 2,
-        "dlParamName": "b",
         "type": "tensor"
       },
       {
