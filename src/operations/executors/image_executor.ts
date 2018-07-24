@@ -24,9 +24,9 @@ import {Node} from '../types';
 import {OpExecutor} from './types';
 import {getParamValue} from './utils';
 
-export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+export let executeOp: OpExecutor = async(
+    node: Node, tensorMap: NamedTensorsMap,
+    context: ExecutionContext): Promise<tfc.Tensor[]> => {
   switch (node.op) {
     case 'resizeBilinear': {
       const images =
@@ -59,7 +59,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('iouThreshold', node, tensorMap, context) as number;
       const scoreThreshold =
           getParamValue('scoreThreshold', node, tensorMap, context) as number;
-      return [tfc.image.nonMaxSuppression(
+      return [await tfc.image.nonMaxSuppressionAsync(
           boxes as tfc.Tensor2D, scores as tfc.Tensor1D, maxOutputSize,
           iouThreshold, scoreThreshold)];
     }

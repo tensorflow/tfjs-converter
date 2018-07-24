@@ -77,9 +77,9 @@ describe('image', () => {
         const input2 = [tfc.tensor1d([1])];
         const input3 = [tfc.tensor1d([1])];
         const input4 = [tfc.tensor1d([1])];
-        spyOn(tfc.image, 'nonMaxSuppression');
+        spyOn(tfc.image, 'nonMaxSuppressionAsync');
         executeOp(node, {input1, input2, input3, input4}, context);
-        expect(tfc.image.nonMaxSuppression)
+        expect(tfc.image.nonMaxSuppressionAsync)
             .toHaveBeenCalledWith(
                 input1[0], input2[0], input3[0], input4[0], 1);
       });
