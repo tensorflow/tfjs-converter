@@ -26,7 +26,7 @@ import {createBoolAttr, createNumberAttrFromIndex, createTensorAttr} from './tes
 describe('evaluation', () => {
   let node: Node;
   const input1 = [tfc.tensor1d([1])];
-  const input2 = [tfc.scalar(2)];
+  const input2 = [tfc.scalar(1)];
   const context = new ExecutionContext({}, {});
 
   beforeEach(() => {
@@ -48,9 +48,9 @@ describe('evaluation', () => {
         node.params['x'] = createTensorAttr(0);
         node.params['k'] = createNumberAttrFromIndex(1);
         node.params['sorted'] = createBoolAttr(true);
-        spyOn(tfc, 'topk');
+        spyOn(tfc, 'topk').and.callThrough();
         executeOp(node, {input1, input2}, context);
-        expect(tfc.topk).toHaveBeenCalledWith(input1[0], 2, true);
+        expect(tfc.topk).toHaveBeenCalledWith(input1[0], 1, true);
       });
     });
   });
