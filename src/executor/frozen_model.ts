@@ -262,8 +262,8 @@ export class FrozenModel implements tfc.InferenceModel {
 /**
  * Load the frozen model through url.
  *
- * Example loading the MobileNetV2 model and run inference for an all zero
- * tensor.
+ * Example of loading the MobileNetV2 model and making a prediction with a zero
+ * input.
  *
  * ```js
  * const GOOGLE_CLOUD_STORAGE_DIR =
