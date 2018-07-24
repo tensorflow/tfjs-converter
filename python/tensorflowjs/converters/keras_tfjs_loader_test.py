@@ -324,30 +324,26 @@ class LoadKerasModelTest(tf.test.TestCase):
           os.path.join(save_dir, 'model.json'), use_unique_name_scope=True)
       self.assertAllClose(predict_out, model2.predict(x))
 
-  # TODO(cais): The following test currently fails. This is related to an
-  #   issue in TensorFlow tf.keras:
-  #   https://github.com/tensorflow/tensorflow/issues/19836
-  #   Uncomment the following test once the issue is fixed.
-  # def testLoadNestedTfKerasModel(self):
-  #   with tf.Graph().as_default(), tf.Session():
-  #     inner_model = tf.keras.Sequential([
-  #         tf.keras.layers.Dense(4, input_shape=[3], activation='relu'),
-  #         tf.keras.layers.Dense(3, activation='tanh')])
-  #     outer_model = tf.keras.Sequential()
-  #     outer_model.add(inner_model)
-  #     outer_model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-  #     outer_model.compile(loss='binary_crossentropy', optimizer='sgd')
+  def testLoadNestedTfKerasModel(self):
+    with tf.Graph().as_default(), tf.Session():
+      inner_model = tf.keras.Sequential([
+          tf.keras.layers.Dense(4, input_shape=[3], activation='relu'),
+          tf.keras.layers.Dense(3, activation='tanh')])
+      outer_model = tf.keras.Sequential()
+      outer_model.add(inner_model)
+      outer_model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+      outer_model.compile(loss='binary_crossentropy', optimizer='sgd')
 
-  #     x = np.ones([1, 3], dtype=np.float32)
-  #     predict_out = outer_model.predict(x)
+      x = np.ones([1, 3], dtype=np.float32)
+      predict_out = outer_model.predict(x)
 
-  #     save_dir = os.path.join(self._tmp_dir, 'nested_model')
-  #     keras_h5_conversion.save_keras_model(outer_model, save_dir)
+      save_dir = os.path.join(self._tmp_dir, 'nested_model')
+      keras_h5_conversion.save_keras_model(outer_model, save_dir)
 
-  #   with tf.Graph().as_default(), tf.Session():
-  #     model2 = keras_tfjs_loader.load_keras_model(
-  #         os.path.join(save_dir, 'model.json'), use_unique_name_scope=True)
-  #     self.assertAllClose(predict_out, model2.predict(x))
+    with tf.Graph().as_default(), tf.Session():
+      model2 = keras_tfjs_loader.load_keras_model(
+          os.path.join(save_dir, 'model.json'), use_unique_name_scope=True)
+      self.assertAllClose(predict_out, model2.predict(x))
 
   def testLoadKerasModeFromNonexistentWeightsPathRaisesError(self):
     with tf.Graph().as_default(), tf.Session():
@@ -386,6 +382,63 @@ class LoadKerasModelTest(tf.test.TestCase):
             model_json_path,
             weights_data_buffers=[b'foo'], weights_path_prefix='bar')
 
+  def testLoadFunctionalKerasModel(self):
+    with tf.Graph().as_default(), tf.Session():
+      input1 = keras.Input([4])
+      x1 = keras.layers.Dense(2, activation='relu')(input1)
+      x1 = keras.layers.BatchNormalization()(x1)
+
+      input2 = keras.Input([10])
+      x2 = keras.layers.Dense(5, activation='relu')(input2)
+      x2 = keras.layers.BatchNormalization()(x2)
+
+      y = keras.layers.Concatenate()([x1, x2])
+      y = keras.layers.Dense(1, activation='sigmoid')(y)
+
+      model = keras.Model([input1, input2], y)
+      model.compile(loss='binary_crossentropy', optimizer='sgd')
+
+      input1_val = np.ones([1, 4])
+      input2_val = np.ones([1, 10])
+      predict_out = model.predict([input1_val, input2_val])
+
+      save_dir = os.path.join(self._tmp_dir, 'functional_model')
+      keras_h5_conversion.save_keras_model(model, save_dir)
+
+    with tf.Graph().as_default(), tf.Session():
+      model2 = keras_tfjs_loader.load_keras_model(
+          os.path.join(save_dir, 'model.json'))
+      self.assertAllClose(
+          predict_out, model2.predict([input1_val, input2_val]))
+
+  def testLoadFunctionalTfKerasModel(self):
+    with tf.Graph().as_default(), tf.Session():
+      input1 = tf.keras.Input([4])
+      x1 = tf.keras.layers.Dense(2, activation='relu')(input1)
+      x1 = tf.keras.layers.BatchNormalization()(x1)
+
+      input2 = tf.keras.Input([10])
+      x2 = tf.keras.layers.Dense(5, activation='relu')(input2)
+      x2 = tf.keras.layers.BatchNormalization()(x2)
+
+      y = tf.keras.layers.Concatenate()([x1, x2])
+      y = tf.keras.layers.Dense(1, activation='sigmoid')(y)
+
+      model = tf.keras.Model([input1, input2], y)
+      model.compile(loss='binary_crossentropy', optimizer='sgd')
+
+      input1_val = np.ones([1, 4])
+      input2_val = np.ones([1, 10])
+      predict_out = model.predict([input1_val, input2_val])
+
+      save_dir = os.path.join(self._tmp_dir, 'functional_model')
+      keras_h5_conversion.save_keras_model(model, save_dir)
+
+    with tf.Graph().as_default(), tf.Session():
+      model2 = keras_tfjs_loader.load_keras_model(
+          os.path.join(save_dir, 'model.json'))
+      self.assertAllClose(
+          predict_out, model2.predict([input1_val, input2_val]))
 
 
 if __name__ == '__main__':
