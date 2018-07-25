@@ -66,6 +66,37 @@ class TestWriteWeights(unittest.TestCase):
     weight1 = np.fromfile(weights_path, 'float32')
     np.testing.assert_array_equal(weight1, np.array([1, 2, 3], 'float32'))
 
+  def test_1_group_1_weight_bool(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([True, False, True], 'bool')
+        }]
+    ]
+
+    manifest_json = write_weights.write_weights(
+        groups, TMP_DIR, shard_size_bytes=4 * 4)
+    manifest = json.loads(manifest_json)
+
+    self.assertTrue(
+        os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
+        'weights_manifest.json does not exist')
+
+    self.assertEqual(
+        manifest,
+        [{
+            'paths': ['group1-shard1of1'],
+            'weights': [{
+                'name': 'weight1',
+                'shape': [3],
+                'dtype': 'bool'
+            }]
+        }])
+
+    weights_path = os.path.join(TMP_DIR, 'group1-shard1of1')
+    weight1 = np.fromfile(weights_path, 'bool')
+    np.testing.assert_array_equal(weight1, np.array([True, False, True], 'bool'))
+
   def test_1_group_1_weight_sharded(self):
     groups = [
         [{
