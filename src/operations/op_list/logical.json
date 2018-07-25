@@ -228,23 +228,5 @@
         "notSupported": true
       }
     ]
-  },
-  {
-    "tfOpName": "Where",
-    "dlOpName": "whereAsync",
-    "category": "logical",
-    "params": [
-      {
-        "tfInputIndex": 0,
-        "dlParamName": "condition",
-        "type": "tensor"
-      },
-      {
-        "tfParamName": "T",
-        "dlParamName": "dtype",
-        "type": "dtype",
-        "notSupported": true
-      }
-    ]
   }
 ]

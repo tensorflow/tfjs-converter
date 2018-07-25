@@ -74,18 +74,5 @@ describe('logical', () => {
         expect(tfc.where).toHaveBeenCalledWith(input3[0], input1[0], input2[0]);
       });
     });
-
-    describe('whereAsync', () => {
-      it('should call tfc.whereAsync', async () => {
-        spyOn(tfc, 'whereAsync');
-        node.op = 'whereAsync';
-        node.inputNames = ['input1'];
-        const input1 = [tfc.scalar(1)];
-        node.params = {'condition': createTensorAttr(0)};
-        await executeOp(node, {input1}, context);
-
-        expect(tfc.whereAsync).toHaveBeenCalledWith(input1[0]);
-      });
-    });
   });
 });
