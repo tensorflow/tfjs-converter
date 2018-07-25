@@ -95,7 +95,8 @@ class TestWriteWeights(unittest.TestCase):
 
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1')
     weight1 = np.fromfile(weights_path, 'bool')
-    np.testing.assert_array_equal(weight1, np.array([True, False, True], 'bool'))
+    np.testing.assert_array_equal(
+        weight1, np.array([True, False, True], 'bool'))
 
   def test_1_group_1_weight_sharded(self):
     groups = [
@@ -227,7 +228,8 @@ class TestWriteWeights(unittest.TestCase):
     shard_2_int = np.frombuffer(shard_2_bytes[:4], 'int32')
     np.testing.assert_array_equal(shard_2_int, np.array([3], 'int32'))
     shard_2_bool = np.frombuffer(shard_2_bytes[4:], 'bool')
-    np.testing.assert_array_equal(shard_2_bool, np.array([True, False, False, True], 'bool'))
+    np.testing.assert_array_equal(
+        shard_2_bool, np.array([True, False, False, True], 'bool'))
 
     shard_3_path = os.path.join(TMP_DIR, 'group1-shard3of3')
     shard_3 = np.fromfile(shard_3_path, 'float32')
