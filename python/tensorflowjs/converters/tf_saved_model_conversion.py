@@ -79,7 +79,6 @@ def validate(nodes, skip_op_check, strip_debug_ops):
   """
   if skip_op_check:
     return set()
-  print(nodes)
   ops = []
   op_list_path = os.path.join(
       os.path.dirname(os.path.abspath(__file__)), '../op_list/')
