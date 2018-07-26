@@ -27,8 +27,6 @@ from tensorflow.python.tools import freeze_graph
 import tensorflow_hub as hub
 from tensorflowjs.converters import tf_saved_model_conversion
 
-from unittest.mock import patch
-
 SAVED_MODEL_DIR = 'saved_model'
 SESSION_BUNDLE_MODEL_DIR = 'session_bundle'
 FROZEN_MODEL_DIR = 'frozen_model'
@@ -229,7 +227,7 @@ class ConvertTest(unittest.TestCase):
 
   def test_optimizer_add_unsupported_op(self):
     with tf.test.mock.patch.object(tf_saved_model_conversion, 'optimize_graph',
-                    return_value={'node': [{'op': 'unknown'}]}):
+                                   return_value={'node': [{'op': 'unknown'}]}):
       self.create_saved_model()
       print(glob.glob(
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
@@ -243,13 +241,13 @@ class ConvertTest(unittest.TestCase):
       self.assertFalse(
           glob.glob(
               os.path.join(self._tmp_dir, SAVED_MODEL_DIR,
-                          'weights_manifest.json')))
+                           'weights_manifest.json')))
 
       # Check the content of the output directory.
       self.assertFalse(
           glob.glob(
               os.path.join(self._tmp_dir, SAVED_MODEL_DIR,
-                          'tensorflowjs_model.pb')))
+                           'tensorflowjs_model.pb')))
       self.assertFalse(
           glob.glob(
               os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))

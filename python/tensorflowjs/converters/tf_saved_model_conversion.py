@@ -357,7 +357,7 @@ def load_and_initialize_hub_module(module_path, signature='default'):
     signature_outputs = module.get_output_info_dict(signature)
     # First check there are no SparseTensors in input or output.
     for key, info in list(signature_inputs.items()) + list(
-            signature_outputs.items()):
+        signature_outputs.items()):
       if info.is_sparse:
         raise ValueError(
             'Signature "%s" has a SparseTensor on input/output "%s".'
@@ -379,8 +379,8 @@ def load_and_initialize_hub_module(module_path, signature='default'):
 
 
 def convert_tf_hub_module(module_path, output_dir,
-                          signature='default', quantization_dtype=None, skip_op_check=False,
-                          strip_debug_ops=False):
+                          signature='default', quantization_dtype=None,
+                          skip_op_check=False, strip_debug_ops=False):
   """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
 
   Optimize and convert the TF-Hub module to Tensorflow.js format, if it passes
