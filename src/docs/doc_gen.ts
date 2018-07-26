@@ -63,37 +63,40 @@ async function genDoc() {
 
   output.push('# Supported Tensorflow Ops\n\n');
 
-  generateTable('Operations', 'Arithmetic', arithmetic.json, output, coreApis);
-  generateTable('Operations', 'Basic math', basicMath.json, output, coreApis);
   generateTable(
-      'Operations', 'Control Flow', (control.json, output,
+      'Operations', 'Arithmetic', arithmetic.json as OpMapper[], output,
       coreApis);
   generateTable(
-      'Operations', 'Convolution', (convolution.json, output,
+      'Operations', 'Basic math', basicMath.json as OpMapper[], output,
       coreApis);
   generateTable(
-      'Tensors', 'Creation', (creation.json, output, coreApis);
-  generateTable(
-      'Tensorflow', 'Graph', (graph.json, output, coreApis);
-  generateTable(
-      'Operations', 'Logical', (logical.json, output, coreApis);
-  generateTable(
-      'Operations', 'Matrices', (matrices.json, output,
+      'Operations', 'Control Flow', control.json as OpMapper[], output,
       coreApis);
   generateTable(
-      'Operations', 'Normalization', (normalization.json,
-      output, coreApis);
-  generateTable(
-      'Operations', 'Images', (image.json, output, coreApis);
-  generateTable(
-      'Operations', 'Reduction', (reduction.json, output,
+      'Operations', 'Convolution', convolution.json as OpMapper[], output,
       coreApis);
   generateTable(
-      'Tensors', 'Slicing and Joining', (sliceJoin.json, output,
+      'Tensors', 'Creation', creation.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Tensorflow', 'Graph', graph.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Operations', 'Logical', logical.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Operations', 'Matrices', matrices.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Operations', 'Normalization', normalization.json as OpMapper[], output,
       coreApis);
   generateTable(
-      'Tensors', 'Transformations', (transformation.json,
-      output, coreApis);
+      'Operations', 'Images', image.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Operations', 'Reduction', reduction.json as OpMapper[], output,
+      coreApis);
+  generateTable(
+      'Tensors', 'Slicing and Joining', sliceJoin.json as OpMapper[], output,
+      coreApis);
+  generateTable(
+      'Tensors', 'Transformations', transformation.json as OpMapper[], output,
+      coreApis);
 
   console.log(process.cwd());
   fs.writeFileSync(DOC_DIR + 'supported_ops.md', output.join(''));

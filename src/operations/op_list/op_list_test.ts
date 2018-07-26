@@ -14,10 +14,9 @@
  * limitations under the License.
  * =============================================================================
  */
+
 import * as ajv from 'ajv';
-
 import * as schema from '../op_mapper_schema';
-
 import * as arithmetic from './arithmetic';
 import * as basicMath from './basic_math';
 import * as convolution from './convolution';
@@ -33,31 +32,29 @@ import * as transformation from './transformation';
 
 describe('OpListTest', () => {
   const jsonValidator = new ajv();
-  const validator = jsonValidator.compile(schema);
+  const validator = jsonValidator.compile(schema.json);
   beforeEach(() => {});
 
-  describe('validate schema', () => {
-    // tslint:disable-next-line:no-any
-    const mappersJson: any = {
-      arithmetic,
-      basicMath,
-      convolution,
-      creation,
-      logical,
-      image,
-      graph,
-      matrices,
-      normalization,
-      reduction,
-      sliceJoin,
-      transformation
-    };
-    Object.keys(mappersJson).forEach(key => {
-      it('should satisfy the schema: ' + key, () => {
-        const valid = validator(mappersJson[key]);
-        if (!valid) console.log(validator.errors);
-        expect(valid).toBeTruthy();
-      });
+  // tslint:disable-next-line:no-any
+  const mappersJson: any = {
+    arithmetic,
+    basicMath,
+    convolution,
+    creation,
+    logical,
+    image,
+    graph,
+    matrices,
+    normalization,
+    reduction,
+    sliceJoin,
+    transformation
+  };
+  Object.keys(mappersJson).forEach(key => {
+    it('should satisfy the schema: ' + key, () => {
+      const valid = validator(mappersJson[key].json);
+      if (!valid) console.log(validator.errors);
+      expect(valid).toBeTruthy();
     });
   });
 });

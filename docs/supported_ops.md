@@ -74,6 +74,15 @@
 |Merge|merge|
 |NextIteration|nextIteration|
 |Switch|switch|
+|TensorArrayCloseV3|tensorArrayClose|
+|TensorArrayConcatV3|tensorArrayConcat|
+|TensorArrayGatherV3|tensorArrayGather|
+|TensorArrayReadV3|tensorArrayRead|
+|TensorArrayScatterV3|tensorArrayScatter|
+|TensorArraySizeV3|tensorArraySize|
+|TensorArraySplitV3|tensorArraySplit|
+|TensorArrayV3|tensorArray|
+|TensorArrayWriteV3|tensorArrayWrite|
 
 
 ## Operations - Convolution
@@ -152,7 +161,6 @@
 |LogicalOr|logicalOr|
 |NotEqual|notEqual|
 |Select|where|
-|Where|whereAsync|
 |Not mapped|logicalXor|
 
 
@@ -182,6 +190,8 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
+|NonMaxSuppressionV2|nonMaxSuppression|
+|NonMaxSuppressionV3|nonMaxSuppression|
 |ResizeBilinear|resizeBilinear|
 |ResizeNearestNeighbor|resizeNearestNeighbor|
 
@@ -229,7 +239,7 @@
 |Pad|pad|
 |PadV2|pad|
 |Reshape|reshape|
-|Squeeze|squeeze|
 |SpaceToBatchND|spaceToBatchND|
+|Squeeze|squeeze|
 
 
