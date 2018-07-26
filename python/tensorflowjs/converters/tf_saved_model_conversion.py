@@ -79,7 +79,7 @@ def validate(nodes, skip_op_check, strip_debug_ops):
   """
   if skip_op_check:
     return set()
-
+  print(nodes)
   ops = []
   op_list_path = os.path.join(
       os.path.dirname(os.path.abspath(__file__)), '../op_list/')
@@ -99,6 +99,7 @@ def validate(nodes, skip_op_check, strip_debug_ops):
 def optimize_graph(graph,
                    output_graph,
                    quantization_dtype=None,
+                   skip_op_check=False,
                    strip_debug_ops=False):
   """Takes a Python Graph object and optimizes the graph.
 
@@ -118,7 +119,14 @@ def optimize_graph(graph,
   optimized_graph = tf_optimizer.OptimizeGraph(
       rewriter_config, meta_graph, cluster=get_cluster())
 
-  extract_weights(optimized_graph, output_graph, quantization_dtype)
+  unsupported = validate(optimized_graph.node, skip_op_check,
+                         strip_debug_ops)
+
+  if unsupported:
+    print('Unsupported Ops in the model\n' + ', '.join(unsupported))
+  else:
+    extract_weights(optimized_graph, output_graph, quantization_dtype)
+
   return optimize_graph
 
 
@@ -220,7 +228,8 @@ def convert_tf_session_bundle(session_bundle_dir,
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
   else:
-    optimize_graph(graph, output_graph, quantization_dtype, strip_debug_ops)
+    optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
+                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
   # Clean up the temp files.
   if os.path.exists(frozen_file):
@@ -278,7 +287,8 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
   else:
-    optimize_graph(graph, output_graph, quantization_dtype, strip_debug_ops)
+    optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
+                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
   # Clean up the temp files.
   if os.path.exists(frozen_file):
@@ -319,7 +329,8 @@ def convert_tf_frozen_model(frozen_model_path, output_node_names,
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
   else:
-    optimize_graph(graph, output_graph, quantization_dtype, strip_debug_ops)
+    optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
+                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
 
 def load_and_initialize_hub_module(module_path, signature='default'):
@@ -347,7 +358,7 @@ def load_and_initialize_hub_module(module_path, signature='default'):
     signature_outputs = module.get_output_info_dict(signature)
     # First check there are no SparseTensors in input or output.
     for key, info in list(signature_inputs.items()) + list(
-        signature_outputs.items()):
+            signature_outputs.items()):
       if info.is_sparse:
         raise ValueError(
             'Signature "%s" has a SparseTensor on input/output "%s".'
@@ -369,7 +380,7 @@ def load_and_initialize_hub_module(module_path, signature='default'):
 
 
 def convert_tf_hub_module(module_path, output_dir,
-                          signature='default', skip_op_check=False,
+                          signature='default', quantization_dtype=None, skip_op_check=False,
                           strip_debug_ops=False):
   """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
 
@@ -419,7 +430,8 @@ def convert_tf_hub_module(module_path, output_dir,
       f.write(frozen_graph_def.SerializeToString())
 
     graph = load_graph(frozen_file, ','.join(output_node_names))
-    optimize_graph(graph, output_graph, strip_debug_ops=strip_debug_ops)
+    optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
+                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
   # Clean up the temp files.
   if os.path.exists(frozen_file):

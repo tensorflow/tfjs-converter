@@ -27,6 +27,8 @@ from tensorflow.python.tools import freeze_graph
 import tensorflow_hub as hub
 from tensorflowjs.converters import tf_saved_model_conversion
 
+from unittest.mock import patch
+
 SAVED_MODEL_DIR = 'saved_model'
 SESSION_BUNDLE_MODEL_DIR = 'session_bundle'
 FROZEN_MODEL_DIR = 'frozen_model'
@@ -192,7 +194,7 @@ class ConvertTest(unittest.TestCase):
   def test_convert_saved_model(self):
     self.create_saved_model()
     print(glob.glob(
-        os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR, '*')))
+        os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
 
     tf_saved_model_conversion.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
@@ -224,6 +226,33 @@ class ConvertTest(unittest.TestCase):
     self.assertTrue(
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
+
+  def test_optimizer_add_unsupported_op(self):
+    with tf.test.mock.patch.object(tf_saved_model_conversion, 'optimize_graph',
+                    return_value={'node': [{'op': 'unknown'}]}):
+      self.create_saved_model()
+      print(glob.glob(
+          os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
+
+      tf_saved_model_conversion.convert_tf_saved_model(
+          os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
+          'Softmax',
+          os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
+      )
+
+      self.assertFalse(
+          glob.glob(
+              os.path.join(self._tmp_dir, SAVED_MODEL_DIR,
+                          'weights_manifest.json')))
+
+      # Check the content of the output directory.
+      self.assertFalse(
+          glob.glob(
+              os.path.join(self._tmp_dir, SAVED_MODEL_DIR,
+                          'tensorflowjs_model.pb')))
+      self.assertFalse(
+          glob.glob(
+              os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
   def test_convert_saved_model_skip_op_check(self):
     self.create_unsupported_saved_model()
