@@ -225,7 +225,7 @@ def convert_tf_session_bundle(session_bundle_dir,
   unsupported = validate(graph.as_graph_def().node, skip_op_check,
                          strip_debug_ops)
   if unsupported:
-    print('Unsupported Ops in the model\n' + ', '.join(unsupported))
+    print('Unsupported Ops in the model after optimization\n' + ', '.join(unsupported))
   else:
     optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
                    skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
