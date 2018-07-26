@@ -37,7 +37,6 @@ export interface OpMapper {
   dlOpName: string;
   category: Category;
   params: ParamMapper[];
-  unsupportedParams: string[];
 }
 
 export interface Node {

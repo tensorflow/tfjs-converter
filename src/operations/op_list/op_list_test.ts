@@ -16,20 +16,20 @@
  */
 import * as ajv from 'ajv';
 
-import * as schema from '../op_mapper_schema.json';
+import * as schema from '../op_mapper_schema';
 
-import * as arithmetic from './arithmetic.json';
-import * as basicMath from './basic_math.json';
-import * as convolution from './convolution.json';
-import * as creation from './creation.json';
-import * as graph from './graph.json';
-import * as image from './image.json';
-import * as logical from './logical.json';
-import * as matrices from './matrices.json';
-import * as normalization from './normalization.json';
-import * as reduction from './reduction.json';
-import * as sliceJoin from './slice_join.json';
-import * as transformation from './transformation.json';
+import * as arithmetic from './arithmetic';
+import * as basicMath from './basic_math';
+import * as convolution from './convolution';
+import * as creation from './creation';
+import * as graph from './graph';
+import * as image from './image';
+import * as logical from './logical';
+import * as matrices from './matrices';
+import * as normalization from './normalization';
+import * as reduction from './reduction';
+import * as sliceJoin from './slice_join';
+import * as transformation from './transformation';
 
 describe('OpListTest', () => {
   const jsonValidator = new ajv();

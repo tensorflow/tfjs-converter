@@ -15,9 +15,7 @@
  * =============================================================================
  */
 
-import json from 'rollup-plugin-json';
 import node from 'rollup-plugin-node-resolve';
-import typescript from 'rollup-plugin-typescript2';
 import commonjs from 'rollup-plugin-commonjs';
 import uglify from 'rollup-plugin-uglify';
 
@@ -46,20 +44,17 @@ function minify() {
 
 function config({plugins = [], output = {}}) {
   return {
-    input: 'src/index.ts',
+    input: 'src/data/compiled_api.js',
     plugins: [
-      typescript({
-        tsconfigOverride: {compilerOptions: {module: 'ES2015'}}
-      }),
       node(),
       // Polyfill require() from dependencies.
       commonjs({
         namedExports: {
-          './src/data/compiled_api.js': ['tensorflow'],
+          //'./src/data/compiled_api.js': ['tensorflow'],
           './node_modules/protobufjs/minimal.js': ['roots', 'Reader', 'util']
         }
       }),
-      json(),
+      // json(),
       ...plugins
     ],
     output: {
@@ -80,28 +75,27 @@ function config({plugins = [], output = {}}) {
 }
 
 export default [
+  // config({
+  //   output: {
+  //     format: 'umd',
+  //     name: 'tf',
+  //     extend: true,
+  //     file: 'dist/tf-converter.js'
+  //   }
+  // }),
+  // config({
+  //   plugins: [minify()],
+  //   output: {
+  //     format: 'umd',
+  //     name: 'tf',
+  //     extend: true,
+  //     file: 'dist/tf-converter.min.js'
+  //   }
+  // }),
   config({
-    output: {
-      format: 'umd',
-      name: 'tf',
-      extend: true,
-      file: 'dist/tf-converter.js'
-    }
-  }),
-  config({
-    plugins: [minify()],
-    output: {
-      format: 'umd',
-      name: 'tf',
-      extend: true,
-      file: 'dist/tf-converter.min.js'
-    }
-  }),
-  config({
-    plugins: [minify()],
     output: {
       format: 'es',
-      file: 'dist/tf-converter.esm.js'
+      file: 'src/data/compiled_api.esm.js'
     }
   })
 ];

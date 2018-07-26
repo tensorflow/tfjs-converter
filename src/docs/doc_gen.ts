@@ -18,31 +18,28 @@ import * as tfc from '@tensorflow/tfjs-core';
 import * as fs from 'fs';
 import fetch from 'node-fetch';
 
-import * as arithmetic from '../operations/op_list/arithmetic.json';
-import * as basicMath from '../operations/op_list/basic_math.json';
-import * as control from '../operations/op_list/control.json';
-import * as convolution from '../operations/op_list/convolution.json';
-import * as creation from '../operations/op_list/creation.json';
-import * as graph from '../operations/op_list/graph.json';
-import * as image from '../operations/op_list/image.json';
-import * as logical from '../operations/op_list/logical.json';
-import * as matrices from '../operations/op_list/matrices.json';
-import * as normalization from '../operations/op_list/normalization.json';
-import * as reduction from '../operations/op_list/reduction.json';
-import * as sliceJoin from '../operations/op_list/slice_join.json';
-import * as transformation from '../operations/op_list/transformation.json';
+import * as arithmetic from '../operations/op_list/arithmetic';
+import * as basicMath from '../operations/op_list/basic_math';
+import * as control from '../operations/op_list/control';
+import * as convolution from '../operations/op_list/convolution';
+import * as creation from '../operations/op_list/creation';
+import * as graph from '../operations/op_list/graph';
+import * as image from '../operations/op_list/image';
+import * as logical from '../operations/op_list/logical';
+import * as matrices from '../operations/op_list/matrices';
+import * as normalization from '../operations/op_list/normalization';
+import * as reduction from '../operations/op_list/reduction';
+import * as sliceJoin from '../operations/op_list/slice_join';
+import * as transformation from '../operations/op_list/transformation';
 import {OpMapper} from '../operations/types';
 
 const DOC_DIR = './docs/';
 
 const opMappers = [
-  ...(arithmetic as {}) as OpMapper[], ...(basicMath as {}) as OpMapper[],
-  ...(control as {}) as OpMapper[], ...(convolution as {}) as OpMapper[],
-  ...(creation as {}) as OpMapper[], ...(logical as {}) as OpMapper[],
-  ...(image as {}) as OpMapper[], ...(graph as {}) as OpMapper[],
-  ...(matrices as {}) as OpMapper[], ...(normalization as {}) as OpMapper[],
-  ...(reduction as {}) as OpMapper[], ...(sliceJoin as {}) as OpMapper[],
-  ...(transformation as {}) as OpMapper[]
+  ...arithmetic.json, ...basicMath.json, ...control.json, ...convolution.json,
+  ...creation.json, ...logical.json, ...image.json, ...graph.json,
+  ...matrices.json, ...normalization.json, ...reduction.json, ...sliceJoin.json,
+  ...transformation.json
 ];
 const GITHUB_URL_PREFIX =
     'https://raw.githubusercontent.com/tensorflow/tfjs-website';
@@ -66,40 +63,36 @@ async function genDoc() {
 
   output.push('# Supported Tensorflow Ops\n\n');
 
+  generateTable('Operations', 'Arithmetic', arithmetic.json, output, coreApis);
+  generateTable('Operations', 'Basic math', basicMath.json, output, coreApis);
   generateTable(
-      'Operations', 'Arithmetic', (arithmetic as {}) as OpMapper[], output,
+      'Operations', 'Control Flow', (control.json, output,
       coreApis);
   generateTable(
-      'Operations', 'Basic math', (basicMath as {}) as OpMapper[], output,
+      'Operations', 'Convolution', (convolution.json, output,
       coreApis);
   generateTable(
-      'Operations', 'Control Flow', (control as {}) as OpMapper[], output,
+      'Tensors', 'Creation', (creation.json, output, coreApis);
+  generateTable(
+      'Tensorflow', 'Graph', (graph.json, output, coreApis);
+  generateTable(
+      'Operations', 'Logical', (logical.json, output, coreApis);
+  generateTable(
+      'Operations', 'Matrices', (matrices.json, output,
       coreApis);
   generateTable(
-      'Operations', 'Convolution', (convolution as {}) as OpMapper[], output,
-      coreApis);
-  generateTable(
-      'Tensors', 'Creation', (creation as {}) as OpMapper[], output, coreApis);
-  generateTable(
-      'Tensorflow', 'Graph', (graph as {}) as OpMapper[], output, coreApis);
-  generateTable(
-      'Operations', 'Logical', (logical as {}) as OpMapper[], output, coreApis);
-  generateTable(
-      'Operations', 'Matrices', (matrices as {}) as OpMapper[], output,
-      coreApis);
-  generateTable(
-      'Operations', 'Normalization', (normalization as {}) as OpMapper[],
+      'Operations', 'Normalization', (normalization.json,
       output, coreApis);
   generateTable(
-      'Operations', 'Images', (image as {}) as OpMapper[], output, coreApis);
+      'Operations', 'Images', (image.json, output, coreApis);
   generateTable(
-      'Operations', 'Reduction', (reduction as {}) as OpMapper[], output,
+      'Operations', 'Reduction', (reduction.json, output,
       coreApis);
   generateTable(
-      'Tensors', 'Slicing and Joining', (sliceJoin as {}) as OpMapper[], output,
+      'Tensors', 'Slicing and Joining', (sliceJoin.json, output,
       coreApis);
   generateTable(
-      'Tensors', 'Transformations', (transformation as {}) as OpMapper[],
+      'Tensors', 'Transformations', (transformation.json,
       output, coreApis);
 
   console.log(process.cwd());
