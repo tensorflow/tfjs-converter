@@ -231,8 +231,8 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
     with self.assertRaisesRegexp(ValueError, r'^Unsupported Ops'):
-      node = Mock(op='unknown')
-      graph = Mock(node=[node])
+      node = tf.test.mock.Mock(op='unknown')
+      graph = tf.test.mock.Mock(node=[node])
       with tf.test.mock.patch.object(tf_optimizer, 'OptimizeGraph',
                                      return_value=graph):
         tf_saved_model_conversion.convert_tf_saved_model(
