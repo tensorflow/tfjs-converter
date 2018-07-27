@@ -111,7 +111,7 @@ def optimize_graph(graph,
   if unsupported:
     print('Unsupported Ops in the model before optimization\n' +
           ', '.join(unsupported))
-    raise Exception('Validation Error')
+    raise ValueError('Validation Error')
 
   rewriter_config = rewriter_config_pb2.RewriterConfig()
   rewriter_config.optimizers[:] = [
@@ -130,7 +130,7 @@ def optimize_graph(graph,
 
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
-    raise Exception('validation error')
+    raise ValueError('validation error')
 
   extract_weights(optimized_graph, output_graph, quantization_dtype)
   return optimize_graph
