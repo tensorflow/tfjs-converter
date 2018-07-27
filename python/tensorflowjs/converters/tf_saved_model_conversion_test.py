@@ -21,7 +21,6 @@ import shutil
 import tempfile
 import unittest
 
-from unittest.mock import Mock
 import tensorflow as tf
 from tensorflow.python.tools import freeze_graph
 from tensorflow.python.grappler import tf_optimizer
