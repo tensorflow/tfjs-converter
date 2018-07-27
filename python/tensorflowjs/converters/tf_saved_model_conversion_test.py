@@ -230,7 +230,8 @@ class ConvertTest(unittest.TestCase):
     self.create_saved_model()
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
-    with self.assertRaisesRegexp(ValueError, r'^Unsupported Ops'):
+    with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
+        ValueError, r'^Unsupported Ops'):
       node = tf.test.mock.Mock(op='unknown')
       graph = tf.test.mock.Mock(node=[node])
       with tf.test.mock.patch.object(tf_optimizer, 'OptimizeGraph',
