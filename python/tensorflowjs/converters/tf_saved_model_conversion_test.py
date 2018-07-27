@@ -232,7 +232,7 @@ class ConvertTest(unittest.TestCase):
     self.create_saved_model()
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
-    with self.assertRaisesRegex(ValueError, 'validation error'):
+    with self.assertRaisesRegex(ValueError, r'^Unsupported Ops'):
       node = Mock(op='unknown')
       graph = Mock(node=[node])
       with tf.test.mock.patch.object(tf_optimizer, 'OptimizeGraph',
