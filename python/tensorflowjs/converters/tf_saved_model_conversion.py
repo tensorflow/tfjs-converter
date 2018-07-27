@@ -106,6 +106,13 @@ def optimize_graph(graph,
     graph: tf.Graph TensorFlow dataflow graph.
     strip_debug_ops: Bool whether to strip out debug ops.
   """
+  unsupported = validate(graph.as_graph_def().node, skip_op_check,
+                         strip_debug_ops)
+  if unsupported:
+    print('Unsupported Ops in the model before optimization\n' +
+          ', '.join(unsupported))
+    raise Exception('Validation Error')
+
   rewriter_config = rewriter_config_pb2.RewriterConfig()
   rewriter_config.optimizers[:] = [
       'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning',
@@ -123,9 +130,9 @@ def optimize_graph(graph,
 
   if unsupported:
     print('Unsupported Ops in the model\n' + ', '.join(unsupported))
-  else:
-    extract_weights(optimized_graph, output_graph, quantization_dtype)
+    raise Exception('validation error')
 
+  extract_weights(optimized_graph, output_graph, quantization_dtype)
   return optimize_graph
 
 
@@ -222,17 +229,14 @@ def convert_tf_session_bundle(session_bundle_dir,
       '',
       input_meta_graph=input_checkpoint + '.meta')
   graph = load_graph(output_graph + '.frozen', output_node_names)
-  unsupported = validate(graph.as_graph_def().node, skip_op_check,
-                         strip_debug_ops)
-  if unsupported:
-    print('Unsupported Ops in the model after optimization\n' + ', '.join(unsupported))
-  else:
+
+  try:
     optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
                    skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
-
-  # Clean up the temp files.
-  if os.path.exists(frozen_file):
-    os.remove(frozen_file)
+  finally:
+    # Clean up the temp files.
+    if os.path.exists(frozen_file):
+      os.remove(frozen_file)
 
 
 def convert_tf_saved_model(saved_model_dir, output_node_names,
@@ -281,17 +285,13 @@ def convert_tf_saved_model(saved_model_dir, output_node_names,
       input_saved_model_dir=saved_model_dir)
 
   graph = load_graph(output_graph + '.frozen', output_node_names)
-  unsupported = validate(graph.as_graph_def().node, skip_op_check,
-                         strip_debug_ops)
-  if unsupported:
-    print('Unsupported Ops in the model\n' + ', '.join(unsupported))
-  else:
+  try:
     optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
                    skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
-
-  # Clean up the temp files.
-  if os.path.exists(frozen_file):
-    os.remove(frozen_file)
+  finally:
+    # Clean up the temp files.
+    if os.path.exists(frozen_file):
+      os.remove(frozen_file)
 
 
 def convert_tf_frozen_model(frozen_model_path, output_node_names,
@@ -322,14 +322,8 @@ def convert_tf_frozen_model(frozen_model_path, output_node_names,
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
 
   graph = load_graph(frozen_model_path, output_node_names)
-  unsupported = validate(graph.as_graph_def().node, skip_op_check,
-                         strip_debug_ops)
-
-  if unsupported:
-    print('Unsupported Ops in the model\n' + ', '.join(unsupported))
-  else:
-    optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
-                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
+  optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
+                 skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
 
 def load_and_initialize_hub_module(module_path, signature='default'):
@@ -418,20 +412,16 @@ def convert_tf_hub_module(module_path, output_dir,
   frozen_graph_def = graph_util.convert_variables_to_constants(
       sess, graph.as_graph_def(), output_node_names)
 
-  unsupported = validate(frozen_graph_def.node, skip_op_check, strip_debug_ops)
-
   output_graph = os.path.join(output_dir, DEFAULT_MODEL_PB_FILENAME)
   frozen_file = output_graph + '.frozen'
-  if unsupported:
-    print('Unsupported Ops in the module\n' + ', '.join(unsupported))
-  else:
+  try:
     with tf.gfile.GFile(frozen_file, 'wb') as f:
       f.write(frozen_graph_def.SerializeToString())
 
     graph = load_graph(frozen_file, ','.join(output_node_names))
     optimize_graph(graph, output_graph, quantization_dtype=quantization_dtype,
                    skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
-
-  # Clean up the temp files.
-  if os.path.exists(frozen_file):
-    os.remove(frozen_file)
+  finally:
+    # Clean up the temp files.
+    if os.path.exists(frozen_file):
+      os.remove(frozen_file)
