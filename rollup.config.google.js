@@ -43,7 +43,6 @@ export default {
       // Polyfill require() from dependencies.
       commonjs({
         namedExports: {
-          //'./src/data/compiled_api.js': ['tensorflow'],
           './node_modules/protobufjs/minimal.js': ['roots', 'Reader', 'util']
         }
       }),
@@ -53,7 +52,7 @@ export default {
       banner: PREAMBLE,
       globals: {'@tensorflow/tfjs-core': 'tf'},
       format: 'es',
-      file: 'compiled_api.js'
+      file: 'src/data/compiled_api.js'
     },
     external: ['@tensorflow/tfjs-core'],
     onwarn: warning => {
