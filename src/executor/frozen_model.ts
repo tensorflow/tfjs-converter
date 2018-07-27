@@ -95,8 +95,8 @@ export class FrozenModel implements tfc.InferenceModel {
   private async loadRemoteProtoFile(): Promise<tensorflow.GraphDef> {
     try {
       const response = await fetch(this.modelUrl, this.requestOption);
-      return tensorflow.GraphDef.decode(
-          new Uint8Array(await response.arrayBuffer()));
+      const buffer = await response.arrayBuffer();
+      return tensorflow.GraphDef.decode(new Uint8Array(buffer));
     } catch (error) {
       throw new Error(`${this.modelUrl} not found. ${error}`);
     }
@@ -122,7 +122,8 @@ export class FrozenModel implements tfc.InferenceModel {
     const graphPromise = this.loadRemoteProtoFile();
     const manifestPromise = this.loadWeightManifest();
 
-    const [graph, ] = await Promise.all([graphPromise, manifestPromise]);
+    const res = await Promise.all([graphPromise, manifestPromise]);
+    const graph = res[0];
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap = await tfc.io.loadWeights(

@@ -18,6 +18,7 @@
 import node from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import uglify from 'rollup-plugin-uglify';
+import cleanup from 'rollup-plugin-cleanup';
 
 const PREAMBLE = `/**
  * @license
@@ -55,6 +56,7 @@ function config({plugins = [], output = {}}) {
         }
       }),
       // json(),
+      cleanup({comments: 'none'}),
       ...plugins
     ],
     output: {
