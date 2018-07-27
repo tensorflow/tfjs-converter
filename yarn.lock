@@ -3871,7 +3871,7 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
-rollup-plugin-cleanup@^3.0.0:
+rollup-plugin-cleanup@~3.0.0:
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/rollup-plugin-cleanup/-/rollup-plugin-cleanup-3.0.0.tgz#d23b3eef6c3fab78fc313a89eb8f0c955526815f"
   dependencies:
