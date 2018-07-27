@@ -16,12 +16,9 @@
  */
 
 import * as tfc from '@tensorflow/tfjs-core';
-import * as Url from 'url';
-
 import {tensorflow} from '../data/compiled_api';
 import {NamedTensorsMap, TensorInfo} from '../data/types';
 import {OperationMapper} from '../operations/operation_mapper';
-
 import {GraphExecutor} from './graph_executor';
 
 /**
@@ -78,11 +75,18 @@ export class FrozenModel implements tfc.InferenceModel {
    * Returns the path prefix for this.weightManifestUrl.
    */
   getPathPrefix() {
-    const url = Url.parse(this.weightManifestUrl);
-    const segments = url.pathname.split('/');
-    segments.splice(-1);
-    url.pathname = segments.join('/');
-    return Url.format(url) + '/';
+    let lastIndex = this.weightManifestUrl.length;
+    const queryIndex = this.weightManifestUrl.indexOf('?');
+    const hashIndex = this.weightManifestUrl.indexOf('#');
+    if (queryIndex >= 0) {
+      lastIndex = queryIndex;
+    }
+    if (hashIndex >= 0) {
+      lastIndex = Math.min(lastIndex, hashIndex);
+    }
+    const url = this.weightManifestUrl.slice(0, lastIndex);
+    const end = url.lastIndexOf('/');
+    return end >= 0 ? url.slice(0, end) + '/' : '/';
   }
 
   /**
