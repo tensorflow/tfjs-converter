@@ -42,7 +42,7 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
         }
       }
     },
-    {
+   {
       name: 'Const',
       op: 'Const',
       attr: {
@@ -55,7 +55,7 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
           }
         }
       }
-    },
+    }, 
     {
       name: 'Shape',
       op: 'Const',
@@ -101,6 +101,14 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
       op: 'Squeeze',
       input: ['BiasAdd'],
       attr: {squeeze_dims: {list: {i: [Long.fromInt(1), Long.fromInt(2)]}}}
+    },
+    {
+      name: 'Split',
+      op: 'Split',
+      input: ['image_placeholder'],
+      attr: {
+        num_split: {i: 3}
+      }
     }
   ],
   versions: {producer: 1.0}
@@ -122,14 +130,14 @@ describe('operationMapper', () => {
 
       it('should find the graph output nodes', () => {
         expect(graph.outputs.map(node => node.name)).toEqual([
-          'Fill', 'Squeeze'
+          'Fill', 'Squeeze', 'Split'
         ]);
       });
 
       it('should convert nodes', () => {
         expect(Object.keys(graph.nodes)).toEqual([
           'image_placeholder', 'Const', 'Shape', 'Value', 'Fill', 'Conv2D',
-          'BiasAdd', 'Squeeze'
+          'BiasAdd', 'Squeeze', 'Split'
         ]);
       });
     });
@@ -142,7 +150,7 @@ describe('operationMapper', () => {
       });
       it('should find the children nodes', () => {
         expect(graph.nodes['image_placeholder'].children.map(node => node.name))
-            .toEqual(['Conv2D']);
+            .toEqual(['Conv2D', 'Split']);
       });
 
       it('should map the input params', () => {
@@ -157,6 +165,7 @@ describe('operationMapper', () => {
         expect(graph.nodes['Conv2D'].params['pad'].value).toEqual('valid');
         expect(graph.nodes['Conv2D'].params['useCudnnOnGpu'].value)
             .toEqual(true);
+        expect(graph.nodes['Split'].params['numOrSizeSplits'].value).toEqual(3);
       });
 
       it('should map the placeholder attribute params', () => {
