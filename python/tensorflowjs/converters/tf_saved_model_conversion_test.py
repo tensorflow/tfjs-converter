@@ -21,14 +21,13 @@ import shutil
 import tempfile
 import unittest
 
+from unittest.mock import Mock
 import tensorflow as tf
 from tensorflow.python.tools import freeze_graph
 from tensorflow.python.grappler import tf_optimizer
 
 import tensorflow_hub as hub
 from tensorflowjs.converters import tf_saved_model_conversion
-
-from unittest.mock import Mock
 
 SAVED_MODEL_DIR = 'saved_model'
 SESSION_BUNDLE_MODEL_DIR = 'session_bundle'
@@ -236,7 +235,7 @@ class ConvertTest(unittest.TestCase):
       node = Mock(op='unknown')
       graph = Mock(node=[node])
       with tf.test.mock.patch.object(tf_optimizer, 'OptimizeGraph',
-                                      return_value=graph):
+                                     return_value=graph):
         tf_saved_model_conversion.convert_tf_saved_model(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
             'Softmax',
