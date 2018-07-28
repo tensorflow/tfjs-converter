@@ -19,6 +19,13 @@ import node from 'rollup-plugin-node-resolve';
 import commonjs from 'rollup-plugin-commonjs';
 import cleanup from 'rollup-plugin-cleanup';
 
+/**
+ * This rollup config is used by `yarn gen-google3-proto` to create a
+ * self-contained compiled_api.js that has protobuf in it. This script is used
+ * only when synching code internally to eliminate having protobufjs as an
+ * external dependency.
+ */
+
 const PREAMBLE = `/**
  * @license
  * Copyright ${(new Date).getFullYear()} Google LLC. All Rights Reserved.
