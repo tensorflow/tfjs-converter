@@ -17,10 +17,14 @@
 
 import * as ajv from 'ajv';
 import * as schema from '../op_mapper_schema';
+
 import * as arithmetic from './arithmetic';
 import * as basicMath from './basic_math';
+import * as control from './control';
 import * as convolution from './convolution';
 import * as creation from './creation';
+import * as dynamic from './dynamic';
+import * as evaluation from './evaluation';
 import * as graph from './graph';
 import * as image from './image';
 import * as logical from './logical';
@@ -39,7 +43,10 @@ describe('OpListTest', () => {
   const mappersJson: any = {
     arithmetic,
     basicMath,
+    control,
     convolution,
+    dynamic,
+    evaluation,
     creation,
     logical,
     image,

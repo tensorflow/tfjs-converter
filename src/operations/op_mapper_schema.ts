@@ -20,9 +20,9 @@ export const json = {
   'definitions': {
     'Category': {
       'enum': [
-        'arithmetic', 'basic_math', 'convolution', 'creation', 'dynamic',
-        'evaluation', 'image', 'graph', 'logical', 'matrices', 'normalization',
-        'reduction', 'slice_join', 'transformation'
+        'arithmetic', 'basic_math', 'control', 'convolution', 'creation',
+        'dynamic', 'evaluation', 'image', 'graph', 'logical', 'matrices',
+        'normalization', 'reduction', 'slice_join', 'transformation'
       ],
       'type': 'string'
     },
