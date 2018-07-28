@@ -14,24 +14,26 @@
  * limitations under the License.
  * =============================================================================
  */
+
 import * as tfc from '@tensorflow/tfjs-core';
 import * as fs from 'fs';
 import fetch from 'node-fetch';
-
-import * as arithmetic from '../operations/op_list/arithmetic';
-import * as basicMath from '../operations/op_list/basic_math';
-import * as control from '../operations/op_list/control';
-import * as convolution from '../operations/op_list/convolution';
-import * as creation from '../operations/op_list/creation';
-import * as graph from '../operations/op_list/graph';
-import * as image from '../operations/op_list/image';
-import * as logical from '../operations/op_list/logical';
-import * as matrices from '../operations/op_list/matrices';
-import * as normalization from '../operations/op_list/normalization';
-import * as reduction from '../operations/op_list/reduction';
-import * as sliceJoin from '../operations/op_list/slice_join';
-import * as transformation from '../operations/op_list/transformation';
-import {OpMapper} from '../operations/types';
+import * as arithmetic from '../src/operations/op_list/arithmetic';
+import * as basicMath from '../src/operations/op_list/basic_math';
+import * as control from '../src/operations/op_list/control';
+import * as convolution from '../src/operations/op_list/convolution';
+import * as creation from '../src/operations/op_list/creation';
+import * as dynamic from '../src/operations/op_list/dynamic';
+import * as evaluation from '../src/operations/op_list/evaluation';
+import * as graph from '../src/operations/op_list/graph';
+import * as image from '../src/operations/op_list/image';
+import * as logical from '../src/operations/op_list/logical';
+import * as matrices from '../src/operations/op_list/matrices';
+import * as normalization from '../src/operations/op_list/normalization';
+import * as reduction from '../src/operations/op_list/reduction';
+import * as sliceJoin from '../src/operations/op_list/slice_join';
+import * as transformation from '../src/operations/op_list/transformation';
+import {OpMapper} from '../src/operations/types';
 
 const DOC_DIR = './docs/';
 
