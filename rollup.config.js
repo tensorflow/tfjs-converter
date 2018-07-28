@@ -15,7 +15,6 @@
  * =============================================================================
  */
 
-import json from 'rollup-plugin-json';
 import node from 'rollup-plugin-node-resolve';
 import typescript from 'rollup-plugin-typescript2';
 import commonjs from 'rollup-plugin-commonjs';
@@ -59,7 +58,6 @@ function config({plugins = [], output = {}}) {
           './node_modules/protobufjs/minimal.js': ['roots', 'Reader', 'util']
         }
       }),
-      json(),
       ...plugins
     ],
     output: {
