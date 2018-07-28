@@ -50,7 +50,7 @@
     "yalc": "~1.0.0-pre.21"
   },
   "scripts": {
-    "build": "tsc && copyfiles -f src/data/compiled_api.* dist/data && copyfiles -f src/operations/op_list/*.json dist/operations/op_list",
+    "build": "tsc && yarn gen-json && copyfiles -f src/data/compiled_api.* dist/data",
     "build-npm": "./scripts/build-npm.sh",
     "link-local": "yalc link",
     "publish-local": "yarn build-npm && yalc push",
@@ -58,8 +58,9 @@
     "test-travis": "karma start --browsers='bs_firefox_mac,bs_chrome_mac' --singleRun",
     "lint": "tslint -p . -t verbose",
     "make-version": "sh -c ./scripts/make-version",
-    "gen-doc": "ts-node ./scripts/doc_gen.ts",
-    "gen-proto-api": "rollup -c rollup.config.google.js"
+    "gen-doc": "ts-node ./scripts/gen_doc.ts",
+    "gen-google3-proto": "rollup -c rollup.config.google.js",
+    "gen-json": "ts-node ./scripts/gen_json.ts"
   },
   "dependencies": {
     "@types/long": "~3.0.32",

@@ -18,6 +18,7 @@
 import * as tfc from '@tensorflow/tfjs-core';
 import * as fs from 'fs';
 import fetch from 'node-fetch';
+
 import * as arithmetic from '../src/operations/op_list/arithmetic';
 import * as basicMath from '../src/operations/op_list/basic_math';
 import * as control from '../src/operations/op_list/control';
@@ -39,9 +40,9 @@ const DOC_DIR = './docs/';
 
 const opMappers = [
   ...arithmetic.json, ...basicMath.json, ...control.json, ...convolution.json,
-  ...creation.json, ...logical.json, ...image.json, ...graph.json,
-  ...matrices.json, ...normalization.json, ...reduction.json, ...sliceJoin.json,
-  ...transformation.json
+  ...creation.json, ...dynamic.json, ...evaluation.json, ...logical.json,
+  ...image.json, ...graph.json, ...matrices.json, ...normalization.json,
+  ...reduction.json, ...sliceJoin.json, ...transformation.json
 ];
 const GITHUB_URL_PREFIX =
     'https://raw.githubusercontent.com/tensorflow/tfjs-website';
@@ -79,6 +80,11 @@ async function genDoc() {
       coreApis);
   generateTable(
       'Tensors', 'Creation', creation.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Operations', 'Dynamic', dynamic.json as OpMapper[], output, coreApis);
+  generateTable(
+      'Operations', 'Evaluation', evaluation.json as OpMapper[], output,
+      coreApis);
   generateTable(
       'Tensorflow', 'Graph', graph.json as OpMapper[], output, coreApis);
   generateTable(
