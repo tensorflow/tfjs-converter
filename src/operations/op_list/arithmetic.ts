@@ -31,6 +31,17 @@ export const json = [
     ]
   },
   {
+    'tfOpName': 'AddN',
+    'dlOpName': 'addN',
+    'category': 'arithmetic',
+    'params': [{
+      'tfInputIndex': 0,
+      'tfInputParamLength': 0,
+      'dlParamName': 'tensors',
+      'type': 'tensors'
+    }]
+  },
+  {
     'tfOpName': 'BiasAdd',
     'dlOpName': 'add',
     'category': 'arithmetic',

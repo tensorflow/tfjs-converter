@@ -53,28 +53,5 @@ export const json = [
         'notSupported': true
       }
     ]
-  },
-  {
-    'tfOpName': 'NonMaxSuppressionV2',
-    'dlOpName': 'nonMaxSuppression',
-    'category': 'image',
-    'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'boxes', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'scores', 'type': 'tensor'},
-      {'tfInputIndex': 2, 'dlParamName': 'maxOutputSize', 'type': 'number'},
-      {'tfInputIndex': 3, 'dlParamName': 'iouThreshold', 'type': 'number'}
-    ]
-  },
-  {
-    'tfOpName': 'NonMaxSuppressionV3',
-    'dlOpName': 'nonMaxSuppression',
-    'category': 'image',
-    'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'boxes', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'scores', 'type': 'tensor'},
-      {'tfInputIndex': 2, 'dlParamName': 'maxOutputSize', 'type': 'number'},
-      {'tfInputIndex': 3, 'dlParamName': 'iouThreshold', 'type': 'number'},
-      {'tfInputIndex': 4, 'dlParamName': 'scoreThreshold', 'type': 'number'}
-    ]
   }
 ];

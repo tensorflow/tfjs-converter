@@ -5,6 +5,7 @@
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
 |Add|add|
+|AddN|addN|
 |BiasAdd|add|
 |Div|div|
 |FloorDiv|floorDiv|
@@ -129,6 +130,22 @@
 |Not mapped|variable|
 
 
+## Operations - Dynamic
+
+|Tensorflow Op Name|Tensorflow.js Op Name|
+|---|---|
+|NonMaxSuppressionV2|nonMaxSuppression|
+|NonMaxSuppressionV3|nonMaxSuppression|
+|Where|whereAsync|
+
+
+## Operations - Evaluation
+
+|Tensorflow Op Name|Tensorflow.js Op Name|
+|---|---|
+|TopKV2|topK|
+
+
 ## Tensorflow - Graph
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
@@ -190,8 +207,6 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
-|NonMaxSuppressionV2|nonMaxSuppression|
-|NonMaxSuppressionV3|nonMaxSuppression|
 |ResizeBilinear|resizeBilinear|
 |ResizeNearestNeighbor|resizeNearestNeighbor|
 
