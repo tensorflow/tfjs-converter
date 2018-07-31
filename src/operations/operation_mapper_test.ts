@@ -107,6 +107,12 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
       op: 'Split',
       input: ['image_placeholder'],
       attr: {num_split: {f: 0, i: 3, value: 'i'} as tensorflow.IAttrValue}
+    },
+    {
+      name: 'FusedBatchNorm',
+      op: 'FusedBatchNorm',
+      input: ['image_placeholder'],
+      attr: {epsilon: {f: 0.0001, i: 0, value: 'f'} as tensorflow.IAttrValue}
     }
   ],
   versions: {producer: 1.0}
@@ -128,14 +134,14 @@ describe('operationMapper', () => {
 
       it('should find the graph output nodes', () => {
         expect(graph.outputs.map(node => node.name)).toEqual([
-          'Fill', 'Squeeze', 'Split'
+          'Fill', 'Squeeze', 'Split', 'FusedBatchNorm'
         ]);
       });
 
       it('should convert nodes', () => {
         expect(Object.keys(graph.nodes)).toEqual([
           'image_placeholder', 'Const', 'Shape', 'Value', 'Fill', 'Conv2D',
-          'BiasAdd', 'Squeeze', 'Split'
+          'BiasAdd', 'Squeeze', 'Split', 'FusedBatchNorm'
         ]);
       });
     });
@@ -148,7 +154,7 @@ describe('operationMapper', () => {
       });
       it('should find the children nodes', () => {
         expect(graph.nodes['image_placeholder'].children.map(node => node.name))
-            .toEqual(['Conv2D', 'Split']);
+            .toEqual(['Conv2D', 'Split', 'FusedBatchNorm']);
       });
 
       it('should map the input params', () => {
@@ -164,6 +170,8 @@ describe('operationMapper', () => {
         expect(graph.nodes['Conv2D'].params['useCudnnOnGpu'].value)
             .toEqual(true);
         expect(graph.nodes['Split'].params['numOrSizeSplits'].value).toEqual(3);
+        expect(graph.nodes['FusedBatchNorm'].params['epsilon'].value)
+            .toEqual(0.0001);
       });
 
       it('should map the placeholder attribute params', () => {
