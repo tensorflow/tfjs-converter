@@ -127,6 +127,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
     # Load the saved weights as a JSON string.
     out, groups = self._converter.h5_merged_saved_model_to_tfjs_format(
         h5py.File(h5_path))
+    print(len(groups))  # DEBUG
+    print(groups)  # DEBUG
     saved_topology = out['model_config']
 
     # check the model topology was stored
