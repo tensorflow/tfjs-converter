@@ -54,7 +54,7 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
       (Default: `None`).
     split_weights_by_layer: Whether to split the weights into separate weight
       groups (corresponding to separate binary weight files) layer by layer
-      (Default: `None`).
+      (Default: `False`).
 
   Returns:
     (model_json, groups)

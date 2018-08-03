@@ -67,7 +67,7 @@ class HDF5Converter(object):
   and saved model to a JSON format for use in js based implementations.
   """
 
-  def _convert_single_h5_group(self, group):
+  def _convert_h5_group(self, group):
     """Construct a weights group entry.
 
     Args:
@@ -95,7 +95,7 @@ class HDF5Converter(object):
       # 'foo/bar/Dense').
       for key in group.keys():
         # Call this method recursively.
-        group_out += self._convert_single_h5_group(group[key])
+        group_out += self._convert_h5_group(group[key])
 
     return group_out
 
@@ -173,7 +173,7 @@ class HDF5Converter(object):
     layer_names = [as_text(n) for n in model_weights]
     for layer_name in layer_names:
       layer = model_weights[layer_name]
-      group = self._convert_single_h5_group(layer)
+      group = self._convert_h5_group(layer)
       if group:
         if split_by_layer:
           groups.append(group)
@@ -211,7 +211,7 @@ class HDF5Converter(object):
     # pylint: enable=not-an-iterable
     for layer_name in layer_names:
       layer = h5file[layer_name]
-      group = self._convert_single_h5_group(layer)
+      group = self._convert_h5_group(layer)
       if group:
         if split_by_layer:
           groups.append(group)
