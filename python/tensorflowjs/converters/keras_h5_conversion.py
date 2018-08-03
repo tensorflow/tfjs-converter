@@ -167,9 +167,7 @@ class HDF5Converter(object):
       model_json['training_config'] = self._ensure_json_dict(
           h5file.attrs['training_config'])
 
-    groups = []
-    if not split_by_layer:
-      groups.append([])
+    groups = [] if split_by_layer else [[]]
 
     model_weights = h5file['model_weights']
     layer_names = [as_text(n) for n in model_weights]
@@ -178,7 +176,7 @@ class HDF5Converter(object):
       group = self._convert_single_h5_group(layer)
       if group:
         if split_by_layer:
-            groups.append(group)
+          groups.append(group)
         else:
           groups[0] += group
     return model_json, groups
@@ -205,7 +203,8 @@ class HDF5Converter(object):
     """
     h5file = self._ensure_h5file(h5file)
     self._check_version(h5file)
-    groups = []
+
+    groups = [] if split_by_layer else [[]]
 
     # pylint: disable=not-an-iterable
     layer_names = [as_text(n) for n in h5file.attrs['layer_names']]
@@ -214,7 +213,10 @@ class HDF5Converter(object):
       layer = h5file[layer_name]
       group = self._convert_single_h5_group(layer)
       if group:
-        groups.append(group)
+        if split_by_layer:
+          groups.append(group)
+        else:
+          groups[0] += group
     return groups
 
   def write_artifacts(self,

@@ -305,6 +305,53 @@ class APIAndShellTest(tf.test.TestCase):
     self.assertEqual(weight_dtypes['MergedDenseForCLI1/bias'], 'float32')
     self.assertEqual(weight_dtypes['MergedDenseForCLI2/kernel'], 'float32')
 
+  def testKerasH5ConversionSplitWeightsByLayerWorksFromCLI(self):
+    with tf.Graph().as_default(), tf.Session():
+      # First create a toy keras model.
+      os.makedirs(os.path.join(self._tmp_dir, 'keras_h5'))
+      h5_path = os.path.join(self._tmp_dir, 'keras_h5', 'model.h5')
+      _createKerasModel('MergedDenseForCLI', h5_path)
+
+      process = subprocess.Popen([
+          'tensorflowjs_converter', '--input_format', 'keras',
+          '--split_weights_by_layer', h5_path, self._tmp_dir
+      ])
+      process.communicate()
+      self.assertEqual(0, process.returncode)
+
+      # Briefly check the model topology.
+      with open(os.path.join(self._tmp_dir, 'model.json'), 'rt') as f:
+        json_content = json.load(f)
+      model_json = json_content['modelTopology']
+      self.assertIsInstance(model_json['model_config'], dict)
+      self.assertIsInstance(model_json['model_config']['config'], dict)
+      self.assertIn('layers', model_json['model_config']['config'])
+
+      weights_manifest = json_content['weightsManifest']
+      self.assertIsInstance(weights_manifest, list)
+
+      # Briefly check the weights manifest.
+      weight_shapes = dict()
+      weight_dtypes = dict()
+      for manifest_item in weights_manifest:
+        for weight in manifest_item['weights']:
+          weight_name = weight['name']
+          weight_shapes[weight_name] = weight['shape']
+          weight_dtypes[weight_name] = weight['dtype']
+
+    self.assertEqual(
+        sorted(list(weight_shapes.keys())),
+        sorted([
+            'MergedDenseForCLI1/kernel', 'MergedDenseForCLI1/bias',
+            'MergedDenseForCLI2/kernel'
+        ]))
+    self.assertEqual(weight_shapes['MergedDenseForCLI1/kernel'], [3, 4])
+    self.assertEqual(weight_shapes['MergedDenseForCLI1/bias'], [4])
+    self.assertEqual(weight_shapes['MergedDenseForCLI2/kernel'], [4, 2])
+    self.assertEqual(weight_dtypes['MergedDenseForCLI1/kernel'], 'float32')
+    self.assertEqual(weight_dtypes['MergedDenseForCLI1/bias'], 'float32')
+    self.assertEqual(weight_dtypes['MergedDenseForCLI2/kernel'], 'float32')
+
   def testKerasH5ConversionWithOutputNodeNamesErrors(self):
     process = subprocess.Popen(
         [

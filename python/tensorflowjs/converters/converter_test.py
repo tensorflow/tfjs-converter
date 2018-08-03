@@ -63,8 +63,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertIsNone(model_json)
 
     # Check the loaded weights.
-    weights1 = groups[0]
-    self.assertEqual(2, len(weights1))
+    self.assertEqual(1, len(groups))
+    self.assertEqual(3, len(groups[0]))
     # contents of weights are verified in tests of the library code
 
     # Check the content of the output directory.
@@ -100,8 +100,44 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertEqual(keras.__version__, model_json['keras_version'])
     self.assertEqual('tensorflow', model_json['backend'])
     self.assertEqual(1, len(groups))
-    weights1 = groups[0]
-    self.assertEqual(3, len(weights1))
+    self.assertEqual(3, len(groups[0]))
+    # contents of weights are verified in tests of the library code
+
+    # Check the content of the output directory.
+    output_json = json.load(
+        open(os.path.join(self._tmp_dir, 'model.json'), 'rt'))
+    self.assertEqual(model_json, output_json['modelTopology'])
+    self.assertIsInstance(output_json['weightsManifest'], list)
+    self.assertTrue(glob.glob(os.path.join(self._tmp_dir, 'group*-*')))
+
+  def testConvertSavedKerasModelSplitByLayer(self):
+    with tf.Graph().as_default(), tf.Session():
+      input_tensor = keras.layers.Input((3,))
+      dense1 = keras.layers.Dense(
+          4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
+          name='MergedDense1')(input_tensor)
+      output = keras.layers.Dense(
+          2, use_bias=False,
+          kernel_initializer='ones', name='MergedDense2')(dense1)
+      model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+      h5_path = os.path.join(self._tmp_dir, 'MyModelMerged.h5')
+      model.save(h5_path)
+
+    # Load the saved weights as a JSON string.
+    model_json, groups = (
+        converter.dispatch_keras_h5_to_tensorflowjs_conversion(
+            h5_path, output_dir=self._tmp_dir, split_weights_by_layer=True))
+    # check the model topology was stored
+    self.assertIsInstance(model_json['model_config'], dict)
+    self.assertIsInstance(model_json['model_config']['config'], dict)
+    self.assertIn('layers', model_json['model_config']['config'])
+
+    # Check the loaded weights.
+    self.assertEqual(keras.__version__, model_json['keras_version'])
+    self.assertEqual('tensorflow', model_json['backend'])
+    self.assertEqual(2, len(groups))
+    self.assertEqual(2, len(groups[0]))
+    self.assertEqual(1, len(groups[1]))
     # contents of weights are verified in tests of the library code
 
     # Check the content of the output directory.
@@ -129,8 +165,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertIsNone(model_json)
 
     # Check the loaded weights.
-    weights1 = groups[0]
-    self.assertEqual(2, len(weights1))
+    self.assertEqual(1, len(groups))
+    self.assertEqual(3, len(groups[0]))
     # contents of weights are verified in tests of the library code
 
     # Check the content of the output directory.
