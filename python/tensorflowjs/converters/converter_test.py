@@ -74,7 +74,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertIsInstance(output_json['weightsManifest'], list)
     self.assertTrue(glob.glob(os.path.join(self._tmp_dir, 'group*-*')))
 
-  def testConvertSavedModel(self):
+  def testConvertSavedKerasModelNoSplitByLayer(self):
     with tf.Graph().as_default(), tf.Session():
       input_tensor = keras.layers.Input((3,))
       dense1 = keras.layers.Dense(
@@ -99,8 +99,9 @@ class ConvertH5WeightsTest(unittest.TestCase):
     # Check the loaded weights.
     self.assertEqual(keras.__version__, model_json['keras_version'])
     self.assertEqual('tensorflow', model_json['backend'])
+    self.assertEqual(1, len(groups))
     weights1 = groups[0]
-    self.assertEqual(2, len(weights1))
+    self.assertEqual(3, len(weights1))
     # contents of weights are verified in tests of the library code
 
     # Check the content of the output directory.

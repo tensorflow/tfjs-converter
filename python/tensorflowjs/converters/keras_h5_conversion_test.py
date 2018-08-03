@@ -111,7 +111,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertEqual([8, 4], weight_shapes['foo/bar/dense/kernel'])
     self.assertEqual([4], weight_shapes['foo/bar/dense/bias'])
 
-  def testConvertMergedModelFromSimpleModel(self):
+  def testConvertMergedModelFromSimpleModelNoSplitByLayer(self):
     input_tensor = keras.layers.Input((3,))
     dense1 = keras.layers.Dense(
         4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
@@ -127,8 +127,6 @@ class ConvertH5WeightsTest(unittest.TestCase):
     # Load the saved weights as a JSON string.
     out, groups = self._converter.h5_merged_saved_model_to_tfjs_format(
         h5py.File(h5_path))
-    print(len(groups))  # DEBUG
-    print(groups)  # DEBUG
     saved_topology = out['model_config']
 
     # check the model topology was stored
@@ -136,24 +134,72 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertEqual(config_json['config'], saved_topology['config'])
 
     # Check the loaded weights.
+    # By default, all weights of the model ought to be put in the same group.
+    self.assertEqual(1, len(groups))
+
     self.assertEqual(keras.__version__, out['keras_version'])
     self.assertEqual('tensorflow', out['backend'])
-    weights1 = groups[0]
-    self.assertEqual(2, len(weights1))
-    kernel1 = weights1[0]
+    weight_group = groups[0]
+    self.assertEqual(3, len(weight_group))
+    kernel1 = weight_group[0]
     self.assertEqual('MergedDense10/kernel', kernel1['name'])
     self.assertEqual('float32', kernel1['data'].dtype)
     self.assertEqual((3, 4), kernel1['data'].shape)
     self.assertTrue(np.allclose(np.ones([3, 4]), kernel1['data']))
-    bias1 = weights1[1]
+    bias1 = weight_group[1]
     self.assertEqual('MergedDense10/bias', bias1['name'])
     self.assertEqual('float32', bias1['data'].dtype)
     self.assertEqual((4,), bias1['data'].shape)
     self.assertTrue(np.allclose(np.zeros([4]), bias1['data']))
-    weights2 = groups[1]
-    self.assertEqual(1, len(weights2))
-    kernel2 = weights2[0]
+    kernel2 = weight_group[2]
     self.assertEqual('MergedDense20/kernel', kernel2['name'])
+    self.assertEqual('float32', kernel2['data'].dtype)
+    self.assertEqual((4, 2), kernel2['data'].shape)
+    self.assertTrue(np.allclose(np.ones([4, 2]), kernel2['data']))
+
+  def testConvertMergedModelFromSimpleModelSplitByLayer(self):
+    input_tensor = keras.layers.Input((3,))
+    dense1 = keras.layers.Dense(
+        4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
+        name='MergedDense30')(input_tensor)
+    output = keras.layers.Dense(
+        2, use_bias=False,
+        kernel_initializer='ones', name='MergedDense40')(dense1)
+    model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+    h5_path = os.path.join(self._tmp_dir, 'MyModelMerged.h5')
+    model.save(h5_path)
+    config_json = json.loads(model.to_json(), encoding='utf8')
+
+    # Load the saved weights as a JSON string.
+    out, groups = self._converter.h5_merged_saved_model_to_tfjs_format(
+        h5py.File(h5_path), split_by_layer=True)
+    saved_topology = out['model_config']
+
+    # check the model topology was stored
+    self.assertEqual(config_json['class_name'], saved_topology['class_name'])
+    self.assertEqual(config_json['config'], saved_topology['config'])
+
+    # Check the loaded weights.
+    # Due to `split_by_layer=True`, there ought to be two weigth groups,
+    # because the model has two layers.
+    self.assertEqual(2, len(groups))
+
+    self.assertEqual(keras.__version__, out['keras_version'])
+    self.assertEqual('tensorflow', out['backend'])
+    self.assertEqual(2, len(groups[0]))
+    kernel1 = groups[0][0]
+    self.assertEqual('MergedDense30/kernel', kernel1['name'])
+    self.assertEqual('float32', kernel1['data'].dtype)
+    self.assertEqual((3, 4), kernel1['data'].shape)
+    self.assertTrue(np.allclose(np.ones([3, 4]), kernel1['data']))
+    bias1 = groups[0][1]
+    self.assertEqual('MergedDense30/bias', bias1['name'])
+    self.assertEqual('float32', bias1['data'].dtype)
+    self.assertEqual((4,), bias1['data'].shape)
+    self.assertTrue(np.allclose(np.zeros([4]), bias1['data']))
+    self.assertEqual(1, len(groups[1]))
+    kernel2 = groups[1][0]
+    self.assertEqual('MergedDense40/kernel', kernel2['name'])
     self.assertEqual('float32', kernel2['data'].dtype)
     self.assertEqual((4, 2), kernel2['data'].shape)
     self.assertTrue(np.allclose(np.ones([4, 2]), kernel2['data']))
