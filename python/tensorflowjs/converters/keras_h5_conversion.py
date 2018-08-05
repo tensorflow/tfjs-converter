@@ -146,7 +146,7 @@ class HDF5Converter(object):
 
     Args:
       h5file: An instance of h5py.File, or the path to an h5py file.
-      split_by_layer: (Optinoal) whether the weights of different layers are
+      split_by_layer: (Optional) whether the weights of different layers are
         to be stored in separate weight groups (Default: `False`).
 
     Returns:
@@ -193,7 +193,7 @@ class HDF5Converter(object):
 
     Args:
       h5file: An instance of h5py.File, or the path to an h5py file.
-      split_by_layer: (Optinoal) whether the weights of different layers are
+      split_by_layer: (Optional) whether the weights of different layers are
         to be stored in separate weight groups (Default: `False`).
 
     Returns:
