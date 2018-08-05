@@ -193,7 +193,8 @@ class HDF5Converter(object):
 
     Args:
       h5file: An instance of h5py.File, or the path to an h5py file.
-      split_by_layer: TODO(cais): DO NOT SUBMIT.
+      split_by_layer: (Optinoal) whether the weights of different layers are
+        to be stored in separate weight groups (Default: `False`).
 
     Returns:
       An array of group_weights as defined in tfjs write_weights.
