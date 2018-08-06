@@ -48,10 +48,11 @@ describe('creation', () => {
         node.op = 'fill';
         node.params['shape'] = createNumericArrayAttrFromIndex(0);
         node.params['value'] = createNumberAttrFromIndex(1);
+        node.params['dtype'] = createDtypeAttr('int32');
 
         executeOp(node, {input1, input2}, context);
 
-        expect(tfc.fill).toHaveBeenCalledWith([1, 2, 3], 1);
+        expect(tfc.fill).toHaveBeenCalledWith([1, 2, 3], 1, 'int32');
       });
     });
     describe('linspace', () => {
