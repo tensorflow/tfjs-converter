@@ -25,13 +25,8 @@ const image = document.getElementById('image');
       'https://storage.googleapis.com/tfjs-models/savedmodel/';
       const MODEL_URL = GOOGLE_CLOUD_STORAGE_DIR + 'coco-ssd-mobilenet_v1/tensorflowjs_model.pb';
       const WEIGHTS_URL = GOOGLE_CLOUD_STORAGE_DIR + 'coco-ssd-mobilenet_v1/weights_manifest.json';
-      const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
       tf.loadFrozenModel(MODEL_URL, WEIGHTS_URL).then(async model => {
         const pixels = tf.fromPixels(image);
-        const preprocessedInput = tf.div(
-          tf.sub(pixels.asType('float32'), PREPROCESS_DIVISOR),
-          PREPROCESS_DIVISOR);
-        const test = preprocessedInput.reshape([1, ...preprocessedInput.shape]);
         console.log('model loaded');
         console.time('predict1');
         const res1 = await model.executeAsync(pixels.reshape([1, ...pixels.shape]));
