@@ -16,6 +16,7 @@
  */
 
 import * as tf from '@tensorflow/tfjs';
+import {CLASSES} from './classes';
 import imageURL from './image1.jpg';
 import image2URL from './image2.jpg';
 
@@ -62,6 +63,7 @@ runButton.onclick = async () => {
   context.font = '10px Arial';
 
   console.log('number of detections: ', count);
+  console.log(classes);
   for (let i = 0; i < count; i++) {
     const min_y = boxes[i * 4] * 399;
     const min_x = boxes[i * 4 + 1] * 600;
@@ -73,8 +75,9 @@ runButton.onclick = async () => {
     context.lineWidth = 1;
     context.strokeStyle = 'black';
     context.stroke();
+    console.log(CLASSES);
     context.fillText(
-        scores[i].toFixed(3) + ' ' + (classes[i] === 1 ? 'person' : 'kite'),
+        scores[i].toFixed(3) + ' ' + CLASSES.find(label => label.id === classes[i]).display_name,
         min_x, min_y - 5);
   }
 };
