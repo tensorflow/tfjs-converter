@@ -143,7 +143,7 @@ export class FrozenModel implements tfc.InferenceModel {
       inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
       config?: tfc.ModelPredictConfig): tfc.Tensor
       |tfc.Tensor[]|tfc.NamedTensorMap {
-    return this.execute(inputs, this.outputNodes);
+    return this.execute_(inputs, true, this.outputNodes);
   }
 
   private constructTensorMap(inputs: tfc.Tensor|tfc.Tensor[]) {
@@ -176,6 +176,13 @@ export class FrozenModel implements tfc.InferenceModel {
   execute(
       inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
       outputs?: string|string[]): tfc.Tensor|tfc.Tensor[] {
+    return this.execute_(inputs, false, outputs);
+  }
+
+  private execute_(
+      inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
+      strictInputCheck = true, outputs?: string|string[]): tfc.Tensor
+      |tfc.Tensor[] {
     outputs = outputs || this.outputNodes;
     if (inputs instanceof tfc.Tensor || Array.isArray(inputs)) {
       inputs = this.constructTensorMap(inputs);
@@ -186,13 +193,12 @@ export class FrozenModel implements tfc.InferenceModel {
           'please use executeAsync method');
     }
     const result = this.executor.execute(
-        this.convertTensorMapToTensorsMap(inputs), outputs);
+        this.convertTensorMapToTensorsMap(inputs), strictInputCheck, outputs);
     const keys = Object.keys(result);
     return (Array.isArray(outputs) && outputs.length > 1) ?
         outputs.map(node => result[node]) :
         result[keys[0]];
   }
-
   /**
    * Executes inference for the model for given input tensors in async
    * fashion, use this method when your model contains control flow ops.
