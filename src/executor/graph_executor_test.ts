@@ -186,12 +186,23 @@ describe('GraphExecutor', () => {
             const inputTensor = tfc.scalar(1);
             expect(
                 () => executor.execute(
-                    {test: [inputTensor], input: [inputTensor]}, false))
+                    {intermediate: [inputTensor], input: [inputTensor]}, false))
                 .not.toThrow(new Error(
                     'The dict provided in model.execute(dict)' +
                     ' has unused keys: [test]. Please provide' +
                     ' only the following keys: [input].'));
           });
+          it('should throw exception if contains inputs no in the graph',
+             () => {
+               const inputTensor = tfc.scalar(1);
+               expect(
+                   () => executor.execute(
+                       {test: [inputTensor], input: [inputTensor]}, false))
+                   .not.toThrow(new Error(
+                       'The dict provided in model.execute(dict)' +
+                       ' has unused keys: [test]. Please provide' +
+                       ' only the following keys: [input].'));
+             });
           it('should throw exception if inputs shapes mismatch', () => {
             inputNode.params['shape'] = {value: [1, 1], type: 'shape'};
             const inputTensor = tfc.tensor1d([1], 'float32');
