@@ -126,16 +126,13 @@ export class FrozenModel implements tfc.InferenceModel {
    * order of inputNodes array. @see {@link FrozenModel.inputNodes}
    *
    * You can also feed any intermediate nodes using the NamedTensorMap as the
-   * input type. For example a graph as following:
-   *   InputNode => IntermediateNode => OutputNode
-   *
-   * If you call execute method by feeding the intermediate node:
-   * frozenModel.execute({'IntermediateNode': tf.scalar(1.0)})
-   * you will be only executing the subgraph:
-   *   IntermediateNode => OutputNode
+   * input type. For example, given the graph
+   *    InputNode => Intermediate => OutputNode,
+   * you can execute the subgraph Intermediate => OutputNode by calling
+   *    frozenModel.execute('IntermediateNode' : tf.tensor(...));
    *
    * This is useful for models that uses tf.dynamic_rnn, where the intermediate
-   * state needs to be feed manually.
+   * state needs to be fed manually.
    *
    * For batch inference execution, the tensors for each input need to be
    * concatenated together. For example with mobilenet, the required input shape

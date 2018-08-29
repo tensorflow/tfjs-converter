@@ -107,9 +107,12 @@ export class GraphExecutor {
     const compiledOrder = [];
     const inputs = startNodes || this.graph.placeholders;
     const sortedNodeNames = inputs.map(node => node.name).sort();
+    const nameKey = sortedNodeNames.join(this.SEPERATOR);
 
     // do nothing is the compiled graph cache contains the input.
-    if (this.compiledMap.get(sortedNodeNames.join(this.SEPERATOR))) return;
+    if (this.compiledMap.get(nameKey)) {
+      return;
+    }
 
     const stack = [...inputs, ...this.graph.weights];
     const visited: {[key: string]: boolean} = {};
@@ -126,7 +129,7 @@ export class GraphExecutor {
         }
       });
     }
-    this.compiledMap.set(sortedNodeNames.join(this.SEPERATOR), compiledOrder);
+    this.compiledMap.set(nameKey, compiledOrder);
   }
 
   /**
@@ -161,8 +164,10 @@ export class GraphExecutor {
           tensorMap[node.name] =
               executeOp(node, tensorMap, context) as Tensor[];
         }
-        // stop the exuection if all outputs are found.
-        if (outputNames.every(name => !!tensorMap[name])) break;
+        // stop the execution if all outputs are found.
+        if (outputNames.every(name => !!tensorMap[name])) {
+          break;
+        }
       }
       return this.findOutputs(tensorMap, context, outputNames);
     });
@@ -330,9 +335,11 @@ export class GraphExecutor {
       inputs: NamedTensorsMap, strictInputCheck = true) {
     this.placeholders.forEach(node => {
       const inputTensors = inputs[node.name];
-      // do nothing if no strick input check and input tensors is not for the
-      // placehloder.
-      if (!strictInputCheck && !inputTensors) return;
+      // do nothing if not strict input check and input tensors is not for the
+      // placeholders.
+      if (!strictInputCheck && !inputTensors) {
+        return;
+      }
 
       const input = inputTensors[0];
       if (node.params['shape'] && node.params['shape'].value) {
