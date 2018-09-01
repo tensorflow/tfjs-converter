@@ -172,7 +172,7 @@ export const json = [
     ]
   },
   {
-    'tfOpName': 'Mod',
+    'tfOpName': 'FloorMod',
     'dlOpName': 'mod',
     'category': 'arithmetic',
     'params': [
