@@ -17,7 +17,6 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 import {scalar} from '@tensorflow/tfjs-core';
-import {test_util} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
