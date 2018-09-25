@@ -18,7 +18,7 @@
 import {DataType, Tensor, tidy, util} from '@tensorflow/tfjs-core';
 
 // tslint:disable-next-line:max-line-length
-import {NamedTensorMap, NamedTensorsMap, TensorArrayMap, TensorInfo} from '../data/types';
+import {NamedTensorMap, NamedTensorsMap, Optimizer, TensorArrayMap, TensorInfo} from '../data/types';
 // tslint:disable-next-line:max-line-length
 import {getNodeNameAndIndex, getParamValue, getTensor} from '../operations/executors/utils';
 import {executeOp} from '../operations/operation_executor';
@@ -80,9 +80,16 @@ export class GraphExecutor {
     return this.outputs.map(node => node.name);
   }
 
-  constructor(private graph: Graph) {
+  constructor(
+      private graph: Graph, weightMap: NamedTensorsMap,
+      private optimizers?: Optimizer[]) {
     this.placeholders = graph.placeholders;
     this._outputs = graph.outputs;
+    this.weightMap = weightMap;
+    this.graph =
+        (this.optimizers || [])
+            .reduce(
+                (graph, optimizer) => graph = optimizer.optimize(graph), graph);
     this.compile();
   }
 

@@ -16,6 +16,7 @@
  */
 import {DataType, Tensor} from '@tensorflow/tfjs-core';
 import {TensorArray} from '../executor/tensor_array';
+import {Graph} from '../operations/types';
 
 export type NamedTensorMap = {
   [key: string]: Tensor
@@ -33,4 +34,8 @@ export interface TensorInfo {
   name: string;
   shape?: number[];
   dtype: DataType;
+}
+
+export interface Optimizer {
+  optimize(graph: Graph): Graph;
 }

@@ -18,7 +18,7 @@
 import * as tfc from '@tensorflow/tfjs-core';
 
 import {tensorflow} from '../data/compiled_api';
-import {NamedTensorsMap, TensorInfo} from '../data/types';
+import {NamedTensorsMap, Optimizer, TensorInfo} from '../data/types';
 import {OperationMapper} from '../operations/operation_mapper';
 
 import {GraphExecutor} from './graph_executor';
@@ -68,7 +68,7 @@ export class FrozenModel implements tfc.InferenceModel {
    */
   constructor(
       private modelUrl: string, private weightManifestUrl: string,
-      private requestOption?: RequestInit) {}
+      private requestOption?: RequestInit, private optimizers?: Optimizer[]) {}
 
   private findIOHandler() {
     const path = [this.modelUrl, this.weightManifestUrl];
@@ -107,8 +107,8 @@ export class FrozenModel implements tfc.InferenceModel {
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap =
         tfc.io.decodeWeights(artifacts.weightData, artifacts.weightSpecs);
-    this.executor =
-        new GraphExecutor(OperationMapper.Instance.transformGraph(graph));
+    this.executor = new GraphExecutor(
+        OperationMapper.Instance.transformGraph(graph), this.optimizers);
     this.executor.weightMap = this.convertTensorMapToTensorsMap(weightMap);
     return true;
   }
@@ -286,9 +286,10 @@ export class FrozenModel implements tfc.InferenceModel {
  */
 /** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadFrozenModel(
-    modelUrl: string, weightsManifestUrl: string,
-    requestOption?: RequestInit): Promise<FrozenModel> {
-  const model = new FrozenModel(modelUrl, weightsManifestUrl, requestOption);
+    modelUrl: string, weightsManifestUrl: string, requestOption?: RequestInit,
+    optimizers?: Optimizer[]): Promise<FrozenModel> {
+  const model =
+      new FrozenModel(modelUrl, weightsManifestUrl, requestOption, optimizers);
   await model.load();
   return model;
 }

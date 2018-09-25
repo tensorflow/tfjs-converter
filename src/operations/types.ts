@@ -20,6 +20,8 @@ export type ParamTypes =
 export type Category = 'arithmetic'|'basic_math'|'control'|'convolution'|
     'dynamic'|'evaluation'|'image'|'creation'|'graph'|'logical'|'matrices'|
     'normalization'|'reduction'|'slice_join'|'transformation';
+export type Backends = 'cpu'|'webgl';
+
 export declare interface ParamMapper {
   tfParamName?: string;
   tfParamNameDeprecated?: string;
@@ -47,6 +49,7 @@ export declare interface Node {
   inputs: Node[];
   params: {[key: string]: ParamValue};
   children: Node[];
+  backend?: Backends;
 }
 
 export declare interface Graph {
