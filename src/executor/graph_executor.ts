@@ -14,8 +14,8 @@
  * limitations under the License.
  * =============================================================================
  */
-
-import {DataType, Tensor, tidy, util} from '@tensorflow/tfjs-core';
+// tslint:disable-next-line:max-line-length
+import {DataType, getBackend, setBackend, Tensor, tidy, util} from '@tensorflow/tfjs-core';
 
 // tslint:disable-next-line:max-line-length
 import {NamedTensorMap, NamedTensorsMap, Optimizer, TensorArrayMap, TensorInfo} from '../data/types';
@@ -168,8 +168,15 @@ export class GraphExecutor {
       for (let i = 0; i < compiledNodes.length; i++) {
         const node = compiledNodes[i];
         if (!tensorMap[node.name]) {
+          const backend = getBackend();
+          if (node.backend) {
+            setBackend(node.backend);
+          }
           tensorMap[node.name] =
               executeOp(node, tensorMap, context) as Tensor[];
+          if (node.backend) {
+            setBackend(backend);
+          }
         }
         // stop the execution if all outputs are found.
         if (outputNames.every(name => !!tensorMap[name])) {
@@ -264,7 +271,16 @@ export class GraphExecutor {
 
       // only process nodes that are not provided as input nodes.
       if (inputNodes.indexOf(item.node) === -1) {
+        const backend = getBackend();
+        if (item.node.backend) {
+          setBackend(item.node.backend);
+        }
+
         const tensors = executeOp(item.node, tensorMap, context);
+        if (item.node.backend) {
+          setBackend(backend);
+        }
+
         if (!nodeName) {
           [nodeName] = getNodeNameAndIndex(item.node.name, context);
         }

@@ -86,9 +86,8 @@ describe('GraphExecutor', () => {
     inputNode.children.push(intermediateNode);
     constNode.children.push(intermediateNode, outputNode);
     intermediateNode.children.push(outputNode);
-    executor = new GraphExecutor(graph);
+    executor = new GraphExecutor(graph, {'const': [constTensor]});
     constTensor = tfc.scalar(2.0);
-    executor.weightMap = {'const': [constTensor]};
   });
   afterEach(() => {});
 
@@ -285,8 +284,8 @@ describe('GraphExecutor', () => {
             placeholders: [inputNode]
           };
 
-          executor = new GraphExecutor(graphWithControlFlow);
-          executor.weightMap = {const : [constTensor]};
+          executor =
+              new GraphExecutor(graphWithControlFlow, {'const': [constTensor]});
         });
 
         it('should execute control flow graph', (done) => {

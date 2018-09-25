@@ -108,8 +108,8 @@ export class FrozenModel implements tfc.InferenceModel {
     const weightMap =
         tfc.io.decodeWeights(artifacts.weightData, artifacts.weightSpecs);
     this.executor = new GraphExecutor(
-        OperationMapper.Instance.transformGraph(graph), this.optimizers);
-    this.executor.weightMap = this.convertTensorMapToTensorsMap(weightMap);
+        OperationMapper.Instance.transformGraph(graph),
+        this.convertTensorMapToTensorsMap(weightMap), this.optimizers);
     return true;
   }
 
