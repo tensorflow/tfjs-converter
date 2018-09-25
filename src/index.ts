@@ -15,4 +15,6 @@
  * =============================================================================
  */
 export {FrozenModel, loadFrozenModel} from './executor/frozen_model';
+// tslint:disable-next-line:max-line-length
+export {DeviceAllocationOptimizer} from './executor/optimizers/device_allocation_optimizer';
 export {version as version_converter} from './version';

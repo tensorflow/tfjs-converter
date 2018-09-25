@@ -25,6 +25,7 @@ import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
+import {DeviceAllocationOptimizer} from './optimizers/device_allocation_optimizer';
 
 interface NodeWithContexts {
   contexts: ExecutionContextInfo[];
@@ -87,7 +88,7 @@ export class GraphExecutor {
     this._outputs = graph.outputs;
     this.weightMap = weightMap;
     this.graph =
-        (this.optimizers || [])
+        (this.optimizers || [new DeviceAllocationOptimizer()])
             .reduce(
                 (graph, optimizer) => graph = optimizer.optimize(graph), graph);
     this.compile();
@@ -168,14 +169,14 @@ export class GraphExecutor {
       for (let i = 0; i < compiledNodes.length; i++) {
         const node = compiledNodes[i];
         if (!tensorMap[node.name]) {
-          const backend = getBackend();
+          const origBackend = getBackend();
           if (node.backend) {
             setBackend(node.backend);
           }
           tensorMap[node.name] =
               executeOp(node, tensorMap, context) as Tensor[];
           if (node.backend) {
-            setBackend(backend);
+            setBackend(origBackend);
           }
         }
         // stop the execution if all outputs are found.
@@ -271,14 +272,14 @@ export class GraphExecutor {
 
       // only process nodes that are not provided as input nodes.
       if (inputNodes.indexOf(item.node) === -1) {
-        const backend = getBackend();
+        const origBackend = getBackend();
         if (item.node.backend) {
           setBackend(item.node.backend);
         }
 
         const tensors = executeOp(item.node, tensorMap, context);
         if (item.node.backend) {
-          setBackend(backend);
+          setBackend(origBackend);
         }
 
         if (!nodeName) {
