@@ -21,8 +21,21 @@ import {Backends, Graph} from '../../operations/types';
 
 const CPU_OPS = new Set(['rank', 'shape', 'size', 'loopCond']);
 
+/**
+ * Optimizer for allocating ops to browser backends (webgl, cpu).
+ * It uses following heuristics when designate an op to a particular backend:
+ *  1. If any of the inputs is on webgl the op will be executed on webgl.
+ *  2. If all of the inputs are on cpu th eop will be executed on cpu.
+ *  3. Always allocate CPU optimized ops to cpu execution.
+ *  4. User can specify the allocation for the input nodes.
+ */
 export class DeviceAllocationOptimizer implements Optimizer {
   constructor(private inputBackend: Backends = 'webgl') {}
+
+  /**
+   * device allocation of the nodes in the input graph.
+   * @param graph the graph of the model
+   */
   public optimize(graph: Graph): Graph {
     const inputs = graph.placeholders;
 
@@ -34,12 +47,14 @@ export class DeviceAllocationOptimizer implements Optimizer {
       const node = stack.pop();
       visited[node.name] = true;
 
+      // device allocation based on input locations
       if (node.inputs.every(input => input.backend === 'cpu')) {
         node.backend = 'cpu';
       } else {
         node.backend = 'webgl';
       }
 
+      // device allocation based on op preference
       if (node.op === 'placeholder') {
         node.backend = this.inputBackend;
       } else if (CPU_OPS.has(node.op)) {

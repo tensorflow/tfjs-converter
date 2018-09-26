@@ -86,8 +86,8 @@ describe('GraphExecutor', () => {
     inputNode.children.push(intermediateNode);
     constNode.children.push(intermediateNode, outputNode);
     intermediateNode.children.push(outputNode);
-    executor = new GraphExecutor(graph, {'const': [constTensor]});
     constTensor = tfc.scalar(2.0);
+    executor = new GraphExecutor(graph, {'const': [constTensor]});
   });
   afterEach(() => {});
 

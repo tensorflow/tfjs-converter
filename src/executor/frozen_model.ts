@@ -283,6 +283,8 @@ export class FrozenModel implements tfc.InferenceModel {
  * scripts/convert.py script.
  * @param requestOption options for Request, which allows to send credentials
  * and custom headers.
+ * @param optimizers optional list of optimizer instances, for example
+ * DeviceAllocationOptimizer.
  */
 /** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadFrozenModel(

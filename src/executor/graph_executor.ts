@@ -25,7 +25,6 @@ import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
-import {DeviceAllocationOptimizer} from './optimizers/device_allocation_optimizer';
 
 interface NodeWithContexts {
   contexts: ExecutionContextInfo[];
@@ -88,7 +87,7 @@ export class GraphExecutor {
     this._outputs = graph.outputs;
     this.weightMap = weightMap;
     this.graph =
-        (this.optimizers || [new DeviceAllocationOptimizer()])
+        (this.optimizers || [])
             .reduce(
                 (graph, optimizer) => graph = optimizer.optimize(graph), graph);
     this.compile();
