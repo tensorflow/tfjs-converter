@@ -30,7 +30,8 @@ const CPU_OPS = new Set(['rank', 'shape', 'size', 'loopCond']);
  *  4. User can specify the allocation for the input nodes.
  */
 export class DeviceAllocationOptimizer implements Optimizer {
-  constructor(private inputBackend: Backends = 'webgl') {}
+  constructor(private inputBackend: Backends = 'webgl', private debug = false) {
+  }
 
   /**
    * device allocation of the nodes in the input graph.
@@ -80,10 +81,11 @@ export class DeviceAllocationOptimizer implements Optimizer {
         }
       });
     }
-
-    console.log('gpu nodes =', gpuCount);
-    console.log('cpu nodes =', cpuCount);
-    console.log('non-constant cpu nodes =', cpuCount - graph.weights.length);
+    if (this.debug) {
+      console.log('gpu nodes =', gpuCount);
+      console.log('cpu nodes =', cpuCount);
+      console.log('non-constant cpu nodes =', cpuCount - graph.weights.length);
+    }
     return graph;
   }
 }
