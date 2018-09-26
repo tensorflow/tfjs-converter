@@ -36,19 +36,21 @@ export class DeviceAllocationOptimizer implements Optimizer {
 
       if (node.inputs.every(input => input.backend === 'cpu')) {
         node.backend = 'cpu';
-        cpuCount += 1;
       } else {
         node.backend = 'webgl';
-        gpuCount += 1;
       }
 
       if (node.op === 'placeholder') {
         node.backend = this.inputBackend;
       } else if (CPU_OPS.has(node.op)) {
         node.backend = 'cpu';
-        cpuCount += 1;
       }
 
+      if (node.backend === 'cpu') {
+        cpuCount += 1;
+      } else {
+        gpuCount += 1;
+      }
       node.children.forEach((childNode) => {
         if (!visited[childNode.name] &&
             (childNode.op === 'merge' && childNode.inputNames.some(name => {
