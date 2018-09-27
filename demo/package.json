@@ -6,7 +6,7 @@
   "license": "Apache-2.0",
   "private": true,
   "dependencies": {
-    "@tensorflow/tfjs": "0.12.5"
+    "@tensorflow/tfjs": "0.12.7"
   },
   "scripts": {
     "mobilenet": "NODE_ENV=development parcel --no-hmr --open mobilenet/index.html ",
@@ -18,7 +18,11 @@
     "babel-polyfill": "~6.26.0",
     "babel-preset-env": "~1.6.1",
     "clang-format": "~1.2.2",
-    "parcel-bundler": "~1.6.2"
+    "parcel-bundler": "~1.6.2",
+    "jpeg-js": "^0.3.4",
+    "node-simple-timer": "^0.1.1",
+    "@tensorflow/tfjs-node-gpu": "0.1.17",
+    "node-fetch": "^2.2.0"
   },
   "babel": {
     "presets": [
