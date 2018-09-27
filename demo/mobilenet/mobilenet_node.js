@@ -29,8 +29,8 @@ const GOOGLE_CLOUD_STORAGE_DIR =
     'https://storage.googleapis.com/tfjs-models/savedmodel/';
 const MODEL_FILE_URL = 'mobilenet_v1_1.0_224/optimized_model.pb';
 const WEIGHT_MANIFEST_FILE_URL = 'mobilenet_v1_1.0_224/weights_manifest.json';
-const INPUT_NODE_NAME = 'images';
-const OUTPUT_NODE_NAME = 'module_apply_default/MobilenetV2/Logits/output';
+const INPUT_NODE_NAME = 'input';
+const OUTPUT_NODE_NAME = 'MobilenetV1/Predictions/Reshape_1';
 const PREPROCESS_DIVISOR = tf.scalar(255 / 2);
 
 // based on implementation from
