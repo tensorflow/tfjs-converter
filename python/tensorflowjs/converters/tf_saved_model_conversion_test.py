@@ -269,7 +269,7 @@ class ConvertTest(unittest.TestCase):
                      'weights_manifest.json'), 'rt')
     output_json = json.load(weights_manifest)
     weights_manifest.close()
-    self.assertEqual(output_json, weights)
+    self.assertEqual(output_json, json.load(json.dumps(weights)))
 
     # Check the content of the output directory.
     self.assertTrue(
@@ -321,7 +321,7 @@ class ConvertTest(unittest.TestCase):
                      'weights_manifest.json'), 'rt')
     output_json = json.load(weights_manifest)
     weights_manifest.close()
-    self.assertEqual(output_json, weights)
+    self.assertEqual(output_json, json.load(json.dumps(weights)))
     # Check the content of the output directory.
     self.assertTrue(
         glob.glob(
@@ -355,7 +355,7 @@ class ConvertTest(unittest.TestCase):
                      'weights_manifest.json'), 'rt')
     output_json = json.load(weights_manifest)
     weights_manifest.close()
-    self.assertEqual(output_json, weights)
+    self.assertEqual(output_json, json.load(json.dumps(weights)))
 
     # Check the content of the output directory.
     self.assertTrue(
@@ -391,7 +391,7 @@ class ConvertTest(unittest.TestCase):
                      'weights_manifest.json'), 'rt')
     output_json = json.load(weights_manifest)
     weights_manifest.close()
-    self.assertEqual(output_json, weights)
+    self.assertEqual(output_json, json.load(json.dumps(weights)))
 
     # Check the content of the output directory.
     self.assertTrue(
