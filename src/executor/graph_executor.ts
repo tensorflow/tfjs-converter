@@ -184,7 +184,7 @@ export class GraphExecutor {
     const ids = Object.keys(tensorMap)
                     .map(key => tensorMap[key])
                     .map(tensors => tensors.map(tensor => tensor.id));
-    return new Set([].concat(...ids));
+    return new Set(...ids);
   }
   private checkTensorForDisposal(
       nodeName: string, node: Node, tensorMap: NamedTensorsMap,
@@ -192,9 +192,9 @@ export class GraphExecutor {
       intermediateTensorConsumerCount: {[key: string]: number}) {
     // Skip any control flow nodes, since its dependency is tricky to track
     // correctly.
-    if (node.category === 'control') return;
+    if (node.category === 'control') return new Set();
     tensorMap[nodeName].forEach(tensor => {
-      if (tensor) {
+      if (tensor != null) {
         intermediateTensorConsumerCount[tensor.id] =
             (intermediateTensorConsumerCount[tensor.id] || 0) +
             node.children.length;
@@ -206,16 +206,17 @@ export class GraphExecutor {
       if (input.category !== 'control') {
         const tensors =
             getTensorsForCurrentContenxt(input.name, tensorMap, context);
-        if (tensors) {
+        if (tensors != null) {
           tensors.forEach(tensor => {
             if (tensor && !tensorsToKeep.has(tensor.id)) {
               const count = intermediateTensorConsumerCount[tensor.id];
               if (count === 1) {
                 tensor.dispose();
                 delete intermediateTensorConsumerCount[tensor.id];
-              } else if (!!count) {
-                intermediateTensorConsumerCount[tensor.id] =
-                    intermediateTensorConsumerCount[tensor.id] - 1;
+              } else if (count != null) {
+                // only intermediate nodes has count set, inputs and weights are
+                // not.
+                intermediateTensorConsumerCount[tensor.id]--;
               }
             }
           });
