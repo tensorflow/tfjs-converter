@@ -105,10 +105,11 @@ $ tensorflowjs_converter \
 
 ### Web-friendly format
 
-The conversion script above produces 3 types of files:
+The conversion script above produces 4 types of files:
 
 * `tensorflowjs_model.pb` (the dataflow graph)
 * `weights_manifest.json` (weight manifest file)
+* `model.json` (the two above, in a single file)
 * `group1-shard\*of\*` (collection of binary weight files)
 
 For example, here is the MobileNet model converted and served in
