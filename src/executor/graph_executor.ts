@@ -192,7 +192,7 @@ export class GraphExecutor {
       intermediateTensorConsumerCount: {[key: string]: number}) {
     // Skip any control flow nodes, since its dependency is tricky to track
     // correctly.
-    if (node.category === 'control') return new Set();
+    if (node.category === 'control') return;
     tensorMap[nodeName].forEach(tensor => {
       if (tensor != null) {
         intermediateTensorConsumerCount[tensor.id] =
