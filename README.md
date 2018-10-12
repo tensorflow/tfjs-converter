@@ -112,8 +112,8 @@ The conversion script above produces 4 types of files:
 * `model.json` (the two above, in a single file)
 * `group1-shard\*of\*` (collection of binary weight files)
 
-For `keras` input files, the converter generates `model.json` and sharded weight files.
-For other input formats, it generates the other three.
+For `keras` input files, the converter generates `model.json` and `group1-shard\*of\*`.
+For other input formats, it generates the `tensorflowjs_model.pb`, `weights_manifest.json`, and `group1-shard\*of\*`.
 
 For example, here is the MobileNet model converted and served in
 following location:
