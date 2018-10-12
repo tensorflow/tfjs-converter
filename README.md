@@ -124,20 +124,15 @@ following location:
 
 ## Step 2: Loading and running in the browser
 
-1. Install the tfjs-converter npm package
-
-`yarn add @tensorflow/tfjs-converter` or `npm install @tensorflow/tfjs-converter`
-
-2. Instantiate the [FrozenModel class](./src/executor/frozen_model.ts) and run inference.
+Instantiate the [FrozenModel class](./src/executor/frozen_model.ts) and run inference.
 
 ```typescript
 import * as tf from '@tensorflow/tfjs';
-import {loadFrozenModel} from '@tensorflow/tfjs-converter';
 
 const MODEL_URL = 'https://.../mobilenet/tensorflowjs_model.pb';
 const WEIGHTS_URL = 'https://.../mobilenet/weights_manifest.json';
 
-const model = await loadFrozenModel(MODEL_URL, WEIGHTS_URL);
+const model = await tf.loadFrozenModel(MODEL_URL, WEIGHTS_URL);
 const cat = document.getElementById('cat');
 model.execute({input: tf.fromPixels(cat)});
 ```
@@ -159,7 +154,7 @@ TensorFlow.js can be used from Node.js. See
 [the tfjs-node project](https://github.com/tensorflow/tfjs-node) for more details.
 Unlike web browsers, Node.js can access the local file system directly.
 Therefore, you can load the same frozen model from local file system into
-a Node.js program running TensorFlow.js. This is done by calling `laodFrozenModel` with the path
+a Node.js program running TensorFlow.js. This is done by calling `loadFrozenModel` with the path
 to the model files:
 
 ```js
