@@ -14,5 +14,6 @@
  * limitations under the License.
  * =============================================================================
  */
-export {FrozenModel, loadFrozenModel} from './executor/frozen_model';
+// tslint:disable-next-line:max-line-length
+export {FrozenModel, loadFrozenModel, loadTfHubFrozenModel} from './executor/frozen_model';
 export {version as version_converter} from './version';
