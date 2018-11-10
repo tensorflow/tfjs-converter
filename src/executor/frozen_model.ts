@@ -23,7 +23,7 @@ import {OperationMapper} from '../operations/operation_mapper';
 
 import {GraphExecutor} from './graph_executor';
 
-export const TFHUB_PREFIX = '?tfjs-format=file&file=';
+export const TFHUB_SEARCH_PARAM = '?tfjs-format=file';
 export const DEFAULT_MODEL_NAME = 'tensorflowjs_model.pb';
 export const DEFAULT_MANIFEST_NAME = 'weights_manifest.json';
 /**
@@ -318,12 +318,13 @@ export async function loadFrozenModel(
  * and custom headers.
  */
 /** @doc {heading: 'Models', subheading: 'Loading'} */
-export async function loadTfHubFrozenModel(
-    tfhubModelUrl: string, requestOption?: RequestInit): Promise<FrozenModel> {
-  tfhubModelUrl += TFHUB_PREFIX;
-  const model = new FrozenModel(
-      tfhubModelUrl + DEFAULT_MODEL_NAME, tfhubModelUrl + DEFAULT_MANIFEST_NAME,
-      requestOption, tfhubModelUrl);
-  await model.load();
-  return model;
+export async function loadTfHubModule(
+    tfhubModuleUrl: string, requestOption?: RequestInit): Promise<FrozenModel> {
+  if (!tfhubModuleUrl.endsWith('/')) {
+    tfhubModuleUrl = tfhubModuleUrl + '/';
+  }
+  return loadFrozenModel(
+      `${tfhubModuleUrl}${DEFAULT_MODEL_NAME}${TFHUB_SEARCH_PARAM}`,
+      `${tfhubModuleUrl}${DEFAULT_MANIFEST_NAME}${TFHUB_SEARCH_PARAM}`,
+      requestOption);
 }

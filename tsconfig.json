@@ -8,7 +8,10 @@
     "preserveConstEnums": true,
     "declaration": true,
     "target": "es5",
-    "lib": ["es2015", "dom"],
+    "lib": [
+      "es2015",
+      "dom"
+    ],
     "outDir": "./dist",
     "noUnusedLocals": true,
     "noImplicitReturns": true,
@@ -17,10 +20,14 @@
     "noUnusedParameters": false,
     "pretty": true,
     "noFallthroughCasesInSwitch": true,
-    "allowUnreachableCode": false
+    "allowUnreachableCode": false,
+    "types": [
+      "jasmine"
+    ]
   },
   "include": [
     "src/",
-    "scripts/"
+    "scripts/",
+    "demo/mobilenet/mobilenet_node.js"
   ]
 }
