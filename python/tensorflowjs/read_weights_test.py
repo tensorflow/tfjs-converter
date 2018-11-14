@@ -48,8 +48,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
-    manifest = json.loads(manifest_json)
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
 
     # Read the weights using `read_weights`.
     read_output = read_weights.read_weights(manifest, self._tmp_dir)
@@ -67,8 +66,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
-    manifest = json.loads(manifest_json)
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
 
     # Read the weights using `read_weights`.
     read_output = read_weights.read_weights(
@@ -88,8 +86,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
-    manifest = json.loads(manifest_json)
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
 
     # Read the weights using `read_weights`.
     read_output = read_weights.read_weights(
@@ -112,8 +109,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
-    manifest = json.loads(manifest_json)
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
 
     # Read the weights using `read_weights`.
     read_output = read_weights.read_weights(
@@ -132,8 +128,7 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(groups, self._tmp_dir)
-    manifest = json.loads(manifest_json)
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
 
     # Read the weights using `read_weights`.
     read_output = read_weights.read_weights(manifest, self._tmp_dir)
@@ -165,9 +160,8 @@ class ReadWeightsTest(unittest.TestCase):
         }]
     ]
 
-    manifest_json = write_weights.write_weights(
+    manifest = write_weights.write_weights(
         groups, self._tmp_dir, quantization_dtype=np.uint8)
-    manifest = json.loads(manifest_json)
 
     # Read the weights using `read_weights`.
     read_output = read_weights.read_weights(manifest, self._tmp_dir)

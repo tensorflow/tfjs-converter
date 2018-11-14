@@ -54,6 +54,7 @@ def _deserialize_keras_model(model_topology_json,
     model_topology_json = json.load(model_topology_json)
   is_tf_keras = ('keras_version' in model_topology_json and
                  model_topology_json['keras_version'].endswith('-tf'))
+  print('is_tf_keras = %s' % is_tf_keras)  # DEBUG
 
   if 'model_config' in model_topology_json:
     model_topology_json = model_topology_json['model_config']
@@ -63,6 +64,8 @@ def _deserialize_keras_model(model_topology_json,
       model = tf.keras.models.model_from_json(json.dumps(model_topology_json))
     else:
       model = keras.models.model_from_json(json.dumps(model_topology_json))
+    print('Loaded:')  # DEBUG
+    model.summary()  # DEBUG
 
   if weight_entries:
     weights_dict = dict()
@@ -205,6 +208,7 @@ def load_keras_model(config_json_path,
           'Weights path prefix is not an existing directory: %s' %
           weights_path_prefix)
     if weights_path_prefix:
+      print('weights_manifest = %s' % weights_manifest)  # DEBUG
       weight_entries = read_weights.read_weights(weights_manifest,
                                                  weights_path_prefix,
                                                  flatten=True)

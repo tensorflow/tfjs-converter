@@ -21,6 +21,7 @@ from __future__ import print_function
 import argparse
 import json
 import os
+import tempfile
 
 import h5py
 import keras
@@ -86,6 +87,24 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
   return model_json, groups
 
 
+def dispatch_keras_saved_model_to_tensorflowjs_conversion(
+    keras_saved_model_path, output_dir, quantization_dtype=None,
+    split_weights_by_layer=False):
+  model = tf.contrib.saved_model.load_keras_model(keras_saved_model_path)
+
+  # Save model temporarily in H5 format.
+  temp_h5_path = tempfile.mktemp(suffix='.h5')
+  model.save(temp_h5_path)
+  assert os.path.isfile(temp_h5_path)
+
+  dispatch_keras_h5_to_tensorflowjs_conversion(
+      temp_h5_path,
+      output_dir,
+      quantization_dtype=quantization_dtype,
+      split_weights_by_layer=split_weights_by_layer)
+  os.remove(temp_h5_path)
+
+
 def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
   """Converts a Keras Model from tensorflowjs format to H5.
 
@@ -142,14 +161,16 @@ def main():
       type=str,
       required=False,
       default='tf_saved_model',
-      choices=set(['keras', 'tf_saved_model', 'tf_session_bundle',
-                   'tf_frozen_model', 'tf_hub', 'tensorflowjs']),
+      choices=set(['keras', 'keras_saved_model',
+                   'tf_saved_model', 'tf_session_bundle', 'tf_frozen_model',
+                   'tf_hub', 'tensorflowjs']),
       help='Input format. '
       'For "keras", the input path can be one of the two following formats:\n'
       '  - A topology+weights combined HDF5 (e.g., generated with'
       '    `keras.model.save_model()` method).\n'
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
+      'For "keras_saved_model" TODO(cais): Description DO NOT SUBMIT'
       'For "tf" formats, a SavedModel, frozen model, session bundle model, '
       ' or TF-Hub module is expected.')
   parser.add_argument(
@@ -245,7 +266,12 @@ def main():
         FLAGS.input_path, output_dir=FLAGS.output_path,
         quantization_dtype=quantization_dtype,
         split_weights_by_layer=FLAGS.split_weights_by_layer)
-
+  elif (FLAGS.input_format == 'keras_saved_model' and
+        FLAGS.output_format == 'tensorflowjs'):
+    dispatch_keras_saved_model_to_tensorflowjs_conversion(
+        FLAGS.input_path, FLAGS.output_path,
+        quantization_dtype=quantization_dtype,
+        split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (FLAGS.input_format == 'tf_saved_model' and
         FLAGS.output_format == 'tensorflowjs'):
     tf_saved_model_conversion.convert_tf_saved_model(
