@@ -97,6 +97,28 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
 def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     keras_saved_model_path, output_dir, quantization_dtype=None,
     split_weights_by_layer=False):
+  """Converts a tf.keras model saved in the TensorFlow SavedModel format
+
+  into to TensorFlow.js format.
+
+  Note that the SavedModel format exists in tf.keras, but not in
+  keras-team/keras.
+
+  Args:
+    keras_saved_model_path: path to a folder in which the
+      assets/saved_model.json can be found. This is usually a subfolder
+      that is under the folder passed to
+      `tf.contrib.saved_model.save_keras_model()` and has a Unix epoch time
+      as its name (e.g., 1542212752).
+    output_dir: Output directory to which the TensorFlow.js-format model JSON
+      file and weights files will be written. If the directory does not exist,
+      it will be created.
+    quantization_dtype: The quantized data type to store the weights in
+      (Default: `None`).
+    split_weights_by_layer: Whether to split the weights into separate weight
+      groups (corresponding to separate binary weight files) layer by layer
+      (Default: `False`).
+  """
   with tf.Graph().as_default(), tf.Session():
     model = tf.contrib.saved_model.load_keras_model(keras_saved_model_path)
 

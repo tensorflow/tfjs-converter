@@ -341,8 +341,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
   def testWrongConverterRaisesCorrectErrorMessage(self):
     with tf.Graph().as_default(), tf.Session():
       model = self._createSimpleSequentialModel()
-      old_model_json = json.loads(model.to_json())
-      old_weights = model.get_weights()
       tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
       save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
@@ -421,8 +419,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
   def testConvertTfKerasSequentialSavedAsSavedModelWithQuantization(self):
     with tf.Graph().as_default(), tf.Session():
       model = self._createSimpleSequentialModel()
-      old_model_json = json.loads(model.to_json())
-      old_weights = model.get_weights()
       tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
       save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
