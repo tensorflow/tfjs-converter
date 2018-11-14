@@ -492,7 +492,7 @@ class APIAndShellTest(tf.test.TestCase):
       model_2 = tfjs.converters.load_keras_model(
           os.path.join(self._tmp_dir, 'model.json'))
       model_2_json = model_2.to_json()
-      self.assertEqual(model_json, model_2_json)   
+      self.assertEqual(model_json, model_2_json)
 
   def testVersion(self):
     process = subprocess.Popen(
@@ -656,8 +656,8 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
           stderr=subprocess.PIPE)
       _, stderr = process.communicate()
       self.assertIn(
-          'Expected path to point to an HDF5 file, '
-          'but it points to a directory', stderr)
+          b'Expected path to point to an HDF5 file, '
+          b'but it points to a directory', tf.compat.as_bytes(stderr))
 
 
 if __name__ == '__main__':
