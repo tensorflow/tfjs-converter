@@ -28,8 +28,8 @@ import unittest
 import keras
 import tensorflow as tf
 
-from tensorflowjs import read_weights
 from tensorflowjs.converters import converter
+from tensorflowjs.converters import keras_tfjs_loader
 
 
 # TODO(adarob): Add tests for quantization option.
@@ -309,21 +309,15 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
   def testConvertTfKerasSequentialSavedAsSavedModel(self):
     with tf.Graph().as_default(), tf.Session():
       model = self._createSimpleSequentialModel()
-      model_json = json.loads(model.to_json())
+      old_model_json = json.loads(model.to_json())
+      old_weights = model.get_weights()
       tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
       save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
+      # Convert the tf.keras SavedModel to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
       converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
           save_result_dir, tfjs_output_dir)
-
-      # Check the content of the output directory.
-      output_json = json.load(
-          open(os.path.join(tfjs_output_dir, 'model.json'), 'rt'))
-      self.assertEqual(
-          model_json['config'],
-          output_json['modelTopology']['model_config']['config'])
-      self.assertIsInstance(output_json['weightsManifest'], list)
 
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
@@ -331,60 +325,79 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
 
-      # Verify the content of the weight file.
-      weights = read_weights.read_weights(
-          output_json['weightsManifest'], tfjs_output_dir)
-      print(weights)
+    with tf.Graph().as_default(), tf.Session():
+      # Load the converted mode back.
+      model_json_path = os.path.join(tfjs_output_dir, 'model.json')
+      model_prime = keras_tfjs_loader.load_keras_model(model_json_path)
+      new_weights = model_prime.get_weights()
+
+      # Check the equality of the old and new model JSONs.
+      self.assertEqual(old_model_json, json.loads(model_prime.to_json()))
+
+      # Check the equality of the old and new weights.
+      self.assertAllClose(old_weights, new_weights)
 
   def testConvertTfKerasNestedSequentialSavedAsSavedModel(self):
     with tf.Graph().as_default(), tf.Session():
       model = self._createNestedSequentialModel()
-      model_json = json.loads(model.to_json())
+      old_model_json = json.loads(model.to_json())
+      old_weights = model.get_weights()
       tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
       save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
+      # Convert the tf.keras SavedModel to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
       converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
           save_result_dir, tfjs_output_dir)
-
-      # Check the content of the output directory.
-      output_json = json.load(
-          open(os.path.join(tfjs_output_dir, 'model.json'), 'rt'))
-      self.assertEqual(
-          model_json['config'],
-          output_json['modelTopology']['model_config']['config'])
-      self.assertIsInstance(output_json['weightsManifest'], list)
 
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
       weight_file_bytes = os.path.getsize(weight_path)
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
+
+    with tf.Graph().as_default(), tf.Session():
+      # Load the converted mode back.
+      model_json_path = os.path.join(tfjs_output_dir, 'model.json')
+      model_prime = keras_tfjs_loader.load_keras_model(model_json_path)
+      new_weights = model_prime.get_weights()
+
+      # Check the equality of the old and new model JSONs.
+      self.assertEqual(old_model_json, json.loads(model_prime.to_json()))
+
+      # Check the equality of the old and new weights.
+      self.assertAllClose(old_weights, new_weights)
 
   def testConvertTfKerasFunctionalModelWithWeightsSavedAsSavedModel(self):
     with tf.Graph().as_default(), tf.Session():
       model = self._createFunctionalModelWithWeights()
-      model_json = json.loads(model.to_json())
+      old_model_json = json.loads(model.to_json())
+      old_weights = model.get_weights()
       tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
       save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
+      # Convert the tf.keras SavedModel to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
       converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
           save_result_dir, tfjs_output_dir)
-
-      # Check the content of the output directory.
-      output_json = json.load(
-          open(os.path.join(tfjs_output_dir, 'model.json'), 'rt'))
-      self.assertEqual(
-          model_json['config'],
-          output_json['modelTopology']['model_config']['config'])
-      self.assertIsInstance(output_json['weightsManifest'], list)
 
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
       weight_file_bytes = os.path.getsize(weight_path)
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
+
+    with tf.Graph().as_default(), tf.Session():
+      # Load the converted mode back.
+      model_json_path = os.path.join(tfjs_output_dir, 'model.json')
+      model_prime = keras_tfjs_loader.load_keras_model(model_json_path)
+      new_weights = model_prime.get_weights()
+
+      # Check the equality of the old and new model JSONs.
+      self.assertEqual(old_model_json, json.loads(model_prime.to_json()))
+
+      # Check the equality of the old and new weights.
+      self.assertAllClose(old_weights, new_weights)
 
 
 if __name__ == '__main__':

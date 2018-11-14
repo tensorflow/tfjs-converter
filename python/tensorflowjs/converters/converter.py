@@ -90,21 +90,22 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
 def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     keras_saved_model_path, output_dir, quantization_dtype=None,
     split_weights_by_layer=False):
-  model = tf.contrib.saved_model.load_keras_model(keras_saved_model_path)
+  with tf.Graph().as_default(), tf.Session():
+    model = tf.contrib.saved_model.load_keras_model(keras_saved_model_path)
 
-  # Save model temporarily in HDF5 format.
-  temp_h5_path = tempfile.mktemp(suffix='.h5')
-  model.save(temp_h5_path)
-  assert os.path.isfile(temp_h5_path)
+    # Save model temporarily in HDF5 format.
+    temp_h5_path = tempfile.mktemp(suffix='.h5')
+    model.save(temp_h5_path)
+    assert os.path.isfile(temp_h5_path)
 
-  dispatch_keras_h5_to_tensorflowjs_conversion(
-      temp_h5_path,
-      output_dir,
-      quantization_dtype=quantization_dtype,
-      split_weights_by_layer=split_weights_by_layer)
+    dispatch_keras_h5_to_tensorflowjs_conversion(
+        temp_h5_path,
+        output_dir,
+        quantization_dtype=quantization_dtype,
+        split_weights_by_layer=split_weights_by_layer)
 
-  # Delete temporary .h5 file.
-  os.remove(temp_h5_path)
+    # Delete temporary .h5 file.
+    os.remove(temp_h5_path)
 
 
 def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
