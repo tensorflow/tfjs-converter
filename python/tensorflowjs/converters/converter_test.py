@@ -28,7 +28,9 @@ import unittest
 import keras
 import tensorflow as tf
 
+from tensorflowjs import read_weights
 from tensorflowjs.converters import converter
+
 
 # TODO(adarob): Add tests for quantization option.
 
@@ -328,6 +330,11 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       weight_file_bytes = os.path.getsize(weight_path)
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
+
+      # Verify the content of the weight file.
+      weights = read_weights.read_weights(
+          output_json['weightsManifest'], tfjs_output_dir)
+      print(weights)
 
   def testConvertTfKerasNestedSequentialSavedAsSavedModel(self):
     with tf.Graph().as_default(), tf.Session():
