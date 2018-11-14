@@ -29,7 +29,6 @@ import keras
 import tensorflow as tf
 
 from tensorflowjs.converters import converter
-from tensorflowjs.converters import keras_tfjs_loader
 
 # TODO(adarob): Add tests for quantization option.
 
@@ -381,7 +380,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
           model_json['config'],
           output_json['modelTopology']['model_config']['config'])
       self.assertIsInstance(output_json['weightsManifest'], list)
-      
+
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
       weight_file_bytes = os.path.getsize(weight_path)

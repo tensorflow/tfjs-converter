@@ -27,6 +27,7 @@ import tempfile
 import unittest
 
 import keras
+import numpy as np
 import tensorflow as tf
 import tensorflow_hub as hub
 
@@ -491,7 +492,7 @@ class APIAndShellTest(tf.test.TestCase):
       model_2 = tfjs.converters.load_keras_model(
           os.path.join(self._tmp_dir, 'model.json'))
       model_2_json = model_2.to_json()
-      self.assertEqual(model_json, model_2_json)
+      self.assertEqual(model_json, model_2_json)   
 
   def testVersion(self):
     process = subprocess.Popen(
@@ -515,5 +516,72 @@ class APIAndShellTest(tf.test.TestCase):
         tf.compat.as_bytes(stdout))
 
 
+class ConvertTfKerasSavedModelTest(tf.test.TestCase):
+
+  def setUp(self):
+    super(ConvertTfKerasSavedModelTest, self).setUp()
+    self._tmp_dir = tempfile.mkdtemp()
+
+  def tearDown(self):
+    if os.path.isdir(self._tmp_dir):
+      shutil.rmtree(self._tmp_dir)
+    super(ConvertTfKerasSavedModelTest, self).tearDown()
+
+  def _createSimpleSequentialModel(self):
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Reshape([2, 3], input_shape=[6]))
+    model.add(tf.keras.layers.LSTM(10))
+    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    return model
+
+  def _createNestedSequentialModel(self):
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Dense(6, input_shape=[10], activation='relu'))
+    model.add(self._createSimpleSequentialModel())
+    return model
+
+  def testConvertTfKerasSavedModelIntoTfjsFormat(self):
+    with tf.Graph().as_default(), tf.Session():
+      x = np.random.randn(8, 10)
+
+      # 1. Run the model.predict(), store the result. Then saved the model
+      #    as a SavedModel.
+      model = self._createNestedSequentialModel()
+      model.summary()  # DEBUG
+      y = model.predict(x)
+
+      tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
+      save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
+
+      # 2. Convert the keras saved model to tfjs format.
+      tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
+      process = subprocess.Popen([
+          'tensorflowjs_converter', '--input_format', 'keras_saved_model',
+          save_result_dir, tfjs_output_dir
+      ])
+      process.communicate()
+      self.assertEqual(0, process.returncode)
+
+      model_json_path = os.path.join(tfjs_output_dir, 'model.json')
+      self.assertTrue(os.path.isfile(model_json_path))
+
+      # 3. Convert the tfjs model to keras h5 format.
+      new_h5_path = os.path.join(self._tmp_dir, 'new_h5.h5')
+      process = subprocess.Popen([
+          'tensorflowjs_converter', '--input_format', 'tensorflowjs',
+          '--output_format', 'keras', model_json_path, new_h5_path])
+      process.communicate()
+      self.assertEqual(0, process.returncode)
+
+      self.assertTrue(os.path.isfile(new_h5_path))
+
+      # 4. Load the model back and assert on the equality of the predict
+      #    results.
+      model_prime = tf.keras.models.load_model(new_h5_path)
+      model_prime.summary()  # DEBUG
+      new_y = model_prime.predict(x)
+      self.assertAllClose(y, new_y)
+
+
 if __name__ == '__main__':
-  unittest.main()
+  tf.test.main()

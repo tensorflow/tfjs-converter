@@ -92,7 +92,7 @@ def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     split_weights_by_layer=False):
   model = tf.contrib.saved_model.load_keras_model(keras_saved_model_path)
 
-  # Save model temporarily in H5 format.
+  # Save model temporarily in HDF5 format.
   temp_h5_path = tempfile.mktemp(suffix='.h5')
   model.save(temp_h5_path)
   assert os.path.isfile(temp_h5_path)
@@ -102,6 +102,8 @@ def dispatch_keras_saved_model_to_tensorflowjs_conversion(
       output_dir,
       quantization_dtype=quantization_dtype,
       split_weights_by_layer=split_weights_by_layer)
+
+  # Delete temporary .h5 file.
   os.remove(temp_h5_path)
 
 
