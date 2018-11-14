@@ -75,6 +75,15 @@ $ tensorflowjs_converter \
     /tmp/my_tfjs_model
 ```
 
+tf.keras SavedModel model example:
+
+```bash
+$ tensorflowjs_converter \
+    --input_format=keras_saved_model \
+    /tmp/my_keras_model.h5 \
+    /tmp/my_tfjs_model
+```
+
 
 |Positional Arguments | Description |
 |---|---|
