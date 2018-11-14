@@ -26,6 +26,7 @@ import tempfile
 import unittest
 
 import keras
+import numpy as np
 import tensorflow as tf
 
 from tensorflowjs.converters import converter
@@ -337,6 +338,24 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       # Check the equality of the old and new weights.
       self.assertAllClose(old_weights, new_weights)
 
+  def testWrongConverterRaisesCorrectErrorMessage(self):
+    with tf.Graph().as_default(), tf.Session():
+      model = self._createSimpleSequentialModel()
+      old_model_json = json.loads(model.to_json())
+      old_weights = model.get_weights()
+      tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
+      save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
+
+      # Convert the tf.keras SavedModel to tfjs format.
+      tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
+      # Use wrong dispatcher.
+      with self.assertRaisesRegexp(
+          ValueError,
+          r'Expected path to point to an HDF5 file, '
+          r'but it points to a directory'):
+        converter.dispatch_keras_h5_to_tensorflowjs_conversion(
+            save_result_dir, tfjs_output_dir)
+
   def testConvertTfKerasNestedSequentialSavedAsSavedModel(self):
     with tf.Graph().as_default(), tf.Session():
       model = self._createNestedSequentialModel()
@@ -398,6 +417,28 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
 
       # Check the equality of the old and new weights.
       self.assertAllClose(old_weights, new_weights)
+
+  def testConvertTfKerasSequentialSavedAsSavedModelWithQuantization(self):
+    with tf.Graph().as_default(), tf.Session():
+      model = self._createSimpleSequentialModel()
+      old_model_json = json.loads(model.to_json())
+      old_weights = model.get_weights()
+      tf.contrib.saved_model.save_keras_model(model, self._tmp_dir)
+      save_result_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
+
+      # Convert the tf.keras SavedModel to tfjs format.
+      tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
+      converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
+          save_result_dir, tfjs_output_dir, quantization_dtype=np.uint16)
+
+      # Verify the size of the weight file.
+      weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
+      weight_file_bytes = os.path.getsize(weight_path)
+      # Each uint16 number has 2 bytes.
+      bytes_per_num = 2
+      model_weight_bytes = sum(
+          w.size * bytes_per_num for w in model.get_weights())
+      self.assertEqual(weight_file_bytes, model_weight_bytes)
 
 
 if __name__ == '__main__':

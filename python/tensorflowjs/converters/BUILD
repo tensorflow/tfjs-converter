@@ -90,6 +90,7 @@ py_test(
         ":converter",
         ":keras_tfjs_loader",
         "//tensorflowjs:expect_keras_installed",
+        "//tensorflowjs:expect_numpy_installed",
         "//tensorflowjs:expect_tensorflow_installed",
         "//tensorflowjs:read_weights",
     ],

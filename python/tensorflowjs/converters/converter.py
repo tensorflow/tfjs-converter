@@ -64,6 +64,13 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
         will be `None`.
       groups: an array of weight_groups as defined in tfjs weights_writer.
   """
+  if not os.path.exists(h5_path):
+    raise ValueError('Nonexistent path to HDF5 file: %s' % h5_path)
+  elif os.path.isdir(h5_path):
+    raise ValueError(
+        'Expected path to point to an HDF5 file, but it points to a '
+        'directory: %s' % h5_path)
+
   converter = keras_h5_conversion.HDF5Converter()
 
   h5_file = h5py.File(h5_path)
@@ -173,7 +180,9 @@ def main():
       '    `keras.model.save_model()` method).\n'
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
-      'For "keras_saved_model" TODO(cais): Description DO NOT SUBMIT'
+      'For "keras_saved_model", the input_path must point to a subfolder '
+      'under the saved model folder. The subfolder is usually named as a '
+      'Unix epoch time (e.g., 1542212752)\n'
       'For "tf" formats, a SavedModel, frozen model, session bundle model, '
       ' or TF-Hub module is expected.')
   parser.add_argument(
