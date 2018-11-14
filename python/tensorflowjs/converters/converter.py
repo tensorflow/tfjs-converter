@@ -203,8 +203,10 @@ def main():
       '  - A weights-only HDF5 (e.g., generated with Keras Model\'s '
       '    `save_weights()` method). \n'
       'For "keras_saved_model", the input_path must point to a subfolder '
-      'under the saved model folder. The subfolder is usually named as a '
-      'Unix epoch time (e.g., 1542212752)\n'
+      'under the saved model folder that is passed as the argument '
+      'to tf.contrib.save_model.save_keras_model(). '
+      'The subfolder is usually named as a '
+      'Unix epoch time (e.g., 1542212752) as its name.\n'
       'For "tf" formats, a SavedModel, frozen model, session bundle model, '
       ' or TF-Hub module is expected.')
   parser.add_argument(
