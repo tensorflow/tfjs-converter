@@ -315,8 +315,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
           save_result_dir, tfjs_output_dir)
 
-      print(glob.glob(os.path.join(tfjs_output_dir, '*')))
-
       # Check the content of the output directory.
       output_json = json.load(
           open(os.path.join(tfjs_output_dir, 'model.json'), 'rt'))
@@ -328,7 +326,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
       weight_file_bytes = os.path.getsize(weight_path)
-      print('weight_file_bytes = %d' % weight_file_bytes)  # DEBUG
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
 
@@ -343,8 +340,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
           save_result_dir, tfjs_output_dir)
 
-      print(glob.glob(os.path.join(tfjs_output_dir, '*')))
-
       # Check the content of the output directory.
       output_json = json.load(
           open(os.path.join(tfjs_output_dir, 'model.json'), 'rt'))
@@ -356,7 +351,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
       weight_file_bytes = os.path.getsize(weight_path)
-      print('weight_file_bytes = %d' % weight_file_bytes)  # DEBUG
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
 
@@ -371,8 +365,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       converter.dispatch_keras_saved_model_to_tensorflowjs_conversion(
           save_result_dir, tfjs_output_dir)
 
-      print(glob.glob(os.path.join(tfjs_output_dir, '*')))
-
       # Check the content of the output directory.
       output_json = json.load(
           open(os.path.join(tfjs_output_dir, 'model.json'), 'rt'))
@@ -384,7 +376,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       # Verify the size of the weight file.
       weight_path = glob.glob(os.path.join(tfjs_output_dir, 'group*-*'))[0]
       weight_file_bytes = os.path.getsize(weight_path)
-      print('weight_file_bytes = %d' % weight_file_bytes)  # DEBUG
       model_weight_bytes = sum(w.size * 4 for w in model.get_weights())
       self.assertEqual(weight_file_bytes, model_weight_bytes)
 
