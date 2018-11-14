@@ -347,10 +347,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       # Convert the tf.keras SavedModel to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
       # Use wrong dispatcher.
-      with self.assertRaisesRegexp(
-          ValueError,
-          r'Expected path to point to an HDF5 file, '
-          r'but it points to a directory'):
+      with self.assertRaisesRegexp(ValueError):
         converter.dispatch_keras_h5_to_tensorflowjs_conversion(
             save_result_dir, tfjs_output_dir)
 
