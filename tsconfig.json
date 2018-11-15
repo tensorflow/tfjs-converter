@@ -27,7 +27,6 @@
   },
   "include": [
     "src/",
-    "scripts/",
-    "demo/mobilenet/mobilenet_node.js"
+    "scripts/"
   ]
 }
