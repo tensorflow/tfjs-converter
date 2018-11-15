@@ -186,7 +186,7 @@ export class GraphExecutor {
         Object.keys(tensorMap)
             .map(key => tensorMap[key])
             .map(tensors => tensors.map(tensor => tensor.id)));
-    return new Set(...ids);
+    return new Set(ids);
   }
   private checkTensorForDisposal(
       nodeName: string, node: Node, tensorMap: NamedTensorsMap,
