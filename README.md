@@ -84,6 +84,10 @@ $ tensorflowjs_converter \
     /tmp/my_tfjs_model
 ```
 
+Note that the input path used above is a subfolder that has a Unix epoch
+time (1542211770) and is generated automatically by tensorflow when it
+saved a tf.keras model in the SavedModel format.
+
 |Positional Arguments | Description |
 |---|---|
 |`input_path`  | Full path of the saved model directory, session bundle directory, frozen model file or TensorFlow Hub module handle or path.|
