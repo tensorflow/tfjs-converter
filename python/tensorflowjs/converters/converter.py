@@ -97,9 +97,7 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
 def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     keras_saved_model_path, output_dir, quantization_dtype=None,
     split_weights_by_layer=False):
-  """Converts a tf.keras model saved in the TensorFlow SavedModel format
-
-  into to TensorFlow.js format.
+  """Converts tf.keras model saved in the SavedModel format to tfjs format.
 
   Note that the SavedModel format exists in tf.keras, but not in
   keras-team/keras.
