@@ -128,6 +128,14 @@ describe('GraphExecutor', () => {
           tfc.test_util.expectArraysClose(result['output'], [5.0]);
         });
 
+        it('should allow output intermediate nodes', () => {
+          const inputTensor = tfc.scalar(1);
+          const result = executor.execute(
+              {input: [inputTensor]}, false, ['output', 'intermediate']);
+          tfc.test_util.expectArraysClose(result['intermediate'], [3.0]);
+          tfc.test_util.expectArraysClose(result['output'], [5.0]);
+        });
+
         it('should allow feed intermediate nodes', () => {
           const intermediateTensor = tfc.scalar(1);
           const result =
@@ -304,6 +312,21 @@ describe('GraphExecutor', () => {
                   });
         });
 
+        it('should allow output intermediate nodes', (done) => {
+          const inputTensor = tfc.scalar(1);
+          executor.executeAsync({input: [inputTensor]}, ['intermediate'])
+              .then(
+                  result => {
+                    tfc.test_util.expectArraysClose(
+                        result['intermediate'], [3.0]);
+                    done();
+                  },
+                  e => {
+                    fail(e);
+                    done();
+                  });
+        });
+
         it('should be able to execute control flow graph ' +
                'with intermediate node more than once',
            (done) => {
@@ -316,12 +339,17 @@ describe('GraphExecutor', () => {
                        executor
                            .executeAsync(
                                {intermediate: [inputTensor]}, 'output:1')
-                           .then(result => {
-                             tfc.test_util.expectArraysClose(
-                                 result['output:1'], [1]);
+                           .then(
+                               result => {
+                                 tfc.test_util.expectArraysClose(
+                                     result['output:1'], [1]);
 
-                             done();
-                           });
+                                 done();
+                               },
+                               e => {
+                                 fail(e);
+                                 done();
+                               });
                      },
                      e => {
                        fail(e);
