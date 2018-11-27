@@ -307,7 +307,7 @@ export async function loadFrozenModel(
  * ```js
  * const TFHUB_MOBILENET =
  *   'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2';
- * const model = await tf.loadTfHubFrozenModel(TFHUB_MOBILENET);
+ * const model = await tf.loadTfHubModule(TFHUB_MOBILENET);
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();
  * ```
