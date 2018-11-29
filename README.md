@@ -285,3 +285,9 @@ $ node_modules/protobufjs/bin/pbts -o src/data/compiled_api.d.ts src/data/compil
 ```bash
 $ node_modules/protobufjs/bin/pbjs -t static-module -w commonjs -o src/data/compiled_api.js --no-create --no-encode --no-verify --no-convert --no-delimited --no-beautify --no-comments src/data/api.proto
 ```
+
+To convert generated `tensorflowjs_model.pb` file to viewable JSON format, use follow command
+
+```bash
+ts-node scripts/pb2json.ts pb_filename output_json_filename
+```
