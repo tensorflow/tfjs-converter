@@ -15,6 +15,7 @@
  * =============================================================================
  */
 import {DataType} from '@tensorflow/tfjs-core';
+import {Base64} from 'js-base64';
 
 import {tensorflow} from '../data/compiled_api';
 
@@ -222,7 +223,7 @@ export class OperationMapper {
       keepCase = false): string {
     const param = attrs[name];
     if (param !== undefined) {
-      const value = String.fromCharCode.apply(null, param.s);
+      const value = Base64.decode(param.s);
       return keepCase ? value : value.toLowerCase();
     }
     return def;
@@ -238,9 +239,11 @@ export class OperationMapper {
   private getNumberParam(
       attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: number): number {
-    const param = attrs[name] as tensorflow.AttrValue;
-    const value = (param ? param[param.value] : def) as number | Long;
-    return (typeof value === 'number') ? value : value['toInt']() as number;
+    const param = attrs[name] || {};
+    const value = param['i'] ? param['i'] : (param['f'] ? param['f'] : def);
+    return (typeof value === 'number') ?
+        value :
+        parseInt(value as string, 10) as number;
   }
   private getDtypeParam(
       attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
@@ -266,8 +269,9 @@ export class OperationMapper {
     const param = attrs[name];
     if (param && param.shape) {
       return param.shape.dim.map(
-          dim =>
-              (typeof dim.size === 'number') ? dim.size : dim.size['toInt']());
+          dim => (typeof dim.size === 'number') ?
+              dim.size :
+              parseInt(dim.size as string, 10));
     }
     return def;
   }
@@ -279,8 +283,10 @@ export class OperationMapper {
     if (param) {
       return ((param.list.f && param.list.f.length ? param.list.f :
                                                      param.list.i))
-                 .map(v => (typeof v === 'number') ? v : v['toInt']()) as
-          number[];
+                 .map(
+                     v => (typeof v === 'number') ?
+                         v :
+                         parseInt(v as string, 10)) as number[];
     }
     return def;
   }

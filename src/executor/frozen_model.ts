@@ -24,8 +24,7 @@ import {OperationMapper} from '../operations/operation_mapper';
 import {GraphExecutor} from './graph_executor';
 
 export const TFHUB_SEARCH_PARAM = '?tfjs-format=file';
-export const DEFAULT_MODEL_NAME = 'tensorflowjs_model.pb';
-export const DEFAULT_MANIFEST_NAME = 'weights_manifest.json';
+export const DEFAULT_MODEL_NAME = 'model.json';
 /**
  * A `tf.FrozenModel` is a directed, acyclic graph of built from
  * SavedModel GraphDef and allows inference exeuction.
@@ -70,11 +69,11 @@ export class FrozenModel implements tfc.InferenceModel {
    * and custom headers.
    */
   constructor(
-      private modelUrl: string, private weightManifestUrl: string,
-      private requestOption?: RequestInit, private weightPrefix?: string) {}
+      private modelUrl: string, private requestOption?: RequestInit,
+      private weightPrefix?: string) {}
 
   private findIOHandler() {
-    const path = [this.modelUrl, this.weightManifestUrl];
+    const path = this.modelUrl;
     if (this.requestOption) {
       this.handler = tfc.io.browserHTTPRequest(
           path, this.requestOption, this.weightPrefix);
@@ -105,8 +104,7 @@ export class FrozenModel implements tfc.InferenceModel {
           'does not have the `load` method implemented.');
     }
     const artifacts = await this.handler.load();
-    const graph = tensorflow.GraphDef.decode(
-        new Uint8Array(artifacts.modelTopology as ArrayBuffer));
+    const graph = artifacts.modelTopology as tensorflow.IGraphDef;
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap =
@@ -291,9 +289,8 @@ export class FrozenModel implements tfc.InferenceModel {
  */
 /** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadFrozenModel(
-    modelUrl: string, weightsManifestUrl: string,
-    requestOption?: RequestInit): Promise<FrozenModel> {
-  const model = new FrozenModel(modelUrl, weightsManifestUrl, requestOption);
+    modelUrl: string, requestOption?: RequestInit): Promise<FrozenModel> {
+  const model = new FrozenModel(modelUrl, requestOption);
   await model.load();
   return model;
 }
@@ -325,6 +322,5 @@ export async function loadTfHubModule(
   }
   return loadFrozenModel(
       `${tfhubModuleUrl}${DEFAULT_MODEL_NAME}${TFHUB_SEARCH_PARAM}`,
-      `${tfhubModuleUrl}${DEFAULT_MANIFEST_NAME}${TFHUB_SEARCH_PARAM}`,
       requestOption);
 }
