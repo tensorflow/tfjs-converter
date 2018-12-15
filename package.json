@@ -20,6 +20,7 @@
     "@tensorflow/tfjs-core": "0.14.2",
     "@types/jasmine": "~2.8.6",
     "@types/node-fetch": "1.6.9",
+    "@types/murmurhash-js": "1.0.3",
     "ajv": "~6.3.0",
     "babel-core": "~6.26.3",
     "babel-plugin-external-helpers": "~6.22.0",
@@ -49,7 +50,7 @@
     "yalc": "~1.0.0-pre.21"
   },
   "scripts": {
-    "build": "tsc && copyfiles -f src/data/compiled_api.* dist/src/data/",
+    "build": "tsc && copyfiles -f src/data/compiled_api.* dist/src/data/ && copyfiles -f src/operations/custom/index.d.ts dist/src/operations/custom",
     "build-npm": "./scripts/build-npm.sh",
     "link-local": "yalc link",
     "publish-local": "yarn build-npm && yalc push",
@@ -63,6 +64,7 @@
   },
   "dependencies": {
     "@types/long": "~3.0.32",
-    "protobufjs": "~6.8.6"
+    "protobufjs": "~6.8.6",
+    "murmurhash-js": "1.0.0"
   }
 }
