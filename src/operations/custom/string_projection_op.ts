@@ -138,7 +138,8 @@ export function getFeatureWeights(
   const ids = [];
   const weights = [];
   for (const key of Object.keys(featureCounts)) {
-    const featureId = murmur3(key);
+    console.log('feature', key);
+    const featureId = new Int32Array([murmur3(key)])[0];
     ids.push(featureId);
     weights.push(featureCounts[key]);
   }
@@ -218,7 +219,10 @@ export class StringProjectionOp {
       key.setFloat32(0, seed);
       keyArray.set(inputData, seedSize);
 
-      const hashSignature = murmur3(key.toString());
+      console.log('signature', Buffer.from(keyArray).toString('utf8'));
+      const hashSignature =
+          new Int32Array([murmur3(Buffer.from(keyArray).toString('utf8'))])[0];
+      console.log(hashSignature);
       inputData[i] += flatInput.shape[1];
       score += weightData[i] * hashSignature;
     }
@@ -236,6 +240,7 @@ export class StringProjectionOp {
       batchSize: number, hash: tf.Tensor2D, batchIds: number[][],
       batchWeights: number[][], binaryProjection: boolean): tf.Tensor {
     const [numHash, numBits] = hash.shape;
+    console.log('==============', numHash, numBits);
     const outputValues = tf.buffer([batchSize, numHash], 'int32');
     const hashValues = hash.dataSync();
     for (let b = 0; b < batchSize; ++b) {
