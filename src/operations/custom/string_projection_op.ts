@@ -138,7 +138,6 @@ export function getFeatureWeights(
   const ids = [];
   const weights = [];
   for (const key of Object.keys(featureCounts)) {
-    console.log('feature', key);
     const featureId = new Int32Array([murmur3(key)])[0];
     ids.push(featureId);
     weights.push(featureCounts[key]);
@@ -193,45 +192,47 @@ export class StringProjectionOp {
     }
   }
 
+  private copyArrayBuffer(
+      source: Uint8Array, dest: Uint8Array, sourceOffset: number,
+      dstOffest: number, size: number) {
+    for (let i = 0; i < size; i++) {
+      dest[dstOffest + i] = source[sourceOffset + i];
+    }
+  }
+
   // compute sign bit of dot product of hash(seed, input) and weight.
   // NOTE: use float as seed, and convert it to double as a temporary
   // solution
   //       to match the trained model. This is going to be changed once the
   //       new model is trained in an optimized method.
   runningSignBit(
-      input: tf.Tensor, weight: tf.Tensor, seed: number,
+      input: number[], weight: number[], seed: number,
       binaryProjection: boolean) {
     let score = 0.0;
-    const size =
-        input.shape.slice().splice(1).reduce((sum, cur) => sum += cur, 0) || 1;
-    const flatInput = input.reshape([input.shape[0], size]);
-    const inputData = flatInput.dataSync();
-    const weightData = weight.dataSync();
-    const inputItemBytes = inputData.length * flatInput.shape[1];
+    const inputItemBytes = 4;
+    let offset = 0;
 
     const seedSize = 4;
     const keyBytes = seedSize + inputItemBytes;
+    const inputData = new Uint8Array(new Int32Array(input).buffer);
+    const seedArray = new Uint8Array(new Float32Array([seed]).buffer);
     const keyArray = new Uint8Array(keyBytes);
-    const key = new DataView(keyArray.buffer);
-
-    for (let i = 0; i < flatInput.shape[0]; ++i) {
+    this.copyArrayBuffer(seedArray, keyArray, 0, 0, 4);
+    for (let i = 0; i < input.length; ++i) {
       // Create running hash id and value for current dimension.
-      key.setFloat32(0, seed);
-      keyArray.set(inputData, seedSize);
-
-      console.log('signature', Buffer.from(keyArray).toString('utf8'));
-      const hashSignature =
-          new Int32Array([murmur3(Buffer.from(keyArray).toString('utf8'))])[0];
-      console.log(hashSignature);
-      inputData[i] += flatInput.shape[1];
-      score += weightData[i] * hashSignature;
+      this.copyArrayBuffer(
+          inputData, keyArray, offset, seedSize, inputItemBytes);
+      const key = String.fromCharCode.apply(null, keyArray);
+      const hashSignature = new Int32Array([murmur3(key, 0)])[0];
+      offset += inputItemBytes;
+      score += weight[i] * hashSignature;
     }
 
-    const inverseNormalizer = 0.00000000046566129;
+    // const inverseNormalizer = 0.00000000046566129;
 
-    if (!binaryProjection) {
-      return Math.tanh(score * inverseNormalizer);
-    }
+    // if (!binaryProjection) {
+    //   return Math.tanh(score * inverseNormalizer);
+    // }
 
     return (score > 0) ? 1 : 0;
   }
@@ -240,19 +241,15 @@ export class StringProjectionOp {
       batchSize: number, hash: tf.Tensor2D, batchIds: number[][],
       batchWeights: number[][], binaryProjection: boolean): tf.Tensor {
     const [numHash, numBits] = hash.shape;
-    console.log('==============', numHash, numBits);
     const outputValues = tf.buffer([batchSize, numHash], 'int32');
     const hashValues = hash.dataSync();
     for (let b = 0; b < batchSize; ++b) {
-      const input = tf.tensor1d(batchIds[b], 'int32');
-      const weight = tf.tensor1d(batchWeights[b], 'float32');
-
       for (let i = 0; i < numHash; i++) {
         let hashSignature = 0;
         for (let j = 0; j < numBits; j++) {
           const seed = hashValues[i * hash.shape[1] + j];
-          const bit =
-              this.runningSignBit(input, weight, seed, binaryProjection);
+          const bit = this.runningSignBit(
+              batchIds[b], batchWeights[b], seed, binaryProjection);
           hashSignature = (hashSignature << 1) | bit;
         }
 
@@ -266,18 +263,15 @@ export class StringProjectionOp {
       batchSize: number, hash: tf.Tensor2D, batchIds: number[][],
       batchWeights: number[][], binaryProjection: boolean): tf.Tensor {
     const [numHash, numBits] = hash.shape;
-    const outputValues = tf.buffer([batchSize, numHash * numBits], 'int32');
+    const outputValues = tf.buffer([batchSize, hash.size], 'int32');
     const hashValues = hash.dataSync();
 
     for (let b = 0; b < batchSize; ++b) {
-      const input = tf.tensor1d(batchIds[b], 'int32');
-      const weight = tf.tensor1d(batchWeights[b], 'float32');
-
       for (let i = 0; i < numHash; i++) {
         for (let j = 0; j < numBits; j++) {
-          const seed = hashValues[i * hash.shape[1] + j];
-          const bit =
-              this.runningSignBit(input, weight, seed, binaryProjection);
+          const seed = hashValues[i * numBits + j];
+          const bit = this.runningSignBit(
+              batchIds[b], batchWeights[b], seed, binaryProjection);
           outputValues.set(bit, b, i * numBits + j);
         }
       }
@@ -295,15 +289,13 @@ export class StringProjectionOp {
     for (let b = 0; b < batchSize; ++b) {
       const ids = [];
       const weights = [];
-      const input = tf.tensor1d(batchIds[b], 'int32');
-      const weight = tf.tensor1d(batchWeights[b], 'float32');
 
       for (let i = 0; i < numHash; i++) {
         let hashSignature = 0;
         for (let j = 0; j < numBits; j++) {
           const seed = hashValues[i * hash.shape[1] + j];
-          const bit =
-              this.runningSignBit(input, weight, seed, binaryProjection);
+          const bit = this.runningSignBit(
+              batchIds[b], batchWeights[b], seed, binaryProjection);
           hashSignature = (hashSignature << 1) | bit;
         }
 

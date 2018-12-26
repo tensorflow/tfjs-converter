@@ -406,7 +406,7 @@ export class GraphExecutor {
       const inputTensors = inputs[node.name];
       // do nothing if not strict input check and input tensors is not for
       // the placeholders.
-      if (!strictInputCheck && !inputTensors) {
+      if (!strictInputCheck) {
         return;
       }
 

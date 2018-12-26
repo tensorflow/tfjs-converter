@@ -19,6 +19,7 @@ import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
+import {StringProjectionOp} from '../custom/string_projection_op';
 import {Node} from '../types';
 
 import {OpExecutor} from './types';
@@ -85,6 +86,33 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
       return [tfc.depthToSpace(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor4D,
           blockSize, dataFormat)];
+    }
+    case 'stringProjection': {
+      const hash =
+          getParamValue('hash', node, tensorMap, context) as tfc.Tensor2D;
+      const x = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
+      const nGramSize =
+          getParamValue('nGramSize', node, tensorMap, context) as number;
+      const maxSkipSize =
+          getParamValue('maxSkipSize', node, tensorMap, context) as number;
+      const includeAllNGrams =
+          getParamValue('includeAllNGrams', node, tensorMap, context) as
+          boolean;
+      const preprocess =
+          getParamValue('preprocess', node, tensorMap, context) as boolean;
+      const charLevel =
+          getParamValue('charLevel', node, tensorMap, context) as boolean;
+      const binaryProjection =
+          getParamValue('binaryProjection', node, tensorMap, context) as
+          boolean;
+      const method =
+          getParamValue('method', node, tensorMap, context) as string;
+
+      return [
+        new StringProjectionOp().compute(
+            x, hash, method, nGramSize, maxSkipSize, includeAllNGrams,
+            preprocess, charLevel, binaryProjection) as tfc.Tensor
+      ];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

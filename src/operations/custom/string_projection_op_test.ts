@@ -16,7 +16,6 @@
  */
 import * as tf from '@tensorflow/tfjs-core';
 import {expectArraysClose} from '@tensorflow/tfjs-core/dist/test_util';
-import {murmur3} from 'murmurhash-js';
 
 import {StringProjectionOp} from './string_projection_op';
 
@@ -26,9 +25,18 @@ describe('StringProjectionOp', () => {
     op = new StringProjectionOp();
   });
   it('should initialize', () => {
-    console.log(new Int32Array([murmur3('this is a test')])[0]);
-    console.log(new Int32Array([murmur3('not really a test')])[0]);
     expect(op).toBeDefined();
+  });
+  fit('should be fast', () => {
+    const hash = tf.ones<tf.Rank.R2>([90, 14], 'float32');
+    const input = tf.tensor1d(
+        [
+          'i would like to find a flight from charlotte to las vegas that makes a stop in st. louis'
+        ],
+        'string');
+    console.time('start');
+    op.compute(input, hash, 'dense', 2, 1, true, true, false, true);
+    console.timeEnd('start');
   });
 
   it('should generate dense projection', () => {
@@ -38,11 +46,9 @@ describe('StringProjectionOp', () => {
         ['hello world abc def ghi', 'hello world abc def ghi1'], 'string');
     const output =
         op.compute(input, hash, 'dense', 2, 1, true, true, false, true);
-
     // First checks dimensions.
     expect(output.rank).toEqual(2);
     expect(output.shape).toEqual([2, 6]);
-    console.log(output.dataSync());
     expectArraysClose(output, [0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0, 1]);
   });
 
@@ -57,7 +63,6 @@ describe('StringProjectionOp', () => {
     // First checks dimensions.
     expect(output.rank).toEqual(2);
     expect(output.shape).toEqual([2, 3]);
-    console.log(output.dataSync());
     expectArraysClose(output, [0, 7, 9, 0, 7, 9]);
   });
 
@@ -72,7 +77,6 @@ describe('StringProjectionOp', () => {
     // First checks dimensions.
     expect(output.rank).toEqual(2);
     expect(output.shape).toEqual([2, 6]);
-    console.log(output.dataSync());
     expectArraysClose(output, [1, 0, 0, 1, 1, 0, 1, 0, 0, 1, 1, 0]);
   });
 });

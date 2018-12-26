@@ -129,5 +129,21 @@ export const json = [
         'type': 'string'
       }
     ]
+  },
+  {
+    'tfOpName': 'StringProjection',
+    'dlOpName': 'stringProjection',
+    'category': 'transformation',
+    'params': [
+      {'tfInputIndex': 0, 'dlParamName': 'hash', 'type': 'tensor'},
+      {'tfInputIndex': 1, 'dlParamName': 'x', 'type': 'tensor'},
+      {'tfInputIndex': 2, 'dlParamName': 'nGramSize', 'type': 'number'},
+      {'tfInputIndex': 3, 'dlParamName': 'maxSkipSize', 'type': 'number'},
+      {'tfInputIndex': 4, 'dlParamName': 'includeAllNGrame', 'type': 'bool'},
+      {'tfInputIndex': 5, 'dlParamName': 'preprocess', 'type': 'bool'},
+      {'tfInputIndex': 6, 'dlParamName': 'charLevel', 'type': 'bool'},
+      {'tfInputIndex': 7, 'dlParamName': 'binaryProjection', 'type': 'bool'},
+      {'tfParamName': 'method', 'dlParamName': 'method', 'type': 'string'}
+    ]
   }
 ];
