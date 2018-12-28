@@ -47,7 +47,8 @@
     "tslint": "~5.8.0",
     "tslint-no-circular-imports": "~0.5.0",
     "typescript": "~2.7.2",
-    "yalc": "~1.0.0-pre.21"
+    "yalc": "~1.0.0-pre.21",
+    "protobufjs": "6.8.8"
   },
   "scripts": {
     "build": "tsc",
