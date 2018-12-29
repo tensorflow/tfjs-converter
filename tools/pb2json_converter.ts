@@ -15,9 +15,20 @@
  * =============================================================================
  */
 import * as fs from 'fs';
+import * as Long from 'long';
 import * as path from 'path';
+
 import {tensorflow} from './compiled_api';
 
+function replacer(key: string, value: any) {
+  if (value instanceof Long) {
+    return (value as Long).toString();
+  }
+  if (value instanceof Uint8Array) {
+    return Array.from(value);
+  }
+  return value;
+}
 function convert(argv: string[]) {
   if (argv.length < 4) {
     console.log(
@@ -38,7 +49,7 @@ function convert(argv: string[]) {
 
     const modelFile = path.join(sourcePath, 'tensorflowjs_model.pb');
     console.log('reading pb file: ' + modelFile);
-    const buffer = fs.readFileSync(modelFile).buffer;
+    const buffer = fs.readFileSync(modelFile);
 
     const modelTopology = tensorflow.GraphDef.decode(new Uint8Array(buffer));
 
@@ -54,7 +65,8 @@ function convert(argv: string[]) {
     const destModelFile = path.join(destPath, 'model.json');
     console.log('writing json file: ' + destModelFile);
     fs.writeFileSync(
-        destModelFile, JSON.stringify({modelTopology, weightsManifest}));
+        destModelFile,
+        JSON.stringify({modelTopology, weightsManifest}, replacer));
 
     files.forEach(file => {
       if (file !== 'tensorflowjs_model.pb' &&

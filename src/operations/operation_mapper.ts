@@ -223,7 +223,8 @@ export class OperationMapper {
       keepCase = false): string {
     const param = attrs[name];
     if (param !== undefined) {
-      const value = Base64.decode(param.s);
+      const value = Array.isArray(param.s) ?
+        String.fromCharCode.apply(null, param.s) : Base64.decode(param.s);
       return keepCase ? value : value.toLowerCase();
     }
     return def;
@@ -250,7 +251,12 @@ export class OperationMapper {
       def: DataType): DataType {
     const param = attrs[name];
     if (param && param.type) {
-      switch (param.type) {
+      // tslint:disable-next-line:no-any
+      let type: any = param.type;
+      if (typeof (param.type) === 'string') {
+        type = tensorflow.DataType[param.type];
+      }
+      switch (type) {
         case tensorflow.DataType.DT_FLOAT:
           return 'float32';
         case tensorflow.DataType.DT_INT32:
