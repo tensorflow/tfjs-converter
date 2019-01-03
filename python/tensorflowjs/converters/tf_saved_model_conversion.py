@@ -29,7 +29,6 @@ from tensorflow.core.protobuf import rewriter_config_pb2
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
-from tensorflow.python.lib.io import file_io
 from tensorflow.python.tools import freeze_graph
 
 from google.protobuf.json_format import MessageToDict
@@ -98,11 +97,10 @@ def validate(nodes, skip_op_check, strip_debug_ops):
       with open(os.path.join(op_list_path, filename)) as json_data:
         ops += json.load(json_data)
 
-  names = set([x['tfOpName'] for x in ops])
+  names = {x['tfOpName'] for x in ops}
   if strip_debug_ops:
-    names = names.union(set(['Assert', 'CheckNumerics', 'Print']))
-  not_supported = set(
-      [x.op for x in [x for x in nodes if x.op not in names]])
+    names = names.union({'Assert', 'CheckNumerics', 'Print'})
+  not_supported = {x.op for x in [x for x in nodes if x.op not in names]}
   return not_supported
 
 
@@ -166,7 +164,6 @@ def extract_weights(graph_def,
 
   print('Writing weight file ' + output_graph + '...')
   const_manifest = []
-  path = os.path.dirname(output_graph)
 
   graph = tf.Graph()
   with tf.Session(graph=graph) as sess:
@@ -385,7 +382,7 @@ def load_and_initialize_hub_module(module_path, signature='default'):
     signature_outputs = module.get_output_info_dict(signature)
     # First check there are no SparseTensors in input or output.
     for key, info in list(signature_inputs.items()) + list(
-            signature_outputs.items()):
+        signature_outputs.items()):
       if info.is_sparse:
         raise ValueError(
             'Signature "%s" has a SparseTensor on input/output "%s".'

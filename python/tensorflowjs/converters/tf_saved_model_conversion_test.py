@@ -227,7 +227,7 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
-            ValueError, r'^Unsupported Ops'):
+        ValueError, r'^Unsupported Ops'):
       node = tf.test.mock.Mock(op='unknown')
       graph = tf.test.mock.Mock(node=[node])
       with tf.test.mock.patch.object(tf_optimizer, 'OptimizeGraph',
@@ -278,12 +278,12 @@ class ConvertTest(unittest.TestCase):
         strip_debug_ops=True)
 
     weights = [{
-      'paths': ['group1-shard1of1'],
-      'weights': [{
-        'dtype': 'float32',
-        'name': 'add',
-        'shape': [2, 2]
-      }]
+        'paths': ['group1-shard1of1'],
+        'weights': [{
+            'dtype': 'float32',
+            'name': 'add',
+            'shape': [2, 2]
+        }]
     }]
     tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     # Check model.json and weights manifest.

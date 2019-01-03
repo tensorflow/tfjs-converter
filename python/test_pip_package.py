@@ -227,14 +227,12 @@ class APIAndShellTest(tf.test.TestCase):
         }]
     }]
     # Load the saved weights as a JSON string.
-    with open(os.path.join(output_dir, 'weights_manifest.json'),
+    with open(os.path.join(output_dir, 'model.json'),
               'rt') as f:
       output_json = json.load(f)
-    self.assertEqual(output_json, weights)
+    self.assertEqual(output_json['weightsManifest'], weights)
 
     # Check the content of the output directory.
-    self.assertTrue(
-        glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
     self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
   def testInvalidInputFormatRaisesError(self):
@@ -404,12 +402,10 @@ class APIAndShellTest(tf.test.TestCase):
     }]
     # Load the saved weights as a JSON string.
     output_json = json.load(
-        open(os.path.join(output_dir, 'weights_manifest.json'), 'rt'))
-    self.assertEqual(output_json, weights)
+        open(os.path.join(output_dir, 'model.json'), 'rt'))
+    self.assertEqual(output_json['weightsManifest'], weights)
 
     # Check the content of the output directory.
-    self.assertTrue(
-        glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
     self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
   def testConvertTFHubModuleWithCommandLineWorks(self):
@@ -431,12 +427,10 @@ class APIAndShellTest(tf.test.TestCase):
     }]
     # Load the saved weights as a JSON string.
     output_json = json.load(
-        open(os.path.join(output_dir, 'weights_manifest.json'), 'rt'))
-    self.assertEqual(output_json, weights)
+        open(os.path.join(output_dir, 'model.json'), 'rt'))
+    self.assertEqual(output_json['weightsManifest'], weights)
 
     # Check the content of the output directory.
-    self.assertTrue(
-        glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
     self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
   def testConvertTensorflowjsArtifactsToKerasH5(self):
