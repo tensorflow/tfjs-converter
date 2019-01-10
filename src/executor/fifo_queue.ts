@@ -14,7 +14,6 @@
  * limitations under the License.
  * =============================================================================
  */
-// tslint:disable-next-line:max-line-length
 import {DataType, Tensor, util} from '@tensorflow/tfjs-core';
 
 export interface TensorWithState {
@@ -24,7 +23,7 @@ export interface TensorWithState {
   cleared?: boolean;
 }
 /**
- * A queue implementation that dequeues elements in first-in first-out order.
+ * A queue that produces elements in first-in first-out order.
  */
 export class FIFOQueue {
   private static nextId = 0;
@@ -32,10 +31,8 @@ export class FIFOQueue {
   private closed_ = false;
   readonly id: number;
   constructor(
-      public readonly capacity: number,
-      public readonly dtypes: DataType[],
-      public readonly shapes: number[][],
-      public readonly name: string) {
+      public readonly dtypes: DataType[], public readonly shapes?: number[][],
+      public readonly capacity = -1, public readonly name = '') {
     this.id = FIFOQueue.nextId++;
   }
 
@@ -64,28 +61,31 @@ export class FIFOQueue {
 
   /**
    * Write value into the index of the TensorArray.
-   * @param index number the index to write to.
-   * @param tensor
+   * @param element
    */
   enqueue(element: Tensor[]) {
     if (this.closed_) {
       throw new Error(`Queue ${this.name} has already been closed.`);
     }
+    if (this.capacity >= 0 && this.queue.length >= this.capacity) {
+      throw new Error(`Queue ${this.name} has reached maximum capacity.`);
+    }
 
     const dtypes: DataType[] = [];
     element.forEach((tensor, index) => {
-      if(this.size() === 0 && this.shapes.length === 0) {
+      if (this.size() === 0 && this.shapes.length === 0) {
         this.shapes.push(tensor.shape);
       } else {
-          this.assertShapesMatch(this.shapes[index], tensor.shape,
-            `Queue shape mismatch: shape of ${index} Tensor in queue element `
-            + `${this.shapes[index]} vs shape of enqueueing Tensor shape `
-            + `${tensor.shape}`);
+        this.assertShapesMatch(
+            this.shapes[index], tensor.shape,
+            `Queue shape mismatch: shape of ${index} Tensor in queue element ` +
+                `${this.shapes[index]} vs shape of enqueueing Tensor shape ` +
+                `${tensor.shape}`);
 
-          util.assert(this.dtypes[index] ===
-            tensor.dtype,
-            `Queue ${this.name}: Could not enqueue because Tensor datatypes `
-            +`are different`);
+        util.assert(
+            this.dtypes[index] === tensor.dtype,
+            `Queue ${this.name}: Could not enqueue because Tensor datatypes ` +
+                `are different`);
       }
       dtypes.push(tensor.dtype);
     });
@@ -98,11 +98,16 @@ export class FIFOQueue {
    * @param tensor
    */
   enqueueMany(elements: Tensor[][]) {
+    if (this.capacity >= 0 &&
+        elements.length > (this.capacity - this.queue.length)) {
+      throw new Error(
+          `Number of dequeueing elements exceeds Queue  ${this.name} capacity.`)
+    }
     elements.forEach(element => this.enqueue(element));
   }
 
   /**
-   * Dequeue one element from this queue.
+   * Dequeue one element from the given queue.
    */
   dequeue(): Tensor[] {
     if (this.queue.length === 0) {
@@ -115,14 +120,14 @@ export class FIFOQueue {
   }
 
   /**
-   * Helper method to read multiple tensors from the specified indices.
+   * Dequeues n tuples of one or more tensors from the given queue.
    */
   dequeueMany(num: number): Tensor[][] {
-    if (num < 0 || num>this.queue.length) {
+    if (num < 0 || num > this.queue.length) {
       throw new Error(`Invalid number of dequeueing Queue ${this.name}.`);
     }
     const result = [];
-    for (let i =0;i<num;i++){
+    for (let i = 0; i < num; i++) {
       result.push(this.dequeue());
     }
     return result;
