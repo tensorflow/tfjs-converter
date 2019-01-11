@@ -171,8 +171,7 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
     model.save(h5_path)
     print('Saved Keras model to HDF5 file: %s' % h5_path)
 
-
-def main():
+def setup_arugments():
   parser = argparse.ArgumentParser('TensorFlow.js model converters.')
   parser.add_argument(
       'input_path',
@@ -266,8 +265,10 @@ def main():
       default=False,
       help='Generate model file in JSON instead of protobuf for '
       'all TF input model formats.')
-  FLAGS = parser.parse_args()
+  return parser.parse_args()
 
+def main():
+  FLAGS = setup_arugments()
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
