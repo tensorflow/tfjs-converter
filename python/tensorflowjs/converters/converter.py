@@ -264,7 +264,8 @@ def main():
       '--output_json',
       type=bool,
       default=False,
-      help='Generate model file in JSON instead of protobuf for all TF input model formats.')
+      help='Generate model file in JSON instead of protobuf for '
+      'all TF input model formats.')
   FLAGS = parser.parse_args()
 
   if FLAGS.show_version:
@@ -311,7 +312,7 @@ def main():
         split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (FLAGS.input_format == 'tf_saved_model' and
         FLAGS.output_format == 'tensorflowjs'):
-    if FLAGS.output_json == False:
+    if not FLAGS.output_json:
       tf_saved_model_conversion_pb.convert_tf_saved_model(
           FLAGS.input_path, FLAGS.output_node_names,
           FLAGS.output_path, saved_model_tags=FLAGS.saved_model_tags,
@@ -328,7 +329,7 @@ def main():
 
   elif (FLAGS.input_format == 'tf_session_bundle' and
         FLAGS.output_format == 'tensorflowjs'):
-    if FLAGS.output_json == False:
+    if not FLAGS.output_json:
       tf_saved_model_conversion_pb.convert_tf_session_bundle(
           FLAGS.input_path, FLAGS.output_node_names,
           FLAGS.output_path, quantization_dtype=quantization_dtype,
@@ -342,7 +343,7 @@ def main():
           strip_debug_ops=FLAGS.strip_debug_ops)
   elif (FLAGS.input_format == 'tf_frozen_model' and
         FLAGS.output_format == 'tensorflowjs'):
-    if FLAGS.output_json == False:
+    if not FLAGS.output_json:
       tf_saved_model_conversion_pb.convert_tf_frozen_model(
           FLAGS.input_path, FLAGS.output_node_names,
           FLAGS.output_path, quantization_dtype=quantization_dtype,
@@ -357,7 +358,7 @@ def main():
 
   elif (FLAGS.input_format == 'tf_hub' and
         FLAGS.output_format == 'tensorflowjs'):
-    if FLAGS.output_json == False:
+    if not FLAGS.output_json:
       if FLAGS.signature_name:
         tf_saved_model_conversion_pb.convert_tf_hub_module(
             FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
