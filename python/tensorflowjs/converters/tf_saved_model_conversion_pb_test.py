@@ -195,7 +195,7 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
 
-    tf_saved_model_conversion.convert_tf_saved_model(
+    tf_saved_model_conversion_pb.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
         'Softmax',
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
@@ -236,7 +236,7 @@ class ConvertTest(unittest.TestCase):
       graph = tf.test.mock.Mock(node=[node])
       with tf.test.mock.patch.object(tf_optimizer, 'OptimizeGraph',
                                      return_value=graph):
-        tf_saved_model_conversion.convert_tf_saved_model(
+        tf_saved_model_conversion_pb.convert_tf_saved_model(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
             'Softmax',
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
@@ -249,7 +249,7 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR, '*')))
 
-    tf_saved_model_conversion.convert_tf_saved_model(
+    tf_saved_model_conversion_pb.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
         'Softmax',
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR), skip_op_check=True
@@ -283,7 +283,7 @@ class ConvertTest(unittest.TestCase):
   def test_convert_saved_model_strip_debug_ops(self):
     self.create_saved_model_with_debug_ops()
 
-    tf_saved_model_conversion.convert_tf_saved_model(
+    tf_saved_model_conversion_pb.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
         'add',
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
@@ -301,7 +301,7 @@ class ConvertTest(unittest.TestCase):
   def test_convert_session_bundle(self):
     self.create_session_bundle()
 
-    tf_saved_model_conversion.convert_tf_session_bundle(
+    tf_saved_model_conversion_pb.convert_tf_session_bundle(
         os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR),
         'Softmax',
         os.path.join(self._tmp_dir, SESSION_BUNDLE_MODEL_DIR)
@@ -336,7 +336,7 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, FROZEN_MODEL_DIR, '*')))
 
-    tf_saved_model_conversion.convert_tf_frozen_model(
+    tf_saved_model_conversion_pb.convert_tf_frozen_model(
         os.path.join(self._tmp_dir, FROZEN_MODEL_DIR, 'model.frozen'),
         'Softmax',
         os.path.join(self._tmp_dir, FROZEN_MODEL_DIR))
@@ -371,7 +371,7 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, HUB_MODULE_DIR, '*')))
 
-    tf_saved_model_conversion.convert_tf_hub_module(
+    tf_saved_model_conversion_pb.convert_tf_hub_module(
         os.path.join(self._tmp_dir, HUB_MODULE_DIR),
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
         'default'
