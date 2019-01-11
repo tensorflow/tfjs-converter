@@ -307,18 +307,23 @@ export class OperationMapper {
       def: DataType[]): DataType[] {
     const param = attrs[name];
     if (param && param.list.type && param.list.type.length) {
-      return param.list.type.map((v, index) => {
-        switch (v) {
+      const result: DataType[] = [];
+      for (let i = 0; i < param.list.type.length; i++) {
+        switch (param.list.type[i]) {
           case tensorflow.DataType.DT_FLOAT:
-            return 'float32';
+            result.push('float32');
+            break;
           case tensorflow.DataType.DT_INT32:
-            return 'int32';
+            result.push('int32');
+            break;
           case tensorflow.DataType.DT_BOOL:
-            return 'bool';
+            result.push('bool');
+            break;
           default:
-            return def[index];
+            return def;
         }
-      }) as DataType[];
+      }
+      return result;
     }
     return def;
   }
