@@ -15,10 +15,8 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import {Node} from '../types';
-
 import {executeOp} from './convolution_executor';
 // tslint:disable-next-line:max-line-length
 import {createNumberAttr, createNumericArrayAttr, createStrAttr, createTensorAttr} from './test_helper';
@@ -26,7 +24,7 @@ import {createNumberAttr, createNumericArrayAttr, createStrAttr, createTensorAtt
 describe('convolution', () => {
   let node: Node;
   const input = [tfc.scalar(1)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

@@ -15,6 +15,7 @@
  * =============================================================================
  */
 import {DataType, Tensor} from '@tensorflow/tfjs-core';
+import {FIFOQueue} from '../executor/fifo_queue';
 import {TensorArray} from '../executor/tensor_array';
 
 export type NamedTensorMap = {
@@ -27,6 +28,10 @@ export type NamedTensorsMap = {
 
 export type TensorArrayMap = {
   [key: number]: TensorArray
+};
+
+export type FIFOQueueMap = {
+  [key: number]: FIFOQueue
 };
 
 export interface TensorInfo {

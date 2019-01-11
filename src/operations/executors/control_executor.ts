@@ -17,12 +17,11 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 import {scalar} from '@tensorflow/tfjs-core';
-
 import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
+import {FIFOQueue} from '../../executor/fifo_queue';
 import {TensorArray} from '../../executor/tensor_array';
 import {Node} from '../types';
-
 import {getParamValue, getTensor} from './utils';
 
 export async function executeOp(
@@ -158,6 +157,30 @@ export async function executeOp(
       const closeTensorArray = context.getTensorArray(closeId);
       closeTensorArray.clearAndClose();
       return [];
+
+    case 'fifoQueue':
+      const dtypes =
+          getParamValue('dtypes', node, tensorMap, context) as tfc.DataType[];
+      const shapes =
+          getParamValue('shapes', node, tensorMap, context) as number[][];
+      const capacity =
+          getParamValue('capacity', node, tensorMap, context) as number;
+      const container =
+          getParamValue('container', node, tensorMap, context) as string;
+      const queueName =
+          getParamValue('name', node, tensorMap, context) as string;
+      const fifoQueue =
+          new FIFOQueue(dtypes, shapes, capacity, queueName, container);
+      context.addFIFOQueue(fifoQueue);
+      return [scalar(fifoQueue.id), scalar(1.0)];
+
+    case 'queueDequeueUpTo':
+      const queueDequeueUpToId =
+          getParamValue('fifoQueueId', node, tensorMap, context) as number;
+      const num = getParamValue('num', node, tensorMap, context) as number;
+      const dequeueUpToQueue = context.getFIFOQueue(queueDequeueUpToId);
+      return dequeueUpToQueue.dequeueUpTo(num);
+
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);
   }

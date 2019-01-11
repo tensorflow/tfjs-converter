@@ -32,7 +32,8 @@ export class FIFOQueue {
   readonly id: number;
   constructor(
       public readonly dtypes: DataType[], public readonly shapes?: number[][],
-      public readonly capacity = -1, public readonly name = '') {
+      public readonly capacity = -1, public readonly name = '',
+      public readonly container = '') {
     this.id = FIFOQueue.nextId++;
   }
 
@@ -43,15 +44,7 @@ export class FIFOQueue {
   /**
    * Close the current queue.
    */
-  close(cancelPendingEnqueues = false) {
-    if (cancelPendingEnqueues) {
-      this.closeAndCancel();
-    } else {
-      this.closed_ = true;
-    }
-  }
-
-  closeAndCancel() {
+  close() {
     this.closed_ = true;
   }
 
@@ -60,12 +53,12 @@ export class FIFOQueue {
   }
 
   /**
-   * Write value into the index of the TensorArray.
+   * Enqueues a tuple of one or more tensors in the given queue.
    * @param element
    */
   enqueue(element: Tensor[]) {
     if (this.closed_) {
-      throw new Error(`Queue ${this.name} has already been closed.`);
+      throw new Error(`Queue ${this.name} has been closed.`);
     }
     if (this.capacity >= 0 && this.queue.length >= this.capacity) {
       throw new Error(`Queue ${this.name} has reached maximum capacity.`);
@@ -78,14 +71,12 @@ export class FIFOQueue {
       } else {
         this.assertShapesMatch(
             this.shapes[index], tensor.shape,
-            `Queue shape mismatch: shape of ${index} Tensor in queue element ` +
-                `${this.shapes[index]} vs shape of enqueueing Tensor shape ` +
-                `${tensor.shape}`);
+            `Queue ${this.name} enqueue shape mismatch:`);
 
         util.assert(
             this.dtypes[index] === tensor.dtype,
-            `Queue ${this.name}: Could not enqueue because Tensor datatypes ` +
-                `are different`);
+            `Queue ${this.name} enqueue Tensor datatypes mismatch: ` +
+                `${this.dtypes[index]} vs ${tensor.dtype}.`);
       }
       dtypes.push(tensor.dtype);
     });
@@ -93,15 +84,15 @@ export class FIFOQueue {
   }
 
   /**
-   * Write value into the index of the TensorArray.
-   * @param index number the index to write to.
-   * @param tensor
+   * Enqueues zero or more tuples of one or more tensors in the given queue.
+   * @param elements One or more tensors from which the enqueued tensors should
+   *     be taken.
    */
   enqueueMany(elements: Tensor[][]) {
     if (this.capacity >= 0 &&
         elements.length > (this.capacity - this.queue.length)) {
       throw new Error(
-          `Number of dequeueing elements exceeds Queue  ${this.name} capacity.`)
+          `Number of equeueing elements exceeds Queue  ${this.name} capacity.`);
     }
     elements.forEach(element => this.enqueue(element));
   }
@@ -121,14 +112,67 @@ export class FIFOQueue {
 
   /**
    * Dequeues n tuples of one or more tensors from the given queue.
+   *
+   * This operation concatenates queue-element component tensors along the 0th
+   * dimension to make a single component tensor. All of the components in the
+   * dequeued tuple will have size n in the 0th dimension.
+   *
+   * This operation has k outputs, where k is the number of components in the
+   * tuples stored in the given queue, and output i is the ith component of the
+   * dequeued tuple.
    */
-  dequeueMany(num: number): Tensor[][] {
+  dequeueMany(num: number): Tensor[] {
     if (num < 0 || num > this.queue.length) {
       throw new Error(`Invalid number of dequeueing Queue ${this.name}.`);
     }
+    let current = this.dequeue();
     const result = [];
-    for (let i = 0; i < num; i++) {
-      result.push(this.dequeue());
+    for (let i = 0; i < current.length; i++) {
+      result.push(current[i].reshape([1].concat(this.shapes[i])));
+    }
+
+    for (let i = 1; i < num; i++) {
+      current = this.dequeue();
+      for (let j = 0; j < current.length; j++) {
+        const temp = current[j].reshape([1].concat(this.shapes[j]));
+        result[j] = result[j].concat(temp, 0);
+      }
+    }
+    return result;
+  }
+
+  /**
+   * Dequeues n tuples of one or more tensors from the given queue.
+   *
+   * If there are more than 0 but less than n elements remaining, then instead
+   * of throwing an error like dequeueMany, less than n elements are returned.
+   * If there are 0 elements left in the queue, then an error is throwed just
+   * like in dequeueMany. Otherwise the behavior is identical to dequeueMany:
+   *
+   * This operation concatenates queue-element component tensors along the 0th
+   * dimension to make a single component tensor. All of the components in the
+   * dequeued tuple will have size n in the 0th dimension.
+   *
+   * This operation has k outputs, where k is the number of components in the
+   * tuples stored in the given queue, and output i is the ith component of the
+   * dequeued tuple.
+   */
+  dequeueUpTo(num: number): Tensor[] {
+    if (num <= 0) {
+      throw new Error(`Invalid number of dequeueing Queue ${this.name}.`);
+    }
+    let current = this.dequeue();
+    const result = [];
+    for (let i = 0; i < current.length; i++) {
+      result.push(current[i].reshape([1].concat(this.shapes[i])));
+    }
+
+    for (let i = 1; this.queue.length && i < num; i++) {
+      current = this.dequeue();
+      for (let j = 0; j < current.length; j++) {
+        const temp = current[j].reshape([1].concat(this.shapes[j]));
+        result[j] = result[j].concat(temp, 0);
+      }
     }
     return result;
   }
@@ -137,7 +181,7 @@ export class FIFOQueue {
       shapeA: number[], shapeB: number[], errorMessagePrefix = ''): void {
     util.assert(
         this.arraysEqual(shapeA, shapeB),
-        errorMessagePrefix + ` Shapes ${shapeA} and ${shapeB} must match`);
+        errorMessagePrefix + ` Shapes ${shapeA} and ${shapeB} must match.`);
   }
 
   private arraysEqual(n1: number[], n2: number[]) {

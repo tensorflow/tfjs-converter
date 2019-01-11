@@ -15,9 +15,7 @@
  * =============================================================================
  */
 import {DataType} from '@tensorflow/tfjs-core';
-
 import {tensorflow} from '../data/compiled_api';
-
 import {getNodeNameAndIndex} from './executors/utils';
 import * as arithmetic from './op_list/arithmetic';
 import * as basicMath from './op_list/basic_math';
@@ -193,6 +191,16 @@ export class OperationMapper {
                     param.defaultValue as number[]);
               }
               break;
+            case 'shape[]':
+              value = this.getTensorShapeArrayParam(
+                  node.attr, param.tfParamName,
+                  param.defaultValue as number[][]);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getTensorShapeArrayParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number[][]);
+              }
+              break;
             case 'dtype':
               value = this.getDtypeParam(
                   node.attr, param.tfParamName, param.defaultValue as DataType);
@@ -200,6 +208,16 @@ export class OperationMapper {
                 value = this.getDtypeParam(
                     node.attr, param.tfParamNameDeprecated,
                     param.defaultValue as DataType);
+              }
+              break;
+            case 'dtype[]':
+              value = this.getDtypeArrayParam(
+                  node.attr, param.tfParamName,
+                  param.defaultValue as DataType[]);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getDtypeArrayParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as DataType[]);
               }
               break;
             case 'tensor':
@@ -281,6 +299,39 @@ export class OperationMapper {
                                                      param.list.i))
                  .map(v => (typeof v === 'number') ? v : v['toInt']()) as
           number[];
+    }
+    return def;
+  }
+  private getDtypeArrayParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def: DataType[]): DataType[] {
+    const param = attrs[name];
+    if (param && param.list.type && param.list.type.length) {
+      return param.list.type.map((v, index) => {
+        switch (v) {
+          case tensorflow.DataType.DT_FLOAT:
+            return 'float32';
+          case tensorflow.DataType.DT_INT32:
+            return 'int32';
+          case tensorflow.DataType.DT_BOOL:
+            return 'bool';
+          default:
+            return def[index];
+        }
+      }) as DataType[];
+    }
+    return def;
+  }
+  private getTensorShapeArrayParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def?: number[][]): number[][]|undefined {
+    const param = attrs[name];
+    if (param && param.list.shape && param.list.shape.length) {
+      return param.list.shape.map(v => {
+        return v.dim.map(
+            dim => (typeof dim.size === 'number') ? dim.size :
+                                                    dim.size['toInt']());
+      });
     }
     return def;
   }

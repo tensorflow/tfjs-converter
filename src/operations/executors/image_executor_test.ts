@@ -15,11 +15,9 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import * as image from '../op_list/image';
 import {Node, OpMapper} from '../types';
-
 import {executeOp} from './image_executor';
 // tslint:disable-next-line:max-line-length
 import {createBoolAttr, createNumberAttr, createNumericArrayAttrFromIndex, createStrAttr, createTensorAttr, validateParam} from './test_helper';
@@ -27,7 +25,7 @@ import {createBoolAttr, createNumberAttr, createNumericArrayAttrFromIndex, creat
 describe('image', () => {
   let node: Node;
   const input1 = [tfc.tensor1d([1])];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

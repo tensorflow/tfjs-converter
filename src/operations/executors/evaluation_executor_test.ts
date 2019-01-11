@@ -15,10 +15,8 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import {Node} from '../types';
-
 import {executeOp} from './evaluation_executor';
 // tslint:disable-next-line:max-line-length
 import {createBoolAttr, createNumberAttrFromIndex, createTensorAttr} from './test_helper';
@@ -27,7 +25,7 @@ describe('evaluation', () => {
   let node: Node;
   const input1 = [tfc.tensor1d([1])];
   const input2 = [tfc.scalar(1)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

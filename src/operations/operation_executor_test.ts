@@ -16,7 +16,6 @@
  */
 
 import {ExecutionContext} from '../executor/execution_context';
-
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';
 import * as convolution from './executors/convolution_executor';
@@ -37,7 +36,7 @@ import {Node} from './types';
 
 describe('OperationExecutor', () => {
   let node: Node;
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

@@ -15,11 +15,9 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import * as dynamic from '../op_list/dynamic';
 import {Node, OpMapper} from '../types';
-
 import {executeOp} from './dynamic_executor';
 // tslint:disable-next-line:max-line-length
 import {createNumberAttrFromIndex, createTensorAttr, validateParam} from './test_helper';
@@ -27,7 +25,7 @@ import {createNumberAttrFromIndex, createTensorAttr, validateParam} from './test
 describe('dynamic', () => {
   let node: Node;
   const input1 = [tfc.tensor1d([1])];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

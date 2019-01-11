@@ -15,14 +15,11 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-import {scalar, tensor1d, tensor2d} from '@tensorflow/tfjs-core';
-import {test_util} from '@tensorflow/tfjs-core';
-
+import {scalar, tensor1d, tensor2d, test_util} from '@tensorflow/tfjs-core';
 import {ExecutionContext} from '../../executor/execution_context';
 import {TensorArray} from '../../executor/tensor_array';
 import * as control from '../op_list/control';
 import {Node, OpMapper} from '../types';
-
 import {executeOp} from './control_executor';
 // tslint:disable-next-line:max-line-length
 import {createBoolAttr, createDtypeAttr, createNumberAttrFromIndex, createNumericArrayAttrFromIndex, createStrAttr, createTensorAttr, createTensorShapeAttr, validateParam} from './test_helper';
@@ -30,7 +27,7 @@ import {createBoolAttr, createDtypeAttr, createNumberAttrFromIndex, createNumeri
 describe('control', () => {
   let node: Node;
   const input1 = [tfc.scalar(1, 'int32')];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

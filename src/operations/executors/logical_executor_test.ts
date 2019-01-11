@@ -15,10 +15,8 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import {Node} from '../types';
-
 import {executeOp} from './logical_executor';
 import {createTensorAttr} from './test_helper';
 
@@ -26,7 +24,7 @@ describe('logical', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
   const input2 = [tfc.scalar(2)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

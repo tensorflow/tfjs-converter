@@ -222,8 +222,41 @@ export const json = [
     'tfOpName': 'TensorArrayCloseV3',
     'dlOpName': 'tensorArrayClose',
     'category': 'control',
+    'params':
+        [{'tfInputIndex': 0, 'dlParamName': 'tensorArrayId', 'type': 'number'}]
+  },
+  {
+    'tfOpName': 'FIFOQueueV2',
+    'dlOpName': 'fifoQueue',
+    'category': 'control',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'tensorArrayId', 'type': 'number'}
+      {
+        'tfParamName': 'component_types',
+        'dlParamName': 'dtypes',
+        'type': 'dtype[]'
+      },
+      {'tfParamName': 'shapes', 'dlParamName': 'shapes', 'type': 'number[][]'},
+      {'tfParamName': 'capacity', 'dlParamName': 'capacity', 'type': 'number'},
+      {
+        'tfParamName': 'container',
+        'dlParamName': 'container',
+        'type': 'string'
+      },
+      {'tfParamName': 'shared_name', 'dlParamName': 'name', 'type': 'string'}
     ]
-  }
+  },
+  {
+    'tfOpName': 'QueueDequeueUpToV2',
+    'dlOpName': 'queueDequeueUpTo',
+    'category': 'control',
+    'params': [
+      {'tfInputIndex': 0, 'dlParamName': 'fifoQueueId', 'type': 'number'},
+      {'tfInputIndex': 1, 'dlParamName': 'num', 'type': 'number'},
+      // {
+      //   'tfParamName': 'component_types',
+      //   'dlParamName': 'dtypes',
+      //   'type': 'dtype'
+      // }
+    ]
+  },
 ];

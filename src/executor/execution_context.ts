@@ -15,9 +15,8 @@
  * =============================================================================
  */
 import {Tensor} from '@tensorflow/tfjs-core';
-
-import {NamedTensorsMap, TensorArrayMap} from '../data/types';
-
+import {FIFOQueueMap, NamedTensorsMap, TensorArrayMap} from '../data/types';
+import {FIFOQueue} from './fifo_queue';
 import {TensorArray} from './tensor_array';
 
 export interface ExecutionContextInfo {
@@ -44,7 +43,8 @@ export class ExecutionContext {
 
   constructor(
       public readonly weightMap: NamedTensorsMap,
-      public readonly tensorArrayMap: TensorArrayMap) {
+      public readonly tensorArrayMap: TensorArrayMap,
+      public readonly fifoQueueMap: FIFOQueueMap) {
     this.generateCurrentContextIds();
   }
 
@@ -162,5 +162,13 @@ export class ExecutionContext {
 
   getTensorArray(id: number): TensorArray {
     return this.tensorArrayMap[id];
+  }
+
+  addFIFOQueue(fifoQueue: FIFOQueue) {
+    this.fifoQueueMap[fifoQueue.id] = fifoQueue;
+  }
+
+  getFIFOQueue(id: number): FIFOQueue {
+    return this.fifoQueueMap[id];
   }
 }

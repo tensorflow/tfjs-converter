@@ -15,18 +15,16 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import * as spectral from '../op_list/spectral';
 import {Node, OpMapper} from '../types';
-
 import {executeOp} from './spectral_executor';
 import {createTensorAttr, validateParam} from './test_helper';
 
 describe('spectral', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

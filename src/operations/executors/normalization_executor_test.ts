@@ -15,11 +15,9 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import * as normalization from '../op_list/normalization';
 import {Node, OpMapper} from '../types';
-
 import {executeOp} from './normalization_executor';
 // tslint:disable-next-line:max-line-length
 import {createNumberAttr, createNumericArrayAttrFromIndex, createTensorAttr, validateParam} from './test_helper';
@@ -27,7 +25,7 @@ import {createNumberAttr, createNumericArrayAttrFromIndex, createTensorAttr, val
 describe('normalization', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

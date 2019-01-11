@@ -15,10 +15,8 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import {Node} from '../types';
-
 import {executeOp} from './reduction_executor';
 // tslint:disable-next-line:max-line-length
 import {createBoolAttr, createNumberAttr, createTensorAttr} from './test_helper';
@@ -26,7 +24,7 @@ import {createBoolAttr, createNumberAttr, createTensorAttr} from './test_helper'
 describe('reduction', () => {
   let node: Node;
   const input1 = [tfc.scalar(1)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {

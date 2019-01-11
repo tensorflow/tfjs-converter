@@ -16,14 +16,12 @@
  */
 
 import {DataType, Tensor, tidy, util} from '@tensorflow/tfjs-core';
-
 // tslint:disable-next-line:max-line-length
-import {NamedTensorMap, NamedTensorsMap, TensorArrayMap, TensorInfo} from '../data/types';
+import {FIFOQueueMap, NamedTensorMap, NamedTensorsMap, TensorArrayMap, TensorInfo} from '../data/types';
 // tslint:disable-next-line:max-line-length
 import {getNodeNameAndIndex, getParamValue, getTensor, getTensorsForCurrentContenxt} from '../operations/executors/utils';
 import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
-
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
 
 interface NodeWithContexts {
@@ -154,8 +152,10 @@ export class GraphExecutor {
         this.compiledMap.get(names.join(this.SEPERATOR)), outputNames);
 
     const tensorArrayMap: TensorArrayMap = {};
+    const fifoQueueMap: FIFOQueueMap = {};
     const result = tidy(() => {
-      const context = new ExecutionContext(this._weightMap, tensorArrayMap);
+      const context =
+          new ExecutionContext(this._weightMap, tensorArrayMap, fifoQueueMap);
       const tensorMap = {...this.weightMap, ...inputs};
       const tensorsToKeep = this.getFrozenTensorIds(tensorMap);
       const intermediateTensorConsumerCount: {[key: number]: number} = {};
@@ -244,7 +244,9 @@ export class GraphExecutor {
     this.checkInput(inputs, false);
     this.checkInputShapeAndType(inputs, false);
     const tensorArrayMap: TensorArrayMap = {};
-    const context = new ExecutionContext(this._weightMap, tensorArrayMap);
+    const fifoQueueMap: FIFOQueueMap = {};
+    const context =
+        new ExecutionContext(this._weightMap, tensorArrayMap, fifoQueueMap);
     const outputNames = this.calculateOutputs(outputs);
     // Graph with control flow op requires runtime evaluation of the execution
     // order, while without control flow the execution order is pre-determined

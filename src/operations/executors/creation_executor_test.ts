@@ -15,11 +15,9 @@
  * =============================================================================
  */
 import * as tfc from '@tensorflow/tfjs-core';
-
 import {ExecutionContext} from '../../executor/execution_context';
 import * as creation from '../op_list/creation';
 import {Node, OpMapper} from '../types';
-
 import {executeOp} from './creation_executor';
 // tslint:disable-next-line:max-line-length
 import {createDtypeAttr, createNumberAttr, createNumberAttrFromIndex, createNumericArrayAttrFromIndex, createTensorAttr, validateParam} from './test_helper';
@@ -28,7 +26,7 @@ describe('creation', () => {
   let node: Node;
   const input1 = [tfc.tensor1d([1, 2, 3])];
   const input2 = [tfc.scalar(1)];
-  const context = new ExecutionContext({}, {});
+  const context = new ExecutionContext({}, {}, {});
 
   beforeEach(() => {
     node = {
