@@ -32,6 +32,7 @@ $ tensorflowjs_converter \
     --input_format=tf_saved_model \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
     --saved_model_tags=serve \
+    --out_json=true \
     /mobilenet/saved_model \
     /mobilenet/web_model
 ```
@@ -43,6 +44,7 @@ $ tensorflowjs_converter \
     --input_format=tf_frozen_model \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
     --saved_model_tags=serve \
+    --out_json=true \
     /mobilenet/frozen_model.pb \
     /mobilenet/web_model
 ```
@@ -53,6 +55,7 @@ Session bundle model example:
 $ tensorflowjs_converter \
     --input_format=tf_session_bundle \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
+    --out_json=true \
     /mobilenet/session_bundle \
     /mobilenet/web_model
 ```
@@ -62,6 +65,7 @@ Tensorflow Hub module example:
 ```bash
 $ tensorflowjs_converter \
     --input_format=tf_hub \
+    --out_json=true \
     'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1' \
     /mobilenet/web_model
 ```
@@ -102,6 +106,7 @@ saved a tf.keras model in the SavedModel format.
 |<nobr>`--saved_model_tags`</nobr> | Only applicable to SavedModel conversion. Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
 |`--signature_name`   | Only applicable to TensorFlow Hub module conversion, signature to load. Defaults to `default`. See https://www.tensorflow.org/hub/common_signatures/.|
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
+|`--output_json`   | Generate model file in JSON instead of protobuf for all TF input model formats. Defaults to `False`.|
 
 
 ### Format conversions support table
@@ -141,7 +146,7 @@ import * as tf from '@tensorflow/tfjs';
 
 const MODEL_URL = 'https://.../mobilenet/model.json';
 
-const model = await tf.loadFrozenModel(MODEL_URL);
+const model = await tf.loadFrozenModelJSON(MODEL_URL);
 const cat = document.getElementById('cat');
 model.execute({input: tf.fromPixels(cat)});
 ```
@@ -171,7 +176,7 @@ to the model files:
 import '@tensorflow/tfjs-node';
 
 const MODEL_PATH = 'file:///tmp/mobilenet/model.pb';
-const model = await tf.loadFrozenModel(MODEL_PATH);
+const model = await tf.loadFrozenModelJSON(MODEL_PATH);
 ```
 
 You can also load the remote model files the same way as in browser, but you might need to polyfill
