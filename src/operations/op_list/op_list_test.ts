@@ -17,7 +17,6 @@
 
 import * as ajv from 'ajv';
 import * as schema from '../op_mapper_schema';
-
 import * as arithmetic from './arithmetic';
 import * as basicMath from './basic_math';
 import * as control from './control';

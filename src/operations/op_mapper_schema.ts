@@ -60,8 +60,8 @@ export const json = {
     },
     'ParamTypes': {
       'enum': [
-        'bool', 'dtype', 'number', 'number[]', 'shape', 'string', 'tensor',
-        'tensors'
+        'bool', 'dtype', 'dtype[]', 'number', 'number[]', 'shape', 'shape[]',
+        'string', 'tensor', 'tensors'
       ],
       'type': 'string'
     }

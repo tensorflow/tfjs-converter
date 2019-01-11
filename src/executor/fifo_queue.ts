@@ -157,7 +157,7 @@ export class FIFOQueue {
    * tuples stored in the given queue, and output i is the ith component of the
    * dequeued tuple.
    */
-  dequeueUpTo(num: number): Tensor[] {
+  dequeueUpTo(num: number, dtypes: DataType[] = []): Tensor[] {
     if (num <= 0) {
       throw new Error(`Invalid number of dequeueing Queue ${this.name}.`);
     }

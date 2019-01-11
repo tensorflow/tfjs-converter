@@ -178,8 +178,10 @@ export async function executeOp(
       const queueDequeueUpToId =
           getParamValue('fifoQueueId', node, tensorMap, context) as number;
       const num = getParamValue('num', node, tensorMap, context) as number;
+      const dequeueUpToDtypes =
+          getParamValue('dtypes', node, tensorMap, context) as tfc.DataType[];
       const dequeueUpToQueue = context.getFIFOQueue(queueDequeueUpToId);
-      return dequeueUpToQueue.dequeueUpTo(num);
+      return dequeueUpToQueue.dequeueUpTo(num, dequeueUpToDtypes);
 
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

@@ -235,7 +235,7 @@ export const json = [
         'dlParamName': 'dtypes',
         'type': 'dtype[]'
       },
-      {'tfParamName': 'shapes', 'dlParamName': 'shapes', 'type': 'number[][]'},
+      {'tfParamName': 'shapes', 'dlParamName': 'shapes', 'type': 'shape[]'},
       {'tfParamName': 'capacity', 'dlParamName': 'capacity', 'type': 'number'},
       {
         'tfParamName': 'container',
@@ -251,12 +251,11 @@ export const json = [
     'category': 'control',
     'params': [
       {'tfInputIndex': 0, 'dlParamName': 'fifoQueueId', 'type': 'number'},
-      {'tfInputIndex': 1, 'dlParamName': 'num', 'type': 'number'},
-      // {
-      //   'tfParamName': 'component_types',
-      //   'dlParamName': 'dtypes',
-      //   'type': 'dtype'
-      // }
+      {'tfInputIndex': 1, 'dlParamName': 'num', 'type': 'number'}, {
+        'tfParamName': 'component_types',
+        'dlParamName': 'dtypes',
+        'type': 'dtype[]'
+      }
     ]
-  },
+  }
 ];
