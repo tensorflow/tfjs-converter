@@ -15,4 +15,5 @@
  * =============================================================================
  */
 export {FrozenModel, loadFrozenModel, loadTfHubModule} from './executor/frozen_model';
+export {FrozenModel as FrozenModelJSON, loadFrozenModel as loadFrozenModelJSON, loadTfHubModule as loadTfHubModuleJSON} from './executor/frozen_model_json';
 export {version as version_converter} from './version';

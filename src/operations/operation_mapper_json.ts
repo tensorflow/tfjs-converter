@@ -15,8 +15,9 @@
  * =============================================================================
  */
 import {DataType} from '@tensorflow/tfjs-core';
+import {Base64} from 'js-base64';
 
-import {tensorflow} from '../data/compiled_api';
+import {tensorflow_json} from '../data/compiled_api_json';
 
 import {getNodeNameAndIndex} from './executors/utils';
 import * as arithmetic from './op_list/arithmetic';
@@ -68,16 +69,16 @@ export class OperationMapper {
         {});
   }
 
-  private isControlFlow(node: tensorflow.INodeDef) {
+  private isControlFlow(node: tensorflow_json.INodeDef) {
     return CONTROL_FLOW_OPS.some(op => op === node.op);
   }
 
-  private isDynamicShape(node: tensorflow.INodeDef) {
+  private isDynamicShape(node: tensorflow_json.INodeDef) {
     return DYNAMIC_SHAPE_OPS.some(op => op === node.op);
   }
   // Converts the model from Tensorflow GraphDef to local representation for
   // deeplearn.js API
-  transformGraph(graph: tensorflow.IGraphDef): Graph {
+  transformGraph(graph: tensorflow_json.IGraphDef): Graph {
     const tfNodes = graph.node;
     let withControlFlow = false;
     let withDynamicShape = false;
@@ -120,7 +121,7 @@ export class OperationMapper {
     };
   }
 
-  private mapNode(node: tensorflow.INodeDef): Node {
+  private mapNode(node: tensorflow_json.INodeDef): Node {
     const mapper = this.opMappers[node.op];
     if (mapper === undefined) {
       throw new Error('Tensorflow Op is not supported: ' + node.op);
@@ -218,41 +219,50 @@ export class OperationMapper {
   }
 
   private getStringParam(
-      attrs: {[key: string]: tensorflow.IAttrValue}, name: string, def: string,
-      keepCase = false): string {
+      attrs: {[key: string]: tensorflow_json.IAttrValue}, name: string,
+      def: string, keepCase = false): string {
     const param = attrs[name];
     if (param !== undefined) {
-      const value = String.fromCharCode.apply(null, param.s);
+      const value = Array.isArray(param.s) ?
+          String.fromCharCode.apply(null, param.s) :
+          Base64.decode(param.s);
       return keepCase ? value : value.toLowerCase();
     }
     return def;
   }
 
   private getBoolParam(
-      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow_json.IAttrValue}, name: string,
       def: boolean): boolean {
     const param = attrs[name];
     return param ? param.b : def;
   }
 
   private getNumberParam(
-      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow_json.IAttrValue}, name: string,
       def: number): number {
-    const param = attrs[name] as tensorflow.AttrValue;
-    const value = (param ? param[param.value] : def) as number | Long;
-    return (typeof value === 'number') ? value : value['toInt']() as number;
+    const param = attrs[name] || {};
+    const value = param['i'] ? param['i'] : (param['f'] ? param['f'] : def);
+    return (typeof value === 'number') ?
+        value :
+        parseInt(value as string, 10) as number;
   }
   private getDtypeParam(
-      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow_json.IAttrValue}, name: string,
       def: DataType): DataType {
     const param = attrs[name];
     if (param && param.type) {
-      switch (param.type) {
-        case tensorflow.DataType.DT_FLOAT:
+      // tslint:disable-next-line:no-any
+      let type: any = param.type;
+      if (typeof (param.type) === 'string') {
+        type = tensorflow_json.DataType[param.type];
+      }
+      switch (type) {
+        case tensorflow_json.DataType.DT_FLOAT:
           return 'float32';
-        case tensorflow.DataType.DT_INT32:
+        case tensorflow_json.DataType.DT_INT32:
           return 'int32';
-        case tensorflow.DataType.DT_BOOL:
+        case tensorflow_json.DataType.DT_BOOL:
           return 'bool';
         default:
           return def;
@@ -261,26 +271,29 @@ export class OperationMapper {
     return def;
   }
   private getTensorShapeParam(
-      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow_json.IAttrValue}, name: string,
       def?: number[]): number[]|undefined {
     const param = attrs[name];
     if (param && param.shape) {
       return param.shape.dim.map(
-          dim =>
-              (typeof dim.size === 'number') ? dim.size : dim.size['toInt']());
+          dim => (typeof dim.size === 'number') ?
+              dim.size :
+              parseInt(dim.size as string, 10));
     }
     return def;
   }
 
   private getNumericArrayParam(
-      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      attrs: {[key: string]: tensorflow_json.IAttrValue}, name: string,
       def: number[]): number[] {
     const param = attrs[name];
     if (param) {
       return ((param.list.f && param.list.f.length ? param.list.f :
                                                      param.list.i))
-                 .map(v => (typeof v === 'number') ? v : v['toInt']()) as
-          number[];
+                 .map(
+                     v => (typeof v === 'number') ?
+                         v :
+                         parseInt(v as string, 10)) as number[];
     }
     return def;
   }

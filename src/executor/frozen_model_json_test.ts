@@ -17,19 +17,15 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 
-import {tensorflow} from '../data/compiled_api';
+import {tensorflow_json} from '../data/compiled_api_json';
 
-import * as fm from './frozen_model';
+import * as fm from './frozen_model_json';
 
 const HOST = 'http://example.org';
 const TFHUB_SUFFIX = '?tfjs-format=file';
-const MODEL_URL = `${HOST}/model.pb`;
-const WEIGHT_MANIFEST_URL = `${HOST}/weights_manifest.json`;
+const MODEL_URL = `${HOST}/model.json`;
 const RELATIVE_MODEL_URL = '/path/model.pb';
-const RELATIVE_WEIGHT_MANIFEST_URL = '/path/weights_manifest.json';
-const TFHUB_MODEL_URL = `${HOST}/model/1/tensorflowjs_model.pb${TFHUB_SUFFIX}`;
-const TFHUB_WEIGHT_MANIFEST_URL =
-    `${HOST}/model/1/weights_manifest.json${TFHUB_SUFFIX}`;
+const TFHUB_MODEL_URL = `${HOST}/model/1/model.json${TFHUB_SUFFIX}`;
 let model: fm.FrozenModel;
 const bias = tfc.tensor1d([1], 'int32');
 
@@ -38,14 +34,14 @@ const weightsManifest: tfc.io.WeightsManifestConfig = [{
   'weights': [{'name': 'Const', 'dtype': 'int32', 'shape': [1]}],
 }];
 
-const SIMPLE_MODEL: tensorflow.IGraphDef = {
+const SIMPLE_MODEL: tensorflow_json.IGraphDef = {
   node: [
     {
       name: 'Input',
       op: 'Placeholder',
       attr: {
         dtype: {
-          type: tensorflow.DataType.DT_INT32,
+          type: tensorflow_json.DataType.DT_INT32,
         },
         shape: {shape: {dim: [{size: -1}, {size: 1}]}}
       }
@@ -54,10 +50,10 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
       name: 'Const',
       op: 'Const',
       attr: {
-        dtype: {type: tensorflow.DataType.DT_INT32},
+        dtype: {type: tensorflow_json.DataType.DT_INT32},
         value: {
           tensor: {
-            dtype: tensorflow.DataType.DT_INT32,
+            dtype: tensorflow_json.DataType.DT_INT32,
             tensorShape: {dim: [{size: 1}]},
           }
         },
@@ -71,14 +67,14 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
   versions: {producer: 1.0, minConsumer: 3}
 };
 
-const CONTROL_FLOW_MODEL: tensorflow.IGraphDef = {
+const CONTROL_FLOW_MODEL: tensorflow_json.IGraphDef = {
   node: [
     {
       name: 'Input',
       op: 'Placeholder',
       attr: {
         dtype: {
-          type: tensorflow.DataType.DT_INT32,
+          type: tensorflow_json.DataType.DT_INT32,
         },
         shape: {shape: {dim: [{size: -1}, {size: 1}]}}
       }
@@ -88,14 +84,14 @@ const CONTROL_FLOW_MODEL: tensorflow.IGraphDef = {
   versions: {producer: 1.0, minConsumer: 3}
 };
 
-const DYNAMIC_SHAPE_MODEL: tensorflow.IGraphDef = {
+const DYNAMIC_SHAPE_MODEL: tensorflow_json.IGraphDef = {
   node: [
     {
       name: 'Input',
       op: 'Placeholder',
       attr: {
         dtype: {
-          type: tensorflow.DataType.DT_INT32,
+          type: tensorflow_json.DataType.DT_INT32,
         },
         shape: {shape: {dim: [{size: -1}, {size: 1}]}}
       }
@@ -106,29 +102,23 @@ const DYNAMIC_SHAPE_MODEL: tensorflow.IGraphDef = {
 };
 describe('Model', () => {
   beforeEach(() => {
-    model = new fm.FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
-    spyOn(window, 'fetch').and.callFake((path: string) => {
-      if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
-          path === TFHUB_MODEL_URL) {
-        return new Response(new Uint8Array([1, 2, 3]));
-      } else if (
-          path === WEIGHT_MANIFEST_URL ||
-          path === RELATIVE_WEIGHT_MANIFEST_URL ||
-          path === TFHUB_WEIGHT_MANIFEST_URL) {
-        return new Response(JSON.stringify(weightsManifest));
-      } else if (
-          path.match(`${HOST}.*/weight_0`) || path === '/path/weight_0') {
-        return new Response(bias.dataSync() as Int32Array);
-      } else {
-        throw new Error(`Invalid path: ${path}`);
-      }
-    });
+    model = new fm.FrozenModel(MODEL_URL);
   });
-  afterEach(() => {});
 
   describe('simple model', () => {
     beforeEach(() => {
-      spyOn(tensorflow.GraphDef, 'decode').and.returnValue(SIMPLE_MODEL);
+      spyOn(window, 'fetch').and.callFake((path: string) => {
+        if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
+            path === TFHUB_MODEL_URL) {
+          return new Response(
+              JSON.stringify({modelTopology: SIMPLE_MODEL, weightsManifest}));
+        } else if (
+            path.match(`${HOST}.*/weight_0`) || path === '/path/weight_0') {
+          return new Response(bias.dataSync() as Int32Array);
+        } else {
+          throw new Error(`Invalid path: ${path}`);
+        }
+      });
     });
 
     it('load', async () => {
@@ -224,7 +214,7 @@ describe('Model', () => {
     describe('dispose', () => {
       it('should dispose the weights', async () => {
         const numOfTensors = tfc.memory().numTensors;
-        model = new fm.FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+        model = new fm.FrozenModel(MODEL_URL);
 
         await model.load();
         model.dispose();
@@ -242,8 +232,7 @@ describe('Model', () => {
 
     describe('relative path', () => {
       beforeEach(() => {
-        model = new fm.FrozenModel(
-            RELATIVE_MODEL_URL, RELATIVE_WEIGHT_MANIFEST_URL);
+        model = new fm.FrozenModel(RELATIVE_MODEL_URL);
       });
 
       it('load', async () => {
@@ -253,17 +242,14 @@ describe('Model', () => {
     });
 
     it('should loadFrozenModel', async () => {
-      const model = await fm.loadFrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
+      const model = await fm.loadFrozenModel(MODEL_URL);
       expect(model).not.toBeUndefined();
     });
 
     it('should loadFrozenModel with request options', async () => {
-      const model = await fm.loadFrozenModel(
-          MODEL_URL, WEIGHT_MANIFEST_URL, {credentials: 'include'});
+      const model =
+          await fm.loadFrozenModel(MODEL_URL, {credentials: 'include'});
       expect(window.fetch).toHaveBeenCalledWith(MODEL_URL, {
-        credentials: 'include'
-      });
-      expect(window.fetch).toHaveBeenCalledWith(WEIGHT_MANIFEST_URL, {
         credentials: 'include'
       });
       expect(model).not.toBeUndefined();
@@ -293,7 +279,18 @@ describe('Model', () => {
 
   describe('control flow model', () => {
     beforeEach(() => {
-      spyOn(tensorflow.GraphDef, 'decode').and.returnValue(CONTROL_FLOW_MODEL);
+      spyOn(window, 'fetch').and.callFake((path: string) => {
+        if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
+            path === TFHUB_MODEL_URL) {
+          return new Response(JSON.stringify(
+              {modelTopology: CONTROL_FLOW_MODEL, weightsManifest}));
+        } else if (
+            path.match(`${HOST}.*/weight_0`) || path === '/path/weight_0') {
+          return new Response(bias.dataSync() as Int32Array);
+        } else {
+          throw new Error(`Invalid path: ${path}`);
+        }
+      });
     });
 
     it('should throw error if call predict directly', async () => {
@@ -327,7 +324,18 @@ describe('Model', () => {
 
   describe('dynamic shape model', () => {
     beforeEach(() => {
-      spyOn(tensorflow.GraphDef, 'decode').and.returnValue(DYNAMIC_SHAPE_MODEL);
+      spyOn(window, 'fetch').and.callFake((path: string) => {
+        if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
+            path === TFHUB_MODEL_URL) {
+          return new Response(JSON.stringify(
+              {modelTopology: DYNAMIC_SHAPE_MODEL, weightsManifest}));
+        } else if (
+            path.match(`${HOST}.*/weight_0`) || path === '/path/weight_0') {
+          return new Response(bias.dataSync() as Int32Array);
+        } else {
+          throw new Error(`Invalid path: ${path}`);
+        }
+      });
     });
 
     it('should throw error if call predict directly', async () => {

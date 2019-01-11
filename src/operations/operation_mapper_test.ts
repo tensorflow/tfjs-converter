@@ -14,9 +14,11 @@
  * limitations under the License.
  * =============================================================================
  */
+import {DataType} from '@tensorflow/tfjs-core';
 
 import {tensorflow} from '../data/compiled_api';
 
+import {getNodeNameAndIndex} from './executors/utils';
 import * as arithmetic from './op_list/arithmetic';
 import * as basicMath from './op_list/basic_math';
 import * as control from './op_list/control';
@@ -33,197 +35,253 @@ import * as reduction from './op_list/reduction';
 import * as sliceJoin from './op_list/slice_join';
 import * as spectral from './op_list/spectral';
 import * as transformation from './op_list/transformation';
-import {OperationMapper} from './operation_mapper';
-import {Graph, OpMapper} from './types';
+import {Graph, Node, OpMapper, ParamValue} from './types';
 
-const ops = [
-  arithmetic, basicMath, control, convolution, creation, dynamic, evaluation,
-  logical, image, graph, matrices, normalization, reduction, sliceJoin,
-  spectral, transformation
-];
-const mapper: OperationMapper = OperationMapper.Instance;
-let convertedGraph: Graph;
+const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
+const DYNAMIC_SHAPE_OPS =
+    ['NonMaxSuppressionV2', 'NonMaxSuppressionV3', 'Where'];
 
-const SIMPLE_MODEL: tensorflow.IGraphDef = {
-  node: [
-    {
-      name: 'image_placeholder',
-      op: 'Placeholder',
-      attr: {
-        dtype: {
-          type: tensorflow.DataType.DT_FLOAT,
+export class OperationMapper {
+  private static _instance: OperationMapper;
+
+  private opMappers: {[key: string]: OpMapper};
+
+  // Singleton instance for the mapper
+  public static get Instance() {
+    return this._instance || (this._instance = new this());
+  }
+
+  // Loads the op mapping from the JSON file.
+  private constructor() {
+    const ops = [
+      arithmetic, basicMath, control, convolution, creation, dynamic,
+      evaluation, logical, image, graph, matrices, normalization, reduction,
+      sliceJoin, spectral, transformation
+    ];
+    const mappersJson: OpMapper[] = [].concat.apply([], ops.map(op => op.json));
+
+    this.opMappers = mappersJson.reduce<{[key: string]: OpMapper}>(
+        (map, mapper: OpMapper) => {
+          map[mapper.tfOpName] = mapper;
+          return map;
         },
-        shape:
-            {shape: {dim: [{size: '3'}, {size: 3}, {size: '3'}, {size: 1}]}}
-      }
-    },
-    {
-      name: 'Const',
-      op: 'Const',
-      attr: {
-        dtype: {type: tensorflow.DataType.DT_INT32},
-        value: {
-          tensor: {
-            dtype: tensorflow.DataType.DT_INT32,
-            tensorShape: {dim: [{size: 3}, {size: 3}, {size: 1}, {size: 1}]},
-            intVal: [0, 0, 0, 0, 1, 0, 0, 0, 0]
-          }
-        }
-      }
-    },
-    {
-      name: 'Shape',
-      op: 'Const',
-      attr: {
-        dtype: {type: tensorflow.DataType.DT_INT32},
-        value: {
-          tensor: {
-            dtype: tensorflow.DataType.DT_INT32,
-            tensorShape: {dim: [{size: 3}, {size: 1}, {size: 1}, {size: 1}]},
-            intVal: [1, 1, 1]
-          }
-        }
-      }
-    },
-    {
-      name: 'Value',
-      op: 'Const',
-      attr: {dtype: {type: tensorflow.DataType.DT_INT32}, value: {i: 1}}
-    },
-    {name: 'Fill', op: 'Fill', input: ['Shape', 'Value'], attr: {}}, {
-      name: 'Conv2D',
-      op: 'Conv2D',
-      input: ['image_placeholder', 'Const'],
-      attr: {
-        T: {type: tensorflow.DataType.DT_FLOAT},
-        dataFormat: {s: 'TkhXQw=='},
-        padding: {s: 'U0FNRQ=='},
-        strides: {list: {f: [], i: [1, 2, 2, 1]}},
-        useCudnnOnGpu: {b: true}
-      }
-    },
-    {
-      name: 'BiasAdd',
-      op: 'BiasAdd',
-      input: ['Conv2D', 'Shape'],
-      attr: {
-        T: {type: tensorflow.DataType.DT_FLOAT},
-        dataFormat: {s: 'TkhXQw=='}
-      }
-    },
-    {
-      name: 'Squeeze',
-      op: 'Squeeze',
-      input: ['BiasAdd'],
-      attr: {squeeze_dims: {list: {i: ['1', '2']}}}
-    },
-    {
-      name: 'Split',
-      op: 'Split',
-      input: ['image_placeholder'],
-      attr: {num_split: {i: 3} as tensorflow.IAttrValue}
-    },
-    {
-      name: 'FusedBatchNorm',
-      op: 'FusedBatchNorm',
-      input: ['image_placeholder'],
-      attr: {epsilon: {f: 0.0001} as tensorflow.IAttrValue}
+        {});
+  }
+
+  private isControlFlow(node: tensorflow.INodeDef) {
+    return CONTROL_FLOW_OPS.some(op => op === node.op);
+  }
+
+  private isDynamicShape(node: tensorflow.INodeDef) {
+    return DYNAMIC_SHAPE_OPS.some(op => op === node.op);
+  }
+  // Converts the model from Tensorflow GraphDef to local representation for
+  // deeplearn.js API
+  transformGraph(graph: tensorflow.IGraphDef): Graph {
+    const tfNodes = graph.node;
+    let withControlFlow = false;
+    let withDynamicShape = false;
+    const placeholders: Node[] = [];
+    const weights: Node[] = [];
+    const nodes = tfNodes.reduce<{[key: string]: Node}>((map, node) => {
+      map[node.name] = this.mapNode(node);
+      if (this.isControlFlow(node)) withControlFlow = true;
+      if (this.isDynamicShape(node)) withDynamicShape = true;
+      if (node.op === 'Placeholder') placeholders.push(map[node.name]);
+      if (node.op === 'Const') weights.push(map[node.name]);
+      return map;
+    }, {});
+
+    const inputs: Node[] = [];
+    const outputs: Node[] = [];
+    Object.keys(nodes).forEach(key => {
+      const node = nodes[key];
+      node.inputNames.forEach(name => {
+        const [nodeName, ] = getNodeNameAndIndex(name);
+        node.inputs.push(nodes[nodeName]);
+        nodes[nodeName].children.push(node);
+      });
+      if (node.inputs.length === 0) inputs.push(node);
+    });
+
+    Object.keys(nodes).forEach(key => {
+      const node = nodes[key];
+      if (node.children.length === 0) outputs.push(node);
+    });
+
+    return {
+      nodes,
+      inputs,
+      outputs,
+      weights,
+      placeholders,
+      withControlFlow,
+      withDynamicShape
+    };
+  }
+
+  private mapNode(node: tensorflow.INodeDef): Node {
+    const mapper = this.opMappers[node.op];
+    if (mapper === undefined) {
+      throw new Error('Tensorflow Op is not supported: ' + node.op);
     }
-  ],
-  versions: {producer: 1.0}
-};
+    const newNode: Node = {
+      name: node.name,
+      op: mapper.dlOpName,
+      category: mapper.category,
+      inputNames:
+          (node.input ||
+           []).map(input => input.startsWith('^') ? input.substr(1) : input),
+      inputs: [],
+      children: [],
+      params: {}
+    };
 
-describe('completeness check', () => {
-  it('should convert all op categories', () => {
-    ops.forEach(op => {
-      (op.json as OpMapper[]).forEach(tfOp => {
-        const graph = {
-          node: [{name: tfOp.tfOpName, op: tfOp.tfOpName, attr: {}}]
-        };
-        convertedGraph = mapper.transformGraph(graph);
-        expect(Object.keys(convertedGraph.nodes)).toEqual([tfOp.tfOpName]);
-        expect(convertedGraph.nodes[tfOp.tfOpName].op).toEqual(tfOp.dlOpName);
-      });
-    });
-  });
-});
-describe('operationMapper', () => {
-  beforeEach(() => {
-    convertedGraph = mapper.transformGraph(SIMPLE_MODEL);
-  });
-  afterEach(() => {});
+    if (!!mapper.params) {
+      newNode.params = mapper.params.reduce<{[key: string]:
+                                                 ParamValue}>((map, param) => {
+        const inputIndex = param.tfInputIndex;
+        const inputParamLength = param.tfInputParamLength;
+        const type = param.type;
+        let value = undefined;
+        if (inputIndex === undefined) {
+          switch (param.type) {
+            case 'string':
+              value = this.getStringParam(
+                  node.attr, param.tfParamName, param.defaultValue as string);
 
-  describe('transform graph', () => {
-    describe('graph level', () => {
-      it('should find the graph input nodes', () => {
-        expect(convertedGraph.inputs.map(node => node.name)).toEqual([
-          'image_placeholder', 'Const', 'Shape', 'Value'
-        ]);
-      });
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getStringParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as string);
+              }
+              break;
+            case 'number':
+              value = this.getNumberParam(
+                  node.attr, param.tfParamName,
+                  (param.defaultValue || 0) as number);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getNumberParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number);
+              }
+              break;
+            case 'number[]':
+              value = this.getNumericArrayParam(
+                  node.attr, param.tfParamName, param.defaultValue as number[]);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getNumericArrayParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number[]);
+              }
+              break;
+            case 'bool':
+              value = this.getBoolParam(
+                  node.attr, param.tfParamName, param.defaultValue as boolean);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getBoolParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as boolean);
+              }
+              break;
+            case 'shape':
+              value = this.getTensorShapeParam(
+                  node.attr, param.tfParamName, param.defaultValue as number[]);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getTensorShapeParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as number[]);
+              }
+              break;
+            case 'dtype':
+              value = this.getDtypeParam(
+                  node.attr, param.tfParamName, param.defaultValue as DataType);
+              if (value === undefined && !!param.tfParamNameDeprecated) {
+                value = this.getDtypeParam(
+                    node.attr, param.tfParamNameDeprecated,
+                    param.defaultValue as DataType);
+              }
+              break;
+            case 'tensor':
+            case 'tensors':
+              break;
+            default:
+              throw new Error(
+                  `Unsupported param type: ${param.type} for op: ${node.op}`);
+          }
+        }
+        map[param.dlParamName] = {value, inputIndex, type, inputParamLength};
+        return map;
+      }, {});
+    }
+    return newNode;
+  }
 
-      it('should find the graph output nodes', () => {
-        expect(convertedGraph.outputs.map(node => node.name)).toEqual([
-          'Fill', 'Squeeze', 'Split', 'FusedBatchNorm'
-        ]);
-      });
+  private getStringParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string, def: string,
+      keepCase = false): string {
+    const param = attrs[name];
+    if (param !== undefined) {
+      const value = String.fromCharCode.apply(null, param.s);
+      return keepCase ? value : value.toLowerCase();
+    }
+    return def;
+  }
 
-      it('should find the graph weight nodes', () => {
-        expect(convertedGraph.weights.map(node => node.name)).toEqual([
-          'Const', 'Shape', 'Value'
-        ]);
-      });
+  private getBoolParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def: boolean): boolean {
+    const param = attrs[name];
+    return param ? param.b : def;
+  }
 
-      it('should convert nodes', () => {
-        expect(Object.keys(convertedGraph.nodes)).toEqual([
-          'image_placeholder', 'Const', 'Shape', 'Value', 'Fill', 'Conv2D',
-          'BiasAdd', 'Squeeze', 'Split', 'FusedBatchNorm'
-        ]);
-      });
-    });
+  private getNumberParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def: number): number {
+    const param = attrs[name] as tensorflow.AttrValue;
+    const value = (param ? param[param.value] : def) as number | Long;
+    return (typeof value === 'number') ? value : value['toInt']() as number;
+  }
+  private getDtypeParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def: DataType): DataType {
+    const param = attrs[name];
+    if (param && param.type) {
+      switch (param.type) {
+        case tensorflow.DataType.DT_FLOAT:
+          return 'float32';
+        case tensorflow.DataType.DT_INT32:
+          return 'int32';
+        case tensorflow.DataType.DT_BOOL:
+          return 'bool';
+        default:
+          return def;
+      }
+    }
+    return def;
+  }
+  private getTensorShapeParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def?: number[]): number[]|undefined {
+    const param = attrs[name];
+    if (param && param.shape) {
+      return param.shape.dim.map(
+          dim =>
+              (typeof dim.size === 'number') ? dim.size : dim.size['toInt']());
+    }
+    return def;
+  }
 
-    describe('node level', () => {
-      it('should find the input nodes', () => {
-        expect(convertedGraph.nodes['Fill'].inputs.map(node => node.name))
-            .toEqual(['Shape', 'Value']);
-      });
-      it('should find the children nodes', () => {
-        expect(convertedGraph.nodes['image_placeholder'].children.map(
-                   node => node.name))
-            .toEqual(['Conv2D', 'Split', 'FusedBatchNorm']);
-      });
-
-      it('should map the input params', () => {
-        expect(convertedGraph.nodes['Fill'].params['shape'].inputIndex)
-            .toEqual(0);
-        expect(convertedGraph.nodes['Fill'].params['value'].inputIndex)
-            .toEqual(1);
-      });
-
-      it('should map the attribute params', () => {
-        expect(convertedGraph.nodes['Conv2D'].params['strides'].value).toEqual([
-          1, 2, 2, 1
-        ]);
-        expect(convertedGraph.nodes['Conv2D'].params['pad'].value)
-            .toEqual('same');
-        expect(convertedGraph.nodes['Conv2D'].params['useCudnnOnGpu'].value)
-            .toEqual(true);
-        expect(convertedGraph.nodes['Split'].params['numOrSizeSplits'].value)
-            .toEqual(3);
-        expect(convertedGraph.nodes['FusedBatchNorm'].params['epsilon'].value)
-            .toEqual(0.0001);
-      });
-
-      it('should map the placeholder attribute params', () => {
-        expect(convertedGraph.nodes['image_placeholder'].params['shape'].value)
-            .toEqual([3, 3, 3, 1]);
-        expect(convertedGraph.nodes['image_placeholder'].params['dtype'].value)
-            .toEqual('float32');
-      });
-      it('should map params with deprecated name', () => {
-        expect(convertedGraph.nodes['Squeeze'].params['axis'].value).toEqual([
-          1, 2
-        ]);
-      });
-    });
-  });
-});
+  private getNumericArrayParam(
+      attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
+      def: number[]): number[] {
+    const param = attrs[name];
+    if (param) {
+      return ((param.list.f && param.list.f.length ? param.list.f :
+                                                     param.list.i))
+                 .map(v => (typeof v === 'number') ? v : v['toInt']()) as
+          number[];
+    }
+    return def;
+  }
+}
