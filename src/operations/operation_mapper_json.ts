@@ -77,7 +77,7 @@ export class OperationMapper {
     return DYNAMIC_SHAPE_OPS.some(op => op === node.op);
   }
   // Converts the model from Tensorflow GraphDef to local representation for
-  // deeplearn.js API
+  // Tensorflow.js API
   transformGraph(graph: tensorflow_json.IGraphDef): Graph {
     const tfNodes = graph.node;
     let withControlFlow = false;

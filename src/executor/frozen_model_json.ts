@@ -172,7 +172,7 @@ export class FrozenModel implements tfc.InferenceModel {
     }, {} as tfc.NamedTensorMap);
   }
   /**
-   * Executes infrerence for the model for given input tensors.
+   * Executes inference for the model for given input tensors.
    * @param inputs tensor, tensor array or tensor map of the inputs for the
    * model, keyed by the input node names.
    * @param outputs output node name from the Tensorflow model, if no
@@ -271,11 +271,8 @@ export class FrozenModel implements tfc.InferenceModel {
  * ```js
  * const GOOGLE_CLOUD_STORAGE_DIR =
  *     'https://storage.googleapis.com/tfjs-models/savedmodel/';
- * const MODEL_URL = 'mobilenet_v2_1.0_224/tensorflowjs_model.pb';
- * const WEIGHTS_URL =
- *     'mobilenet_v2_1.0_224/weights_manifest.json';
- * const model = await tf.loadFrozenModel(GOOGLE_CLOUD_STORAGE_DIR + MODEL_URL,
- *      GOOGLE_CLOUD_STORAGE_DIR + WEIGHTS_URL);
+ * const MODEL_URL = 'mobilenet_v2_1.0_224/model.json';
+ * const model = await tf.loadFrozenModel(GOOGLE_CLOUD_STORAGE_DIR + MODEL_URL);
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();
  * ```

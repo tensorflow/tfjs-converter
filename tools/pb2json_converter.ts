@@ -29,6 +29,9 @@ function replacer(key: string, value: any) {
   }
   return value;
 }
+const PB_MODEL_FILENAME = 'tensorflowjs_model.pb';
+const WEIGHT_FILENAME = 'weights_manifest.json';
+const JSON_MODEL_FILENAME = 'model.json';
 function convert(argv: string[]) {
   if (argv.length < 4) {
     console.log(
@@ -39,21 +42,21 @@ function convert(argv: string[]) {
   const sourcePath = process.argv[2];
   console.log('reading pb model directory: ' + sourcePath);
   fs.readdir(sourcePath, (err, files) => {
-    if (!['tensorflowjs_model.pb', 'weights_manifest.json'].every(
+    if (![PB_MODEL_FILENAME, WEIGHT_FILENAME].every(
             file => files.indexOf(file) !== -1)) {
       console.log(
           'Please make sure the pb model directory contains ' +
-          'tensorflowjs_model.pb and weights_manifest.json files');
+          'tensorflowjs_model.pb and weights_manifest.json files.');
       return;
     }
 
-    const modelFile = path.join(sourcePath, 'tensorflowjs_model.pb');
+    const modelFile = path.join(sourcePath, PB_MODEL_FILENAME);
     console.log('reading pb file: ' + modelFile);
     const buffer = fs.readFileSync(modelFile);
 
     const modelTopology = tensorflow.GraphDef.decode(new Uint8Array(buffer));
 
-    const manifestFile = path.join(sourcePath, 'weights_manifest.json');
+    const manifestFile = path.join(sourcePath, WEIGHT_FILENAME);
     console.log('reading manifest file: ' + manifestFile);
     const weightsManifest = JSON.parse(fs.readFileSync(manifestFile, 'utf8'));
 
@@ -62,15 +65,14 @@ function convert(argv: string[]) {
     if (!fs.existsSync(destPath)) {
       fs.mkdirSync(destPath);
     }
-    const destModelFile = path.join(destPath, 'model.json');
+    const destModelFile = path.join(destPath, JSON_MODEL_FILENAME);
     console.log('writing json file: ' + destModelFile);
     fs.writeFileSync(
         destModelFile,
         JSON.stringify({modelTopology, weightsManifest}, replacer));
 
     files.forEach(file => {
-      if (file !== 'tensorflowjs_model.pb' &&
-          file !== 'weights_manifest.json') {
+      if (file !== PB_MODEL_FILENAME && file !== WEIGHT_FILENAME) {
         fs.copyFile(
             path.join(sourcePath, file), path.join(destPath, file), (err) => {
               if (err) throw err;
