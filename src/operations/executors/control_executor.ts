@@ -174,6 +174,18 @@ export async function executeOp(
       context.addFIFOQueue(fifoQueue);
       return [scalar(fifoQueue.id), scalar(1.0)];
 
+    case 'queueEnqueue':
+      const queueEnqueueId =
+          getParamValue('fifoQueueId', node, tensorMap, context) as number;
+      const components =
+          getParamValue('components', node, tensorMap, context) as tfc.Tensor[];
+      const tCompoments =
+          getParamValue('Tcomponents', node, tensorMap, context) as
+          tfc.DataType[];
+      const queueEnqueueQueue = context.getFIFOQueue(queueEnqueueId);
+      queueEnqueueQueue.enqueue(components, tCompoments);
+      return [scalar(1.0)];
+
     case 'queueDequeueUpTo':
       const queueDequeueUpToId =
           getParamValue('fifoQueueId', node, tensorMap, context) as number;
@@ -182,6 +194,12 @@ export async function executeOp(
           getParamValue('dtypes', node, tensorMap, context) as tfc.DataType[];
       const dequeueUpToQueue = context.getFIFOQueue(queueDequeueUpToId);
       return dequeueUpToQueue.dequeueUpTo(num, dequeueUpToDtypes);
+
+    case 'queueSize':
+      const queueSizeId =
+          getParamValue('fifoQueueId', node, tensorMap, context) as number;
+      const queueSizeQueue = context.getFIFOQueue(queueSizeId);
+      return [scalar(queueSizeQueue.size(), 'int32')];
 
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

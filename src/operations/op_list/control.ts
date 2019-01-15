@@ -246,6 +246,23 @@ export const json = [
     ]
   },
   {
+    'tfOpName': 'QueueEnqueueV2',
+    'dlOpName': 'queueEnqueue',
+    'category': 'control',
+    'params': [
+      {'tfInputIndex': 0, 'dlParamName': 'fifoQueueId', 'type': 'number'},
+      {'tfInputIndex': 1, 'dlParamName': 'components', 'type': 'tensors'},
+      {'tfParamName': 'Tcomponents', 'dlParamName': 'dtypes', 'type': 'dtype[]'}
+    ]
+  },
+  {
+    'tfOpName': 'QueueSizeV2',
+    'dlOpName': 'queueSize',
+    'category': 'control',
+    'params':
+        [{'tfInputIndex': 0, 'dlParamName': 'fifoQueueId', 'type': 'number'}]
+  },
+  {
     'tfOpName': 'QueueDequeueUpToV2',
     'dlOpName': 'queueDequeueUpTo',
     'category': 'control',

@@ -56,7 +56,7 @@ export class FIFOQueue {
    * Enqueues a tuple of one or more tensors in the given queue.
    * @param element
    */
-  enqueue(element: Tensor[]) {
+  enqueue(element: Tensor[], dtype?: DataType[]) {
     if (this.closed_) {
       throw new Error(`Queue ${this.name} has been closed.`);
     }
