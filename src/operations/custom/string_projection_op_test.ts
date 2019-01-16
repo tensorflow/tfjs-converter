@@ -27,7 +27,7 @@ describe('StringProjectionOp', () => {
   it('should initialize', () => {
     expect(op).toBeDefined();
   });
-  fit('should be fast', () => {
+  it('should be fast', () => {
     const hash = tf.ones<tf.Rank.R2>([90, 14], 'float32');
     const input = tf.tensor1d(
         [

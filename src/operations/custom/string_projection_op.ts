@@ -138,7 +138,7 @@ export function getFeatureWeights(
   const ids = [];
   const weights = [];
   for (const key of Object.keys(featureCounts)) {
-    const featureId = new Int32Array([murmur3(key)])[0];
+    const featureId = murmur3(key, 0) | 0;
     ids.push(featureId);
     weights.push(featureCounts[key]);
   }
@@ -211,28 +211,28 @@ export class StringProjectionOp {
     let score = 0.0;
     const inputItemBytes = 4;
     let offset = 0;
-
     const seedSize = 4;
     const keyBytes = seedSize + inputItemBytes;
     const inputData = new Uint8Array(new Int32Array(input).buffer);
     const seedArray = new Uint8Array(new Float32Array([seed]).buffer);
     const keyArray = new Uint8Array(keyBytes);
-    this.copyArrayBuffer(seedArray, keyArray, 0, 0, 4);
+    this.copyArrayBuffer(seedArray, keyArray, 0, 0, seedSize);
     for (let i = 0; i < input.length; ++i) {
       // Create running hash id and value for current dimension.
       this.copyArrayBuffer(
           inputData, keyArray, offset, seedSize, inputItemBytes);
+
       const key = String.fromCharCode.apply(null, keyArray);
-      const hashSignature = new Int32Array([murmur3(key, 0)])[0];
+      const hashSignature = murmur3(key, 0) | 0;
       offset += inputItemBytes;
       score += weight[i] * hashSignature;
     }
 
-    // const inverseNormalizer = 0.00000000046566129;
+    const inverseNormalizer = 0.00000000046566129;
 
-    // if (!binaryProjection) {
-    //   return Math.tanh(score * inverseNormalizer);
-    // }
+    if (!binaryProjection) {
+      return Math.tanh(score * inverseNormalizer);
+    }
 
     return (score > 0) ? 1 : 0;
   }
@@ -286,6 +286,7 @@ export class StringProjectionOp {
     const hashValues = hash.dataSync();
     const sparseBatchIds = [];
     const sparseBatchWeights = [];
+
     for (let b = 0; b < batchSize; ++b) {
       const ids = [];
       const weights = [];
