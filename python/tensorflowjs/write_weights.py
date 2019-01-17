@@ -22,6 +22,8 @@ import numpy as np
 from tensorflowjs import quantization
 
 _OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool]
+_AUTO_CONVERT_DTYPES = [np.float64, np.int64]
+
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
@@ -131,6 +133,7 @@ def write_weights(
 
   return manifest
 
+
 def _quantize_entry(entry, quantization_dtype):
   """Quantizes the weights in the entry, returning a new entry.
 
@@ -169,6 +172,7 @@ def _quantize_entry(entry, quantization_dtype):
       'min': min_val, 'scale': scale, 'original_dtype': data.dtype.name}
   return quantized_entry
 
+
 def _stack_group_bytes(group):
   """Stacks the bytes for a weight group into a flat byte array.
 
@@ -186,9 +190,11 @@ def _stack_group_bytes(group):
   group_bytes_writer = io.BufferedWriter(group_bytes)
   total_bytes = 0
 
+  with_64bit_weights = False
   for entry in group:
     _assert_valid_weight_entry(entry)
-
+    if _auto_convert_weight_entry(entry):
+      with_64bit_weights = True
     data = entry['data']
     data_bytes = data.tobytes()
     group_bytes_writer.write(data_bytes)
@@ -197,6 +203,9 @@ def _stack_group_bytes(group):
   group_bytes_writer.flush()
   group_bytes.seek(0)
 
+  if with_64bit_weights:
+    print('This model contains 64-bit weights, '
+      'and they have been converted to 32-bit to run in javascript.')
   # NOTE: We must return the bytes writer here, otherwise it goes out of scope
   # and python closes the IO operation.
   return (group_bytes, total_bytes, group_bytes_writer)
@@ -276,6 +285,16 @@ def _assert_no_duplicate_weight_names(weight_groups):
       weight_names.add(name)
 
 
+def _auto_convert_weight_entry(entry):
+  data = entry['data']
+  converted = False
+  if data.dtype in _AUTO_CONVERT_DTYPES:
+    entry['data'] = np.float32(
+        data) if data.dtype == np.float64 else np.int32(data)
+    converted = True
+  return converted
+
+
 def _assert_valid_weight_entry(entry):
   if not 'name' in entry:
     raise ValueError('Error dumping weight, no name field found.')
@@ -285,7 +304,7 @@ def _assert_valid_weight_entry(entry):
   name = entry['name']
   data = entry['data']
 
-  if not data.dtype in _OUTPUT_DTYPES:
+  if not (data.dtype in _OUTPUT_DTYPES or data.dtype in _AUTO_CONVERT_DTYPES):
     raise ValueError('Error dumping weight ' + name + ', dtype ' +
                      data.dtype.name + ' not supported.')
 
@@ -309,11 +328,11 @@ def _assert_weight_groups_valid(weight_groups):
             'weight_groups[' + i + '][' + j + '] has no string field \'name\'')
       if 'data' not in weights:
         raise ValueError(
-            'weight_groups[' + i + '][' + j + '] has no numpy ' + \
+            'weight_groups[' + i + '][' + j + '] has no numpy ' +
             'array field \'data\'')
       if not isinstance(weights['data'], np.ndarray):
         raise ValueError(
-            'weight_groups[' + i + '][' + j + '][\'data\'] is not a numpy ' + \
+            'weight_groups[' + i + '][' + j + '][\'data\'] is not a numpy ' +
             'array')
 
 
