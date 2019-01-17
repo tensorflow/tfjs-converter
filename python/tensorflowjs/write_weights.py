@@ -25,8 +25,8 @@ _OUTPUT_DTYPES = [np.float64, np.int64, np.float32,
                   np.int32, np.uint8, np.uint16, np.bool]
 
 def write_weights(
-        weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
-        write_manifest=True, quantization_dtype=None):
+    weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
+    write_manifest=True, quantization_dtype=None):
   """Writes weights to a binary format on disk for ingestion by JavaScript.
 
     Weights are organized into groups. When writing to disk, the bytes from all
@@ -206,7 +206,7 @@ def _stack_group_bytes(group):
 
 
 def _shard_group_bytes_to_disk(
-        write_dir, group_index, group_bytes, total_bytes, shard_size_bytes):
+    write_dir, group_index, group_bytes, total_bytes, shard_size_bytes):
   """Shards the concatenated bytes for a group to disk.
 
   Args:
