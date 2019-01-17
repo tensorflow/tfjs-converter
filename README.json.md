@@ -107,6 +107,7 @@ saved a tf.keras model in the SavedModel format.
 |`--signature_name`   | Only applicable to TensorFlow Hub module conversion, signature to load. Defaults to `default`. See https://www.tensorflow.org/hub/common_signatures/.|
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
 |`--output_json`   | Generate model file in JSON instead of protobuf for all TF input model formats. Defaults to `False`.|
+|`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
 
 ### Format conversions support table
@@ -221,7 +222,16 @@ Yes, we are splitting the weights into files of 4MB chunks, which enable the bro
 
 4. Will it support model with quantization?
 
-Not yet. We are planning to add quantization support soon.
+Yes, you can use the --quantization_bytes option to compress int32/float32 to 1 or 2 bytes. Here is
+an example of 8-bit quantization:
+
+```
+tensorflowjs_converter \
+    --input_format=tf_hub \
+    --quantization_byptes=1
+    'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1' \
+    /mobilenet/web_model
+```
 
 5. Why is the predict() method for inference so much slower on the first call than the subsequent calls?
 
