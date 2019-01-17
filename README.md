@@ -222,7 +222,7 @@ While the browser supports loading 100-500MB models, the page load time, the inf
 
 Yes, we are splitting the weights into files of 4MB chunks, which enable the browser to cache them automatically. If the model architecture is less than 4MB (most models are), it will also be cached.
 
-4. Will it support model with quantization?
+4. Can I quantize the weights over the wire?
 
 Yes, you can use the --quantization_bytes option to compress int32/float32 to 1 or 2 bytes. Here is
 an example of 8-bit quantization:
