@@ -205,7 +205,7 @@ def _stack_group_bytes(group):
 
   if with_64bit_weights:
     print('This model contains 64-bit weights, '
-      'and they have been converted to 32-bit to run in javascript.')
+          'and they have been converted to 32-bit to run in javascript.')
   # NOTE: We must return the bytes writer here, otherwise it goes out of scope
   # and python closes the IO operation.
   return (group_bytes, total_bytes, group_bytes_writer)
