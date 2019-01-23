@@ -22,7 +22,9 @@ import numpy as np
 from tensorflowjs import quantization
 
 _OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool]
-_AUTO_CONVERT_DTYPES = [np.float64, np.int64]
+_AUTO_DTYPE_CONVERSION = {
+    np.dtype(np.float64): np.float32,
+    np.dtype(np.int64): np.int32}
 
 
 def write_weights(
@@ -190,11 +192,10 @@ def _stack_group_bytes(group):
   group_bytes_writer = io.BufferedWriter(group_bytes)
   total_bytes = 0
 
-  with_64bit_weights = False
+  with_64bit_weights = set()
   for entry in group:
     _assert_valid_weight_entry(entry)
-    if _auto_convert_weight_entry(entry):
-      with_64bit_weights = True
+    with_64bit_weights.union(_auto_convert_weight_entry(entry))
     data = entry['data']
     data_bytes = data.tobytes()
     group_bytes_writer.write(data_bytes)
@@ -203,8 +204,8 @@ def _stack_group_bytes(group):
   group_bytes_writer.flush()
   group_bytes.seek(0)
 
-  if with_64bit_weights:
-    print('This model contains 64-bit weights, '
+  if len(with_64bit_weights) > 0:
+    print('This model contains 64-bit weights ', with_64bit_weights, ', '
           'and they have been converted to 32-bit to run in javascript.')
   # NOTE: We must return the bytes writer here, otherwise it goes out of scope
   # and python closes the IO operation.
@@ -287,11 +288,10 @@ def _assert_no_duplicate_weight_names(weight_groups):
 
 def _auto_convert_weight_entry(entry):
   data = entry['data']
-  converted = False
-  if data.dtype in _AUTO_CONVERT_DTYPES:
-    entry['data'] = np.float32(
-        data) if data.dtype == np.float64 else np.int32(data)
-    converted = True
+  converted = set()
+  if data.dtype in _AUTO_DTYPE_CONVERSION:
+    entry['data'] = _AUTO_DTYPE_CONVERSION[data.dtype](data)
+    converted.add(data.dtype)
   return converted
 
 
@@ -304,7 +304,7 @@ def _assert_valid_weight_entry(entry):
   name = entry['name']
   data = entry['data']
 
-  if not (data.dtype in _OUTPUT_DTYPES or data.dtype in _AUTO_CONVERT_DTYPES):
+  if not (data.dtype in _OUTPUT_DTYPES or data.dtype in _AUTO_DTYPE_CONVERSION):
     raise ValueError('Error dumping weight ' + name + ', dtype ' +
                      data.dtype.name + ' not supported.')
 

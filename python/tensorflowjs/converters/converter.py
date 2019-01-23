@@ -265,6 +265,12 @@ def setup_arugments():
       default=False,
       help='Generate model file in JSON instead of protobuf for '
       'all TF input model formats.')
+  parser.add_argument(
+      '--output_json',
+      type=bool,
+      default=False,
+      help='Generate model file in JSON instead of protobuf for '
+      'all TF input model formats.')
   return parser.parse_args()
 
 def main():
