@@ -1,3 +1,5 @@
+import {OpMapper} from '../types';
+
 /**
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -15,28 +17,27 @@
  * =============================================================================
  */
 
-export const json = [
+export const json: OpMapper[] = [
   {
     'tfOpName': 'MatMul',
-    'dlOpName': 'matMul',
     'category': 'matrices',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'a', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'b', 'type': 'tensor'}, {
-        'tfParamName': 'transpose_a',
-        'dlParamName': 'transposeA',
+      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'transpose_a'},
+        'name': 'transposeA',
         'type': 'bool',
         'defaultValue': false
       },
       {
-        'tfParamName': 'transpose_b',
-        'dlParamName': 'transposeB',
+        attrMapper: {'tfName': 'transpose_b'},
+        'name': 'transposeB',
         'type': 'bool',
         'defaultValue': false
       },
       {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -44,25 +45,24 @@ export const json = [
   },
   {
     'tfOpName': 'BatchMatMul',
-    'dlOpName': 'matMul',
     'category': 'matrices',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'a', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'b', 'type': 'tensor'}, {
-        'tfParamName': 'adj_x',
-        'dlParamName': 'transposeA',
+      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'adj_x'},
+        'name': 'transposeA',
         'type': 'bool',
         'defaultValue': false
       },
       {
-        'tfParamName': 'adj_y',
-        'dlParamName': 'transposeB',
+        attrMapper: {'tfName': 'adj_y'},
+        'name': 'transposeB',
         'type': 'bool',
         'defaultValue': false
       },
       {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -70,13 +70,12 @@ export const json = [
   },
   {
     'tfOpName': 'Transpose',
-    'dlOpName': 'transpose',
     'category': 'matrices',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'perm', 'type': 'number[]'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'perm', 'type': 'number[]'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }

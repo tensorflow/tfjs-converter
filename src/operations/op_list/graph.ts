@@ -1,3 +1,5 @@
+import {OpMapper} from '../types';
+
 /**
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -15,106 +17,89 @@
  * =============================================================================
  */
 
-export const json = [
+export const json: OpMapper[] = [
   {
     'tfOpName': 'PlaceholderWithDefault',
-    'dlOpName': 'placeholder',
     'category': 'graph',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'default', 'type': 'tensor'},
-      {'tfParamName': 'shape', 'dlParamName': 'shape', 'type': 'shape'},
-      {'tfParamName': 'dtype', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {inputMapper: {'start': 0}, 'name': 'default', 'type': 'tensor'},
+      {attrMapper: {'tfName': 'shape'}, 'name': 'shape', 'type': 'shape'},
+      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
     'tfOpName': 'Placeholder',
-    'dlOpName': 'placeholder',
     'category': 'graph',
     'params': [
-      {'tfParamName': 'shape', 'dlParamName': 'shape', 'type': 'shape'},
-      {'tfParamName': 'dtype', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {attrMapper: {'tfName': 'shape'}, 'name': 'shape', 'type': 'shape'},
+      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
-  {'tfOpName': 'Const', 'dlOpName': 'const', 'category': 'graph'}, {
+  {'tfOpName': 'Const', 'category': 'graph'}, {
     'tfOpName': 'Identity',
-    'dlOpName': 'identity',
     'category': 'graph',
-    'params': [{'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}]
+    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'Snapshot',
-    'dlOpName': 'snapshot',
     'category': 'graph',
-    'params': [{'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}]
+    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'Rank',
-    'dlOpName': 'rank',
     'category': 'graph',
-    'params': [{'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}]
+    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'Size',
-    'dlOpName': 'size',
     'category': 'graph',
-    'params': [{'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}]
+    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'Shape',
-    'dlOpName': 'shape',
     'category': 'graph',
-    'params': [{'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}]
+    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'ShapeN',
-    'dlOpName': 'shapeN',
     'category': 'graph',
-    'params': [{
-      'tfInputIndex': 0,
-      'tfInputParamLength': 0,
-      'dlParamName': 'x',
-      'type': 'tensors'
-    }]
+    'params': [
+      {inputMapper: {'start': 0, 'end': 0}, 'name': 'x', 'type': 'tensors'}
+    ]
   },
   {
     'tfOpName': 'Print',
-    'dlOpName': 'print',
     'category': 'graph',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfInputIndex': 1,
-        'tfInputParamLength': 1,
-        'dlParamName': 'data',
-        'type': 'tensors'
-      },
-      {'tfParamName': 'message', 'dlParamName': 'message', 'type': 'string'}, {
-        'tfParamName': 'first_n',
-        'dlParamName': 'firstN',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'data', 'type': 'tensors'},
+      {attrMapper: {'tfName': 'message'}, 'name': 'message', 'type': 'string'},
+      {
+        attrMapper: {'tfName': 'first_n'},
+        'name': 'firstN',
         'type': 'number',
-        'notSupprted': true
+        'notSupported': true
       },
       {
-        'tfParamName': 'summarize',
-        'dlParamName': 'summarize',
+        attrMapper: {'tfName': 'summarize'},
+        'name': 'summarize',
         'type': 'number',
         'defaultValue': 3
       }
     ]
   },
-  {'tfOpName': 'NoOp', 'dlOpName': 'noop', 'category': 'graph', 'params': []}, {
+  {'tfOpName': 'NoOp', 'category': 'graph', 'params': []}, {
     'tfOpName': 'StopGradient',
-    'dlOpName': 'stopGradient',
     'category': 'graph',
-    'params': [{'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}]
+    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'FakeQuantWithMinMaxVars',
-    'dlOpName': 'fakeQuantWithMinMaxVars',
     'category': 'graph',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfParamName': 'min', 'dlParamName': 'min', 'type': 'number'},
-      {'tfParamName': 'max', 'dlParamName': 'max', 'type': 'number'}
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {attrMapper: {'tfName': 'min'}, 'name': 'min', 'type': 'number'},
+      {attrMapper: {'tfName': 'max'}, 'name': 'max', 'type': 'number'}
     ]
   }
 ];

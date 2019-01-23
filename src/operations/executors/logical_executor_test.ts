@@ -41,31 +41,32 @@ describe('logical', () => {
   });
 
   describe('executeOp', () => {
-    ['equal', 'notEqual', 'greater', 'greaterEqual', 'less', 'lessEqual',
-     'logicalAnd', 'logicalOr']
+    ['Equal', 'NotEqual', 'Greater', 'GreaterEqual', 'Less', 'LessEqual',
+     'LogicalAnd', 'LogicalOr']
         .forEach(op => {
           it('should call tfc.' + op, () => {
-            const spy = spyOn(tfc, op as 'equal');
+            const spy =
+                spyOn(tfc, op.charAt(0).toLowerCase() + op.slice(1) as 'equal');
             node.op = op;
             executeOp(node, {input1, input2}, context);
 
             expect(spy).toHaveBeenCalledWith(input1[0], input2[0]);
           });
         });
-    describe('logicalNot', () => {
+    describe('LogicalNot', () => {
       it('should call tfc.logicalNot', () => {
         spyOn(tfc, 'logicalNot');
-        node.op = 'logicalNot';
+        node.op = 'LogicalNot';
         executeOp(node, {input1}, context);
 
         expect(tfc.logicalNot).toHaveBeenCalledWith(input1[0]);
       });
     });
 
-    describe('where', () => {
+    describe('Select', () => {
       it('should call tfc.where', () => {
         spyOn(tfc, 'where');
-        node.op = 'where';
+        node.op = 'Select';
         node.inputNames = ['input1', 'input2', 'input3'];
         node.params.condition = createTensorAttr(2);
         const input3 = [tfc.scalar(1)];

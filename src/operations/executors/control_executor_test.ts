@@ -45,9 +45,9 @@ describe('control', () => {
   });
 
   describe('executeOp', () => {
-    describe('switch', () => {
+    describe('Switch', () => {
       it('should set the output condition is true', async () => {
-        node.op = 'switch';
+        node.op = 'Switch';
         node.params['pred'] = createTensorAttr(1);
         node.params['data'] = createTensorAttr(0);
 
@@ -57,7 +57,7 @@ describe('control', () => {
         test_util.expectArraysEqual(result[1], input1[0]);
       });
       it('should set the output condition is false', async () => {
-        node.op = 'switch';
+        node.op = 'Switch';
         node.params['pred'] = createTensorAttr(1);
         node.params['data'] = createTensorAttr(0);
 
@@ -67,16 +67,16 @@ describe('control', () => {
         expect(result[1]).toBeUndefined();
       });
       it('should match json def', () => {
-        node.op = 'switch';
+        node.op = 'Switch';
         node.params['pred'] = createTensorAttr(1);
         node.params['data'] = createTensorAttr(0);
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('merge', () => {
+    describe('Merge', () => {
       it('should return the first available input', async () => {
-        node.op = 'merge';
+        node.op = 'Merge';
 
         const pred = [tfc.scalar(true)];
         test_util.expectArraysEqual(
@@ -87,23 +87,24 @@ describe('control', () => {
             pred[0]);
       });
       it('should return undefined if no inputs are available', async () => {
-        node.op = 'merge';
+        node.op = 'Merge';
         expect(await executeOp(
                    node, {pred: undefined, input1: undefined}, context))
             .toEqual(undefined);
       });
       it('should match json def', () => {
-        node.op = 'merge';
+        node.op = 'Merge';
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();
       });
     });
 
-    describe('enter', () => {
+    describe('Enter', () => {
       it('should call enterFrame on context', async () => {
         spyOn(context, 'enterFrame');
-        node.op = 'enter';
+        node.op = 'Enter';
         node.params['tensor'] = createTensorAttr(0);
+        node.params['frameName'] = createStrAttr('test');
         node.inputNames = ['input1'];
 
         test_util.expectArraysEqual(
@@ -111,16 +112,16 @@ describe('control', () => {
         expect(context.enterFrame).toHaveBeenCalled();
       });
       it('should match json def', () => {
-        node.op = 'enter';
+        node.op = 'Enter';
         node.params['tensor'] = createTensorAttr(0);
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('exit', () => {
+    describe('Exit', () => {
       it('should call existFrame on context', async () => {
         spyOn(context, 'exitFrame');
-        node.op = 'exit';
+        node.op = 'Exit';
         node.params['tensor'] = createTensorAttr(0);
         node.inputNames = ['input1'];
 
@@ -129,16 +130,16 @@ describe('control', () => {
         expect(context.exitFrame).toHaveBeenCalled();
       });
       it('should match json def', () => {
-        node.op = 'exit';
+        node.op = 'Exit';
         node.params['tensor'] = createTensorAttr(0);
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('nextIteration', () => {
+    describe('NextIteration', () => {
       it('should call nextIteration on context', async () => {
         spyOn(context, 'nextIteration');
-        node.op = 'nextIteration';
+        node.op = 'NextIteration';
         node.params['tensor'] = createTensorAttr(0);
         node.inputNames = ['input1'];
 
@@ -147,16 +148,17 @@ describe('control', () => {
         expect(context.nextIteration).toHaveBeenCalled();
       });
       it('should match json def', () => {
-        node.op = 'nextIteration';
+        node.op = 'NextIteration';
         node.params['tensor'] = createTensorAttr(0);
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();
       });
     });
 
-    describe('tensorArray', () => {
+    describe('TensorArrayV3', () => {
       it('should create new tensor on the context', async () => {
-        node.op = 'tensorArray';
+        node.op = 'TensorArrayV3';
+        node.params['size'] = createTensorAttr(0);
         node.params['name'] = createStrAttr('');
         node.params['dtype'] = createDtypeAttr('int32');
         node.params['elementShape'] = createTensorShapeAttr([10, 10]);
@@ -170,7 +172,7 @@ describe('control', () => {
         expect(context.getTensorArray(tensorId)).toBeDefined();
       });
       it('should match json def', () => {
-        node.op = 'tensorArray';
+        node.op = 'TensorArrayV3';
         node.params['name'] = createStrAttr('');
         node.params['dtype'] = createDtypeAttr('int32');
         node.params['elementShape'] = createTensorShapeAttr([10, 10]);
@@ -182,12 +184,12 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArrayWrite', () => {
+    describe('TensorArrayWriteV3', () => {
       it('should write the tensor to tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [], true, false, true);
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArrayWrite';
+        node.op = 'TensorArrayWriteV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['index'] = createNumberAttrFromIndex(1);
         node.params['tensor'] = createTensorAttr(2);
@@ -199,7 +201,7 @@ describe('control', () => {
         expect(tensorArray.size()).toEqual(1);
       });
       it('should match json def', () => {
-        node.op = 'tensorArrayWrite';
+        node.op = 'TensorArrayWriteV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['index'] = createNumberAttrFromIndex(1);
         node.params['tensor'] = createTensorAttr(2);
@@ -208,14 +210,14 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArrayRead', () => {
+    describe('TensorArrayReadV3', () => {
       it('should read the tensor from tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [3], true, false, true);
         const input4 = tensor1d([0, 0, 0], 'int32');
         tensorArray.write(0, input4);
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArrayRead';
+        node.op = 'TensorArrayReadV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['index'] = createNumberAttrFromIndex(1);
         node.inputNames = ['input2', 'input3'];
@@ -226,7 +228,7 @@ describe('control', () => {
         test_util.expectArraysClose(read[0], input4);
       });
       it('should match json def', () => {
-        node.op = 'tensorArrayRead';
+        node.op = 'TensorArrayReadV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['index'] = createNumberAttrFromIndex(1);
 
@@ -234,7 +236,7 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArrayGather', () => {
+    describe('TensorArrayGatherV3', () => {
       it('should gather the tensors from tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [3], true, false, true);
@@ -242,7 +244,7 @@ describe('control', () => {
         const input5 = tensor1d([1, 1, 1], 'int32');
         tensorArray.writeMany([0, 1], [input4, input5]);
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArrayGather';
+        node.op = 'TensorArrayGatherV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['indices'] = createNumericArrayAttrFromIndex(1);
         node.params['dtype'] = createDtypeAttr('int32');
@@ -256,7 +258,7 @@ describe('control', () => {
             gather[0].dataSync(), new Int32Array([0, 0, 0, 1, 1, 1]));
       });
       it('should match json def', () => {
-        node.op = 'tensorArrayGather';
+        node.op = 'TensorArrayGatherV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['indices'] = createNumericArrayAttrFromIndex(1);
         node.params['dtype'] = createDtypeAttr('int32');
@@ -265,13 +267,13 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArrayScatter', () => {
+    describe('TensorArrayScatterV3', () => {
       it('should scatter the tensor to tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [3], true, false, true);
         const input4 = [tensor2d([0, 0, 0, 1, 1, 1], [2, 3], 'int32')];
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArrayScatter';
+        node.op = 'TensorArrayScatterV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['indices'] = createNumericArrayAttrFromIndex(1);
         node.params['tensor'] = createTensorAttr(2);
@@ -284,7 +286,7 @@ describe('control', () => {
       });
 
       it('should match json def', () => {
-        node.op = 'tensorArrayScatter';
+        node.op = 'TensorArrayScatterV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['indices'] = createNumericArrayAttrFromIndex(1);
         node.params['tensor'] = createTensorAttr(2);
@@ -293,13 +295,13 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArraySplit', () => {
+    describe('TensorArraySplitV3', () => {
       it('should split the tensor to tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 2, [3], true, false, true);
         const input4 = [tensor2d([0, 0, 0, 1, 1, 1], [2, 3], 'int32')];
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArraySplit';
+        node.op = 'TensorArraySplitV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['tensor'] = createTensorAttr(1);
         node.params['lengths'] = createNumericArrayAttrFromIndex(2);
@@ -311,7 +313,7 @@ describe('control', () => {
         expect(tensorArray.size()).toEqual(2);
       });
       it('should match json def', () => {
-        node.op = 'tensorArraySplit';
+        node.op = 'TensorArraySplitV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['tensor'] = createTensorAttr(1);
         node.params['lengths'] = createNumericArrayAttrFromIndex(2);
@@ -320,7 +322,7 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArrayConcat', () => {
+    describe('TensorArrayConcatV3', () => {
       it('should concat the tensors from tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [3], true, false, true);
@@ -328,7 +330,7 @@ describe('control', () => {
         const input5 = tensor1d([1, 1, 1], 'int32');
         tensorArray.writeMany([0, 1], [input4, input5]);
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArrayConcat';
+        node.op = 'TensorArrayConcatV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['dtype'] = createDtypeAttr('int32');
         node.inputNames = ['input2'];
@@ -340,7 +342,7 @@ describe('control', () => {
             concat[0].dataSync(), new Int32Array([0, 0, 0, 1, 1, 1]));
       });
       it('should match json def', () => {
-        node.op = 'tensorArrayConcat';
+        node.op = 'TensorArrayConcatV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.params['dtype'] = createDtypeAttr('int32');
 
@@ -348,7 +350,7 @@ describe('control', () => {
       });
     });
 
-    describe('tensorArraySize', () => {
+    describe('TensorArraySizeV3', () => {
       it('should get the size of tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [3], true, false, true);
@@ -356,7 +358,7 @@ describe('control', () => {
         const input5 = tensor1d([1, 1, 1], 'int32');
         tensorArray.writeMany([0, 1], [input4, input5]);
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArraySize';
+        node.op = 'TensorArraySizeV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.inputNames = ['input2'];
         const input2 = [scalar(tensorArray.id)];
@@ -366,14 +368,14 @@ describe('control', () => {
         test_util.expectArraysClose(size[0].dataSync(), new Int32Array([2]));
       });
       it('should match json def', () => {
-        node.op = 'tensorArraySize';
+        node.op = 'TensorArraySizeV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();
       });
     });
 
-    describe('tensorArrayClose', () => {
+    describe('TensorArrayCloseV3', () => {
       it('should close the tensorArray', async () => {
         const tensorArray =
             new TensorArray('', 'int32', 5, [3], true, false, true);
@@ -381,7 +383,7 @@ describe('control', () => {
         const input5 = tensor1d([1, 1, 1], 'int32');
         tensorArray.writeMany([0, 1], [input4, input5]);
         context.addTensorArray(tensorArray);
-        node.op = 'tensorArrayClose';
+        node.op = 'TensorArrayCloseV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
         node.inputNames = ['input2'];
         const input2 = [scalar(tensorArray.id)];
@@ -389,7 +391,7 @@ describe('control', () => {
         expect(tensorArray.closed).toBeTruthy();
       });
       it('should match json def', () => {
-        node.op = 'tensorArrayClose';
+        node.op = 'TensorArrayCloseV3';
         node.params['tensorArrayId'] = createNumberAttrFromIndex(0);
 
         expect(validateParam(node, control.json as OpMapper[])).toBeTruthy();

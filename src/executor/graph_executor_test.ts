@@ -38,7 +38,7 @@ describe('GraphExecutor', () => {
       inputs: [],
       children: [],
       name: 'input',
-      op: 'placeholder',
+      op: 'Placeholder',
       category: 'graph',
       params: {}
     };
@@ -47,7 +47,7 @@ describe('GraphExecutor', () => {
       inputs: [],
       children: [],
       name: 'const',
-      op: 'const',
+      op: 'Const',
       category: 'graph',
       params: {}
     };
@@ -56,7 +56,7 @@ describe('GraphExecutor', () => {
       inputs: [inputNode, constNode],
       children: [],
       name: 'intermediate',
-      op: 'add',
+      op: 'Add',
       category: 'arithmetic',
       params: {'a': createTensorAttr(0), 'b': createTensorAttr(1)}
     };
@@ -65,7 +65,7 @@ describe('GraphExecutor', () => {
       inputs: [intermediateNode, constNode],
       children: [],
       name: 'output',
-      op: 'add',
+      op: 'Add',
       category: 'arithmetic',
       params: {'a': createTensorAttr(0), 'b': createTensorAttr(1)}
     };
@@ -244,7 +244,7 @@ describe('GraphExecutor', () => {
             inputs: [],
             children: [],
             name: 'input',
-            op: 'placeholder',
+            op: 'Placeholder',
             category: 'graph',
             params: {}
           };
@@ -253,7 +253,7 @@ describe('GraphExecutor', () => {
             inputs: [],
             children: [],
             name: 'const',
-            op: 'const',
+            op: 'Const',
             category: 'graph',
             params: {}
           };
@@ -262,7 +262,7 @@ describe('GraphExecutor', () => {
             inputs: [inputNode, constNode],
             children: [],
             name: 'intermediate',
-            op: 'add',
+            op: 'Add',
             category: 'arithmetic',
             params: {'a': createTensorAttr(0), 'b': createTensorAttr(1)}
           };
@@ -271,7 +271,7 @@ describe('GraphExecutor', () => {
             inputs: [constNode, intermediateNode],
             children: [],
             name: 'output',
-            op: 'switch',
+            op: 'Switch',
             category: 'control',
             params: {'pred': createTensorAttr(0), 'data': createTensorAttr(1)}
           };

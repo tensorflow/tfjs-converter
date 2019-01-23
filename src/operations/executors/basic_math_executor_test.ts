@@ -42,13 +42,14 @@ describe('basic math', () => {
   });
 
   describe('executeOp', () => {
-    ['abs', 'acos', 'asin', 'atan', 'ceil', 'cos', 'cosh', 'elu', 'exp',
-     'floor', 'log', 'neg', 'relu', 'selu', 'sigmoid', 'sin', 'sinh', 'sqrt',
-     'square', 'tanh', 'tan', 'sign', 'round', 'expm1', 'log1p', 'reciprocal',
-     'softplus', 'asinh', 'acosh', 'atanh', 'erf']
+    ['Abs', 'Acos', 'Asin', 'Atan', 'Ceil', 'Cos', 'Cosh', 'Elu', 'Exp',
+     'Floor', 'Log', 'Neg', 'Relu', 'Selu', 'Sigmoid', 'Sin', 'Sinh', 'Sqrt',
+     'Square', 'Tanh', 'Tan', 'Sign', 'Round', 'Expm1', 'Log1p', 'Reciprocal',
+     'Softplus', 'Asinh', 'Acosh', 'Atanh', 'Erf']
         .forEach(op => {
           it('should call tfc.' + op, () => {
-            const spy = spyOn(tfc, op as 'abs');
+            const spy =
+                spyOn(tfc, op.charAt(0).toLowerCase() + op.slice(1) as 'abs');
             node.op = op;
             executeOp(node, {input1}, context);
 
@@ -61,10 +62,10 @@ describe('basic math', () => {
                 .toBeTruthy();
           });
         });
-    describe('clipByValue', () => {
+    describe('Relu6', () => {
       it('should call tfc.clipByValue', () => {
         spyOn(tfc, 'clipByValue');
-        node.op = 'clipByValue';
+        node.op = 'Relu6';
         node.params['clipValueMax'] = createNumberAttr(6);
         node.params['clipValueMin'] = createNumberAttr(0);
 
@@ -73,17 +74,17 @@ describe('basic math', () => {
         expect(tfc.clipByValue).toHaveBeenCalledWith(input1[0], 0, 6);
       });
       it('should match op def', () => {
-        node.op = 'clipByValue';
+        node.op = 'Relu6';
         node.params['clipValueMax'] = createNumberAttr(6);
         node.params['clipValueMin'] = createNumberAttr(0);
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('prod', () => {
+    describe('Prod', () => {
       it('should call tfc.prod', () => {
         spyOn(tfc, 'prod');
-        node.op = 'prod';
+        node.op = 'Prod';
         node.params['axes'] = createNumericArrayAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
         const input2 = [tfc.scalar(2)];
@@ -92,16 +93,16 @@ describe('basic math', () => {
         expect(tfc.prod).toHaveBeenCalledWith(input1[0], [2]);
       });
       it('should match op def', () => {
-        node.op = 'prod';
+        node.op = 'Prod';
         node.params['axes'] = createNumericArrayAttrFromIndex(1);
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('rsqrt', () => {
+    describe('Rsqrt', () => {
       it('should call tfc.div', () => {
         const input1 = [tfc.scalar(1)];
-        node.op = 'rsqrt';
+        node.op = 'Rsqrt';
         spyOn(tfc, 'div');
         spyOn(tfc, 'sqrt').and.returnValue(input1);
 
@@ -111,15 +112,15 @@ describe('basic math', () => {
         expect(tfc.div).toHaveBeenCalledWith(jasmine.any(tfc.Tensor), input1);
       });
       it('should match op def', () => {
-        node.op = 'rsqrt';
+        node.op = 'Rsqrt';
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('leakyRelu', () => {
+    describe('LeakyRelu', () => {
       it('should call tfc.leakyRelu', () => {
         spyOn(tfc, 'leakyRelu');
-        node.op = 'leakyRelu';
+        node.op = 'LeakyRelu';
         node.params['alpha'] = createNumberAttr(1);
         node.inputNames = ['input1'];
         executeOp(node, {input1}, context);
@@ -127,15 +128,15 @@ describe('basic math', () => {
         expect(tfc.leakyRelu).toHaveBeenCalledWith(input1[0], 1);
       });
       it('should match op def', () => {
-        node.op = 'leakyRelu';
+        node.op = 'LeakyRelu';
         node.params['alpha'] = createNumberAttr(1);
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('atan2', () => {
+    describe('Atan2', () => {
       it('should call tfc.atan2', () => {
         spyOn(tfc, 'atan2');
-        node.op = 'atan2';
+        node.op = 'Atan2';
         node.params['y'] = createTensorAttr(1);
         node.inputNames = ['input1', 'input2'];
         const input2 = [tfc.scalar(2)];
@@ -144,7 +145,7 @@ describe('basic math', () => {
         expect(tfc.atan2).toHaveBeenCalledWith(input1[0], input2[0]);
       });
       it('should match op def', () => {
-        node.op = 'atan2';
+        node.op = 'Atan2';
         node.params['y'] = createTensorAttr(1);
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();

@@ -25,23 +25,22 @@ export function getParamValue(
     paramName: string, node: Node, tensorMap: NamedTensorsMap,
     context: ExecutionContext): ValueType {
   const param = node.params[paramName];
-  if (param && param.inputIndex !== undefined) {
+  const start = param.inputIndexStart;
+  const end = param.inputIndexEnd === 0 ?
+      undefined :
+      (param.inputIndexEnd === undefined ? start + 1 : param.inputIndexEnd);
+  if (param && param.inputIndexStart !== undefined) {
     if (param.type === 'tensor') {
-      return getTensor(node.inputNames[param.inputIndex], tensorMap, context);
+      return getTensor(
+          node.inputNames[param.inputIndexStart], tensorMap, context);
     }
     if (param.type === 'tensors') {
-      const inputs = param.inputIndex === 0 ?
-          (param.inputParamLength === 0 ?
-               node.inputNames :
-               node.inputNames.slice(
-                   param.inputIndex, -param.inputParamLength)) :
-          node.inputNames.splice(param.inputIndex);
+      const inputs = node.inputNames.slice(start, end);
 
       return inputs.map(name => getTensor(name, tensorMap, context));
     }
     const data = Array.prototype.slice.call(
-        getTensor(
-            node.inputNames.slice(param.inputIndex)[0], tensorMap, context)
+        getTensor(node.inputNames.slice(start)[0], tensorMap, context)
             .dataSync());
     return param.type === 'number' ? data[0] : data;
   }

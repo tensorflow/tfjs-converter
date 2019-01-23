@@ -42,9 +42,9 @@ describe('evaluation', () => {
   });
 
   describe('executeOp', () => {
-    describe('topK', () => {
+    describe('TopKV2', () => {
       it('should return input', () => {
-        node.op = 'topK';
+        node.op = 'TopKV2';
         node.params['x'] = createTensorAttr(0);
         node.params['k'] = createNumberAttrFromIndex(1);
         node.params['sorted'] = createBoolAttr(true);

@@ -41,10 +41,10 @@ describe('convolution', () => {
   });
 
   describe('executeOp', () => {
-    describe('avgPool', () => {
+    describe('AvgPool', () => {
       it('should call tfc.avgPool', () => {
         spyOn(tfc, 'avgPool');
-        node.op = 'avgPool';
+        node.op = 'AvgPool';
         node.params['strides'] = createNumericArrayAttr([1, 2, 2, 1]);
         node.params['pad'] = createStrAttr('same');
         node.params['kernelSize'] = createNumericArrayAttr([1, 2, 2, 1]);
@@ -59,7 +59,7 @@ describe('convolution', () => {
     describe('maxPool', () => {
       it('should call tfc.maxPool', () => {
         spyOn(tfc, 'maxPool');
-        node.op = 'maxPool';
+        node.op = 'MaxPool';
         node.params['strides'] = createNumericArrayAttr([1, 2, 2, 1]);
         node.params['pad'] = createStrAttr('same');
         node.params['kernelSize'] = createNumericArrayAttr([1, 2, 2, 1]);
@@ -73,7 +73,7 @@ describe('convolution', () => {
     describe('Conv2d', () => {
       it('should call tfc.conv2d', () => {
         spyOn(tfc, 'conv2d');
-        node.op = 'conv2d';
+        node.op = 'Conv2D';
         node.params['filter'] = createTensorAttr(1);
         node.params['strides'] = createNumericArrayAttr([1, 2, 2, 1]);
         node.params['pad'] = createStrAttr('same');
@@ -91,10 +91,10 @@ describe('convolution', () => {
                 input1[0], input2[0], [2, 2], 'same', 'NHWC', [2, 2]);
       });
     });
-    describe('conv2dTranspose', () => {
+    describe('Conv2DBackpropInput', () => {
       it('should call tfc.conv2dTranspose', () => {
         spyOn(tfc, 'conv2dTranspose');
-        node.op = 'conv2dTranspose';
+        node.op = 'Conv2DBackpropInput';
         node.params['outputShape'] = createNumericArrayAttr([1, 2, 2, 2]);
         node.params['filter'] = createTensorAttr(1);
         node.params['strides'] = createNumericArrayAttr([1, 2, 2, 1]);
@@ -111,10 +111,10 @@ describe('convolution', () => {
                 input1[0], input2[0], [1, 2, 2, 2], [2, 2], 'same');
       });
     });
-    describe('Conv1d', () => {
+    describe('Conv1D', () => {
       it('should call tfc.conv1d', () => {
         spyOn(tfc, 'conv1d');
-        node.op = 'conv1d';
+        node.op = 'Conv1D';
         node.category = 'convolution';
         node.params['filter'] = createTensorAttr(1);
         node.params['stride'] = createNumberAttr(1);
@@ -133,10 +133,10 @@ describe('convolution', () => {
       });
     });
 
-    describe('depthwiseConv2d', () => {
+    describe('DepthwiseConv2d', () => {
       it('should call tfc.depthwiseConv2d', () => {
         spyOn(tfc, 'depthwiseConv2d');
-        node.op = 'depthwiseConv2d';
+        node.op = 'DepthwiseConv2d';
         node.category = 'convolution';
         node.params['input'] = createTensorAttr(0);
         node.params['filter'] = createTensorAttr(1);

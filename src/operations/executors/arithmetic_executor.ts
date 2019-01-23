@@ -28,54 +28,57 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
                                     context: ExecutionContext):
                                        tfc.Tensor[] => {
   switch (node.op) {
-    case 'add': {
+    case 'BiasAdd':
+    case 'Add': {
       return [tfc.add(
           (getParamValue('a', node, tensorMap, context) as tfc.Tensor),
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'addN': {
+    case 'AddN': {
       return [tfc.addN((
           getParamValue('tensors', node, tensorMap, context) as tfc.Tensor[]))];
     }
-    case 'mod':
+    case 'FloorMod':
+    case 'Mod':
       return [tfc.mod(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-    case 'mul':
+    case 'Mul':
       return [tfc.mul(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
-    case 'div': {
+    case 'RealDiv':
+    case 'Div': {
       return [tfc.div(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'floorDiv': {
+    case 'FloorDiv': {
       return [tfc.floorDiv(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'sub': {
+    case 'Sub': {
       return [tfc.sub(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'minimum': {
+    case 'Minimum': {
       return [tfc.minimum(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'maximum': {
+    case 'Maximum': {
       return [tfc.maximum(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'pow': {
+    case 'Pow': {
       return [tfc.pow(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];
     }
-    case 'squaredDifference': {
+    case 'SquaredDifference': {
       return [tfc.squaredDifference(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor)];

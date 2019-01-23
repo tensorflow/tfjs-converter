@@ -1,3 +1,5 @@
+import {OpMapper} from '../types';
+
 /**
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -15,27 +17,25 @@
  * =============================================================================
  */
 
-export const json = [
+export const json: OpMapper[] = [
   {
     'tfOpName': 'Fill',
-    'dlOpName': 'fill',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'shape', 'type': 'number[]'},
-      {'tfInputIndex': 1, 'dlParamName': 'value', 'type': 'number'},
-      {'tfParamName': 'T', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'},
+      {inputMapper: {'start': 1}, 'name': 'value', 'type': 'number'},
+      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
     'tfOpName': 'LinSpace',
-    'dlOpName': 'linspace',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'start', 'type': 'number'},
-      {'tfInputIndex': 1, 'dlParamName': 'stop', 'type': 'number'},
-      {'tfInputIndex': 2, 'dlParamName': 'num', 'type': 'number'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'start', 'type': 'number'},
+      {inputMapper: {'start': 1}, 'name': 'stop', 'type': 'number'},
+      {inputMapper: {'start': 2}, 'name': 'num', 'type': 'number'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -43,31 +43,30 @@ export const json = [
   },
   {
     'tfOpName': 'OneHot',
-    'dlOpName': 'oneHot',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'indices', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'depth', 'type': 'number'}, {
-        'tfInputIndex': 2,
-        'dlParamName': 'onValue',
+      {inputMapper: {'start': 0}, 'name': 'indices', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'depth', 'type': 'number'}, {
+        inputMapper: {'start': 2},
+        'name': 'onValue',
         'type': 'number',
         'defaultValue': 1
       },
       {
-        'tfInputIndex': 3,
-        'dlParamName': 'offValue',
+        inputMapper: {'start': 3},
+        'name': 'offValue',
         'type': 'number',
         'defaultValue': 0
       },
       {
-        'tfParamName': 'axis',
-        'dlParamName': 'axis',
+        attrMapper: {'tfName': 'axis'},
+        'name': 'axis',
         'type': 'number',
         'notSupported': true
       },
       {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -75,55 +74,52 @@ export const json = [
   },
   {
     'tfOpName': 'Ones',
-    'dlOpName': 'ones',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'shape', 'type': 'number[]'},
-      {'tfParamName': 'T', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'},
+      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
     'tfOpName': 'OnesLike',
-    'dlOpName': 'onesLike',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfParamName': 'dtype', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
     'tfOpName': 'RandomUniform',
-    'dlOpName': 'randomUniform',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'shape', 'type': 'number[]'}, {
-        'tfParamName': 'minval',
-        'dlParamName': 'minval',
+      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'}, {
+        attrMapper: {'tfName': 'minval'},
+        'name': 'minval',
         'type': 'number',
         'defaultValue': 0
       },
       {
-        'tfParamName': 'maxval',
-        'dlParamName': 'maxval',
+        attrMapper: {'tfName': 'maxval'},
+        'name': 'maxval',
         'type': 'number',
         'defaultValue': 1
       },
-      {'tfParamName': 'dtype', 'dlParamName': 'dtype', 'type': 'dtype'}, {
-        'tfParamName': 'seed',
-        'dlParamName': 'seed',
+      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}, {
+        attrMapper: {'tfName': 'seed'},
+        'name': 'seed',
         'type': 'number',
         'defaultValue': 0
       },
       {
-        'tfParamName': 'seed2',
-        'dlParamName': 'seed2',
+        attrMapper: {'tfName': 'seed2'},
+        'name': 'seed2',
         'type': 'number',
         'defaultValue': 0,
         'notSupported': true
       },
       {
-        'tfParamName': 'T',
-        'dlParamName': 'T',
+        attrMapper: {'tfName': 'T'},
+        'name': 'T',
         'type': 'number',
         'notSupported': true
       }
@@ -131,46 +127,44 @@ export const json = [
   },
   {
     'tfOpName': 'Range',
-    'dlOpName': 'range',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'start', 'type': 'number'},
-      {'tfInputIndex': 1, 'dlParamName': 'stop', 'type': 'number'}, {
-        'tfInputIndex': 2,
-        'dlParamName': 'step',
+      {inputMapper: {'start': 0}, 'name': 'start', 'type': 'number'},
+      {inputMapper: {'start': 1}, 'name': 'stop', 'type': 'number'}, {
+        inputMapper: {'start': 2},
+        'name': 'step',
         'type': 'number',
         'defaultValue': 0
       },
-      {'tfParamName': 'Tidx', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {attrMapper: {'tfName': 'Tidx'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
-    'tfOpName': 'truncatedNormal',
-    'dlOpName': 'truncatedNormal',
+    'tfOpName': 'TruncatedNormal',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'shape', 'type': 'number[]'}, {
-        'tfParamName': 'means',
-        'dlParamName': 'mean',
+      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'}, {
+        attrMapper: {'tfName': 'means'},
+        'name': 'mean',
         'type': 'number',
         'defaultValue': 0.0
       },
       {
-        'tfParamName': 'stddev',
-        'dlParamName': 'stdDev',
+        attrMapper: {'tfName': 'stddev'},
+        'name': 'stdDev',
         'type': 'number',
         'defaultValue': 1.0
       },
-      {'tfParamName': 'seed', 'dlParamName': 'seed', 'type': 'number'}, {
-        'tfParamName': 'seed2',
-        'dlParamName': 'seed2',
+      {attrMapper: {'tfName': 'seed'}, 'name': 'seed', 'type': 'number'}, {
+        attrMapper: {'tfName': 'seed2'},
+        'name': 'seed2',
         'type': 'number',
         'defaultValue': 0,
         'notSupported': true
       },
-      {'tfParamName': 'dtype', 'dlParamName': 'dtype', 'type': 'dtype'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'T',
+      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'T',
         'type': 'number',
         'notSupported': true
       }
@@ -178,20 +172,18 @@ export const json = [
   },
   {
     'tfOpName': 'Zeros',
-    'dlOpName': 'zeros',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'shape', 'type': 'number[]'},
-      {'tfParamName': 'T', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'},
+      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
     'tfOpName': 'ZerosLike',
-    'dlOpName': 'zerosLike',
     'category': 'creation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfParamName': 'T', 'dlParamName': 'dtype', 'type': 'dtype'}
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
     ]
   }
 ];

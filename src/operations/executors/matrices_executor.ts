@@ -28,13 +28,14 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
                                     context: ExecutionContext):
                                        tfc.Tensor[] => {
   switch (node.op) {
-    case 'matMul':
+    case 'BatchMatMul':
+    case 'MatMul':
       return [tfc.matMul(
           getParamValue('a', node, tensorMap, context) as tfc.Tensor2D,
           getParamValue('b', node, tensorMap, context) as tfc.Tensor2D,
           getParamValue('transposeA', node, tensorMap, context) as boolean,
           getParamValue('transposeB', node, tensorMap, context) as boolean)];
-    case 'transpose':
+    case 'Transpose':
       return [tfc.transpose(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor,
           getParamValue('perm', node, tensorMap, context) as number[])];

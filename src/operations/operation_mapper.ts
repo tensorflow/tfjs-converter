@@ -127,7 +127,7 @@ export class OperationMapper {
     }
     const newNode: Node = {
       name: node.name,
-      op: mapper.dlOpName,
+      op: node.op,
       category: mapper.category,
       inputNames:
           (node.input ||
@@ -140,65 +140,72 @@ export class OperationMapper {
     if (!!mapper.params) {
       newNode.params = mapper.params.reduce<{[key: string]:
                                                  ParamValue}>((map, param) => {
-        const inputIndex = param.tfInputIndex;
-        const inputParamLength = param.tfInputParamLength;
+        const inputIndexStart =
+            !!param.inputMapper ? param.inputMapper.start : undefined;
+        const inputIndexEnd =
+            !!param.inputMapper ? param.inputMapper.end : undefined;
         const type = param.type;
         let value = undefined;
-        if (inputIndex === undefined) {
+        if (param.attrMapper) {
           switch (param.type) {
             case 'string':
               value = this.getStringParam(
-                  node.attr, param.tfParamName, param.defaultValue as string);
+                  node.attr, param.attrMapper.tfName,
+                  param.defaultValue as string);
 
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+              if (value === undefined && !!param.attrMapper.tfDeprecatedName) {
                 value = this.getStringParam(
-                    node.attr, param.tfParamNameDeprecated,
+                    node.attr, param.attrMapper.tfDeprecatedName,
                     param.defaultValue as string);
               }
               break;
             case 'number':
               value = this.getNumberParam(
-                  node.attr, param.tfParamName,
+                  node.attr, param.attrMapper.tfName,
                   (param.defaultValue || 0) as number);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+              if (value === undefined && !!param.attrMapper.tfDeprecatedName) {
                 value = this.getNumberParam(
-                    node.attr, param.tfParamNameDeprecated,
+                    node.attr, param.attrMapper.tfDeprecatedName,
                     param.defaultValue as number);
               }
               break;
             case 'number[]':
               value = this.getNumericArrayParam(
-                  node.attr, param.tfParamName, param.defaultValue as number[]);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                  node.attr, param.attrMapper.tfName,
+                  param.defaultValue as number[]);
+              if (value === undefined && !!param.attrMapper.tfDeprecatedName) {
                 value = this.getNumericArrayParam(
-                    node.attr, param.tfParamNameDeprecated,
+                    node.attr, param.attrMapper.tfDeprecatedName,
                     param.defaultValue as number[]);
               }
               break;
             case 'bool':
               value = this.getBoolParam(
-                  node.attr, param.tfParamName, param.defaultValue as boolean);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                  node.attr, param.attrMapper.tfName,
+                  param.defaultValue as boolean);
+              if (value === undefined && !!param.attrMapper.tfDeprecatedName) {
                 value = this.getBoolParam(
-                    node.attr, param.tfParamNameDeprecated,
+                    node.attr, param.attrMapper.tfDeprecatedName,
                     param.defaultValue as boolean);
               }
               break;
             case 'shape':
               value = this.getTensorShapeParam(
-                  node.attr, param.tfParamName, param.defaultValue as number[]);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                  node.attr, param.attrMapper.tfName,
+                  param.defaultValue as number[]);
+              if (value === undefined && !!param.attrMapper.tfDeprecatedName) {
                 value = this.getTensorShapeParam(
-                    node.attr, param.tfParamNameDeprecated,
+                    node.attr, param.attrMapper.tfDeprecatedName,
                     param.defaultValue as number[]);
               }
               break;
             case 'dtype':
               value = this.getDtypeParam(
-                  node.attr, param.tfParamName, param.defaultValue as DataType);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                  node.attr, param.attrMapper.tfName,
+                  param.defaultValue as DataType);
+              if (value === undefined && !!param.attrMapper.tfDeprecatedName) {
                 value = this.getDtypeParam(
-                    node.attr, param.tfParamNameDeprecated,
+                    node.attr, param.attrMapper.tfDeprecatedName,
                     param.defaultValue as DataType);
               }
               break;
@@ -210,7 +217,7 @@ export class OperationMapper {
                   `Unsupported param type: ${param.type} for op: ${node.op}`);
           }
         }
-        map[param.dlParamName] = {value, inputIndex, type, inputParamLength};
+        map[param.name] = {value, type, inputIndexStart, inputIndexEnd};
         return map;
       }, {});
     }

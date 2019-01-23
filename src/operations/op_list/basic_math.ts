@@ -1,3 +1,5 @@
+import {OpMapper} from '../types';
+
 /**
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -15,15 +17,14 @@
  * =============================================================================
  */
 
-export const json = [
+export const json: OpMapper[] = [
   {
     'tfOpName': 'Abs',
-    'dlOpName': 'abs',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -31,12 +32,11 @@ export const json = [
   },
   {
     'tfOpName': 'Acos',
-    'dlOpName': 'acos',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -44,12 +44,11 @@ export const json = [
   },
   {
     'tfOpName': 'Asin',
-    'dlOpName': 'asin',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -57,12 +56,11 @@ export const json = [
   },
   {
     'tfOpName': 'Atan',
-    'dlOpName': 'atan',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -70,13 +68,12 @@ export const json = [
   },
   {
     'tfOpName': 'Atan2',
-    'dlOpName': 'atan2',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'y', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'y', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -84,12 +81,11 @@ export const json = [
   },
   {
     'tfOpName': 'Ceil',
-    'dlOpName': 'ceil',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -97,29 +93,27 @@ export const json = [
   },
   {
     'tfOpName': 'ClipByValue',
-    'dlOpName': 'clipByValue',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'clip_value_min',
-        'dlParamName': 'clipValueMin',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'clip_value_min'},
+        'name': 'clipValueMin',
         'type': 'number'
       },
       {
-        'tfParamName': 'clip_value_max',
-        'dlParamName': 'clipValueMax',
+        attrMapper: {'tfName': 'clip_value_max'},
+        'name': 'clipValueMax',
         'type': 'number'
       }
     ]
   },
   {
     'tfOpName': 'Cos',
-    'dlOpName': 'cos',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -127,12 +121,11 @@ export const json = [
   },
   {
     'tfOpName': 'Cosh',
-    'dlOpName': 'cosh',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -140,12 +133,11 @@ export const json = [
   },
   {
     'tfOpName': 'Elu',
-    'dlOpName': 'elu',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -153,12 +145,11 @@ export const json = [
   },
   {
     'tfOpName': 'Exp',
-    'dlOpName': 'exp',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -166,12 +157,11 @@ export const json = [
   },
   {
     'tfOpName': 'Floor',
-    'dlOpName': 'floor',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -179,12 +169,11 @@ export const json = [
   },
   {
     'tfOpName': 'Log',
-    'dlOpName': 'log',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -192,12 +181,11 @@ export const json = [
   },
   {
     'tfOpName': 'Neg',
-    'dlOpName': 'neg',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -205,12 +193,11 @@ export const json = [
   },
   {
     'tfOpName': 'Relu',
-    'dlOpName': 'relu',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -218,27 +205,25 @@ export const json = [
   },
   {
     'tfOpName': 'Relu6',
-    'dlOpName': 'clipByValue',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       },
-      {'dlParamName': 'clipValueMin', 'type': 'number', 'defaultValue': 0},
-      {'dlParamName': 'clipValueMax', 'type': 'number', 'defaultValue': 6}
+      {'name': 'clipValueMin', 'type': 'number', 'defaultValue': 0},
+      {'name': 'clipValueMax', 'type': 'number', 'defaultValue': 6}
     ]
   },
   {
     'tfOpName': 'Selu',
-    'dlOpName': 'selu',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -246,12 +231,11 @@ export const json = [
   },
   {
     'tfOpName': 'Sigmoid',
-    'dlOpName': 'sigmoid',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -259,12 +243,11 @@ export const json = [
   },
   {
     'tfOpName': 'Sin',
-    'dlOpName': 'sin',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -272,12 +255,11 @@ export const json = [
   },
   {
     'tfOpName': 'Sinh',
-    'dlOpName': 'sinh',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -285,12 +267,11 @@ export const json = [
   },
   {
     'tfOpName': 'Sqrt',
-    'dlOpName': 'sqrt',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -298,12 +279,11 @@ export const json = [
   },
   {
     'tfOpName': 'Rsqrt',
-    'dlOpName': 'rsqrt',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -311,12 +291,11 @@ export const json = [
   },
   {
     'tfOpName': 'Square',
-    'dlOpName': 'square',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -324,12 +303,11 @@ export const json = [
   },
   {
     'tfOpName': 'Tan',
-    'dlOpName': 'tan',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -337,12 +315,11 @@ export const json = [
   },
   {
     'tfOpName': 'Tanh',
-    'dlOpName': 'tanh',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -350,12 +327,11 @@ export const json = [
   },
   {
     'tfOpName': 'Sign',
-    'dlOpName': 'sign',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -363,12 +339,11 @@ export const json = [
   },
   {
     'tfOpName': 'Round',
-    'dlOpName': 'round',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -376,12 +351,11 @@ export const json = [
   },
   {
     'tfOpName': 'Expm1',
-    'dlOpName': 'expm1',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -389,12 +363,11 @@ export const json = [
   },
   {
     'tfOpName': 'Log1p',
-    'dlOpName': 'log1p',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -402,25 +375,11 @@ export const json = [
   },
   {
     'tfOpName': 'Reciprocal',
-    'dlOpName': 'reciprocal',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
-    ]
-  },
-  {
-    'tfOpName': 'Reciprocal',
-    'dlOpName': 'reciprocal',
-    'category': 'basic_math',
-    'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -428,12 +387,11 @@ export const json = [
   },
   {
     'tfOpName': 'Softplus',
-    'dlOpName': 'softplus',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -441,12 +399,11 @@ export const json = [
   },
   {
     'tfOpName': 'Asinh',
-    'dlOpName': 'asinh',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -454,12 +411,11 @@ export const json = [
   },
   {
     'tfOpName': 'Acosh',
-    'dlOpName': 'acosh',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -467,12 +423,11 @@ export const json = [
   },
   {
     'tfOpName': 'Atanh',
-    'dlOpName': 'atanh',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -480,12 +435,11 @@ export const json = [
   },
   {
     'tfOpName': 'Erf',
-    'dlOpName': 'erf',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -493,19 +447,18 @@ export const json = [
   },
   {
     'tfOpName': 'Prod',
-    'dlOpName': 'prod',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'axes', 'type': 'number[]'}, {
-        'tfParamName': 'keep_dims',
-        'dlParamName': 'keepDims',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+      {inputMapper: {'start': 1}, 'name': 'axes', 'type': 'number[]'}, {
+        attrMapper: {'tfName': 'keep_dims'},
+        'name': 'keepDims',
         'type': 'bool',
         'notSupported': true
       },
       {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }
@@ -513,18 +466,17 @@ export const json = [
   },
   {
     'tfOpName': 'LeakyRelu',
-    'dlOpName': 'leakyRelu',
     'category': 'basic_math',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
-        'tfParamName': 'alpha',
-        'dlParamName': 'alpha',
+      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
+        attrMapper: {'tfName': 'alpha'},
+        'name': 'alpha',
         'type': 'number',
         'defaultValue': 0.2
       },
       {
-        'tfParamName': 'T',
-        'dlParamName': 'dtype',
+        attrMapper: {'tfName': 'T'},
+        'name': 'dtype',
         'type': 'dtype',
         'notSupported': true
       }

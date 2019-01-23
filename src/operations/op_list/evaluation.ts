@@ -1,3 +1,5 @@
+import {OpMapper} from '../types';
+
 /**
  * @license
  * Copyright 2018 Google LLC. All Rights Reserved.
@@ -15,13 +17,12 @@
  * =============================================================================
  */
 
-export const json = [{
+export const json: OpMapper[] = [{
   'tfOpName': 'TopKV2',
-  'dlOpName': 'topK',
   'category': 'evaluation',
   'params': [
-    {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'},
-    {'tfInputIndex': 1, 'dlParamName': 'k', 'type': 'number'},
-    {'tfParamName': 'sorted', 'dlParamName': 'sorted', 'type': 'bool'}
+    {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
+    {inputMapper: {'start': 1}, 'name': 'k', 'type': 'number'},
+    {attrMapper: {'tfName': 'sorted'}, 'name': 'sorted', 'type': 'bool'}
   ]
 }];

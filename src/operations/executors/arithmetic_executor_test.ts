@@ -41,20 +41,21 @@ describe('arithmetic', () => {
   });
 
   describe('executeOp', () => {
-    ['add', 'mul', 'div', 'sub', 'maximum', 'minimum', 'pow',
-     'squaredDifference', 'mod', 'floorDiv']
+    ['Add', 'Mul', 'Div', 'Sub', 'Maximum', 'Minimum', 'Pow',
+     'SquaredDifference', 'Mod', 'FloorDiv']
         .forEach((op => {
           it('should call tfc.' + op, () => {
-            const spy = spyOn(tfc, op as 'add');
+            const spy =
+                spyOn(tfc, op.charAt(0).toLowerCase() + op.slice(1) as 'add');
             node.op = op;
             executeOp(node, {input1, input2}, context);
 
             expect(spy).toHaveBeenCalledWith(input1[0], input2[0]);
           });
         }));
-    it('addN', () => {
+    it('AddN', () => {
       const spy = spyOn(tfc, 'addN').and.callThrough();
-      node.op = 'addN';
+      node.op = 'AddN';
       node.params = {tensors: createTensorsAttr(0, 0)};
       node.inputNames = ['input1', 'input2', 'input3'];
       const res =

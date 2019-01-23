@@ -150,7 +150,7 @@ describe('completeness check', () => {
         };
         convertedGraph = mapper.transformGraph(graph);
         expect(Object.keys(convertedGraph.nodes)).toEqual([tfOp.tfOpName]);
-        expect(convertedGraph.nodes[tfOp.tfOpName].op).toEqual(tfOp.dlOpName);
+        expect(convertedGraph.nodes[tfOp.tfOpName].op).toEqual(tfOp.tfOpName);
       });
     });
   });
@@ -201,9 +201,9 @@ describe('operationMapper', () => {
       });
 
       it('should map the input params', () => {
-        expect(convertedGraph.nodes['Fill'].params['shape'].inputIndex)
+        expect(convertedGraph.nodes['Fill'].params['shape'].inputIndexStart)
             .toEqual(0);
-        expect(convertedGraph.nodes['Fill'].params['value'].inputIndex)
+        expect(convertedGraph.nodes['Fill'].params['value'].inputIndexStart)
             .toEqual(1);
       });
 

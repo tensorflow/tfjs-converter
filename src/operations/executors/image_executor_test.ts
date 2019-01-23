@@ -42,9 +42,9 @@ describe('image', () => {
   });
 
   describe('executeOp', () => {
-    describe('resizeBilinear', () => {
+    describe('ResizeBilinear', () => {
       it('should return input', () => {
-        node.op = 'resizeBilinear';
+        node.op = 'ResizeBilinear';
         node.params['images'] = createTensorAttr(0);
         node.params['size'] = createNumericArrayAttrFromIndex(1);
         node.params['alignCorners'] = createBoolAttr(true);
@@ -56,7 +56,7 @@ describe('image', () => {
             .toHaveBeenCalledWith(input1[0], [1, 2], true);
       });
       it('should match json def', () => {
-        node.op = 'resizeBilinear';
+        node.op = 'ResizeBilinear';
         node.params['images'] = createTensorAttr(0);
         node.params['size'] = createNumericArrayAttrFromIndex(1);
         node.params['alignCorners'] = createBoolAttr(true);
@@ -64,9 +64,9 @@ describe('image', () => {
         expect(validateParam(node, image.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('resizeNearestNeighbor', () => {
+    describe('ResizeNearestNeighbor', () => {
       it('should return input', () => {
-        node.op = 'resizeNearestNeighbor';
+        node.op = 'ResizeNearestNeighbor';
         node.params['images'] = createTensorAttr(0);
         node.params['size'] = createNumericArrayAttrFromIndex(1);
         node.params['alignCorners'] = createBoolAttr(true);
@@ -78,7 +78,7 @@ describe('image', () => {
             .toHaveBeenCalledWith(input1[0], [1, 2], true);
       });
       it('should match json def', () => {
-        node.op = 'resizeNearestNeighbor';
+        node.op = 'ResizeNearestNeighbor';
         node.params['images'] = createTensorAttr(0);
         node.params['size'] = createNumericArrayAttrFromIndex(1);
         node.params['alignCorners'] = createBoolAttr(true);
@@ -86,9 +86,9 @@ describe('image', () => {
         expect(validateParam(node, image.json as OpMapper[])).toBeTruthy();
       });
     });
-    describe('cropAndResize', () => {
+    describe('CropAndResize', () => {
       it('should return input', () => {
-        node.op = 'cropAndResize';
+        node.op = 'CropAndResize';
         node.params['image'] = createTensorAttr(0);
         node.params['boxes'] = createTensorAttr(1);
         node.params['boxInd'] = createTensorAttr(2);
@@ -109,7 +109,7 @@ describe('image', () => {
       });
 
       it('should match json def', () => {
-        node.op = 'cropAndResize';
+        node.op = 'CropAndResize';
         node.params['image'] = createTensorAttr(0);
         node.params['boxes'] = createTensorAttr(1);
         node.params['boxInd'] = createTensorAttr(2);

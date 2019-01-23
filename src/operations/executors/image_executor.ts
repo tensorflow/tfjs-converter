@@ -28,7 +28,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
                                     context: ExecutionContext):
                                        tfc.Tensor[] => {
   switch (node.op) {
-    case 'resizeBilinear': {
+    case 'ResizeBilinear': {
       const images =
           getParamValue('images', node, tensorMap, context) as tfc.Tensor;
       const size = getParamValue('size', node, tensorMap, context) as number[];
@@ -38,7 +38,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           images as tfc.Tensor3D | tfc.Tensor4D, [size[0], size[1]],
           alignCorners)];
     }
-    case 'resizeNearestNeighbor': {
+    case 'ResizeNearestNeighbor': {
       const images =
           getParamValue('images', node, tensorMap, context) as tfc.Tensor;
       const size = getParamValue('size', node, tensorMap, context) as number[];
@@ -48,7 +48,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           images as tfc.Tensor3D | tfc.Tensor4D, [size[0], size[1]],
           alignCorners)];
     }
-    case 'cropAndResize': {
+    case 'CropAndResize': {
       const image =
           getParamValue('image', node, tensorMap, context) as tfc.Tensor;
       const boxes =

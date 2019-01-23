@@ -28,25 +28,28 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
                                     context: ExecutionContext):
                                        tfc.Tensor[] => {
   switch (node.op) {
-    case 'concat': {
+    case 'ConcatV2':
+    case 'Concat': {
       const axis = getParamValue('axis', node, tensorMap, context) as number;
       const inputs =
           getParamValue('tensors', node, tensorMap, context) as tfc.Tensor[];
       return [tfc.concat(inputs, axis)];
     }
-    case 'gather': {
+    case 'GatherV2':
+    case 'Gather': {
       const axis = getParamValue('axis', node, tensorMap, context) as number;
       const input = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
       const indices =
           getParamValue('indices', node, tensorMap, context) as tfc.Tensor1D;
       return [tfc.gather(input, indices, axis)];
     }
-    case 'reverse': {
+    case 'ReverseV2':
+    case 'Reverse': {
       const axis = getParamValue('axis', node, tensorMap, context) as number[];
       const input = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
       return [tfc.reverse(input, axis)];
     }
-    case 'slice': {
+    case 'Slice': {
       // tslint:disable-next-line:no-any
       const begin = getParamValue('begin', node, tensorMap, context) as any;
       // tslint:disable-next-line:no-any
@@ -55,7 +58,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('x', node, tensorMap, context) as tfc.Tensor, begin,
           size)];
     }
-    case 'stridedSlice': {
+    case 'StridedSlice': {
       const begin =
           getParamValue('begin', node, tensorMap, context) as number[];
       const end = getParamValue('end', node, tensorMap, context) as number[];
@@ -83,7 +86,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           tensor, begin, end, strides, beginMask, endMask, ellipsisMask,
           newAxisMask, shrinkAxisMask)];
     }
-    case 'stack': {
+    case 'Pack': {
       return tfc.tidy(() => {
         const axis = getParamValue('axis', node, tensorMap, context) as number;
         const tensors =
@@ -102,7 +105,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
         return [tfc.stack(mapped, axis)];
       });
     }
-    case 'unstack': {
+    case 'Unpack': {
       return tfc.tidy(() => {
         const axis = getParamValue('axis', node, tensorMap, context) as number;
         const tensor =
@@ -110,12 +113,13 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
         return tfc.unstack(tensor, axis);
       });
     }
-    case 'tile': {
+    case 'Tile': {
       const reps = getParamValue('reps', node, tensorMap, context) as number[];
       return [tfc.tile(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor, reps)];
     }
-    case 'split': {
+    case 'Split':
+    case 'SplitV': {
       const axis = getParamValue('axis', node, tensorMap, context) as number;
       const numOrSizeSplits =
           getParamValue('numOrSizeSplits', node, tensorMap, context) as number |
@@ -124,7 +128,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('x', node, tensorMap, context) as tfc.Tensor,
           numOrSizeSplits, axis);
     }
-    case 'scatterNd': {
+    case 'ScatterNd': {
       const indices =
           getParamValue('indices', node, tensorMap, context) as tfc.Tensor;
       const values =
@@ -133,13 +137,13 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('shape', node, tensorMap, context) as number[];
       return [tfc.scatterND(indices, values, shape)];
     }
-    case 'gatherNd': {
+    case 'GatherNd': {
       const x = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
       const indices =
           getParamValue('indices', node, tensorMap, context) as tfc.Tensor;
       return [tfc.gatherND(x, indices)];
     }
-    case 'sparseToDense': {
+    case 'SparseToDense': {
       const indices =
           getParamValue('sparseIndices', node, tensorMap, context) as
           tfc.Tensor;

@@ -22,7 +22,7 @@ export function createNumberAttr(value: number): ParamValue {
 }
 
 export function createNumberAttrFromIndex(inputIndex: number): ParamValue {
-  return {inputIndex, type: 'number'};
+  return {inputIndexStart: inputIndex, type: 'number'};
 }
 
 export function createStrAttr(str: string): ParamValue {
@@ -42,16 +42,16 @@ export function createNumericArrayAttr(value: number[]): ParamValue {
 
 export function createNumericArrayAttrFromIndex(inputIndex: number):
     ParamValue {
-  return {inputIndex, type: 'number[]'};
+  return {inputIndexStart: inputIndex, type: 'number[]'};
 }
 
 export function createTensorAttr(index: number): ParamValue {
-  return {inputIndex: index, type: 'tensor'};
+  return {inputIndexStart: index, type: 'tensor'};
 }
 
 export function createTensorsAttr(
     index: number, paramLength: number): ParamValue {
-  return {inputIndex: index, inputParamLength: paramLength, type: 'tensors'};
+  return {inputIndexStart: index, inputIndexEnd: paramLength, type: 'tensors'};
 }
 
 export function createDtypeAttr(dtype: string): ParamValue {
@@ -62,11 +62,14 @@ export function validateParam(
     node: Node, opMappers: OpMapper[], tfOpName?: string) {
   const opMapper = tfOpName != null ?
       opMappers.find(mapper => mapper.tfOpName === tfOpName) :
-      opMappers.find(mapper => mapper.dlOpName === node.op);
+      opMappers.find(mapper => mapper.tfOpName === node.op);
   return Object.keys(node.params).every(key => {
     const value = node.params[key];
-    const def = opMapper.params.find(param => param.dlParamName === key);
+    const def = opMapper.params.find(param => param.name === key);
     return def && def.type === value.type &&
-        def.tfInputIndex === value.inputIndex;
+        (def.inputMapper ? def.inputMapper.start : undefined) ===
+        value.inputIndexStart &&
+        (def.inputMapper ? def.inputMapper.end : undefined) ===
+        value.inputIndexEnd;
   });
 }

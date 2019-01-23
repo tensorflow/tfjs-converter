@@ -42,30 +42,30 @@ describe('transformation', () => {
   });
 
   describe('executeOp', () => {
-    describe('cast', () => {
+    describe('Cast', () => {
       it('should call tfc.cast', () => {
         spyOn(tfc, 'cast');
-        node.op = 'cast';
+        node.op = 'Cast';
         node.params.dtype = createDtypeAttr('float32');
         executeOp(node, {input1}, context);
 
         expect(tfc.cast).toHaveBeenCalledWith(input1[0], 'float32');
       });
     });
-    describe('expandDims', () => {
+    describe('expandDExpandDimsims', () => {
       it('should call tfc.expandDims', () => {
         spyOn(tfc, 'expandDims');
-        node.op = 'expandDims';
+        node.op = 'ExpandDims';
         node.params.axis = createNumberAttr(1);
         executeOp(node, {input1}, context);
 
         expect(tfc.expandDims).toHaveBeenCalledWith(input1[0], 1);
       });
     });
-    describe('pad', () => {
+    describe('Pad', () => {
       it('should call tfc.pad', () => {
         spyOn(tfc, 'pad');
-        node.op = 'pad';
+        node.op = 'Pad';
         node.params.padding = createNumericArrayAttrFromIndex(1);
         node.params.constantValue = createNumberAttr(1);
         node.inputNames = ['input1', 'input3'];
@@ -75,10 +75,23 @@ describe('transformation', () => {
         expect(tfc.pad).toHaveBeenCalledWith(input1[0], [[1, 1], [2, 2]], 1);
       });
     });
-    describe('reshape', () => {
+    describe('PadV2', () => {
+      it('should call tfc.pad', () => {
+        spyOn(tfc, 'pad');
+        node.op = 'PadV2';
+        node.params.padding = createNumericArrayAttrFromIndex(1);
+        node.params.constantValue = createNumberAttr(1);
+        node.inputNames = ['input1', 'input3'];
+        const input3 = [tfc.tensor2d([1, 1, 2, 2], [2, 2])];
+        executeOp(node, {input1, input3}, context);
+
+        expect(tfc.pad).toHaveBeenCalledWith(input1[0], [[1, 1], [2, 2]], 1);
+      });
+    });
+    describe('Reshape', () => {
       it('should call tfc.reshape', () => {
         spyOn(tfc, 'reshape');
-        node.op = 'reshape';
+        node.op = 'Reshape';
         node.params.shape = createNumericArrayAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
 
@@ -87,20 +100,20 @@ describe('transformation', () => {
         expect(tfc.reshape).toHaveBeenCalledWith(input1[0], [1, 1]);
       });
     });
-    describe('squeeze', () => {
+    describe('Squeeze', () => {
       it('should call tfc.squeeze', () => {
         spyOn(tfc, 'squeeze');
-        node.op = 'squeeze';
+        node.op = 'Squeeze';
         node.params.axis = createNumberAttr(1);
         executeOp(node, {input1}, context);
 
         expect(tfc.squeeze).toHaveBeenCalledWith(input1[0], 1);
       });
     });
-    describe('spaceToBatchND', () => {
+    describe('SpaceToBatchND', () => {
       it('should call tfc.spaceToBatchND', () => {
         spyOn(tfc, 'spaceToBatchND');
-        node.op = 'spaceToBatchND';
+        node.op = 'SpaceToBatchND';
         node.params.blockShape = createNumericArrayAttrFromIndex(1);
         node.params.paddings = createNumericArrayAttrFromIndex(2);
         node.inputNames = ['input1', 'input2', 'input3'];
@@ -113,10 +126,10 @@ describe('transformation', () => {
                 input1[0], [1, 1, 2, 2], [[1, 2], [2, 3], [2, 3], [3, 4]]);
       });
     });
-    describe('batchToSpaceND', () => {
+    describe('BatchToSpaceND', () => {
       it('should call tfc.batchToSpaceND', () => {
         spyOn(tfc, 'batchToSpaceND');
-        node.op = 'batchToSpaceND';
+        node.op = 'BatchToSpaceND';
         node.params.blockShape = createNumericArrayAttrFromIndex(1);
         node.params.crops = createNumericArrayAttrFromIndex(2);
         node.inputNames = ['input1', 'input2', 'input3'];
@@ -129,10 +142,10 @@ describe('transformation', () => {
                 input1[0], [1, 1, 2, 2], [[1, 2], [2, 3], [2, 3], [3, 4]]);
       });
     });
-    describe('depthToSpace', () => {
+    describe('DepthToSpace', () => {
       it('should call tfc.depthToSpace', () => {
         spyOn(tfc, 'depthToSpace');
-        node.op = 'depthToSpace';
+        node.op = 'DepthToSpace';
         node.params.blockSize = createNumberAttr(1);
         node.params.dataFormat = createStrAttr('nhwc');
         node.inputNames = ['input1'];
