@@ -204,7 +204,7 @@ def _stack_group_bytes(group):
   group_bytes_writer.flush()
   group_bytes.seek(0)
 
-  if len(with_64bit_weights) > 0:
+  if with_64bit_weights:
     print('This model contains 64-bit weights ', with_64bit_weights, ', '
           'and they have been converted to 32-bit to run in javascript.')
   # NOTE: We must return the bytes writer here, otherwise it goes out of scope
