@@ -286,9 +286,9 @@ def _auto_convert_weight_entry(entry):
   data = entry['data']
   if data.dtype in _AUTO_DTYPE_CONVERSION:
     entry['data'] = _AUTO_DTYPE_CONVERSION[data.dtype](data)
-    print('weight ' + entry['name'] + ' with shape ' + str(data.shape) + 
-        ' and dtype ' + data.dtype.name + ' was auto converted to the type ' +
-        np.dtype(_AUTO_DTYPE_CONVERSION[data.dtype]).name)
+    print('weight ' + entry['name'] + ' with shape ' + str(data.shape) +
+          ' and dtype ' + data.dtype.name + ' was auto converted to the type ' +
+          np.dtype(_AUTO_DTYPE_CONVERSION[data.dtype]).name)
 
 
 def _assert_valid_weight_entry(entry):
