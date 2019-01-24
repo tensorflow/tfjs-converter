@@ -234,7 +234,7 @@ class TestWriteWeights(unittest.TestCase):
         # Group 1
         [{
             'name': 'weight1',
-            'data': np.array([1, 2, 3], 'float32')
+            'data': np.array([1, 2, 3], 'float64')
         }, {
             'name': 'weight2',
             'data': np.array([[4, 5], [6, 7]], 'float32')
@@ -242,7 +242,7 @@ class TestWriteWeights(unittest.TestCase):
         # Group 2
         [{
             'name': 'weight3',
-            'data': np.array([1, 2, 3, 4], 'int32')
+            'data': np.array([1, 2, 3, 4], 'int64')
         }, {
             'name': 'weight4',
             'data': np.array([[1.1, 1.2], [1.3, 1.4], [1.5, 1.6]], 'float32')
