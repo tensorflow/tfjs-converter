@@ -382,7 +382,7 @@ class TestWriteWeights(unittest.TestCase):
     groups = [
         [{
             'name': 'weight1',
-            'data': np.array([1, 2, 3], 'float64')
+            'data': np.array([1, 2, 3], 'complex')
         }]
     ]
 
