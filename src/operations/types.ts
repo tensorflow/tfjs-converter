@@ -15,7 +15,12 @@
  * =============================================================================
  */
 import {Tensor} from '@tensorflow/tfjs-core';
+
+import {NamedTensorsMap} from '../data/types';
+import {ExecutionContext} from '../executor/execution_context';
+
 import {OpExecutor} from './executors/types';
+
 export type ParamTypes =
     'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
 export type Category =
@@ -67,6 +72,11 @@ export declare interface ParamMapper {
   attrMapper?: AttrParamMapper;
   defaultValue?: string|string[]|number|number[]|boolean|boolean[];
   notSupported?: boolean;
+}
+
+export interface OpExecutor {
+  (node: Node, tensorMap: NamedTensorsMap,
+   context: ExecutionContext): Tensor[]|Promise<Tensor[]>;
 }
 
 export declare interface OpMapper {
