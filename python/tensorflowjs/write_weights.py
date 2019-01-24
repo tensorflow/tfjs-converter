@@ -192,10 +192,9 @@ def _stack_group_bytes(group):
   group_bytes_writer = io.BufferedWriter(group_bytes)
   total_bytes = 0
 
-  with_64bit_weights = set()
   for entry in group:
     _assert_valid_weight_entry(entry)
-    with_64bit_weights.union(_auto_convert_weight_entry(entry))
+    _auto_convert_weight_entry(entry)
     data = entry['data']
     data_bytes = data.tobytes()
     group_bytes_writer.write(data_bytes)
@@ -204,9 +203,6 @@ def _stack_group_bytes(group):
   group_bytes_writer.flush()
   group_bytes.seek(0)
 
-  if with_64bit_weights:
-    print('This model contains 64-bit weights ', with_64bit_weights, ', '
-          'and they have been converted to 32-bit to run in javascript.')
   # NOTE: We must return the bytes writer here, otherwise it goes out of scope
   # and python closes the IO operation.
   return (group_bytes, total_bytes, group_bytes_writer)
@@ -288,11 +284,11 @@ def _assert_no_duplicate_weight_names(weight_groups):
 
 def _auto_convert_weight_entry(entry):
   data = entry['data']
-  converted = set()
   if data.dtype in _AUTO_DTYPE_CONVERSION:
     entry['data'] = _AUTO_DTYPE_CONVERSION[data.dtype](data)
-    converted.add(data.dtype)
-  return converted
+    print('weight ' + entry['name'] + ' with shape ' + str(data.shape) + 
+        ' and dtype ' + data.dtype.name + ' was auto converted to the type ' +
+        np.dtype(_AUTO_DTYPE_CONVERSION[data.dtype]).name)
 
 
 def _assert_valid_weight_entry(entry):
