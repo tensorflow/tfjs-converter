@@ -35,7 +35,8 @@ describe('logical', () => {
       category: 'logical',
       inputNames: ['input1', 'input2'],
       inputs: [],
-      params: {a: createTensorAttr(0), b: createTensorAttr(1)},
+      inputParams: {a: createTensorAttr(0), b: createTensorAttr(1)},
+      attrParams: {},
       children: []
     };
   });
@@ -68,7 +69,7 @@ describe('logical', () => {
         spyOn(tfc, 'where');
         node.op = 'Select';
         node.inputNames = ['input1', 'input2', 'input3'];
-        node.params.condition = createTensorAttr(2);
+        node.inputParams.condition = createTensorAttr(2);
         const input3 = [tfc.scalar(1)];
         executeOp(node, {input1, input2, input3}, context);
 

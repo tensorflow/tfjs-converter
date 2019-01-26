@@ -52,10 +52,12 @@ export class GraphExecutor {
     return this.placeholders.map(node => {
       return {
         name: node.name,
-        shape: node.params['shape'] ? node.params['shape'].value as number[] :
-                                      undefined,
-        dtype: node.params['dtype'] ? node.params['dtype'].value as DataType :
-                                      undefined
+        shape: node.attrParams['shape'] ?
+            node.attrParams['shape'].value as number[] :
+            undefined,
+        dtype: node.attrParams['dtype'] ?
+            node.attrParams['dtype'].value as DataType :
+            undefined
       };
     });
   }
@@ -64,10 +66,12 @@ export class GraphExecutor {
     return this._outputs.map(node => {
       return {
         name: node.name,
-        shape: node.params['shape'] ? node.params['shape'].value as number[] :
-                                      undefined,
-        dtype: node.params['dtype'] ? node.params['dtype'].value as DataType :
-                                      undefined
+        shape: node.attrParams['shape'] ?
+            node.attrParams['shape'].value as number[] :
+            undefined,
+        dtype: node.attrParams['dtype'] ?
+            node.attrParams['dtype'].value as DataType :
+            undefined
       };
     });
   }
@@ -411,8 +415,8 @@ export class GraphExecutor {
       }
 
       const input = inputTensors[0];
-      if (node.params['shape'] && node.params['shape'].value) {
-        const shape = node.params['shape'].value as number[];
+      if (node.attrParams['shape'] && node.attrParams['shape'].value) {
+        const shape = node.attrParams['shape'].value as number[];
         const match = shape.length === input.shape.length &&
             input.shape.every(
                 (dim, index) => shape[index] === -1 || shape[index] === dim);
@@ -422,12 +426,12 @@ export class GraphExecutor {
                 node.name}'] provided in model.execute(dict) must be [${
                 shape}], but was [${input.shape}]`);
       }
-      if (node.params['dtype'] && node.params['dtype'].value) {
+      if (node.attrParams['dtype'] && node.attrParams['dtype'].value) {
         util.assert(
-            input.dtype === node.params['dtype'].value as string,
+            input.dtype === node.attrParams['dtype'].value as string,
             `The dtype of dict['${
                 node.name}'] provided in model.execute(dict) must be ${
-                node.params['dtype'].value}, but was ${input.dtype}`);
+                node.attrParams['dtype'].value}, but was ${input.dtype}`);
       }
     });
   }

@@ -35,11 +35,8 @@ describe('reduction', () => {
       category: 'logical',
       inputNames: ['input1'],
       inputs: [],
-      params: {
-        x: createTensorAttr(0),
-        axis: createNumberAttr(1),
-        keepDims: createBoolAttr(true)
-      },
+      inputParams: {x: createTensorAttr(0)},
+      attrParams: {keepDims: createBoolAttr(true), axis: createNumberAttr(1)},
       children: []
     };
   });

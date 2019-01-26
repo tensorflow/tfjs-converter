@@ -21,169 +21,147 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Add',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'AddN',
     'category': 'arithmetic',
-    'params': [{
-      inputMapper: {'start': 0, 'end': 0},
-      'name': 'tensors',
-      'type': 'tensors'
-    }]
+    'inputParams':
+        [{'start': 0, 'end': 0, 'name': 'tensors', 'type': 'tensors'}]
   },
   {
     'tfOpName': 'BiasAdd',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Sub',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'RealDiv',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Div',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'FloorDiv',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Mul',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Maximum',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'}
     ]
   },
   {
     'tfOpName': 'Minimum',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'}
     ]
   },
   {
     'tfOpName': 'Pow',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'SquaredDifference',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Mod',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'FloorMod',
     'category': 'arithmetic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [{
+      'tfName': 'T',
+      'name': 'dtype',
+      'type': 'dtype',
+      'notSupported': true
+    }]
   }
 ];

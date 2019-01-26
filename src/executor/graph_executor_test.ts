@@ -40,7 +40,8 @@ describe('GraphExecutor', () => {
       name: 'input',
       op: 'Placeholder',
       category: 'graph',
-      params: {}
+      attrParams: {},
+      inputParams: {}
     };
     constNode = {
       inputNames: [],
@@ -49,7 +50,9 @@ describe('GraphExecutor', () => {
       name: 'const',
       op: 'Const',
       category: 'graph',
-      params: {}
+      attrParams: {},
+      inputParams: {}
+
     };
     intermediateNode = {
       inputNames: ['input', 'const'],
@@ -58,7 +61,8 @@ describe('GraphExecutor', () => {
       name: 'intermediate',
       op: 'Add',
       category: 'arithmetic',
-      params: {'a': createTensorAttr(0), 'b': createTensorAttr(1)}
+      inputParams: {'a': createTensorAttr(0), 'b': createTensorAttr(1)},
+      attrParams: {}
     };
     outputNode = {
       inputNames: ['intermediate', 'const'],
@@ -67,7 +71,8 @@ describe('GraphExecutor', () => {
       name: 'output',
       op: 'Add',
       category: 'arithmetic',
-      params: {'a': createTensorAttr(0), 'b': createTensorAttr(1)}
+      inputParams: {'a': createTensorAttr(0), 'b': createTensorAttr(1)},
+      attrParams: {}
     };
     graph = {
       inputs: [constNode, inputNode],
@@ -103,16 +108,16 @@ describe('GraphExecutor', () => {
       });
 
       it('should expose placeholders', () => {
-        inputNode.params['shape'] = {value: [1], type: 'shape'};
-        inputNode.params['dtype'] = {value: 'float32', type: 'dtype'};
+        inputNode.attrParams['shape'] = {value: [1], type: 'shape'};
+        inputNode.attrParams['dtype'] = {value: 'float32', type: 'dtype'};
         expect(executor.inputs).toEqual([
           {name: 'input', shape: [1], dtype: 'float32'}
         ]);
       });
 
       it('should expose outputs', () => {
-        outputNode.params['shape'] = {value: [1, 1], type: 'shape'};
-        outputNode.params['dtype'] = {value: 'int32', type: 'dtype'};
+        outputNode.attrParams['shape'] = {value: [1, 1], type: 'shape'};
+        outputNode.attrParams['dtype'] = {value: 'int32', type: 'dtype'};
         expect(executor.outputs).toEqual([
           {name: 'output', shape: [1, 1], dtype: 'int32'}
         ]);
@@ -164,7 +169,7 @@ describe('GraphExecutor', () => {
           });
 
           it('should throw exception if inputs shapes mismatch', () => {
-            inputNode.params['shape'] = {value: [1, 1], type: 'shape'};
+            inputNode.attrParams['shape'] = {value: [1, 1], type: 'shape'};
             const inputTensor = tfc.tensor1d([1], 'float32');
             expect(() => executor.execute({input: [inputTensor]}))
                 .toThrow(new Error(
@@ -173,7 +178,7 @@ describe('GraphExecutor', () => {
           });
 
           it('should throw exception for dtype mismatch', () => {
-            inputNode.params['dtype'] = {value: 'int32', type: 'dtype'};
+            inputNode.attrParams['dtype'] = {value: 'int32', type: 'dtype'};
             const inputTensor = tfc.tensor1d([1], 'float32');
             expect(() => executor.execute({input: [inputTensor]}))
                 .toThrow(new Error(
@@ -212,7 +217,7 @@ describe('GraphExecutor', () => {
                        ' only the following keys: [input].'));
              });
           it('should throw exception if inputs shapes mismatch', () => {
-            inputNode.params['shape'] = {value: [1, 1], type: 'shape'};
+            inputNode.attrParams['shape'] = {value: [1, 1], type: 'shape'};
             const inputTensor = tfc.tensor1d([1], 'float32');
             expect(() => executor.execute({input: [inputTensor]}, false))
                 .toThrow(new Error(
@@ -221,7 +226,7 @@ describe('GraphExecutor', () => {
           });
 
           it('should throw exception dtype mismatch', () => {
-            inputNode.params['dtype'] = {value: 'int32', type: 'dtype'};
+            inputNode.attrParams['dtype'] = {value: 'int32', type: 'dtype'};
             const inputTensor = tfc.tensor1d([1], 'float32');
             expect(() => executor.execute({input: [inputTensor]}, false))
                 .toThrow(new Error(
@@ -231,7 +236,7 @@ describe('GraphExecutor', () => {
         });
 
         it('should not throw exception if inputs shapes is dynamic', () => {
-          inputNode.params['shape'] = {value: [-1, 1, 1, 1], type: 'shape'};
+          inputNode.attrParams['shape'] = {value: [-1, 1, 1, 1], type: 'shape'};
           const inputTensor = tfc.tensor4d([1, 1], [2, 1, 1, 1], 'float32');
           expect(() => executor.execute({input: [inputTensor]})).not.toThrow();
         });
@@ -246,7 +251,8 @@ describe('GraphExecutor', () => {
             name: 'input',
             op: 'Placeholder',
             category: 'graph',
-            params: {}
+            attrParams: {},
+            inputParams: {}
           };
           constNode = {
             inputNames: [],
@@ -255,7 +261,8 @@ describe('GraphExecutor', () => {
             name: 'const',
             op: 'Const',
             category: 'graph',
-            params: {}
+            attrParams: {},
+            inputParams: {}
           };
           intermediateNode = {
             inputNames: ['input', 'const'],
@@ -264,7 +271,8 @@ describe('GraphExecutor', () => {
             name: 'intermediate',
             op: 'Add',
             category: 'arithmetic',
-            params: {'a': createTensorAttr(0), 'b': createTensorAttr(1)}
+            inputParams: {'a': createTensorAttr(0), 'b': createTensorAttr(1)},
+            attrParams: {}
           };
           outputNode = {
             inputNames: ['const', 'intermediate'],
@@ -273,7 +281,9 @@ describe('GraphExecutor', () => {
             name: 'output',
             op: 'Switch',
             category: 'control',
-            params: {'pred': createTensorAttr(0), 'data': createTensorAttr(1)}
+            inputParams:
+                {'pred': createTensorAttr(0), 'data': createTensorAttr(1)},
+            attrParams: {}
           };
           inputNode.children.push(intermediateNode);
           constNode.children.push(intermediateNode, outputNode);
@@ -297,7 +307,7 @@ describe('GraphExecutor', () => {
           executor.weightMap = {const : [constTensor]};
         });
 
-        it('should execute control flow graph', async (done) => {
+        it('should execute control flow graph', async (done: DoneFn) => {
           const inputTensor = tfc.scalar(1);
 
           const result =
@@ -306,7 +316,7 @@ describe('GraphExecutor', () => {
           done();
         });
 
-        it('should allow output intermediate nodes', async (done) => {
+        it('should allow output intermediate nodes', async (done: DoneFn) => {
           const inputTensor = tfc.scalar(1);
           const result = await executor.executeAsync(
               {input: [inputTensor]}, ['intermediate']);
@@ -316,7 +326,7 @@ describe('GraphExecutor', () => {
 
         it('should be able to execute control flow graph ' +
                'with intermediate node more than once',
-           async (done) => {
+           async (done: DoneFn) => {
              const inputTensor = tfc.scalar(1);
 
              const result = await executor.executeAsync(

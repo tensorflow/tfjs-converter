@@ -36,7 +36,8 @@ describe('normalization', () => {
       category: 'normalization',
       inputNames: ['input1'],
       inputs: [],
-      params: {x: createTensorAttr(0)},
+      inputParams: {x: createTensorAttr(0)},
+      attrParams: {},
       children: []
     };
   });
@@ -46,11 +47,11 @@ describe('normalization', () => {
       it('should call tfc.batchNormalization', () => {
         spyOn(tfc, 'batchNormalization');
         node.op = 'FusedBatchNorm';
-        node.params.scale = createTensorAttr(1);
-        node.params.offset = createTensorAttr(2);
-        node.params.mean = createTensorAttr(3);
-        node.params.variance = createTensorAttr(4);
-        node.params.epsilon = createNumberAttr(5);
+        node.inputParams.scale = createTensorAttr(1);
+        node.inputParams.offset = createTensorAttr(2);
+        node.inputParams.mean = createTensorAttr(3);
+        node.inputParams.variance = createTensorAttr(4);
+        node.attrParams.epsilon = createNumberAttr(5);
         node.inputNames = ['input1', 'input2', 'input3', 'input4', 'input5'];
         const input2 = [tfc.scalar(1)];
         const input3 = [tfc.scalar(2)];
@@ -67,11 +68,11 @@ describe('normalization', () => {
       it('should call tfc.batchNormalization', () => {
         spyOn(tfc, 'batchNormalization');
         node.op = 'FusedBatchNormV2';
-        node.params.scale = createTensorAttr(1);
-        node.params.offset = createTensorAttr(2);
-        node.params.mean = createTensorAttr(3);
-        node.params.variance = createTensorAttr(4);
-        node.params.epsilon = createNumberAttr(5);
+        node.inputParams.scale = createTensorAttr(1);
+        node.inputParams.offset = createTensorAttr(2);
+        node.inputParams.mean = createTensorAttr(3);
+        node.inputParams.variance = createTensorAttr(4);
+        node.attrParams.epsilon = createNumberAttr(5);
         node.inputNames = ['input1', 'input2', 'input3', 'input4', 'input5'];
         const input2 = [tfc.scalar(1)];
         const input3 = [tfc.scalar(2)];
@@ -88,10 +89,10 @@ describe('normalization', () => {
       it('should call tfc.localResponseNormalization', () => {
         spyOn(tfc, 'localResponseNormalization');
         node.op = 'LRN';
-        node.params.radius = createNumberAttr(1);
-        node.params.bias = createNumberAttr(2);
-        node.params.alpha = createNumberAttr(3);
-        node.params.beta = createNumberAttr(4);
+        node.attrParams.radius = createNumberAttr(1);
+        node.attrParams.bias = createNumberAttr(2);
+        node.attrParams.alpha = createNumberAttr(3);
+        node.attrParams.beta = createNumberAttr(4);
 
         executeOp(node, {input1}, context);
 
@@ -100,10 +101,10 @@ describe('normalization', () => {
       });
       it('should match json def', () => {
         node.op = 'LRN';
-        node.params.radius = createNumberAttr(1);
-        node.params.bias = createNumberAttr(2);
-        node.params.alpha = createNumberAttr(3);
-        node.params.beta = createNumberAttr(4);
+        node.attrParams.radius = createNumberAttr(1);
+        node.attrParams.bias = createNumberAttr(2);
+        node.attrParams.alpha = createNumberAttr(3);
+        node.attrParams.beta = createNumberAttr(4);
 
         expect(validateParam(node, normalization.json as OpMapper[]))
             .toBeTruthy();
@@ -147,10 +148,10 @@ describe('normalization', () => {
       it('should call tfc.sparseToDense', () => {
         spyOn(tfc, 'sparseToDense');
         node.op = 'SparseToDense';
-        node.params.sparseIndices = createTensorAttr(0);
-        node.params.outputShape = createNumericArrayAttrFromIndex(1);
-        node.params.sparseValues = createTensorAttr(2);
-        node.params.defaultValue = createTensorAttr(3);
+        node.inputParams.sparseIndices = createTensorAttr(0);
+        node.inputParams.outputShape = createNumericArrayAttrFromIndex(1);
+        node.inputParams.sparseValues = createTensorAttr(2);
+        node.inputParams.defaultValue = createTensorAttr(3);
         node.inputNames = ['input1', 'input2', 'input3', 'input4'];
         const input2 = [tfc.scalar(1)];
         const input3 = [tfc.scalar(2)];
@@ -162,11 +163,11 @@ describe('normalization', () => {
       });
       it('should match json def', () => {
         node.op = 'SparseToDense';
-        delete node.params.x;
-        node.params.sparseIndices = createTensorAttr(0);
-        node.params.outputShape = createNumericArrayAttrFromIndex(1);
-        node.params.sparseValues = createTensorAttr(2);
-        node.params.defaultValue = createTensorAttr(3);
+        delete node.inputParams.x;
+        node.inputParams.sparseIndices = createTensorAttr(0);
+        node.inputParams.outputShape = createNumericArrayAttrFromIndex(1);
+        node.inputParams.sparseValues = createTensorAttr(2);
+        node.inputParams.defaultValue = createTensorAttr(3);
 
         expect(validateParam(node, normalization.json as OpMapper[]))
             .toBeTruthy();

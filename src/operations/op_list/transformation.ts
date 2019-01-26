@@ -21,44 +21,48 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Cast',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'SrcT'},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'SrcT',
         'name': 'sdtype',
         'type': 'dtype',
         'notSupported': true
       },
-      {attrMapper: {'tfName': 'DstT'}, 'name': 'dtype', 'type': 'dtype'}
+      {'tfName': 'DstT', 'name': 'dtype', 'type': 'dtype'}
     ]
   },
   {
     'tfOpName': 'ExpandDims',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number'}
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number'}
     ]
   },
   {
     'tfOpName': 'Pad',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'padding', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'constant_value'},
-        'name': 'constantValue',
-        'type': 'number',
-        'defaultValue': 0
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'padding', 'type': 'number[]'},
+    ],
+    'attrParams': [{
+      'tfName': 'constant_value',
+      'name': 'constantValue',
+      'type': 'number',
+      'defaultValue': 0
+    }]
   },
   {
     'tfOpName': 'PadV2',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'padding', 'type': 'number[]'}, {
-        inputMapper: {'start': 2},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'padding', 'type': 'number[]'}, {
+        'start': 2,
         'name': 'constantValue',
         'type': 'number',
         'defaultValue': 0
@@ -68,54 +72,51 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Reshape',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'shape', 'type': 'number[]'}
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'shape', 'type': 'number[]'}
     ]
   },
   {
     'tfOpName': 'Squeeze',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'axis', 'tfDeprecatedName': 'squeeze_dims'},
-        'name': 'axis',
-        'type': 'number[]'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+    ],
+    'attrParams': [{
+      'tfName': 'axis',
+      'tfDeprecatedName': 'squeeze_dims',
+      'name': 'axis',
+      'type': 'number[]'
+    }]
   },
   {
     'tfOpName': 'SpaceToBatchND',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'blockShape', 'type': 'number[]'},
-      {inputMapper: {'start': 2}, 'name': 'paddings', 'type': 'number[]'}
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'blockShape', 'type': 'number[]'},
+      {'start': 2, 'name': 'paddings', 'type': 'number[]'}
     ]
   },
   {
     'tfOpName': 'BatchToSpaceND',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'blockShape', 'type': 'number[]'},
-      {inputMapper: {'start': 2}, 'name': 'crops', 'type': 'number[]'}
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'blockShape', 'type': 'number[]'},
+      {'start': 2, 'name': 'crops', 'type': 'number[]'}
     ]
   },
   {
     'tfOpName': 'DepthToSpace',
     'category': 'transformation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'block_size'},
-        'name': 'blockSize',
-        'type': 'number'
-      },
-      {
-        attrMapper: {'tfName': 'data_format'},
-        'name': 'dataFormat',
-        'type': 'string'
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'block_size', 'name': 'blockSize', 'type': 'number'},
+      {'tfName': 'data_format', 'name': 'dataFormat', 'type': 'string'}
     ]
   }
 ];

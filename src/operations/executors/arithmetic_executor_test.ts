@@ -35,7 +35,8 @@ describe('arithmetic', () => {
       category: 'arithmetic',
       inputNames: ['input1', 'input2'],
       inputs: [],
-      params: {a: createTensorAttr(0), b: createTensorAttr(1)},
+      inputParams: {a: createTensorAttr(0), b: createTensorAttr(1)},
+      attrParams: {},
       children: []
     };
   });
@@ -56,7 +57,7 @@ describe('arithmetic', () => {
     it('AddN', () => {
       const spy = spyOn(tfc, 'addN').and.callThrough();
       node.op = 'AddN';
-      node.params = {tensors: createTensorsAttr(0, 0)};
+      node.inputParams = {tensors: createTensorsAttr(0, 0)};
       node.inputNames = ['input1', 'input2', 'input3'];
       const res =
           executeOp(node, {input1, input2, input3}, context) as tfc.Tensor[];

@@ -35,7 +35,8 @@ describe('spectral', () => {
       category: 'spectral',
       inputNames: ['input1'],
       inputs: [],
-      params: {x: createTensorAttr(0)},
+      inputParams: {x: createTensorAttr(0)},
+      attrParams: {},
       children: []
     };
   });

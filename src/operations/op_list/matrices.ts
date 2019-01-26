@@ -21,64 +21,61 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'MatMul',
     'category': 'matrices',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'transpose_a'},
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'transpose_a',
         'name': 'transposeA',
         'type': 'bool',
         'defaultValue': false
       },
       {
-        attrMapper: {'tfName': 'transpose_b'},
+        'tfName': 'transpose_b',
         'name': 'transposeB',
         'type': 'bool',
         'defaultValue': false
       },
-      {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'BatchMatMul',
     'category': 'matrices',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'a', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'b', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'adj_x'},
+    'inputParams': [
+      {'start': 0, 'name': 'a', 'type': 'tensor'},
+      {'start': 1, 'name': 'b', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'adj_x',
         'name': 'transposeA',
         'type': 'bool',
         'defaultValue': false
       },
       {
-        attrMapper: {'tfName': 'adj_y'},
+        'tfName': 'adj_y',
         'name': 'transposeB',
         'type': 'bool',
         'defaultValue': false
       },
-      {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Transpose',
     'category': 'matrices',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'perm', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'perm', 'type': 'number[]'},
+    ],
+    'attrParams': [{
+      'tfName': 'T',
+      'name': 'dtype',
+      'type': 'dtype',
+      'notSupported': true
+    }]
   }
 ];

@@ -36,7 +36,8 @@ describe('basic math', () => {
       category: 'basic_math',
       inputNames: ['input1'],
       inputs: [],
-      params: {x: createTensorAttr(0)},
+      inputParams: {x: createTensorAttr(0)},
+      attrParams: {},
       children: []
     };
   });
@@ -66,8 +67,8 @@ describe('basic math', () => {
       it('should call tfc.clipByValue', () => {
         spyOn(tfc, 'clipByValue');
         node.op = 'Relu6';
-        node.params['clipValueMax'] = createNumberAttr(6);
-        node.params['clipValueMin'] = createNumberAttr(0);
+        node.attrParams['clipValueMax'] = createNumberAttr(6);
+        node.attrParams['clipValueMin'] = createNumberAttr(0);
 
         executeOp(node, {input1}, context);
 
@@ -75,8 +76,8 @@ describe('basic math', () => {
       });
       it('should match op def', () => {
         node.op = 'Relu6';
-        node.params['clipValueMax'] = createNumberAttr(6);
-        node.params['clipValueMin'] = createNumberAttr(0);
+        node.attrParams['clipValueMax'] = createNumberAttr(6);
+        node.attrParams['clipValueMin'] = createNumberAttr(0);
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
@@ -85,7 +86,7 @@ describe('basic math', () => {
       it('should call tfc.prod', () => {
         spyOn(tfc, 'prod');
         node.op = 'Prod';
-        node.params['axes'] = createNumericArrayAttrFromIndex(1);
+        node.inputParams['axes'] = createNumericArrayAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
         const input2 = [tfc.scalar(2)];
         executeOp(node, {input1, input2}, context);
@@ -94,7 +95,7 @@ describe('basic math', () => {
       });
       it('should match op def', () => {
         node.op = 'Prod';
-        node.params['axes'] = createNumericArrayAttrFromIndex(1);
+        node.inputParams['axes'] = createNumericArrayAttrFromIndex(1);
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
@@ -121,7 +122,7 @@ describe('basic math', () => {
       it('should call tfc.leakyRelu', () => {
         spyOn(tfc, 'leakyRelu');
         node.op = 'LeakyRelu';
-        node.params['alpha'] = createNumberAttr(1);
+        node.attrParams['alpha'] = createNumberAttr(1);
         node.inputNames = ['input1'];
         executeOp(node, {input1}, context);
 
@@ -129,7 +130,7 @@ describe('basic math', () => {
       });
       it('should match op def', () => {
         node.op = 'LeakyRelu';
-        node.params['alpha'] = createNumberAttr(1);
+        node.attrParams['alpha'] = createNumberAttr(1);
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });
     });
@@ -137,7 +138,7 @@ describe('basic math', () => {
       it('should call tfc.atan2', () => {
         spyOn(tfc, 'atan2');
         node.op = 'Atan2';
-        node.params['y'] = createTensorAttr(1);
+        node.inputParams['y'] = createTensorAttr(1);
         node.inputNames = ['input1', 'input2'];
         const input2 = [tfc.scalar(2)];
         executeOp(node, {input1, input2}, context);
@@ -146,7 +147,7 @@ describe('basic math', () => {
       });
       it('should match op def', () => {
         node.op = 'Atan2';
-        node.params['y'] = createTensorAttr(1);
+        node.inputParams['y'] = createTensorAttr(1);
 
         expect(validateParam(node, basic_math.json as OpMapper[])).toBeTruthy();
       });

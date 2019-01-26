@@ -21,47 +21,46 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'NonMaxSuppressionV2',
     'category': 'dynamic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'boxes', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'scores', 'type': 'tensor'},
-      {inputMapper: {'start': 2}, 'name': 'maxOutputSize', 'type': 'number'},
-      {inputMapper: {'start': 3}, 'name': 'iouThreshold', 'type': 'number'}
+    'inputParams': [
+      {'start': 0, 'name': 'boxes', 'type': 'tensor'},
+      {'start': 1, 'name': 'scores', 'type': 'tensor'},
+      {'start': 2, 'name': 'maxOutputSize', 'type': 'number'},
+      {'start': 3, 'name': 'iouThreshold', 'type': 'number'}
     ]
   },
   {
     'tfOpName': 'NonMaxSuppressionV3',
     'category': 'dynamic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'boxes', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'scores', 'type': 'tensor'},
-      {inputMapper: {'start': 2}, 'name': 'maxOutputSize', 'type': 'number'},
-      {inputMapper: {'start': 3}, 'name': 'iouThreshold', 'type': 'number'},
-      {inputMapper: {'start': 4}, 'name': 'scoreThreshold', 'type': 'number'}
+    'inputParams': [
+      {'start': 0, 'name': 'boxes', 'type': 'tensor'},
+      {'start': 1, 'name': 'scores', 'type': 'tensor'},
+      {'start': 2, 'name': 'maxOutputSize', 'type': 'number'},
+      {'start': 3, 'name': 'iouThreshold', 'type': 'number'},
+      {'start': 4, 'name': 'scoreThreshold', 'type': 'number'}
     ]
   },
   {
     'tfOpName': 'Where',
     'category': 'dynamic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'condition', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'condition', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'ListDiff',
     'category': 'dynamic',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'y', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'y', 'type': 'tensor'},
+    ],
+    'attrParams': [{
+      'tfName': 'T',
+      'name': 'dtype',
+      'type': 'dtype',
+      'notSupported': true
+    }]
   }
 ];

@@ -21,101 +21,87 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Max',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   },
   {
     'tfOpName': 'Mean',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   },
   {
     'tfOpName': 'Min',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   },
   {
     'tfOpName': 'Sum',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   },
   {
     'tfOpName': 'All',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   },
   {
     'tfOpName': 'Any',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   },
   {
     'tfOpName': 'ArgMax',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number'}
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number'}
     ]
   },
   {
     'tfOpName': 'ArgMin',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number'}
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number'}
     ]
   },
   {
     'tfOpName': 'Prod',
     'category': 'reduction',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'axis', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'keep_dims'},
-        'name': 'keepDims',
-        'type': 'bool'
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'axis', 'type': 'number[]'},
+    ],
+    'attrParams':
+        [{'tfName': 'keep_dims', 'name': 'keepDims', 'type': 'bool'}]
   }
 ];

@@ -21,49 +21,39 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'ResizeBilinear',
     'category': 'image',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'images', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'size', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'align_corners'},
-        'name': 'alignCorners',
-        'type': 'bool'
-      },
-      {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'images', 'type': 'tensor'},
+      {'start': 1, 'name': 'size', 'type': 'number[]'},
+    ],
+    'attrParams': [
+      {'tfName': 'align_corners', 'name': 'alignCorners', 'type': 'bool'},
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'ResizeNearestNeighbor',
     'category': 'image',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'images', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'size', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'align_corners'},
-        'name': 'alignCorners',
-        'type': 'bool'
-      },
-      {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'images', 'type': 'tensor'},
+      {'start': 1, 'name': 'size', 'type': 'number[]'},
+    ],
+    'attrParams': [
+      {'tfName': 'align_corners', 'name': 'alignCorners', 'type': 'bool'},
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'CropAndResize',
     'category': 'image',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'image', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'boxes', 'type': 'tensor'},
-      {inputMapper: {'start': 2}, 'name': 'boxInd', 'type': 'tensor'},
-      {inputMapper: {'start': 3}, 'name': 'cropSize', 'type': 'number[]'},
-      {attrMapper: {'tfName': 'method'}, 'name': 'method', 'type': 'string'}, {
-        attrMapper: {'tfName': 'extrapolation_value'},
+    'inputParams': [
+      {'start': 0, 'name': 'image', 'type': 'tensor'},
+      {'start': 1, 'name': 'boxes', 'type': 'tensor'},
+      {'start': 2, 'name': 'boxInd', 'type': 'tensor'},
+      {'start': 3, 'name': 'cropSize', 'type': 'number[]'},
+    ],
+    'attrParams': [
+      {'tfName': 'method', 'name': 'method', 'type': 'string'}, {
+        'tfName': 'extrapolation_value',
         'name': 'extrapolationValue',
         'type': 'number'
       }

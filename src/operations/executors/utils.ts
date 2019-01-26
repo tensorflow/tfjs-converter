@@ -24,17 +24,18 @@ import {Node, ValueType} from '../types';
 export function getParamValue(
     paramName: string, node: Node, tensorMap: NamedTensorsMap,
     context: ExecutionContext): ValueType {
-  const param = node.params[paramName];
-  const start = param.inputIndexStart;
-  const end = param.inputIndexEnd === 0 ?
-      undefined :
-      (param.inputIndexEnd === undefined ? start + 1 : param.inputIndexEnd);
-  if (param && param.inputIndexStart !== undefined) {
-    if (param.type === 'tensor') {
+  const inputParam = node.inputParams[paramName];
+  if (inputParam && inputParam.inputIndexStart !== undefined) {
+    const start = inputParam.inputIndexStart;
+    const end = inputParam.inputIndexEnd === 0 ?
+        undefined :
+        (inputParam.inputIndexEnd === undefined ? start + 1 :
+                                                  inputParam.inputIndexEnd);
+    if (inputParam.type === 'tensor') {
       return getTensor(
-          node.inputNames[param.inputIndexStart], tensorMap, context);
+          node.inputNames[inputParam.inputIndexStart], tensorMap, context);
     }
-    if (param.type === 'tensors') {
+    if (inputParam.type === 'tensors') {
       const inputs = node.inputNames.slice(start, end);
 
       return inputs.map(name => getTensor(name, tensorMap, context));
@@ -42,9 +43,10 @@ export function getParamValue(
     const data = Array.prototype.slice.call(
         getTensor(node.inputNames.slice(start)[0], tensorMap, context)
             .dataSync());
-    return param.type === 'number' ? data[0] : data;
+    return inputParam.type === 'number' ? data[0] : data;
   }
-  return param && param.value;
+  const attrParam = node.attrParams[paramName];
+  return attrParam && attrParam.value;
 }
 
 /**

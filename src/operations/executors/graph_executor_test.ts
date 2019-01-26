@@ -38,7 +38,8 @@ describe('graph', () => {
       category: 'graph',
       inputNames: [],
       inputs: [],
-      params: {},
+      inputParams: {},
+      attrParams: {},
       children: []
     };
   });
@@ -58,14 +59,14 @@ describe('graph', () => {
       it('should return default if input not set', () => {
         node.inputNames = ['input2'];
         node.op = 'PlaceholderWithDefault';
-        node.params.default = createTensorAttr(0);
+        node.inputParams.default = createTensorAttr(0);
         expect(executeOp(node, {input2}, context)).toEqual(input2);
       });
     });
     describe('Identity', () => {
       it('should return input', () => {
         node.inputNames = ['input'];
-        node.params.x = createTensorAttr(0);
+        node.inputParams.x = createTensorAttr(0);
         node.op = 'Identity';
         test_util.expectArraysEqual(
             (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0],
@@ -75,7 +76,7 @@ describe('graph', () => {
     describe('Snapshot', () => {
       it('should return input', () => {
         node.inputNames = ['input'];
-        node.params.x = createTensorAttr(0);
+        node.inputParams.x = createTensorAttr(0);
         node.op = 'Snapshot';
         const result =
             (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0];
@@ -86,7 +87,7 @@ describe('graph', () => {
     describe('Shape', () => {
       it('should return shape', () => {
         node.inputNames = ['input'];
-        node.params.x = createTensorAttr(0);
+        node.inputParams.x = createTensorAttr(0);
         node.op = 'Shape';
         expect(
             Array.prototype.slice.call(
@@ -98,7 +99,7 @@ describe('graph', () => {
     describe('ShapeN', () => {
       it('should return shapeN', () => {
         node.inputNames = ['input1', 'input3'];
-        node.params.x = createTensorsAttr(0, 0);
+        node.inputParams.x = createTensorsAttr(0, 0);
         node.op = 'ShapeN';
         expect((executeOp(node, {input1, input3}, context) as tfc.Tensor[])
                    .map(t => {
@@ -110,7 +111,7 @@ describe('graph', () => {
     describe('Size', () => {
       it('should return size', () => {
         node.inputNames = ['input'];
-        node.params.x = createTensorAttr(0);
+        node.inputParams.x = createTensorAttr(0);
         node.op = 'Size';
         expect(
             Array.prototype.slice.call(
@@ -122,7 +123,7 @@ describe('graph', () => {
     describe('Rank', () => {
       it('should return rank', () => {
         node.inputNames = ['input'];
-        node.params.x = createTensorAttr(0);
+        node.inputParams.x = createTensorAttr(0);
         node.op = 'Rank';
         expect(
             Array.prototype.slice.call(
@@ -142,10 +143,10 @@ describe('graph', () => {
     it('should return empty', () => {
       node.op = 'Print';
       node.inputNames = ['input1', 'input2'];
-      node.params.x = createTensorAttr(0);
-      node.params.data = createTensorsAttr(1, 2);
-      node.params.message = createStrAttr('message');
-      node.params.summarize = createNumberAttr(1);
+      node.inputParams.x = createTensorAttr(0);
+      node.inputParams.data = createTensorsAttr(1, 2);
+      node.attrParams.message = createStrAttr('message');
+      node.attrParams.summarize = createNumberAttr(1);
       spyOn(console, 'log').and.callThrough();
       spyOn(console, 'warn').and.callThrough();
 
@@ -158,7 +159,7 @@ describe('graph', () => {
   describe('StopGradient', () => {
     it('should return input', () => {
       node.inputNames = ['input'];
-      node.params.x = createTensorAttr(0);
+      node.inputParams.x = createTensorAttr(0);
       node.op = 'StopGradient';
       test_util.expectArraysClose(
           (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0],
@@ -168,7 +169,7 @@ describe('graph', () => {
   describe('FakeQuantWithMinMaxVars', () => {
     it('should return input', () => {
       node.inputNames = ['input'];
-      node.params.x = createTensorAttr(0);
+      node.inputParams.x = createTensorAttr(0);
       node.op = 'FakeQuantWithMinMaxVars';
       test_util.expectArraysClose(
           (executeOp(node, {input: input1}, context) as tfc.Tensor[])[0],

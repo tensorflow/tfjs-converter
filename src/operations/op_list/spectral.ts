@@ -21,19 +21,19 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'FFT',
     'category': 'spectral',
-    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
+    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'IFFT',
     'category': 'spectral',
-    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
+    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'RFFT',
     'category': 'spectral',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
-        inputMapper: {'start': 1},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'}, {
+        'start': 1,
         'name': 'fft_length',
         'type': 'number',
         'notSupported': true
@@ -43,9 +43,9 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'IRFFT',
     'category': 'spectral',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
-        inputMapper: {'start': 1},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'}, {
+        'start': 1,
         'name': 'fft_length',
         'type': 'number',
         'notSupported': true

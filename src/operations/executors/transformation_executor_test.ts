@@ -36,7 +36,8 @@ describe('transformation', () => {
       category: 'transformation',
       inputNames: ['input1'],
       inputs: [],
-      params: {x: createTensorAttr(0)},
+      inputParams: {x: createTensorAttr(0)},
+      attrParams: {},
       children: []
     };
   });
@@ -46,7 +47,7 @@ describe('transformation', () => {
       it('should call tfc.cast', () => {
         spyOn(tfc, 'cast');
         node.op = 'Cast';
-        node.params.dtype = createDtypeAttr('float32');
+        node.attrParams.dtype = createDtypeAttr('float32');
         executeOp(node, {input1}, context);
 
         expect(tfc.cast).toHaveBeenCalledWith(input1[0], 'float32');
@@ -56,7 +57,7 @@ describe('transformation', () => {
       it('should call tfc.expandDims', () => {
         spyOn(tfc, 'expandDims');
         node.op = 'ExpandDims';
-        node.params.axis = createNumberAttr(1);
+        node.attrParams.axis = createNumberAttr(1);
         executeOp(node, {input1}, context);
 
         expect(tfc.expandDims).toHaveBeenCalledWith(input1[0], 1);
@@ -66,8 +67,8 @@ describe('transformation', () => {
       it('should call tfc.pad', () => {
         spyOn(tfc, 'pad');
         node.op = 'Pad';
-        node.params.padding = createNumericArrayAttrFromIndex(1);
-        node.params.constantValue = createNumberAttr(1);
+        node.inputParams.padding = createNumericArrayAttrFromIndex(1);
+        node.attrParams.constantValue = createNumberAttr(1);
         node.inputNames = ['input1', 'input3'];
         const input3 = [tfc.tensor2d([1, 1, 2, 2], [2, 2])];
         executeOp(node, {input1, input3}, context);
@@ -79,8 +80,8 @@ describe('transformation', () => {
       it('should call tfc.pad', () => {
         spyOn(tfc, 'pad');
         node.op = 'PadV2';
-        node.params.padding = createNumericArrayAttrFromIndex(1);
-        node.params.constantValue = createNumberAttr(1);
+        node.inputParams.padding = createNumericArrayAttrFromIndex(1);
+        node.attrParams.constantValue = createNumberAttr(1);
         node.inputNames = ['input1', 'input3'];
         const input3 = [tfc.tensor2d([1, 1, 2, 2], [2, 2])];
         executeOp(node, {input1, input3}, context);
@@ -92,7 +93,7 @@ describe('transformation', () => {
       it('should call tfc.reshape', () => {
         spyOn(tfc, 'reshape');
         node.op = 'Reshape';
-        node.params.shape = createNumericArrayAttrFromIndex(1);
+        node.inputParams.shape = createNumericArrayAttrFromIndex(1);
         node.inputNames = ['input1', 'input2'];
 
         executeOp(node, {input1, input2}, context);
@@ -104,7 +105,7 @@ describe('transformation', () => {
       it('should call tfc.squeeze', () => {
         spyOn(tfc, 'squeeze');
         node.op = 'Squeeze';
-        node.params.axis = createNumberAttr(1);
+        node.attrParams.axis = createNumberAttr(1);
         executeOp(node, {input1}, context);
 
         expect(tfc.squeeze).toHaveBeenCalledWith(input1[0], 1);
@@ -114,8 +115,8 @@ describe('transformation', () => {
       it('should call tfc.spaceToBatchND', () => {
         spyOn(tfc, 'spaceToBatchND');
         node.op = 'SpaceToBatchND';
-        node.params.blockShape = createNumericArrayAttrFromIndex(1);
-        node.params.paddings = createNumericArrayAttrFromIndex(2);
+        node.inputParams.blockShape = createNumericArrayAttrFromIndex(1);
+        node.inputParams.paddings = createNumericArrayAttrFromIndex(2);
         node.inputNames = ['input1', 'input2', 'input3'];
         const input2 = [tfc.tensor1d([1, 1, 2, 2])];
         const input3 = [tfc.tensor2d([1, 2, 2, 3, 2, 3, 3, 4], [4, 2])];
@@ -130,8 +131,8 @@ describe('transformation', () => {
       it('should call tfc.batchToSpaceND', () => {
         spyOn(tfc, 'batchToSpaceND');
         node.op = 'BatchToSpaceND';
-        node.params.blockShape = createNumericArrayAttrFromIndex(1);
-        node.params.crops = createNumericArrayAttrFromIndex(2);
+        node.inputParams.blockShape = createNumericArrayAttrFromIndex(1);
+        node.inputParams.crops = createNumericArrayAttrFromIndex(2);
         node.inputNames = ['input1', 'input2', 'input3'];
         const input2 = [tfc.tensor1d([1, 1, 2, 2])];
         const input3 = [tfc.tensor2d([1, 2, 2, 3, 2, 3, 3, 4], [4, 2])];
@@ -146,8 +147,8 @@ describe('transformation', () => {
       it('should call tfc.depthToSpace', () => {
         spyOn(tfc, 'depthToSpace');
         node.op = 'DepthToSpace';
-        node.params.blockSize = createNumberAttr(1);
-        node.params.dataFormat = createStrAttr('nhwc');
+        node.attrParams.blockSize = createNumberAttr(1);
+        node.attrParams.dataFormat = createStrAttr('nhwc');
         node.inputNames = ['input1'];
         executeOp(node, {input1}, context);
 

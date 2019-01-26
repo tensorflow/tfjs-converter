@@ -21,19 +21,22 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'FusedBatchNorm',
     'category': 'normalization',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'scale', 'type': 'tensor'},
-      {inputMapper: {'start': 2}, 'name': 'offset', 'type': 'tensor'},
-      {inputMapper: {'start': 3}, 'name': 'mean', 'type': 'tensor'},
-      {inputMapper: {'start': 4}, 'name': 'variance', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'epsilon'},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'scale', 'type': 'tensor'},
+      {'start': 2, 'name': 'offset', 'type': 'tensor'},
+      {'start': 3, 'name': 'mean', 'type': 'tensor'},
+      {'start': 4, 'name': 'variance', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'epsilon',
         'name': 'epsilon',
         'type': 'number',
         'defaultValue': 0.001
       },
       {
-        attrMapper: {'tfName': 'data_format'},
+        'tfName': 'data_format',
         'name': 'dataFormat',
         'type': 'string',
         'notSupported': true
@@ -43,19 +46,22 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'FusedBatchNormV2',
     'category': 'normalization',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'scale', 'type': 'tensor'},
-      {inputMapper: {'start': 2}, 'name': 'offset', 'type': 'tensor'},
-      {inputMapper: {'start': 3}, 'name': 'mean', 'type': 'tensor'},
-      {inputMapper: {'start': 4}, 'name': 'variance', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'epsilon'},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+      {'start': 1, 'name': 'scale', 'type': 'tensor'},
+      {'start': 2, 'name': 'offset', 'type': 'tensor'},
+      {'start': 3, 'name': 'mean', 'type': 'tensor'},
+      {'start': 4, 'name': 'variance', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'epsilon',
         'name': 'epsilon',
         'type': 'number',
         'defaultValue': 0.001
       },
       {
-        attrMapper: {'tfName': 'data_format'},
+        'tfName': 'data_format',
         'name': 'dataFormat',
         'type': 'string',
         'notSupported': true
@@ -65,27 +71,25 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'LRN',
     'category': 'normalization',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'depth_radius'},
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'depth_radius',
         'name': 'radius',
         'type': 'number',
         'defaultValue': 5
       },
+      {'tfName': 'bias', 'name': 'bias', 'type': 'number', 'defaultValue': 1.0},
       {
-        attrMapper: {'tfName': 'bias'},
-        'name': 'bias',
-        'type': 'number',
-        'defaultValue': 1.0
-      },
-      {
-        attrMapper: {'tfName': 'alpha'},
+        'tfName': 'alpha',
         'name': 'alpha',
         'type': 'number',
         'defaultValue': 1.0
       },
       {
-        attrMapper: {'tfName': 'beta'},
+        'tfName': 'beta',
         'name': 'beta',
         'type': 'number',
         'defaultValue': 0.5
@@ -95,27 +99,28 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Softmax',
     'category': 'normalization',
-    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
+    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'LogSoftmax',
     'category': 'normalization',
-    'params': [{inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'}]
+    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'SparseToDense',
     'category': 'normalization',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'sparseIndices', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'outputShape', 'type': 'number[]'},
-      {inputMapper: {'start': 2}, 'name': 'sparseValues', 'type': 'tensor'},
-      {inputMapper: {'start': 3}, 'name': 'defaultValue', 'type': 'tensor'}, {
-        attrMapper: {'tfName': 'validate_indices'},
-        'name': 'validateIndices',
-        'type': 'bool',
-        'defaultValue': true,
-        'notSupported': true
-      }
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'sparseIndices', 'type': 'tensor'},
+      {'start': 1, 'name': 'outputShape', 'type': 'number[]'},
+      {'start': 2, 'name': 'sparseValues', 'type': 'tensor'},
+      {'start': 3, 'name': 'defaultValue', 'type': 'tensor'},
+    ],
+    'attrParams': [{
+      'tfName': 'validate_indices',
+      'name': 'validateIndices',
+      'type': 'bool',
+      'defaultValue': true,
+      'notSupported': true
+    }]
   }
 ];

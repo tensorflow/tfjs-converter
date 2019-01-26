@@ -14,14 +14,14 @@
  * limitations under the License.
  * =============================================================================
  */
-import {OpMapper, ParamValue} from '../types';
+import {InputParamValue, OpMapper, ParamValue} from '../types';
 import {Node} from '../types';
 
 export function createNumberAttr(value: number): ParamValue {
   return {value, type: 'number'};
 }
 
-export function createNumberAttrFromIndex(inputIndex: number): ParamValue {
+export function createNumberAttrFromIndex(inputIndex: number): InputParamValue {
   return {inputIndexStart: inputIndex, type: 'number'};
 }
 
@@ -41,16 +41,16 @@ export function createNumericArrayAttr(value: number[]): ParamValue {
 }
 
 export function createNumericArrayAttrFromIndex(inputIndex: number):
-    ParamValue {
+    InputParamValue {
   return {inputIndexStart: inputIndex, type: 'number[]'};
 }
 
-export function createTensorAttr(index: number): ParamValue {
+export function createTensorAttr(index: number): InputParamValue {
   return {inputIndexStart: index, type: 'tensor'};
 }
 
 export function createTensorsAttr(
-    index: number, paramLength: number): ParamValue {
+    index: number, paramLength: number): InputParamValue {
   return {inputIndexStart: index, inputIndexEnd: paramLength, type: 'tensors'};
 }
 
@@ -63,13 +63,15 @@ export function validateParam(
   const opMapper = tfOpName != null ?
       opMappers.find(mapper => mapper.tfOpName === tfOpName) :
       opMappers.find(mapper => mapper.tfOpName === node.op);
-  return Object.keys(node.params).every(key => {
-    const value = node.params[key];
-    const def = opMapper.params.find(param => param.name === key);
+  return Object.keys(node.inputParams).every(key => {
+    const value = node.inputParams[key];
+    const def = opMapper.inputParams.find(param => param.name === key);
     return def && def.type === value.type &&
-        (def.inputMapper ? def.inputMapper.start : undefined) ===
-        value.inputIndexStart &&
-        (def.inputMapper ? def.inputMapper.end : undefined) ===
-        value.inputIndexEnd;
-  });
+        def.start === value.inputIndexStart && def.end === value.inputIndexEnd;
+  }) &&
+      Object.keys(node.attrParams).every(key => {
+        const value = node.attrParams[key];
+        const def = opMapper.attrParams.find(param => param.name === key);
+        return def && def.type === value.type;
+      });
 }

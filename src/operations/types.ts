@@ -19,8 +19,6 @@ import {Tensor} from '@tensorflow/tfjs-core';
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
 
-import {OpExecutor} from './executors/types';
-
 export type ParamTypes =
     'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
 export type Category =
@@ -28,8 +26,17 @@ export type Category =
     'evaluation'|'image'|'creation'|'graph'|'logical'|'matrices'|
     'normalization'|'reduction'|'slice_join'|'spectral'|'transformation';
 
+// For mapping input or attributes of NodeDef into TensorFlow.js op param.
+export declare interface ParamMapper {
+  // tensorflow.js name for the field, it should be in camelcase format.
+  name: string;
+  type: ParamTypes;
+  defaultValue?: string|string[]|number|number[]|boolean|boolean[];
+  notSupported?: boolean;
+}
+
 // For mapping the input of TensorFlow NodeDef into TensorFlow.js Op param.
-export declare interface InputParamMapper {
+export declare interface InputParamMapper extends ParamMapper {
   // The first number is the starting index of the param, the second number is
   // the length of the param. If the length value is positive number, it
   // represents the true length of the param. Otherwise, it represents a
@@ -57,32 +64,24 @@ export declare interface InputParamMapper {
 }
 
 // For mapping the attributes of TensorFlow NodeDef into TensorFlow.js op param.
-export declare interface AttrParamMapper {
-  // TensorFlow attribute name.
-  tfName: string;
+export declare interface AttrParamMapper extends ParamMapper {
+  // TensorFlow attribute name, this should be set if the tensorflow attribute
+  // name is different form the tensorflow.js name.
+  tfName?: string;
   // TensorFlow deprecated attribute name, this is used to support old models.
   tfDeprecatedName?: string;
 }
 
-// For mapping input or attributes of NodeDef into TensorFlow.js op param.
-export declare interface ParamMapper {
-  name: string;
-  type: ParamTypes;
-  inputMapper?: InputParamMapper;
-  attrMapper?: AttrParamMapper;
-  defaultValue?: string|string[]|number|number[]|boolean|boolean[];
-  notSupported?: boolean;
-}
-
 export interface OpExecutor {
-  (node: Node, tensorMap: NamedTensorsMap,
-   context: ExecutionContext): Tensor[]|Promise<Tensor[]>;
+  (node: Node, tensorMap: NamedTensorsMap, context: ExecutionContext): Tensor
+      |Tensor[]|Promise<Tensor|Tensor[]>;
 }
 
 export declare interface OpMapper {
-  tfOpName: string;
+  tfOpName?: string;
   category?: Category;
-  params?: ParamMapper[];
+  inputParams?: InputParamMapper[];
+  attrParams?: AttrParamMapper[];
   customExecutor?: OpExecutor;
 }
 
@@ -92,7 +91,8 @@ export declare interface Node {
   category: Category;
   inputNames: string[];
   inputs: Node[];
-  params: {[key: string]: ParamValue};
+  inputParams: {[key: string]: InputParamValue};
+  attrParams: {[key: string]: ParamValue};
   children: Node[];
 }
 
@@ -110,7 +110,10 @@ export type ValueType = string|string[]|number|number[]|number[][]|boolean|
     boolean[]|Tensor|Tensor[];
 export declare interface ParamValue {
   value?: ValueType;
+  type: ParamTypes;
+}
+
+export declare interface InputParamValue extends ParamValue {
   inputIndexStart?: number;
   inputIndexEnd?: number;
-  type: ParamTypes;
 }

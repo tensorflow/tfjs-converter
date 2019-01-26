@@ -21,169 +21,143 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Fill',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'},
-      {inputMapper: {'start': 1}, 'name': 'value', 'type': 'number'},
-      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'shape', 'type': 'number[]'},
+      {'start': 1, 'name': 'value', 'type': 'number'},
+    ],
+    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'LinSpace',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'start', 'type': 'number'},
-      {inputMapper: {'start': 1}, 'name': 'stop', 'type': 'number'},
-      {inputMapper: {'start': 2}, 'name': 'num', 'type': 'number'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+    'inputParams': [
+      {'start': 0, 'name': 'start', 'type': 'number'},
+      {'start': 1, 'name': 'stop', 'type': 'number'},
+      {'start': 2, 'name': 'num', 'type': 'number'},
+    ],
+    'attrParams': [
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'OneHot',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'indices', 'type': 'tensor'},
-      {inputMapper: {'start': 1}, 'name': 'depth', 'type': 'number'}, {
-        inputMapper: {'start': 2},
-        'name': 'onValue',
-        'type': 'number',
-        'defaultValue': 1
-      },
+    'inputParams': [
+      {'start': 0, 'name': 'indices', 'type': 'tensor'},
+      {'start': 1, 'name': 'depth', 'type': 'number'},
+      {'start': 2, 'name': 'onValue', 'type': 'number', 'defaultValue': 1},
+      {'start': 3, 'name': 'offValue', 'type': 'number', 'defaultValue': 0},
+    ],
+    'attrParams': [
       {
-        inputMapper: {'start': 3},
-        'name': 'offValue',
-        'type': 'number',
-        'defaultValue': 0
-      },
-      {
-        attrMapper: {'tfName': 'axis'},
+        'tfName': 'axis',
         'name': 'axis',
         'type': 'number',
         'notSupported': true
       },
-      {
-        attrMapper: {'tfName': 'T'},
-        'name': 'dtype',
-        'type': 'dtype',
-        'notSupported': true
-      }
+      {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Ones',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'},
-      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'shape', 'type': 'number[]'},
+    ],
+    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'OnesLike',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+    ],
+    'attrParams': [{'tfName': 'dtype', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'RandomUniform',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'minval'},
+    'inputParams': [
+      {'start': 0, 'name': 'shape', 'type': 'number[]'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'minval',
         'name': 'minval',
         'type': 'number',
         'defaultValue': 0
       },
       {
-        attrMapper: {'tfName': 'maxval'},
+        'tfName': 'maxval',
         'name': 'maxval',
         'type': 'number',
         'defaultValue': 1
       },
-      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}, {
-        attrMapper: {'tfName': 'seed'},
-        'name': 'seed',
-        'type': 'number',
-        'defaultValue': 0
-      },
-      {
-        attrMapper: {'tfName': 'seed2'},
+      {'tfName': 'dtype', 'name': 'dtype', 'type': 'dtype'},
+      {'tfName': 'seed', 'name': 'seed', 'type': 'number', 'defaultValue': 0}, {
+        'tfName': 'seed2',
         'name': 'seed2',
         'type': 'number',
         'defaultValue': 0,
         'notSupported': true
       },
-      {
-        attrMapper: {'tfName': 'T'},
-        'name': 'T',
-        'type': 'number',
-        'notSupported': true
-      }
+      {'tfName': 'T', 'name': 'T', 'type': 'number', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Range',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'start', 'type': 'number'},
-      {inputMapper: {'start': 1}, 'name': 'stop', 'type': 'number'}, {
-        inputMapper: {'start': 2},
-        'name': 'step',
-        'type': 'number',
-        'defaultValue': 0
-      },
-      {attrMapper: {'tfName': 'Tidx'}, 'name': 'dtype', 'type': 'dtype'}
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'start', 'type': 'number'},
+      {'start': 1, 'name': 'stop', 'type': 'number'},
+      {'start': 2, 'name': 'step', 'type': 'number', 'defaultValue': 0},
+    ],
+    'attrParams': [{'tfName': 'Tidx', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'TruncatedNormal',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'}, {
-        attrMapper: {'tfName': 'means'},
+    'inputParams': [
+      {'start': 0, 'name': 'shape', 'type': 'number[]'},
+    ],
+    'attrParams': [
+      {
+        'tfName': 'means',
         'name': 'mean',
         'type': 'number',
         'defaultValue': 0.0
       },
       {
-        attrMapper: {'tfName': 'stddev'},
+        'tfName': 'stddev',
         'name': 'stdDev',
         'type': 'number',
         'defaultValue': 1.0
       },
-      {attrMapper: {'tfName': 'seed'}, 'name': 'seed', 'type': 'number'}, {
-        attrMapper: {'tfName': 'seed2'},
+      {'tfName': 'seed', 'name': 'seed', 'type': 'number'}, {
+        'tfName': 'seed2',
         'name': 'seed2',
         'type': 'number',
         'defaultValue': 0,
         'notSupported': true
       },
-      {attrMapper: {'tfName': 'dtype'}, 'name': 'dtype', 'type': 'dtype'}, {
-        attrMapper: {'tfName': 'T'},
-        'name': 'T',
-        'type': 'number',
-        'notSupported': true
-      }
+      {'tfName': 'dtype', 'name': 'dtype', 'type': 'dtype'},
+      {'tfName': 'T', 'name': 'T', 'type': 'number', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Zeros',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'shape', 'type': 'number[]'},
-      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'shape', 'type': 'number[]'},
+    ],
+    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'ZerosLike',
     'category': 'creation',
-    'params': [
-      {inputMapper: {'start': 0}, 'name': 'x', 'type': 'tensor'},
-      {attrMapper: {'tfName': 'T'}, 'name': 'dtype', 'type': 'dtype'}
-    ]
+    'inputParams': [
+      {'start': 0, 'name': 'x', 'type': 'tensor'},
+    ],
+    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   }
 ];
