@@ -269,10 +269,12 @@ describe('Model', () => {
       const model = await fm.loadFrozenModel(
           MODEL_URL, WEIGHT_MANIFEST_URL, {credentials: 'include'});
       expect(window.fetch).toHaveBeenCalledWith(MODEL_URL, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: Object({Accept: OCTET_STREAM_TYPE})
       });
       expect(window.fetch).toHaveBeenCalledWith(WEIGHT_MANIFEST_URL, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: Object({Accept: JSON_TYPE})
       });
       expect(model).not.toBeUndefined();
     });

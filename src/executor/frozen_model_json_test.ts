@@ -112,6 +112,8 @@ describe('Model', () => {
       spyOn(window, 'fetch').and.callFake(async (path: string) => {
         if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
             path === TFHUB_MODEL_URL) {
+          // TODO(piyu): Investigate why this is returning an OCTET_STREAM_TYPE
+          // and not JSON.
           return new Response(
               JSON.stringify({modelTopology: SIMPLE_MODEL, weightsManifest}),
               {'headers': {'Content-Type': JSON_TYPE}});
@@ -255,7 +257,8 @@ describe('Model', () => {
       const model =
           await fm.loadFrozenModel(MODEL_URL, {credentials: 'include'});
       expect(window.fetch).toHaveBeenCalledWith(MODEL_URL, {
-        credentials: 'include'
+        credentials: 'include',
+        headers: Object({Accept: JSON_TYPE})
       });
       expect(model).not.toBeUndefined();
     });
