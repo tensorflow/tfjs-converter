@@ -107,7 +107,7 @@ const DYNAMIC_SHAPE_MODEL: tensorflow.IGraphDef = {
 describe('Model', () => {
   beforeEach(() => {
     model = new fm.FrozenModel(MODEL_URL, WEIGHT_MANIFEST_URL);
-    spyOn(window, 'fetch').and.callFake((path: string) => {
+    spyOn(window, 'fetch').and.callFake(async (path: string) => {
       if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
           path === TFHUB_MODEL_URL) {
         return new Response(new Uint8Array([1, 2, 3]));

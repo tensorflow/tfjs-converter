@@ -107,7 +107,7 @@ describe('Model', () => {
 
   describe('simple model', () => {
     beforeEach(() => {
-      spyOn(window, 'fetch').and.callFake((path: string) => {
+      spyOn(window, 'fetch').and.callFake(async (path: string) => {
         if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
             path === TFHUB_MODEL_URL) {
           return new Response(
@@ -279,7 +279,7 @@ describe('Model', () => {
 
   describe('control flow model', () => {
     beforeEach(() => {
-      spyOn(window, 'fetch').and.callFake((path: string) => {
+      spyOn(window, 'fetch').and.callFake(async (path: string) => {
         if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
             path === TFHUB_MODEL_URL) {
           return new Response(JSON.stringify(
@@ -324,7 +324,7 @@ describe('Model', () => {
 
   describe('dynamic shape model', () => {
     beforeEach(() => {
-      spyOn(window, 'fetch').and.callFake((path: string) => {
+      spyOn(window, 'fetch').and.callFake(async (path: string) => {
         if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
             path === TFHUB_MODEL_URL) {
           return new Response(JSON.stringify(
