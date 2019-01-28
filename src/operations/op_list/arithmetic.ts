@@ -21,90 +21,90 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Add',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'AddN',
     'category': 'arithmetic',
-    'inputParams':
+    'inputs':
         [{'start': 0, 'end': 0, 'name': 'tensors', 'type': 'tensors'}]
   },
   {
     'tfOpName': 'BiasAdd',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Sub',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'RealDiv',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Div',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'FloorDiv',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Mul',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Maximum',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'}
     ]
@@ -112,7 +112,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Minimum',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'}
     ]
@@ -120,44 +120,44 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Pow',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'SquaredDifference',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'Mod',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'FloorMod',
     'category': 'arithmetic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [{
+    'attrs': [{
       'tfName': 'T',
       'name': 'dtype',
       'type': 'dtype',

@@ -21,11 +21,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'ResizeBilinear',
     'category': 'image',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'images', 'type': 'tensor'},
       {'start': 1, 'name': 'size', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'align_corners', 'name': 'alignCorners', 'type': 'bool'},
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
@@ -33,11 +33,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'ResizeNearestNeighbor',
     'category': 'image',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'images', 'type': 'tensor'},
       {'start': 1, 'name': 'size', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'align_corners', 'name': 'alignCorners', 'type': 'bool'},
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
@@ -45,13 +45,13 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'CropAndResize',
     'category': 'image',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'image', 'type': 'tensor'},
       {'start': 1, 'name': 'boxes', 'type': 'tensor'},
       {'start': 2, 'name': 'boxInd', 'type': 'tensor'},
       {'start': 3, 'name': 'cropSize', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'method', 'name': 'method', 'type': 'string'}, {
         'tfName': 'extrapolation_value',
         'name': 'extrapolationValue',

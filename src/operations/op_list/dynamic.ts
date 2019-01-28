@@ -21,7 +21,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'NonMaxSuppressionV2',
     'category': 'dynamic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'boxes', 'type': 'tensor'},
       {'start': 1, 'name': 'scores', 'type': 'tensor'},
       {'start': 2, 'name': 'maxOutputSize', 'type': 'number'},
@@ -31,7 +31,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'NonMaxSuppressionV3',
     'category': 'dynamic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'boxes', 'type': 'tensor'},
       {'start': 1, 'name': 'scores', 'type': 'tensor'},
       {'start': 2, 'name': 'maxOutputSize', 'type': 'number'},
@@ -42,21 +42,21 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Where',
     'category': 'dynamic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'condition', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'ListDiff',
     'category': 'dynamic',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'y', 'type': 'tensor'},
     ],
-    'attrParams': [{
+    'attrs': [{
       'tfName': 'T',
       'name': 'dtype',
       'type': 'dtype',

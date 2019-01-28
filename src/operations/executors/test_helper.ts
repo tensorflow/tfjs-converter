@@ -65,13 +65,13 @@ export function validateParam(
       opMappers.find(mapper => mapper.tfOpName === node.op);
   return Object.keys(node.inputParams).every(key => {
     const value = node.inputParams[key];
-    const def = opMapper.inputParams.find(param => param.name === key);
+    const def = opMapper.inputs.find(param => param.name === key);
     return def && def.type === value.type &&
         def.start === value.inputIndexStart && def.end === value.inputIndexEnd;
   }) &&
       Object.keys(node.attrParams).every(key => {
         const value = node.attrParams[key];
-        const def = opMapper.attrParams.find(param => param.name === key);
+        const def = opMapper.attrs.find(param => param.name === key);
         return def && def.type === value.type;
       });
 }

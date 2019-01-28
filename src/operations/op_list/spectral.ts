@@ -21,17 +21,17 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'FFT',
     'category': 'spectral',
-    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
+    'inputs': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'IFFT',
     'category': 'spectral',
-    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
+    'inputs': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'RFFT',
     'category': 'spectral',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'}, {
         'start': 1,
         'name': 'fft_length',
@@ -43,7 +43,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'IRFFT',
     'category': 'spectral',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'}, {
         'start': 1,
         'name': 'fft_length',

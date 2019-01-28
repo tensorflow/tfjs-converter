@@ -139,9 +139,9 @@ export class OperationMapper {
       attrParams: {}
     };
 
-    if (!!mapper.inputParams) {
+    if (!!mapper.inputs) {
       newNode.inputParams =
-          mapper.inputParams.reduce<{[key: string]: InputParamValue}>(
+          mapper.inputs.reduce<{[key: string]: InputParamValue}>(
               (map, param) => {
                 map[param.name] = {
                   type: param.type,
@@ -152,10 +152,9 @@ export class OperationMapper {
               },
               {});
     }
-    if (!!mapper.attrParams) {
-      newNode
-          .attrParams = mapper.attrParams.reduce<{[key: string]: ParamValue}>(
-          (map, param) => {
+    if (!!mapper.attrs) {
+      newNode.attrParams =
+          mapper.attrs.reduce<{[key: string]: ParamValue}>((map, param) => {
             const type = param.type;
             let value = undefined;
             switch (param.type) {
@@ -224,8 +223,7 @@ export class OperationMapper {
             }
             map[param.name] = {value, type};
             return map;
-          },
-          {});
+          }, {});
     }
     return newNode;
   }

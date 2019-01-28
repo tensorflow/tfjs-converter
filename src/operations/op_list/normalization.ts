@@ -21,14 +21,14 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'FusedBatchNorm',
     'category': 'normalization',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'scale', 'type': 'tensor'},
       {'start': 2, 'name': 'offset', 'type': 'tensor'},
       {'start': 3, 'name': 'mean', 'type': 'tensor'},
       {'start': 4, 'name': 'variance', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'epsilon',
         'name': 'epsilon',
@@ -46,14 +46,14 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'FusedBatchNormV2',
     'category': 'normalization',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'scale', 'type': 'tensor'},
       {'start': 2, 'name': 'offset', 'type': 'tensor'},
       {'start': 3, 'name': 'mean', 'type': 'tensor'},
       {'start': 4, 'name': 'variance', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'epsilon',
         'name': 'epsilon',
@@ -71,10 +71,10 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'LRN',
     'category': 'normalization',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'depth_radius',
         'name': 'radius',
@@ -99,23 +99,23 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Softmax',
     'category': 'normalization',
-    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
+    'inputs': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'LogSoftmax',
     'category': 'normalization',
-    'inputParams': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
+    'inputs': [{'start': 0, 'name': 'x', 'type': 'tensor'}]
   },
   {
     'tfOpName': 'SparseToDense',
     'category': 'normalization',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'sparseIndices', 'type': 'tensor'},
       {'start': 1, 'name': 'outputShape', 'type': 'number[]'},
       {'start': 2, 'name': 'sparseValues', 'type': 'tensor'},
       {'start': 3, 'name': 'defaultValue', 'type': 'tensor'},
     ],
-    'attrParams': [{
+    'attrs': [{
       'tfName': 'validate_indices',
       'name': 'validateIndices',
       'type': 'bool',

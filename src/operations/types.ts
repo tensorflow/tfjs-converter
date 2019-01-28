@@ -19,7 +19,7 @@ import {Tensor} from '@tensorflow/tfjs-core';
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
 
-export type ParamTypes =
+export type ParamType =
     'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
 export type Category =
     'arithmetic'|'basic_math'|'control'|'convolution'|'custom'|'dynamic'|
@@ -30,7 +30,7 @@ export type Category =
 export declare interface ParamMapper {
   // tensorflow.js name for the field, it should be in camelcase format.
   name: string;
-  type: ParamTypes;
+  type: ParamType;
   defaultValue?: string|string[]|number|number[]|boolean|boolean[];
   notSupported?: boolean;
 }
@@ -80,8 +80,8 @@ export interface OpExecutor {
 export declare interface OpMapper {
   tfOpName?: string;
   category?: Category;
-  inputParams?: InputParamMapper[];
-  attrParams?: AttrParamMapper[];
+  inputs?: InputParamMapper[];
+  attrs?: AttrParamMapper[];
   customExecutor?: OpExecutor;
 }
 
@@ -110,7 +110,7 @@ export type ValueType = string|string[]|number|number[]|number[][]|boolean|
     boolean[]|Tensor|Tensor[];
 export declare interface ParamValue {
   value?: ValueType;
-  type: ParamTypes;
+  type: ParamType;
 }
 
 export declare interface InputParamValue extends ParamValue {
