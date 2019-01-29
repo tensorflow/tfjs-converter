@@ -317,7 +317,7 @@ export class GraphExecutor {
       // The tensor of the Enter op with isConstant set should be set
       // in the parent scope, so it will be available as constant for the
       // whole loop.
-      if (item.node.op === 'enter' &&
+      if (item.node.op === 'Enter' &&
           getParamValue('isConstant', item.node, tensorMap, context)) {
         [nodeName] = getNodeNameAndIndex(item.node.name, context);
       }
@@ -361,7 +361,7 @@ export class GraphExecutor {
       const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
       if (!added[nodeName]) {
         // Merge op can be pushed if any of its inputs has value.
-        if (childNode.op === 'merge') {
+        if (childNode.op === 'Merge') {
           if (childNode.inputNames.some(name => {
                 return !!getTensor(name, tensorMap, context);
               })) {
