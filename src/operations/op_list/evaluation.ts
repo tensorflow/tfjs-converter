@@ -20,9 +20,9 @@ import {OpMapper} from '../types';
 export const json: OpMapper[] = [{
   'tfOpName': 'TopKV2',
   'category': 'evaluation',
-  'inputParams': [
+  'inputs': [
     {'start': 0, 'name': 'x', 'type': 'tensor'},
     {'start': 1, 'name': 'k', 'type': 'number'},
   ],
-  'attrParams': [{'tfName': 'sorted', 'name': 'sorted', 'type': 'bool'}]
+  'attrs': [{'tfName': 'sorted', 'name': 'sorted', 'type': 'bool'}]
 }];

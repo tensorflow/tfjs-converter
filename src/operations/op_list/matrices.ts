@@ -21,11 +21,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'MatMul',
     'category': 'matrices',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'transpose_a',
         'name': 'transposeA',
@@ -44,11 +44,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'BatchMatMul',
     'category': 'matrices',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'a', 'type': 'tensor'},
       {'start': 1, 'name': 'b', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'adj_x',
         'name': 'transposeA',
@@ -67,11 +67,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Transpose',
     'category': 'matrices',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'perm', 'type': 'number[]'},
     ],
-    'attrParams': [{
+    'attrs': [{
       'tfName': 'T',
       'name': 'dtype',
       'type': 'dtype',

@@ -21,34 +21,34 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Fill',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'shape', 'type': 'number[]'},
       {'start': 1, 'name': 'value', 'type': 'number'},
     ],
-    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
+    'attrs': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'LinSpace',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'start', 'type': 'number'},
       {'start': 1, 'name': 'stop', 'type': 'number'},
       {'start': 2, 'name': 'num', 'type': 'number'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true}
     ]
   },
   {
     'tfOpName': 'OneHot',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'indices', 'type': 'tensor'},
       {'start': 1, 'name': 'depth', 'type': 'number'},
       {'start': 2, 'name': 'onValue', 'type': 'number', 'defaultValue': 1},
       {'start': 3, 'name': 'offValue', 'type': 'number', 'defaultValue': 0},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'axis',
         'name': 'axis',
@@ -61,26 +61,26 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Ones',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'shape', 'type': 'number[]'},
     ],
-    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
+    'attrs': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'OnesLike',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
     ],
-    'attrParams': [{'tfName': 'dtype', 'name': 'dtype', 'type': 'dtype'}]
+    'attrs': [{'tfName': 'dtype', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'RandomUniform',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'shape', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'minval',
         'name': 'minval',
@@ -107,20 +107,20 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Range',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'start', 'type': 'number'},
       {'start': 1, 'name': 'stop', 'type': 'number'},
       {'start': 2, 'name': 'step', 'type': 'number', 'defaultValue': 0},
     ],
-    'attrParams': [{'tfName': 'Tidx', 'name': 'dtype', 'type': 'dtype'}]
+    'attrs': [{'tfName': 'Tidx', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'TruncatedNormal',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'shape', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'means',
         'name': 'mean',
@@ -147,17 +147,17 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Zeros',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'shape', 'type': 'number[]'},
     ],
-    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
+    'attrs': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   },
   {
     'tfOpName': 'ZerosLike',
     'category': 'creation',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
     ],
-    'attrParams': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
+    'attrs': [{'tfName': 'T', 'name': 'dtype', 'type': 'dtype'}]
   }
 ];

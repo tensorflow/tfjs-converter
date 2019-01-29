@@ -21,10 +21,10 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'AvgPool',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'strides', 'name': 'strides', 'type': 'number[]'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'}, {
         'tfName': 'data_format',
@@ -39,10 +39,10 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'MaxPool',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'strides', 'name': 'strides', 'type': 'number[]'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'}, {
         'tfName': 'data_format',
@@ -57,11 +57,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Conv1D',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'filter', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'stride', 'name': 'stride', 'type': 'number'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'}, {
         'tfName': 'data_format',
@@ -80,11 +80,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Conv2D',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'filter', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'T', 'name': 'dtype', 'type': 'dtype', 'notSupported': true},
       {'tfName': 'strides', 'name': 'strides', 'type': 'number[]'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'},
@@ -100,12 +100,12 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Conv2DBackpropInput',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 2, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'filter', 'type': 'tensor'},
       {'start': 0, 'name': 'outputShape', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'strides', 'name': 'strides', 'type': 'number[]'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'}, {
         'tfName': 'data_format',
@@ -118,11 +118,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'DepthwiseConv2d',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'input', 'type': 'tensor'},
       {'start': 1, 'name': 'filter', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'strides', 'name': 'strides', 'type': 'number[]'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'}, {
         'tfName': 'data_format',
@@ -136,11 +136,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'DepthwiseConv2dNative',
     'category': 'convolution',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'input', 'type': 'tensor'},
       {'start': 1, 'name': 'filter', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'strides', 'name': 'strides', 'type': 'number[]'},
       {'tfName': 'padding', 'name': 'pad', 'type': 'string'}, {
         'tfName': 'data_format',

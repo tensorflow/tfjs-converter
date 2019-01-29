@@ -21,7 +21,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'ConcatV2',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'end': -1, 'name': 'tensors', 'type': 'tensors'},
       {'start': -1, 'name': 'axis', 'type': 'number'}
     ]
@@ -29,7 +29,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Concat',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 1, 'end': 0, 'name': 'tensors', 'type': 'tensors'},
       {'start': 0, 'name': 'axis', 'type': 'number'}
     ]
@@ -37,7 +37,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'GatherV2',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'indices', 'type': 'tensor'},
       {'start': 2, 'name': 'axis', 'type': 'number', 'defaultValue': 0}
@@ -46,11 +46,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Gather',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'indices', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'axis', 'name': 'axis', 'type': 'number', 'defaultValue': 0}, {
         'tfName': 'validate_indices',
         'name': 'validateIndices',
@@ -62,7 +62,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Reverse',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'dims', 'type': 'bool', 'notSupported': true}
     ]
@@ -70,7 +70,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'ReverseV2',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'axis', 'type': 'number[]'}
     ]
@@ -78,7 +78,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Slice',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'begin', 'type': 'number[]'},
       {'start': 2, 'name': 'size', 'type': 'number[]'}
@@ -87,13 +87,13 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'StridedSlice',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'begin', 'type': 'number[]'},
       {'start': 2, 'name': 'end', 'type': 'number[]'},
       {'start': 3, 'name': 'strides', 'type': 'number[]'},
     ],
-    'attrParams': [
+    'attrs': [
       {
         'tfName': 'begin_mask',
         'name': 'beginMask',
@@ -129,20 +129,20 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Pack',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'end': 0, 'name': 'tensors', 'type': 'tensors'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'axis', 'name': 'axis', 'type': 'number', 'defaultValue': 0}
     ]
   },
   {
     'tfOpName': 'Unpack',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'tensor', 'type': 'tensor'},
     ],
-    'attrParams': [
+    'attrs': [
       {'tfName': 'axis', 'name': 'axis', 'type': 'number', 'defaultValue': 0}, {
         'tfName': 'num',
         'name': 'num',
@@ -155,7 +155,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Tile',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'reps', 'type': 'number[]'}
     ]
@@ -163,11 +163,11 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'Split',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'axis', 'type': 'number', 'defaultValue': 0},
       {'start': 1, 'name': 'x', 'type': 'tensor'},
     ],
-    'attrParams': [{
+    'attrs': [{
       'tfName': 'num_split',
       'name': 'numOrSizeSplits',
       'type': 'number',
@@ -177,7 +177,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'SplitV',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'numOrSizeSplits', 'type': 'number[]'},
       {'start': 2, 'name': 'axis', 'type': 'number', 'defaultValue': 0}
@@ -186,7 +186,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'ScatterNd',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'indices', 'type': 'tensor'},
       {'start': 1, 'name': 'values', 'type': 'tensor'},
       {'start': 2, 'name': 'shape', 'type': 'number[]'}
@@ -195,7 +195,7 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'GatherNd',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'indices', 'type': 'tensor'}
     ]
@@ -203,13 +203,13 @@ export const json: OpMapper[] = [
   {
     'tfOpName': 'SparseToDense',
     'category': 'slice_join',
-    'inputParams': [
+    'inputs': [
       {'start': 0, 'name': 'sparseIndices', 'type': 'tensor'},
       {'start': 1, 'name': 'outputShape', 'type': 'number[]'},
       {'start': 2, 'name': 'sparseValues', 'type': 'tensor'},
       {'start': 3, 'name': 'defaultValue', 'type': 'tensor'},
     ],
-    'attrParams': [{
+    'attrs': [{
       'tfName': 'validate_indices',
       'name': 'validateIndices',
       'type': 'bool',

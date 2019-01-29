@@ -23,11 +23,11 @@ export const json = {
       'properties': {
         'tfOpName': {'type': 'string'},
         'category': {'$ref': '#/definitions/Category'},
-        'inputParams': {
+        'inputs': {
           'type': 'array',
           'items': {'$ref': '#/definitions/InputParamMapper'}
         },
-        'attrParams': {
+        'attrs': {
           'type': 'array',
           'items': {'$ref': '#/definitions/AttrParamMapper'}
         },
