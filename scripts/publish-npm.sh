@@ -26,8 +26,8 @@ set -e
 
 BRANCH=`git rev-parse --abbrev-ref HEAD`
 
-if [ "$BRANCH" != "master" ]; then
-  echo "Error: Switch to the master branch before tagging."
+if [ "$BRANCH" != "master" ] && [ "$BRANCH" != "0.8.x" ]; then
+  echo "Error: Switch to the master or a release branch before tagging."
   exit
 fi
 
