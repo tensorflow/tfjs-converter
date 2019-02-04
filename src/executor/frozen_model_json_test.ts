@@ -255,8 +255,7 @@ describe('Model', () => {
       const model =
           await fm.loadFrozenModel(MODEL_URL, {credentials: 'include'});
       expect(window.fetch).toHaveBeenCalledWith(MODEL_URL, {
-        credentials: 'include',
-        headers: Object({Accept: JSON_TYPE})
+        credentials: 'include'
       });
       expect(model).not.toBeUndefined();
     });

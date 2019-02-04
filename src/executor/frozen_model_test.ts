@@ -32,8 +32,6 @@ const TFHUB_WEIGHT_MANIFEST_URL =
     `${HOST}/model/1/weights_manifest.json${TFHUB_SUFFIX}`;
 let model: fm.FrozenModel;
 const bias = tfc.tensor1d([1], 'int32');
-const OCTET_STREAM_TYPE = 'application/octet-stream';
-const JSON_TYPE = 'application/json';
 
 const weightsManifest: tfc.io.WeightsManifestConfig = [{
   'paths': ['weight_0'],
@@ -112,21 +110,15 @@ describe('Model', () => {
     spyOn(window, 'fetch').and.callFake(async (path: string) => {
       if (path === MODEL_URL || path === RELATIVE_MODEL_URL ||
           path === TFHUB_MODEL_URL) {
-        return new Response(
-            new Uint8Array([1, 2, 3]),
-            {'headers': {'Content-Type': OCTET_STREAM_TYPE}});
+        return new Response(new Uint8Array([1, 2, 3]));
       } else if (
           path === WEIGHT_MANIFEST_URL ||
           path === RELATIVE_WEIGHT_MANIFEST_URL ||
           path === TFHUB_WEIGHT_MANIFEST_URL) {
-        return new Response(
-            JSON.stringify(weightsManifest),
-            {'headers': {'Content-Type': JSON_TYPE}});
+        return new Response(JSON.stringify(weightsManifest));
       } else if (
           path.match(`${HOST}.*/weight_0`) || path === '/path/weight_0') {
-        return new Response(
-            bias.dataSync() as Int32Array,
-            {'headers': {'Content-Type': OCTET_STREAM_TYPE}});
+        return new Response(bias.dataSync() as Int32Array);
       } else {
         throw new Error(`Invalid path: ${path}`);
       }
@@ -269,12 +261,10 @@ describe('Model', () => {
       const model = await fm.loadFrozenModel(
           MODEL_URL, WEIGHT_MANIFEST_URL, {credentials: 'include'});
       expect(window.fetch).toHaveBeenCalledWith(MODEL_URL, {
-        credentials: 'include',
-        headers: Object({Accept: OCTET_STREAM_TYPE})
+        credentials: 'include'
       });
       expect(window.fetch).toHaveBeenCalledWith(WEIGHT_MANIFEST_URL, {
-        credentials: 'include',
-        headers: Object({Accept: JSON_TYPE})
+        credentials: 'include'
       });
       expect(model).not.toBeUndefined();
     });
