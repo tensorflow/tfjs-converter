@@ -278,7 +278,7 @@ export class OperationMapper {
       if (param.shape.unknownRank) {
         return undefined;
       }
-      if (param.shape.dim) {
+      if (param.shape.dim != null) {
         return param.shape.dim.map(
             dim => (typeof dim.size === 'number') ?
                 dim.size :
