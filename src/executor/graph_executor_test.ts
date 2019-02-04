@@ -388,7 +388,8 @@ describe('GraphExecutor', () => {
 
         it('should not have mem leak', async (done) => {
           const inputTensor = tfc.scalar(1);
-          const numTensors = tfc.memory().numTensors;
+          const numTensors: number = tfc.memory().numTensors;
+
           await executor.executeAsync({input: [inputTensor]}, ['output:1']);
           expect(tfc.memory().numTensors).toEqual(numTensors + 1);
           done();
