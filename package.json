@@ -1,6 +1,6 @@
 {
   "name": "@tensorflow/tfjs-converter",
-  "version": "0.7.1",
+  "version": "1.0.0-alpha1",
   "description": "Tensorflow model converter for javascript",
   "main": "dist/src/index.js",
   "jsnext:main": "dist/tf-converter.esm.js",
@@ -14,11 +14,12 @@
   },
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@tensorflow/tfjs-core": "0.14.2"
+    "@tensorflow/tfjs-core": "1.0.0-alpha1"
   },
   "devDependencies": {
-    "@tensorflow/tfjs-core": "0.14.2",
+    "@tensorflow/tfjs-core": "1.0.0-alpha1",
     "@types/jasmine": "~2.8.6",
+    "@types/js-base64": "2.3.1",
     "@types/node-fetch": "1.6.9",
     "ajv": "~6.3.0",
     "babel-core": "~6.26.3",
@@ -54,7 +55,7 @@
     "link-local": "yalc link",
     "publish-local": "yarn build-npm && yalc push",
     "test": "karma start",
-    "test-travis": "karma start --browsers='bs_firefox_mac,bs_chrome_mac' --singleRun",
+    "test-travis": "karma start --singleRun --browsers='bs_firefox_mac,bs_chrome_mac' --reporters='dots,karma-typescript,BrowserStack'",
     "lint": "tslint -p . -t verbose",
     "make-version": "sh -c ./scripts/make-version",
     "gen-doc": "ts-node ./scripts/gen_doc.ts",
@@ -63,6 +64,7 @@
   },
   "dependencies": {
     "@types/long": "~3.0.32",
+    "js-base64": "2.4.9",
     "protobufjs": "~6.8.6"
   }
 }

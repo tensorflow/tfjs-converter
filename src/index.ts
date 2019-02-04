@@ -14,5 +14,20 @@
  * limitations under the License.
  * =============================================================================
  */
-export {FrozenModel, loadFrozenModel, loadTfHubModule} from './executor/frozen_model';
+import {FrozenModel, loadFrozenModel as loadFrozenModelPB} from './executor/frozen_model';
+import {loadFrozenModel as loadFrozenModelJSON} from './executor/frozen_model_json';
+
+export {FrozenModel, loadTfHubModule} from './executor/frozen_model';
+export {FrozenModel as FrozenModelJSON} from './executor/frozen_model_json';
 export {version as version_converter} from './version';
+
+export function loadFrozenModel(
+    modelUrl: string, weightsManifestUrl: string,
+    requestOption?: RequestInit): Promise<FrozenModel> {
+  if (modelUrl && modelUrl.endsWith('.json')) {
+    // tslint:disable-next-line:no-any
+    return (loadFrozenModelJSON(modelUrl, requestOption) as Promise<any>) as
+        Promise<FrozenModel>;
+  }
+  return loadFrozenModelPB(modelUrl, weightsManifestUrl, requestOption);
+}
