@@ -297,7 +297,6 @@ export class GraphExecutor {
           outputNames, intermediateTensorConsumerCount);
       await Promise.all(promises);
     }
-
     return tensorMap;
   }
 
@@ -325,7 +324,6 @@ export class GraphExecutor {
         if (!nodeName) {
           [nodeName] = getNodeNameAndIndex(item.node.name, context);
         }
-
         const currentContext = context.currentContext;
         if (tensors instanceof Promise) {
           promises.push(tensors.then(t => {
@@ -335,6 +333,7 @@ export class GraphExecutor {
                 nodeName, item.node, tensorMap, context, tensorsToKeep,
                 outputNames, intermediateTensorConsumerCount);
             this.processChildNodes(item.node, stack, context, tensorMap, added);
+            console.log(Object.keys(tensorMap));
             return t;
           }));
         } else {
