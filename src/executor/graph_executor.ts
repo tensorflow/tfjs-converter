@@ -333,7 +333,6 @@ export class GraphExecutor {
                 nodeName, item.node, tensorMap, context, tensorsToKeep,
                 outputNames, intermediateTensorConsumerCount);
             this.processChildNodes(item.node, stack, context, tensorMap, added);
-            console.log(Object.keys(tensorMap));
             return t;
           }));
         } else {
