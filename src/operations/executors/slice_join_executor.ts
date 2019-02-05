@@ -151,7 +151,9 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('defaultValue', node, tensorMap, context) as tfc.Scalar;
       return [tfc.sparseToDense(
           indices, sparseValues, shape,
-          defaultValue.asType(sparseValues.dtype))];
+          sparseValues.dtype === defaultValue.dtype ?
+              defaultValue :
+              defaultValue.asType(sparseValues.dtype))];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);
