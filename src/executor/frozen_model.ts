@@ -24,14 +24,12 @@ import {OperationMapper} from '../operations/operation_mapper';
 import {GraphExecutor} from './graph_executor';
 
 export const TFHUB_SEARCH_PARAM = '?tfjs-format=file';
-export const DEFAULT_MODEL_NAME = 'tensorflowjs_model.pb';
-export const DEFAULT_MANIFEST_NAME = 'weights_manifest.json';
+export const DEFAULT_MODEL_NAME = 'model.json';
 /**
  * A `tf.FrozenModel` is a directed, acyclic graph of built from
  * SavedModel GraphDef and allows inference exeuction.
  */
 
-/** @doc {heading: 'Models', subheading: 'Classes'} */
 export class FrozenModel implements tfc.InferenceModel {
   private executor: GraphExecutor;
   private version = 'n/a';
@@ -72,12 +70,11 @@ export class FrozenModel implements tfc.InferenceModel {
    * before the load is completed.
    */
   constructor(
-      private modelUrl: string, private weightManifestUrl: string,
-      private requestOption?: RequestInit, private weightPrefix?: string,
-      private onProgress?: Function) {}
+      private modelUrl: string, private requestOption?: RequestInit,
+      private weightPrefix?: string, private onProgress?: Function) {}
 
   private findIOHandler() {
-    const path = [this.modelUrl, this.weightManifestUrl];
+    const path = this.modelUrl;
     if (this.requestOption) {
       this.handler = tfc.io.browserHTTPRequest(
           path, this.requestOption, this.weightPrefix, null, this.onProgress);
@@ -86,8 +83,9 @@ export class FrozenModel implements tfc.InferenceModel {
       if (handlers.length === 0) {
         // For backward compatibility: if no load handler can be found,
         // assume it is a relative http path.
-        handlers.push(tfc.io.browserHTTPRequest(path, this.requestOption,
-            this.weightPrefix, null, this.onProgress));
+        handlers.push(tfc.io.browserHTTPRequest(
+            path, this.requestOption, this.weightPrefix, null,
+            this.onProgress));
       } else if (handlers.length > 1) {
         throw new Error(
             `Found more than one (${handlers.length}) load handlers for ` +
@@ -109,8 +107,7 @@ export class FrozenModel implements tfc.InferenceModel {
           'does not have the `load` method implemented.');
     }
     const artifacts = await this.handler.load();
-    const graph = tensorflow.GraphDef.decode(
-        new Uint8Array(artifacts.modelTopology as ArrayBuffer));
+    const graph = artifacts.modelTopology as tensorflow.IGraphDef;
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap =
@@ -178,7 +175,7 @@ export class FrozenModel implements tfc.InferenceModel {
     }, {} as tfc.NamedTensorMap);
   }
   /**
-   * Executes infrerence for the model for given input tensors.
+   * Executes inference for the model for given input tensors.
    * @param inputs tensor, tensor array or tensor map of the inputs for the
    * model, keyed by the input node names.
    * @param outputs output node name from the Tensorflow model, if no
@@ -277,11 +274,8 @@ export class FrozenModel implements tfc.InferenceModel {
  * ```js
  * const GOOGLE_CLOUD_STORAGE_DIR =
  *     'https://storage.googleapis.com/tfjs-models/savedmodel/';
- * const MODEL_URL = 'mobilenet_v2_1.0_224/tensorflowjs_model.pb';
- * const WEIGHTS_URL =
- *     'mobilenet_v2_1.0_224/weights_manifest.json';
- * const model = await tf.loadFrozenModel(GOOGLE_CLOUD_STORAGE_DIR + MODEL_URL,
- *      GOOGLE_CLOUD_STORAGE_DIR + WEIGHTS_URL);
+ * const MODEL_URL = 'mobilenet_v2_1.0_224/model.json';
+ * const model = await tf.loadFrozenModel(GOOGLE_CLOUD_STORAGE_DIR + MODEL_URL);
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();
  * ```
@@ -295,11 +289,10 @@ export class FrozenModel implements tfc.InferenceModel {
  * @param onProgress Optional, progress callback function, fired periodically
  * before the load is completed.
  */
-/** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadFrozenModel(
-    modelUrl: string, weightsManifestUrl: string,
-    requestOption?: RequestInit, onProgress?: Function): Promise<FrozenModel> {
-  const model = new FrozenModel(modelUrl, weightsManifestUrl, requestOption, null, onProgress);
+    modelUrl: string, requestOption?: RequestInit,
+    onProgress?: Function): Promise<FrozenModel> {
+  const model = new FrozenModel(modelUrl, requestOption, null, onProgress);
   await model.load();
   return model;
 }
@@ -325,7 +318,6 @@ export async function loadFrozenModel(
  * @param onProgress Optional, progress callback function, fired periodically
  * before the load is completed.
  */
-/** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadTfHubModule(
     tfhubModuleUrl: string, requestOption?: RequestInit,
     onProgress?: Function): Promise<FrozenModel> {
@@ -334,6 +326,5 @@ export async function loadTfHubModule(
   }
   return loadFrozenModel(
       `${tfhubModuleUrl}${DEFAULT_MODEL_NAME}${TFHUB_SEARCH_PARAM}`,
-      `${tfhubModuleUrl}${DEFAULT_MANIFEST_NAME}${TFHUB_SEARCH_PARAM}`,
       requestOption, onProgress);
 }

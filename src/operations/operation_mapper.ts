@@ -15,6 +15,7 @@
  * =============================================================================
  */
 import {DataType} from '@tensorflow/tfjs-core';
+import {Base64} from 'js-base64';
 
 import {tensorflow} from '../data/compiled_api';
 
@@ -76,7 +77,7 @@ export class OperationMapper {
     return DYNAMIC_SHAPE_OPS.some(op => op === node.op);
   }
   // Converts the model from Tensorflow GraphDef to local representation for
-  // deeplearn.js API
+  // Tensorflow.js API
   transformGraph(graph: tensorflow.IGraphDef): Graph {
     const tfNodes = graph.node;
     let withControlFlow = false;
@@ -136,14 +137,18 @@ export class OperationMapper {
       children: [],
       params: {}
     };
+    if (node.attr == null) {
+      node.attr = {};
+    }
 
-    if (!!mapper.params) {
+    if (mapper.params != null) {
       newNode.params = mapper.params.reduce<{[key: string]:
                                                  ParamValue}>((map, param) => {
         const inputIndex = param.tfInputIndex;
         const inputParamLength = param.tfInputParamLength;
         const type = param.type;
         let value = undefined;
+
         if (inputIndex === undefined) {
           switch (param.type) {
             case 'string':
@@ -222,7 +227,9 @@ export class OperationMapper {
       keepCase = false): string {
     const param = attrs[name];
     if (param !== undefined) {
-      const value = String.fromCharCode.apply(null, param.s);
+      const value = Array.isArray(param.s) ?
+          String.fromCharCode.apply(null, param.s) :
+          Base64.decode(param.s);
       return keepCase ? value : value.toLowerCase();
     }
     return def;
@@ -238,16 +245,23 @@ export class OperationMapper {
   private getNumberParam(
       attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: number): number {
-    const param = attrs[name] as tensorflow.AttrValue;
-    const value = (param ? param[param.value] : def) as number | Long;
-    return (typeof value === 'number') ? value : value['toInt']() as number;
+    const param = attrs[name] || {};
+    const value = param['i'] ? param['i'] : (param['f'] ? param['f'] : def);
+    return (typeof value === 'number') ?
+        value :
+        parseInt(value as string, 10) as number;
   }
   private getDtypeParam(
       attrs: {[key: string]: tensorflow.IAttrValue}, name: string,
       def: DataType): DataType {
     const param = attrs[name];
     if (param && param.type) {
-      switch (param.type) {
+      // tslint:disable-next-line:no-any
+      let type: any = param.type;
+      if (typeof (param.type) === 'string') {
+        type = tensorflow.DataType[param.type];
+      }
+      switch (type) {
         case tensorflow.DataType.DT_FLOAT:
           return 'float32';
         case tensorflow.DataType.DT_INT32:
@@ -265,9 +279,15 @@ export class OperationMapper {
       def?: number[]): number[]|undefined {
     const param = attrs[name];
     if (param && param.shape) {
-      return param.shape.dim.map(
-          dim =>
-              (typeof dim.size === 'number') ? dim.size : dim.size['toInt']());
+      if (param.shape.unknownRank) {
+        return undefined;
+      }
+      if (param.shape.dim != null) {
+        return param.shape.dim.map(
+            dim => (typeof dim.size === 'number') ?
+                dim.size :
+                parseInt(dim.size as string, 10));
+      }
     }
     return def;
   }
@@ -279,8 +299,10 @@ export class OperationMapper {
     if (param) {
       return ((param.list.f && param.list.f.length ? param.list.f :
                                                      param.list.i))
-                 .map(v => (typeof v === 'number') ? v : v['toInt']()) as
-          number[];
+                 .map(
+                     v => (typeof v === 'number') ?
+                         v :
+                         parseInt(v as string, 10)) as number[];
     }
     return def;
   }
