@@ -73,7 +73,7 @@ export class FrozenModel implements tfc.InferenceModel {
 
   private findIOHandler() {
     const path = this.modelUrl;
-    if (this.requestOption) {
+    if (this.requestOption || this.weightPrefix) {
       this.handler = tfc.io.browserHTTPRequest(
           path, this.requestOption, this.weightPrefix);
     } else {
@@ -81,7 +81,8 @@ export class FrozenModel implements tfc.InferenceModel {
       if (handlers.length === 0) {
         // For backward compatibility: if no load handler can be found,
         // assume it is a relative http path.
-        handlers.push(tfc.io.browserHTTPRequest(path, this.requestOption));
+        handlers.push(tfc.io.browserHTTPRequest(
+            path, this.requestOption, this.weightPrefix));
       } else if (handlers.length > 1) {
         throw new Error(
             `Found more than one (${handlers.length}) load handlers for ` +
