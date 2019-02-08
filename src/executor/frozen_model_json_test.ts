@@ -247,7 +247,8 @@ describe('Model', () => {
       const model =
           await fm.loadFrozenModel(MODEL_URL, {credentials: 'include'});
       expect(tfc.io.browserHTTPRequest)
-          .toHaveBeenCalledWith(MODEL_URL, {credentials: 'include'}, undefined);
+          .toHaveBeenCalledWith(
+              MODEL_URL, {credentials: 'include'}, null, null, undefined);
       expect(model).not.toBeUndefined();
     });
 

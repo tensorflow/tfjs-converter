@@ -252,8 +252,8 @@ describe('Model', () => {
           MODEL_URL, WEIGHT_MANIFEST_URL, {credentials: 'include'});
       expect(tfc.io.browserHTTPRequest)
           .toHaveBeenCalledWith(
-              [MODEL_URL, WEIGHT_MANIFEST_URL], {credentials: 'include'},
-              undefined);
+              [MODEL_URL, WEIGHT_MANIFEST_URL], {credentials: 'include'}, null,
+              null, undefined);
       expect(model).not.toBeUndefined();
     });
 
