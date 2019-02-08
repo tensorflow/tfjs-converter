@@ -198,8 +198,8 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
-|FusedBatchNorm|batchNormalization|
-|FusedBatchNormV2|batchNormalization|
+|FusedBatchNorm|batchNorm|
+|FusedBatchNormV2|batchNorm|
 |LogSoftmax|logSoftmax|
 |LRN|localResponseNormalization|
 |Softmax|softmax|
