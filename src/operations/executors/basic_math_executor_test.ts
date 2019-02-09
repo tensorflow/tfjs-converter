@@ -103,7 +103,7 @@ describe('basic math', () => {
     describe('Rsqrt', () => {
       it('should call tfc.rsqrt', () => {
         const input1 = [tfc.scalar(1)];
-        node.op = 'rsqrt';
+        node.op = 'Rsqrt';
         spyOn(tfc, 'rsqrt').and.returnValue(input1);
         executeOp(node, {input1}, context);
 

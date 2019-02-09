@@ -82,7 +82,7 @@ describe('normalization', () => {
 
         expect(tfc.batchNorm)
             .toHaveBeenCalledWith(
-                input1[0], input4[0], input5[0], 5, input2[0], input3[0]);
+                input1[0], input4[0], input5[0], input3[0], input2[0], 5);
       });
     });
     describe('LRN', () => {

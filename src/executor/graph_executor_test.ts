@@ -325,9 +325,10 @@ describe('GraphExecutor', () => {
             inputs: [intermediateNode],
             children: [],
             name: 'rsqrt',
-            op: 'rsqrt',
+            op: 'Rsqrt',
             category: 'basic_math',
-            params: {'x': createTensorAttr(0)}
+            inputParams: {'x': createTensorAttr(0)},
+            attrParams: {}
           };
           outputNode = {
             inputNames: ['const', 'rsqrt'],

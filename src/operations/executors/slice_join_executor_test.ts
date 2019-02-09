@@ -254,8 +254,8 @@ describe('slice join', () => {
       it('should call tfc.gather', () => {
         spyOn(tfc, 'gather');
         node.op = 'Gather';
-        node.params.indices = createTensorAttr(1);
-        node.params.axis = createNumberAttrFromIndex(2);
+        node.inputParams.indices = createTensorAttr(1);
+        node.inputParams.axis = createNumberAttrFromIndex(2);
         const input5 = [tfc.scalar(2, 'int32')];
         node.inputNames = ['input1', 'input5', 'input3'];
         executeOp(node, {input1, input5, input3}, context);
@@ -276,8 +276,8 @@ describe('slice join', () => {
       it('should call tfc.gather', () => {
         spyOn(tfc, 'gather');
         node.op = 'GatherV2';
-        node.params.indices = createTensorAttr(1);
-        node.params.axis = createNumberAttrFromIndex(2);
+        node.inputParams.indices = createTensorAttr(1);
+        node.inputParams.axis = createNumberAttrFromIndex(2);
         const input5 = [tfc.scalar(2, 'int32')];
         node.inputNames = ['input1', 'input5', 'input3'];
         executeOp(node, {input1, input5, input3}, context);
@@ -290,9 +290,9 @@ describe('slice join', () => {
 
       it('should make indices param of int32 dtype', () => {
         spyOn(tfc, 'gather');
-        node.op = 'gather';
-        node.params.indices = createTensorAttr(1);
-        node.params.axis = createNumberAttrFromIndex(2);
+        node.op = 'Gather';
+        node.inputParams.indices = createTensorAttr(1);
+        node.inputParams.axis = createNumberAttrFromIndex(2);
         node.inputNames = ['input1', 'input5', 'input3'];
         const input5 = [tfc.scalar(2, 'float32')];
         executeOp(node, {input1, input5, input3}, context);
@@ -402,12 +402,12 @@ describe('slice join', () => {
       });
       it('should make defaultValue of same dtype as sparseValues', () => {
         spyOn(tfc, 'sparseToDense');
-        node.op = 'sparseToDense';
-        node.params.sparseIndices = createTensorAttr(0);
-        node.params.outputShape = createNumericArrayAttrFromIndex(1);
-        node.params.sparseValues = createTensorAttr(2);
-        node.params.defaultValue = createTensorAttr(3);
-        node.params.indices = createTensorAttr(1);
+        node.op = 'SparseToDense';
+        node.inputParams.sparseIndices = createTensorAttr(0);
+        node.inputParams.outputShape = createNumericArrayAttrFromIndex(1);
+        node.inputParams.sparseValues = createTensorAttr(2);
+        node.inputParams.defaultValue = createTensorAttr(3);
+        node.inputParams.indices = createTensorAttr(1);
         const input5 = [tfc.scalar(5, 'int32')];
         node.inputNames = ['input1', 'input4', 'input3', 'input5'];
         executeOp(node, {input1, input5, input3, input4}, context);
