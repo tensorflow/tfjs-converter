@@ -140,9 +140,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('clipValueMin', node, tensorMap, context) as number,
           getParamValue('clipValueMax', node, tensorMap, context) as number)];
     case 'Rsqrt':
-      return [tfc.div(
-          tfc.scalar(1.0, 'float32'),
-          tfc.sqrt(getTensor(node.inputNames[0], tensorMap, context)))];
+      return [tfc.rsqrt(getTensor(node.inputNames[0], tensorMap, context))];
     case 'Prod':
       return [tfc.prod(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor,

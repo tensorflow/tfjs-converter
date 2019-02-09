@@ -265,7 +265,8 @@ export class GraphExecutor {
     Object.keys(tensors).forEach(key => {
       const tensorArray = tensors[key];
       tensorArray.forEach(tensor => {
-        if (tensor && outputIds.indexOf(tensor.id) === -1 &&
+        if (tensor && !tensor.isDisposed &&
+            outputIds.indexOf(tensor.id) === -1 &&
             inputIds.indexOf(tensor.id) === -1 &&
             this.weightIds.indexOf(tensor.id) === -1) {
           tensor.dispose();
@@ -300,7 +301,6 @@ export class GraphExecutor {
           outputNames, intermediateTensorConsumerCount);
       await Promise.all(promises);
     }
-
     return tensorMap;
   }
 
@@ -328,7 +328,6 @@ export class GraphExecutor {
         if (!nodeName) {
           [nodeName] = getNodeNameAndIndex(item.node.name, context);
         }
-
         const currentContext = context.currentContext;
         if (tensors instanceof Promise) {
           promises.push(tensors.then(t => {

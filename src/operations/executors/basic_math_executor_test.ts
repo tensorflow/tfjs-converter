@@ -101,16 +101,13 @@ describe('basic math', () => {
       });
     });
     describe('Rsqrt', () => {
-      it('should call tfc.div', () => {
+      it('should call tfc.rsqrt', () => {
         const input1 = [tfc.scalar(1)];
-        node.op = 'Rsqrt';
-        spyOn(tfc, 'div');
-        spyOn(tfc, 'sqrt').and.returnValue(input1);
-
+        node.op = 'rsqrt';
+        spyOn(tfc, 'rsqrt').and.returnValue(input1);
         executeOp(node, {input1}, context);
 
-        expect(tfc.sqrt).toHaveBeenCalledWith(input1[0]);
-        expect(tfc.div).toHaveBeenCalledWith(jasmine.any(tfc.Tensor), input1);
+        expect(tfc.rsqrt).toHaveBeenCalledWith(input1[0]);
       });
       it('should match op def', () => {
         node.op = 'Rsqrt';

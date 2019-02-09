@@ -39,7 +39,7 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
       const input = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
       const indices =
           getParamValue('indices', node, tensorMap, context) as tfc.Tensor1D;
-      return [tfc.gather(input, indices, axis)];
+      return [tfc.gather(input, indices.asType('int32'), axis)];
     }
     case 'ReverseV2':
     case 'Reverse': {
@@ -151,7 +151,11 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           getParamValue('sparseValues', node, tensorMap, context) as tfc.Tensor;
       const defaultValue =
           getParamValue('defaultValue', node, tensorMap, context) as tfc.Scalar;
-      return [tfc.sparseToDense(indices, sparseValues, shape, defaultValue)];
+      return [tfc.sparseToDense(
+          indices, sparseValues, shape,
+          sparseValues.dtype === defaultValue.dtype ?
+              defaultValue :
+              defaultValue.asType(sparseValues.dtype))];
     }
     default:
       throw TypeError(`Node type ${node.op} is not implemented`);

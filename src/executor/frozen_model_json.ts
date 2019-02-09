@@ -30,7 +30,6 @@ export const DEFAULT_MODEL_NAME = 'model.json';
  * SavedModel GraphDef and allows inference exeuction.
  */
 
-/** @doc {heading: 'Models', subheading: 'Classes'} */
 export class FrozenModel implements tfc.InferenceModel {
   private executor: GraphExecutor;
   private version = 'n/a';
@@ -67,22 +66,26 @@ export class FrozenModel implements tfc.InferenceModel {
    * scripts/convert.py script.
    * @param requestOption options for Request, which allows to send credentials
    * and custom headers.
+   * @param onProgress Optional, progress callback function, fired periodically
+   * before the load is completed.
    */
   constructor(
       private modelUrl: string, private requestOption?: RequestInit,
-      private weightPrefix?: string) {}
+      private weightPrefix?: string, private onProgress?: Function) {}
 
   private findIOHandler() {
     const path = this.modelUrl;
-    if (this.requestOption) {
+    if (this.requestOption || this.weightPrefix) {
       this.handler = tfc.io.browserHTTPRequest(
-          path, this.requestOption, this.weightPrefix);
+          path, this.requestOption, this.weightPrefix, null, this.onProgress);
     } else {
-      const handlers = tfc.io.getLoadHandlers(path);
+      const handlers = tfc.io.getLoadHandlers(path, this.onProgress);
       if (handlers.length === 0) {
         // For backward compatibility: if no load handler can be found,
         // assume it is a relative http path.
-        handlers.push(tfc.io.browserHTTPRequest(path, this.requestOption));
+        handlers.push(tfc.io.browserHTTPRequest(
+            path, this.requestOption, this.weightPrefix, null,
+            this.onProgress));
       } else if (handlers.length > 1) {
         throw new Error(
             `Found more than one (${handlers.length}) load handlers for ` +
@@ -283,11 +286,13 @@ export class FrozenModel implements tfc.InferenceModel {
  * scripts/convert.py script.
  * @param requestOption options for Request, which allows to send credentials
  * and custom headers.
+ * @param onProgress Optional, progress callback function, fired periodically
+ * before the load is completed.
  */
-/** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadFrozenModel(
-    modelUrl: string, requestOption?: RequestInit): Promise<FrozenModel> {
-  const model = new FrozenModel(modelUrl, requestOption);
+    modelUrl: string, requestOption?: RequestInit,
+    onProgress?: Function): Promise<FrozenModel> {
+  const model = new FrozenModel(modelUrl, requestOption, null, onProgress);
   await model.load();
   return model;
 }
@@ -310,14 +315,16 @@ export async function loadFrozenModel(
  * 'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2'.
  * @param requestOption options for Request, which allows to send credentials
  * and custom headers.
+ * @param onProgress Optional, progress callback function, fired periodically
+ * before the load is completed.
  */
-/** @doc {heading: 'Models', subheading: 'Loading'} */
 export async function loadTfHubModule(
-    tfhubModuleUrl: string, requestOption?: RequestInit): Promise<FrozenModel> {
+    tfhubModuleUrl: string, requestOption?: RequestInit,
+    onProgress?: Function): Promise<FrozenModel> {
   if (!tfhubModuleUrl.endsWith('/')) {
     tfhubModuleUrl = tfhubModuleUrl + '/';
   }
   return loadFrozenModel(
       `${tfhubModuleUrl}${DEFAULT_MODEL_NAME}${TFHUB_SEARCH_PARAM}`,
-      requestOption);
+      requestOption, onProgress);
 }

@@ -254,12 +254,16 @@ describe('slice join', () => {
       it('should call tfc.gather', () => {
         spyOn(tfc, 'gather');
         node.op = 'Gather';
-        node.inputParams.indices = createTensorAttr(1);
-        node.inputParams.axis = createNumberAttrFromIndex(2);
-        node.inputNames = ['input1', 'input2', 'input3'];
-        executeOp(node, {input1, input2, input3}, context);
+        node.params.indices = createTensorAttr(1);
+        node.params.axis = createNumberAttrFromIndex(2);
+        const input5 = [tfc.scalar(2, 'int32')];
+        node.inputNames = ['input1', 'input5', 'input3'];
+        executeOp(node, {input1, input5, input3}, context);
 
-        expect(tfc.gather).toHaveBeenCalledWith(input1[0], input2[0], 3);
+        expect(tfc.gather)
+            .toHaveBeenCalledWith(
+                input1[0], jasmine.objectContaining({dataId: input5[0].dataId}),
+                3);
       });
       it('should match json def for gather', () => {
         node.op = 'Gather';
@@ -272,12 +276,30 @@ describe('slice join', () => {
       it('should call tfc.gather', () => {
         spyOn(tfc, 'gather');
         node.op = 'GatherV2';
-        node.inputParams.indices = createTensorAttr(1);
-        node.inputParams.axis = createNumberAttrFromIndex(2);
-        node.inputNames = ['input1', 'input2', 'input3'];
-        executeOp(node, {input1, input2, input3}, context);
+        node.params.indices = createTensorAttr(1);
+        node.params.axis = createNumberAttrFromIndex(2);
+        const input5 = [tfc.scalar(2, 'int32')];
+        node.inputNames = ['input1', 'input5', 'input3'];
+        executeOp(node, {input1, input5, input3}, context);
 
-        expect(tfc.gather).toHaveBeenCalledWith(input1[0], input2[0], 3);
+        expect(tfc.gather)
+            .toHaveBeenCalledWith(
+                input1[0], jasmine.objectContaining({dataId: input5[0].dataId}),
+                3);
+      });
+
+      it('should make indices param of int32 dtype', () => {
+        spyOn(tfc, 'gather');
+        node.op = 'gather';
+        node.params.indices = createTensorAttr(1);
+        node.params.axis = createNumberAttrFromIndex(2);
+        node.inputNames = ['input1', 'input5', 'input3'];
+        const input5 = [tfc.scalar(2, 'float32')];
+        executeOp(node, {input1, input5, input3}, context);
+
+        expect(tfc.gather)
+            .toHaveBeenCalledWith(
+                input1[0], jasmine.objectContaining({dtype: 'int32'}), 3);
       });
       it('should match json def for gather', () => {
         node.op = 'GatherV2';
@@ -377,6 +399,23 @@ describe('slice join', () => {
 
         expect(tfc.sparseToDense)
             .toHaveBeenCalledWith(input1[0], input3[0], [3], input2[0]);
+      });
+      it('should make defaultValue of same dtype as sparseValues', () => {
+        spyOn(tfc, 'sparseToDense');
+        node.op = 'sparseToDense';
+        node.params.sparseIndices = createTensorAttr(0);
+        node.params.outputShape = createNumericArrayAttrFromIndex(1);
+        node.params.sparseValues = createTensorAttr(2);
+        node.params.defaultValue = createTensorAttr(3);
+        node.params.indices = createTensorAttr(1);
+        const input5 = [tfc.scalar(5, 'int32')];
+        node.inputNames = ['input1', 'input4', 'input3', 'input5'];
+        executeOp(node, {input1, input5, input3, input4}, context);
+
+        expect(tfc.sparseToDense)
+            .toHaveBeenCalledWith(
+                input1[0], input3[0], [3],
+                jasmine.objectContaining({dtype: 'float32'}));
       });
       it('should match json def for sparseToDense', () => {
         node.op = 'SparseToDense';
