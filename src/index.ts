@@ -14,20 +14,37 @@
  * limitations under the License.
  * =============================================================================
  */
-import {FrozenModel, loadFrozenModel as loadFrozenModelPB} from './executor/frozen_model';
+import {io} from '@tensorflow/tfjs-core';
+
+import {DEFAULT_MANIFEST_NAME, FrozenModel, FrozenModel as GraphModel, loadFrozenModel as loadFrozenModelPB} from './executor/frozen_model';
 import {loadFrozenModel as loadFrozenModelJSON} from './executor/frozen_model_json';
 
 export {FrozenModel, loadTfHubModule} from './executor/frozen_model';
+export {FrozenModel as GraphModel} from './executor/frozen_model';
 export {FrozenModel as FrozenModelJSON} from './executor/frozen_model_json';
 export {version as version_converter} from './version';
 
 export function loadFrozenModel(
-    modelUrl: string, weightsManifestUrl: string,
-    requestOption?: RequestInit): Promise<FrozenModel> {
+    modelUrl: string, weightsManifestUrl?: string, requestOption?: RequestInit,
+    onProgress?: Function): Promise<FrozenModel> {
   if (modelUrl && modelUrl.endsWith('.json')) {
-    // tslint:disable-next-line:no-any
-    return (loadFrozenModelJSON(modelUrl, requestOption) as Promise<any>) as
-        Promise<FrozenModel>;
+    return (loadFrozenModelJSON(modelUrl, requestOption, onProgress) as
+                // tslint:disable-next-line:no-any
+                Promise<any>) as Promise<FrozenModel>;
   }
-  return loadFrozenModelPB(modelUrl, weightsManifestUrl, requestOption);
+  // if user are using the new loadGraphModel API, the weightManifestUrl will be
+  // omitted, we will build the url using the model url path and default
+  // manifest file name.
+  if (modelUrl != null && weightsManifestUrl == null) {
+    const path = modelUrl.substr(0, modelUrl.lastIndexOf('/'));
+    weightsManifestUrl = path + '/' + DEFAULT_MANIFEST_NAME;
+  }
+  return loadFrozenModelPB(
+      modelUrl, weightsManifestUrl, requestOption, onProgress);
+}
+
+export function loadGraphModel(
+    modelUrl: string, options: io.LoadOptions): Promise<GraphModel> {
+  return loadFrozenModel(
+      modelUrl, undefined, options.requestInit, options.onProgress);
 }
