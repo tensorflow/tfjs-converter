@@ -22,7 +22,7 @@ const MODEL_URL_PB = 'https://test.com/tensorflowjs_model.pb';
 const MODEL_URL_JSON = 'https://test.com/model.json';
 const WEIGHT_MANIFEST_JSON = 'https://test.com/weights_manifest.json';
 const TFHUB_MOBILENET =
-    'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2'
+    'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2';
 const ONPROGRESS_FUNC = () => {};
 describe('external loading API', () => {
   describe('loadFrozenModel', () => {
