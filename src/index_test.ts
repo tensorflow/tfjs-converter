@@ -21,6 +21,8 @@ import * as tfc from './index';
 const MODEL_URL_PB = 'https://test.com/tensorflowjs_model.pb';
 const MODEL_URL_JSON = 'https://test.com/model.json';
 const WEIGHT_MANIFEST_JSON = 'https://test.com/weights_manifest.json';
+const TFHUB_MOBILENET =
+    'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2'
 const ONPROGRESS_FUNC = () => {};
 describe('external loading API', () => {
   describe('loadFrozenModel', () => {
@@ -66,6 +68,15 @@ describe('external loading API', () => {
           MODEL_URL_JSON, {requestInit: {}, onProgress: ONPROGRESS_FUNC});
       expect(frozen_model_json.loadFrozenModel)
           .toHaveBeenCalledWith(MODEL_URL_JSON, {}, ONPROGRESS_FUNC);
+    });
+    it('should support tfhub models', () => {
+      spyOn(frozen_model, 'loadTfHubModule');
+
+      tfc.loadGraphModel(
+          TFHUB_MOBILENET,
+          {requestInit: {}, onProgress: ONPROGRESS_FUNC, fromTFHub: true});
+      expect(frozen_model.loadTfHubModule)
+          .toHaveBeenCalledWith(TFHUB_MOBILENET, {}, ONPROGRESS_FUNC);
     });
   });
 });
