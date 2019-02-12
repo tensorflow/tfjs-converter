@@ -62,8 +62,8 @@ export function loadFrozenModel(
                 // tslint:disable-next-line:no-any
                 Promise<any>) as Promise<FrozenModel>;
   }
-  // if user are using the new loadGraphModel API, the weightManifestUrl will be
-  // omitted, we will build the url using the model url path and default
+  // if users are using the new loadGraphModel API, the weightManifestUrl will
+  // be omitted. We will build the url using the model URL path and default
   // manifest file name.
   if (modelUrl != null && weightsManifestUrl == null) {
     weightsManifestUrl = getWeightsManifestUrl(modelUrl);
@@ -89,7 +89,7 @@ function getWeightsManifestUrl(modelUrl: string): string {
  *
  * ```js
  * const modelUrl =
- * 'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/tensorflowjs_model.pb';
+ *    'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/tensorflowjs_model.pb';
  * const model = await tf.loadGraphModel(modelUrl);
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();
@@ -100,7 +100,7 @@ function getWeightsManifestUrl(modelUrl: string): string {
  *
  * ```js
  * const modelUrl =
- *   'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2';
+ *    'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2';
  * const model = await tf.loadGraphModel(modelUrl, {fromTFHub: true});
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();

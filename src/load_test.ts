@@ -23,7 +23,8 @@ const MODEL_URL_JSON = 'https://test.com/model.json';
 const WEIGHT_MANIFEST_JSON = 'https://test.com/weights_manifest.json';
 const TFHUB_MOBILENET =
     'https://tfhub.dev/google/imagenet/mobilenet_v2_140_224/classification/2';
-const ONPROGRESS_FUNC = () => {};
+const ONPROGRESS_FUNC = (fraction: number) => {};
+
 describe('external loading API', () => {
   describe('loadFrozenModel', () => {
     it('should support pb models', () => {
