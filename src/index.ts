@@ -25,7 +25,7 @@ export {FrozenModel as FrozenModelJSON} from './executor/frozen_model_json';
 export {version as version_converter} from './version';
 
 /**
- * Deprecated. Use `loadGraphModel`.
+ * Deprecated. Use `tf.loadGraphModel`.
  *
  * Load the frozen model through url.
  *
@@ -116,7 +116,7 @@ export function loadGraphModel(
   if (options != null && options.fromTFHub) {
     return loadTfHubModule(modelUrl, options.requestInit, options.onProgress);
   }
-  const undefinedMenifestUrl: string = undefined;
+  const manifestUrl: string = undefined;
   return loadFrozenModel(
-      modelUrl, undefinedMenifestUrl, options.requestInit, options.onProgress);
+      modelUrl, manifestUrl, options.requestInit, options.onProgress);
 }
