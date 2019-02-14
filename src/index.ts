@@ -116,6 +116,7 @@ export function loadGraphModel(
   if (options == null) {
     options = {};
   }
+
   if (options.fromTFHub) {
     return loadTfHubModule(modelUrl, options.requestInit, options.onProgress);
   }
