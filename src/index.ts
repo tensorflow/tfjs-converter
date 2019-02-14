@@ -14,7 +14,7 @@
  * limitations under the License.
  * =============================================================================
  */
-import {io} from '@tensorflow/tfjs-core';
+import {deprecationWarn, io} from '@tensorflow/tfjs-core';
 
 import {DEFAULT_MANIFEST_NAME, FrozenModel, loadFrozenModel as loadFrozenModelPB, loadTfHubModule} from './executor/frozen_model';
 import {loadFrozenModel as loadFrozenModelJSON} from './executor/frozen_model_json';
@@ -23,6 +23,7 @@ export {FrozenModel, loadTfHubModule} from './executor/frozen_model';
 export {FrozenModel as GraphModel} from './executor/frozen_model';
 export {FrozenModel as FrozenModelJSON} from './executor/frozen_model_json';
 export {version as version_converter} from './version';
+
 
 /**
  * Deprecated. Use `tf.loadGraphModel`.
@@ -57,14 +58,18 @@ export {version as version_converter} from './version';
 export function loadFrozenModel(
     modelUrl: string, weightsManifestUrl?: string, requestOption?: RequestInit,
     onProgress?: Function): Promise<FrozenModel> {
+  deprecationWarn(
+      'tf.loadFrozenModel() is going away. ' +
+      'Use tf.loadGraphModel() instead, and note the positional argument changes.');
+
   if (modelUrl && modelUrl.endsWith('.json')) {
     return (loadFrozenModelJSON(modelUrl, requestOption, onProgress) as
                 // tslint:disable-next-line:no-any
                 Promise<any>) as Promise<FrozenModel>;
   }
-  // if users are using the new loadGraphModel API, the weightManifestUrl will
-  // be omitted. We will build the url using the model URL path and default
-  // manifest file name.
+  // if users are using the new loadGraphModel API, the weightManifestUrl
+  // will be omitted. We will build the url using the model URL path and
+  // default manifest file name.
   if (modelUrl != null && weightsManifestUrl == null) {
     weightsManifestUrl = getWeightsManifestUrl(modelUrl);
   }
