@@ -24,7 +24,6 @@ export {FrozenModel as GraphModel} from './executor/frozen_model';
 export {FrozenModel as FrozenModelJSON} from './executor/frozen_model_json';
 export {version as version_converter} from './version';
 
-
 /**
  * Deprecated. Use `tf.loadGraphModel`.
  *
