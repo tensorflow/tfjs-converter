@@ -112,8 +112,8 @@ function getWeightsManifestUrl(modelUrl: string): string {
  */
 /** @doc {heading: 'Models', subheading: 'Loading'} */
 export function loadGraphModel(
-    modelUrl: string, options?: io.LoadOptions): Promise<FrozenModel> {
-  if (options != null && options.fromTFHub) {
+    modelUrl: string, options: io.LoadOptions = {}): Promise<FrozenModel> {
+  if (options.fromTFHub) {
     return loadTfHubModule(modelUrl, options.requestInit, options.onProgress);
   }
   let weightsManifestUrl: string = undefined;

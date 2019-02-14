@@ -62,6 +62,15 @@ describe('external loading API', () => {
           .toHaveBeenCalledWith(
               MODEL_URL_PB, WEIGHT_MANIFEST_JSON, {}, ONPROGRESS_FUNC);
     });
+    it('should support pb models without options', () => {
+      spyOn(frozen_model, 'loadFrozenModel');
+      const undefinedValue: void = undefined;
+      tfc.loadGraphModel(MODEL_URL_PB);
+      expect(frozen_model.loadFrozenModel)
+          .toHaveBeenCalledWith(
+              MODEL_URL_PB, WEIGHT_MANIFEST_JSON, undefinedValue,
+              undefinedValue);
+    });
     it('should support json models', () => {
       spyOn(frozen_model_json, 'loadFrozenModel');
 
@@ -69,6 +78,13 @@ describe('external loading API', () => {
           MODEL_URL_JSON, {requestInit: {}, onProgress: ONPROGRESS_FUNC});
       expect(frozen_model_json.loadFrozenModel)
           .toHaveBeenCalledWith(MODEL_URL_JSON, {}, ONPROGRESS_FUNC);
+    });
+    it('should support json models without options', () => {
+      spyOn(frozen_model_json, 'loadFrozenModel');
+      const undefinedValue: void = undefined;
+      tfc.loadGraphModel(MODEL_URL_JSON);
+      expect(frozen_model_json.loadFrozenModel)
+          .toHaveBeenCalledWith(MODEL_URL_JSON, undefinedValue, undefinedValue);
     });
     it('should support tfhub models', () => {
       spyOn(frozen_model, 'loadTfHubModule');
