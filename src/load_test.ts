@@ -71,7 +71,7 @@ describe('external loading API', () => {
               MODEL_URL_PB, WEIGHT_MANIFEST_JSON, undefinedValue,
               undefinedValue);
     });
-    it('should support pb models without null options value', () => {
+    it('should support pb models with null options value', () => {
       spyOn(frozen_model, 'loadFrozenModel');
       const undefinedValue: void = undefined;
       tfc.loadGraphModel(MODEL_URL_PB, null);
