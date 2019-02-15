@@ -237,7 +237,7 @@ export class OperationMapper {
     } else {
       throw new Error(
           'Unable to decode base64 in this environment. ' +
-          'Missing built-ins atob() or Buffer()');
+          'Missing built-in atob() or Buffer()');
     }
   }
 
