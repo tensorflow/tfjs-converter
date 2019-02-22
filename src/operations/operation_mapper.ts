@@ -14,11 +14,9 @@
  * limitations under the License.
  * =============================================================================
  */
+
 import {DataType} from '@tensorflow/tfjs-core';
-import {Base64} from 'js-base64';
-
 import {tensorflow} from '../data/compiled_api';
-
 import {getNodeNameAndIndex} from './executors/utils';
 import * as arithmetic from './op_list/arithmetic';
 import * as basicMath from './op_list/basic_math';
@@ -36,7 +34,7 @@ import * as reduction from './op_list/reduction';
 import * as sliceJoin from './op_list/slice_join';
 import * as spectral from './op_list/spectral';
 import * as transformation from './op_list/transformation';
-import {Graph, Node, OpMapper, ParamValue} from './types';
+import {Graph, InputParamValue, Node, OpMapper, ParamValue} from './types';
 
 const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
 const DYNAMIC_SHAPE_OPS =
@@ -128,98 +126,119 @@ export class OperationMapper {
     }
     const newNode: Node = {
       name: node.name,
-      op: mapper.dlOpName,
+      op: node.op,
       category: mapper.category,
       inputNames:
           (node.input ||
            []).map(input => input.startsWith('^') ? input.substr(1) : input),
       inputs: [],
       children: [],
-      params: {}
+      inputParams: {},
+      attrParams: {}
     };
     if (node.attr == null) {
       node.attr = {};
     }
 
-    if (mapper.params != null) {
-      newNode.params = mapper.params.reduce<{[key: string]:
-                                                 ParamValue}>((map, param) => {
-        const inputIndex = param.tfInputIndex;
-        const inputParamLength = param.tfInputParamLength;
-        const type = param.type;
-        let value = undefined;
-
-        if (inputIndex === undefined) {
-          switch (param.type) {
-            case 'string':
-              value = this.getStringParam(
-                  node.attr, param.tfParamName, param.defaultValue as string);
-
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+    if (mapper.inputs != null) {
+      newNode.inputParams =
+          mapper.inputs.reduce<{[key: string]: InputParamValue}>(
+              (map, param) => {
+                map[param.name] = {
+                  type: param.type,
+                  inputIndexStart: param.start,
+                  inputIndexEnd: param.end
+                };
+                return map;
+              },
+              {});
+    }
+    if (mapper.attrs != null) {
+      newNode.attrParams =
+          mapper.attrs.reduce<{[key: string]: ParamValue}>((map, param) => {
+            const type = param.type;
+            let value = undefined;
+            switch (param.type) {
+              case 'string':
                 value = this.getStringParam(
-                    node.attr, param.tfParamNameDeprecated,
-                    param.defaultValue as string);
-              }
-              break;
-            case 'number':
-              value = this.getNumberParam(
-                  node.attr, param.tfParamName,
-                  (param.defaultValue || 0) as number);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                    node.attr, param.tfName, param.defaultValue as string);
+
+                if (value === undefined && !!param.tfDeprecatedName) {
+                  value = this.getStringParam(
+                      node.attr, param.tfDeprecatedName,
+                      param.defaultValue as string);
+                }
+                break;
+              case 'number':
                 value = this.getNumberParam(
-                    node.attr, param.tfParamNameDeprecated,
-                    param.defaultValue as number);
-              }
-              break;
-            case 'number[]':
-              value = this.getNumericArrayParam(
-                  node.attr, param.tfParamName, param.defaultValue as number[]);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                    node.attr, param.tfName,
+                    (param.defaultValue || 0) as number);
+                if (value === undefined && !!param.tfDeprecatedName) {
+                  value = this.getNumberParam(
+                      node.attr, param.tfDeprecatedName,
+                      param.defaultValue as number);
+                }
+                break;
+              case 'number[]':
                 value = this.getNumericArrayParam(
-                    node.attr, param.tfParamNameDeprecated,
-                    param.defaultValue as number[]);
-              }
-              break;
-            case 'bool':
-              value = this.getBoolParam(
-                  node.attr, param.tfParamName, param.defaultValue as boolean);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                    node.attr, param.tfName, param.defaultValue as number[]);
+                if (value === undefined && !!param.tfDeprecatedName) {
+                  value = this.getNumericArrayParam(
+                      node.attr, param.tfDeprecatedName,
+                      param.defaultValue as number[]);
+                }
+                break;
+              case 'bool':
                 value = this.getBoolParam(
-                    node.attr, param.tfParamNameDeprecated,
-                    param.defaultValue as boolean);
-              }
-              break;
-            case 'shape':
-              value = this.getTensorShapeParam(
-                  node.attr, param.tfParamName, param.defaultValue as number[]);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                    node.attr, param.tfName, param.defaultValue as boolean);
+                if (value === undefined && !!param.tfDeprecatedName) {
+                  value = this.getBoolParam(
+                      node.attr, param.tfDeprecatedName,
+                      param.defaultValue as boolean);
+                }
+                break;
+              case 'shape':
                 value = this.getTensorShapeParam(
-                    node.attr, param.tfParamNameDeprecated,
-                    param.defaultValue as number[]);
-              }
-              break;
-            case 'dtype':
-              value = this.getDtypeParam(
-                  node.attr, param.tfParamName, param.defaultValue as DataType);
-              if (value === undefined && !!param.tfParamNameDeprecated) {
+                    node.attr, param.tfName, param.defaultValue as number[]);
+                if (value === undefined && !!param.tfDeprecatedName) {
+                  value = this.getTensorShapeParam(
+                      node.attr, param.tfDeprecatedName,
+                      param.defaultValue as number[]);
+                }
+                break;
+              case 'dtype':
                 value = this.getDtypeParam(
-                    node.attr, param.tfParamNameDeprecated,
-                    param.defaultValue as DataType);
-              }
-              break;
-            case 'tensor':
-            case 'tensors':
-              break;
-            default:
-              throw new Error(
-                  `Unsupported param type: ${param.type} for op: ${node.op}`);
-          }
-        }
-        map[param.dlParamName] = {value, inputIndex, type, inputParamLength};
-        return map;
-      }, {});
+                    node.attr, param.tfName, param.defaultValue as DataType);
+                if (value === undefined && !!param.tfDeprecatedName) {
+                  value = this.getDtypeParam(
+                      node.attr, param.tfDeprecatedName,
+                      param.defaultValue as DataType);
+                }
+                break;
+              case 'tensor':
+              case 'tensors':
+                break;
+              default:
+                throw new Error(
+                    `Unsupported param type: ${param.type} for op: ${node.op}`);
+            }
+            map[param.name] = {value, type};
+            return map;
+          }, {});
     }
     return newNode;
+  }
+
+  private decodeBase64(text: string): string {
+    if (typeof atob !== 'undefined') {
+      return atob(text);
+    } else if (typeof Buffer !== 'undefined') {
+      return new Buffer(text, 'base64').toString();
+    } else {
+      throw new Error(
+          'Unable to decode base64 in this environment. ' +
+          'Missing built-in atob() or Buffer()');
+    }
   }
 
   private getStringParam(
@@ -229,7 +248,7 @@ export class OperationMapper {
     if (param !== undefined) {
       const value = Array.isArray(param.s) ?
           String.fromCharCode.apply(null, param.s) :
-          Base64.decode(param.s);
+          this.decodeBase64(param.s);
       return keepCase ? value : value.toLowerCase();
     }
     return def;

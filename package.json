@@ -1,6 +1,6 @@
 {
   "name": "@tensorflow/tfjs-converter",
-  "version": "1.0.0-alpha1",
+  "version": "1.0.0-alpha5",
   "description": "Tensorflow model converter for javascript",
   "main": "dist/src/index.js",
   "jsnext:main": "dist/tf-converter.esm.js",
@@ -14,12 +14,12 @@
   },
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@tensorflow/tfjs-core": "1.0.0-alpha1"
+    "@tensorflow/tfjs-core": "1.0.0-alpha3"
   },
   "devDependencies": {
-    "@tensorflow/tfjs-core": "1.0.0-alpha1",
+    "@tensorflow/tfjs-core": "1.0.0-alpha3",
     "@types/jasmine": "~2.8.6",
-    "@types/js-base64": "2.3.1",
+    "@types/node-fetch": "1.6.9",
     "ajv": "~6.3.0",
     "babel-core": "~6.26.3",
     "babel-plugin-external-helpers": "~6.22.0",
@@ -60,8 +60,5 @@
     "gen-doc": "ts-node ./scripts/gen_doc.ts",
     "gen-google3-proto": "rollup -c rollup.config.google.js",
     "gen-json": "ts-node ./scripts/gen_json.ts"
-  },
-  "dependencies": {
-    "js-base64": "2.4.9"
   }
 }
