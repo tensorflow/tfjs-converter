@@ -117,10 +117,15 @@ describe('loadGraphModel', () => {
       }
     };
     const model = await tfconv.loadGraphModel(customLoader);
-    expect(model != null).toBe(true);
+    expect(model).toBeDefined();
     const bias = model.weights['Const'][0];
     expect(bias.dtype).toBe('int32');
     expect(bias.dataSync()).toEqual(new Int32Array([5]));
+  });
+
+  it('Expect an error when moderUrl is null', () => {
+    expect(() => tfconv.loadGraphModel(null))
+        .toThrowError(/modelUrl in loadGraphModel\(\) cannot be null/);
   });
 });
 
