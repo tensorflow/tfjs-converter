@@ -14,11 +14,10 @@
  * limitations under the License.
  * =============================================================================
  */
-import {deprecationWarn, io} from '@tensorflow/tfjs-core';
 
+import {deprecationWarn, io, util} from '@tensorflow/tfjs-core';
 import {DEFAULT_MANIFEST_NAME, FrozenModel, loadFrozenModel as loadFrozenModelPB} from './executor/frozen_model';
 import {FrozenModel as GraphModel, loadFrozenModel as loadFrozenModelJSON, loadTfHubModule as loadTfHubModuleJSON} from './executor/frozen_model_json';
-
 export {FrozenModel, loadTfHubModule} from './executor/frozen_model';
 export {FrozenModel as GraphModel} from './executor/frozen_model_json';
 export {version as version_converter} from './version';
@@ -108,8 +107,8 @@ function getWeightsManifestUrl(modelUrl: string): string {
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();
  * ```
- * @param modelUrl The url for the model or an `IOHandler` that loads the model.
- * @param options options for the Request, which allows to send credentials
+ * @param modelUrl The url or an `io.IOHandler` that loads the model.
+ * @param options Options for the HTTP request, which allows to send credentials
  *    and custom headers.
  */
 /** @doc {heading: 'Models', subheading: 'Loading'} */
@@ -129,14 +128,15 @@ export function loadGraphModel(
     return loadTfHubModuleJSON(
         modelUrl as string, options.requestInit, options.onProgress);
   }
-  // Backwards-compatibility: handle non-json files.
-  if ((typeof modelUrl === 'string' || modelUrl instanceof String) &&
-      !modelUrl.endsWith('.json')) {
+
+  // Backwards compatibility: handle .pb files. Remove for version 1.0.
+  if (util.isString(modelUrl) && modelUrl.endsWith('.pb')) {
     const weightsManifestUrl = getWeightsManifestUrl(modelUrl as string);
     return loadFrozenModelPB(
                modelUrl as string, weightsManifestUrl, options.requestInit,
                // tslint:disable-next-line:no-any
                options.onProgress) as any;
   }
+
   return loadFrozenModelJSON(modelUrl, options.requestInit, options.onProgress);
 }
