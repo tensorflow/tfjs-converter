@@ -129,7 +129,8 @@ export function loadGraphModel(
         modelUrl as string, options.requestInit, options.onProgress);
   }
 
-  // Backwards compatibility: handle .pb files. Remove for version 1.0.
+  // TODO: Remove this logic for version 1.0.
+  // For backwards compatibility, handle .pb files.
   if (util.isString(modelUrl) && modelUrl.endsWith('.pb')) {
     const weightsManifestUrl = getWeightsManifestUrl(modelUrl as string);
     return loadFrozenModelPB(
