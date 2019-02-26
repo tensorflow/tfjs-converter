@@ -190,7 +190,7 @@ def setup_arugments():
       default='tf_saved_model',
       choices=set(['keras', 'keras_saved_model',
                    'tf_saved_model', 'tf_session_bundle', 'tf_frozen_model',
-                   'tf_hub', 'tfjs_layers_model']),
+                   'tf_hub', 'tfjs_layers_model', 'tensorflowjs']),
       help='Input format. '
       'For "keras", the input path can be one of the two following formats:\n'
       '  - A topology+weights combined HDF5 (e.g., generated with'
@@ -209,7 +209,8 @@ def setup_arugments():
       '--output_format',
       type=str,
       required=False,
-      choices=set(['keras', 'tfjs_layers_model', 'tfjs_graph_model']),
+      choices=set(['keras', 'tfjs_layers_model', 'tfjs_graph_model',
+                   'tensorflowjs']),
       help='Output format. Default: tfjs_graph_model.')
   parser.add_argument(
       '--output_node_names',
@@ -280,19 +281,42 @@ def main():
         'Error: The input_path argument must be set. '
         'Run with --help flag for usage information.')
 
+  if FLAGS.input_format == 'tensorflowjs':
+    raise ValueError(
+          '--input_format=tensorflowjs has been deprecated. '
+          'Use --input_format=tfjs_layers_model instead.')
+
   output_format = FLAGS.output_format
   # If no explicit output_format is provided, infer it from input format.
+  input_format_is_keras = (
+      FLAGS.input_format == 'keras' or
+      FLAGS.input_format == 'keras_saved_model')
+  input_format_is_tf = (
+      FLAGS.input_format == 'tf_frozen_model' or
+      FLAGS.input_format == 'tf_hub' or
+      FLAGS.input_format == 'tf_saved_model' or
+      FLAGS.input_format == 'tf_session_bundle')
   if output_format is None:
-    if (FLAGS.input_format == 'keras' or
-        FLAGS.input_format == 'keras_saved_model'):
+    if input_format_is_keras:
       output_format = 'tfjs_layers_model'
-    elif (FLAGS.input_format == 'tf_frozen_model' or
-          FLAGS.input_format == 'tf_hub' or
-          FLAGS.input_format == 'tf_saved_model' or
-          FLAGS.input_format == 'tf_session_bundle'):
+    elif input_format_is_tf:
       output_format = 'tfjs_graph_model'
     elif FLAGS.input_format == 'tfjs_layers_model':
       output_format = 'keras'
+  elif output_format == 'tensorflowjs':
+    # https://github.com/tensorflow/tfjs/issues/1292: Remove the logic for the
+    # explicit error message of the deprecated model type name 'tensorflowjs'
+    # at version 1.1.0.
+    if input_format_is_keras:
+      raise ValueError(
+          '--output_format=tensorflowjs has been deprecated under '
+          '--input_format=%s. Use --output_format=tfjs_layers_model '
+          'instead.' % FLAGS.input_format)
+    elif input_formta_is_tf:
+      raise ValueError(
+          '--output_format=tensorflowjs has been deprecated under '
+          '--input_format=%s. Use --output_format=tfjs_graph_model '
+          'instead.' % FLAGS.input_format)
 
   quantization_dtype = (
       quantization.QUANTIZATION_BYTES_TO_DTYPES[FLAGS.quantization_bytes]
