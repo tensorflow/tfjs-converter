@@ -190,7 +190,7 @@ def setup_arugments():
       default='tf_saved_model',
       choices=set(['keras', 'keras_saved_model',
                    'tf_saved_model', 'tf_session_bundle', 'tf_frozen_model',
-                   'tf_hub', 'tensorflowjs']),
+                   'tf_hub', 'tfjs_layers_model']),
       help='Input format. '
       'For "keras", the input path can be one of the two following formats:\n'
       '  - A topology+weights combined HDF5 (e.g., generated with'
@@ -209,9 +209,8 @@ def setup_arugments():
       '--output_format',
       type=str,
       required=False,
-      choices=set(['keras', 'tensorflowjs']),
-      default='tensorflowjs',
-      help='Output format. Default: tensorflowjs.')
+      choices=set(['keras', 'tfjs_layers_model', 'tfjs_graph_model']),
+      help='Output format. Default: tfjs_graph_model.')
   parser.add_argument(
       '--output_node_names',
       type=str,
@@ -281,6 +280,20 @@ def main():
         'Error: The input_path argument must be set. '
         'Run with --help flag for usage information.')
 
+  output_format = FLAGS.output_format
+  # If no explicit output_format is provided, infer it from input format.
+  if output_format is None:
+    if (FLAGS.input_format == 'keras' or
+        FLAGS.input_format == 'keras_saved_model'):
+      output_format = 'tfjs_layers_model'
+    elif (FLAGS.input_format == 'tf_frozen_model' or
+          FLAGS.input_format == 'tf_hub' or
+          FLAGS.input_format == 'tf_saved_model' or
+          FLAGS.input_format == 'tf_session_bundle'):
+      output_format = 'tfjs_graph_model'
+    elif FLAGS.input_format == 'tfjs_layers_model':
+      output_format = 'keras'
+
   quantization_dtype = (
       quantization.QUANTIZATION_BYTES_TO_DTYPES[FLAGS.quantization_bytes]
       if FLAGS.quantization_bytes else None)
@@ -300,19 +313,19 @@ def main():
 
   # TODO(cais, piyu): More conversion logics can be added as additional
   #   branches below.
-  if FLAGS.input_format == 'keras' and FLAGS.output_format == 'tensorflowjs':
+  if FLAGS.input_format == 'keras' and output_format == 'tfjs_layers_model':
     dispatch_keras_h5_to_tensorflowjs_conversion(
         FLAGS.input_path, output_dir=FLAGS.output_path,
         quantization_dtype=quantization_dtype,
         split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (FLAGS.input_format == 'keras_saved_model' and
-        FLAGS.output_format == 'tensorflowjs'):
+        output_format == 'tfjs_layers_model'):
     dispatch_keras_saved_model_to_tensorflowjs_conversion(
         FLAGS.input_path, FLAGS.output_path,
         quantization_dtype=quantization_dtype,
         split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (FLAGS.input_format == 'tf_saved_model' and
-        FLAGS.output_format == 'tensorflowjs'):
+        output_format == 'tfjs_graph_model'):
     if not FLAGS.output_json:
       tf_saved_model_conversion_pb.convert_tf_saved_model(
           FLAGS.input_path, FLAGS.output_node_names,
@@ -329,7 +342,7 @@ def main():
           strip_debug_ops=FLAGS.strip_debug_ops)
 
   elif (FLAGS.input_format == 'tf_session_bundle' and
-        FLAGS.output_format == 'tensorflowjs'):
+        output_format == 'tfjs_graph_model'):
     if not FLAGS.output_json:
       tf_saved_model_conversion_pb.convert_tf_session_bundle(
           FLAGS.input_path, FLAGS.output_node_names,
@@ -343,7 +356,7 @@ def main():
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
   elif (FLAGS.input_format == 'tf_frozen_model' and
-        FLAGS.output_format == 'tensorflowjs'):
+        output_format == 'tfjs_graph_model'):
     if not FLAGS.output_json:
       tf_saved_model_conversion_pb.convert_tf_frozen_model(
           FLAGS.input_path, FLAGS.output_node_names,
@@ -357,8 +370,7 @@ def main():
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
 
-  elif (FLAGS.input_format == 'tf_hub' and
-        FLAGS.output_format == 'tensorflowjs'):
+  elif FLAGS.input_format == 'tf_hub' and output_format == 'tfjs_graph_model':
     if not FLAGS.output_json:
       if FLAGS.signature_name:
         tf_saved_model_conversion_pb.convert_tf_hub_module(
@@ -383,15 +395,15 @@ def main():
             FLAGS.output_path,
             skip_op_check=FLAGS.skip_op_check,
             strip_debug_ops=FLAGS.strip_debug_ops)
-  elif (FLAGS.input_format == 'tensorflowjs' and
-        FLAGS.output_format == 'keras'):
+  elif (FLAGS.input_format == 'tfjs_layers_model' and
+        output_format == 'keras'):
     dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
                                                  FLAGS.output_path)
 
   else:
     raise ValueError(
         'Unsupported input_format - output_format pair: %s - %s' %
-        (FLAGS.input_format, FLAGS.output_format))
+        (FLAGS.input_format, output_format))
 
 
 if __name__ == '__main__':
