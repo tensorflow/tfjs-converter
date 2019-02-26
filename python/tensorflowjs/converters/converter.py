@@ -281,10 +281,13 @@ def main():
         'Error: The input_path argument must be set. '
         'Run with --help flag for usage information.')
 
+  # https://github.com/tensorflow/tfjs/issues/1292: Remove the logic for the
+  # explicit error message of the deprecated model type name 'tensorflowjs'
+  # at version 1.1.0.
   if FLAGS.input_format == 'tensorflowjs':
     raise ValueError(
-          '--input_format=tensorflowjs has been deprecated. '
-          'Use --input_format=tfjs_layers_model instead.')
+        '--input_format=tensorflowjs has been deprecated. '
+        'Use --input_format=tfjs_layers_model instead.')
 
   output_format = FLAGS.output_format
   # If no explicit output_format is provided, infer it from input format.
@@ -312,7 +315,7 @@ def main():
           '--output_format=tensorflowjs has been deprecated under '
           '--input_format=%s. Use --output_format=tfjs_layers_model '
           'instead.' % FLAGS.input_format)
-    elif input_formta_is_tf:
+    elif input_format_is_tf:
       raise ValueError(
           '--output_format=tensorflowjs has been deprecated under '
           '--input_format=%s. Use --output_format=tfjs_graph_model '
