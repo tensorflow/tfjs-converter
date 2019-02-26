@@ -21,7 +21,6 @@ import {FrozenModel as GraphModel, loadFrozenModel, loadTfHubModule} from './exe
 export {FrozenModel as GraphModel} from './executor/frozen_model';
 export {version as version_converter} from './version';
 
-
 /**
  * Load a graph model given a URL to the model definition.
  *
