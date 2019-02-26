@@ -104,7 +104,11 @@ saved a tf.keras model in the SavedModel format.
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
 |`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes. The default (unquantized) size is 4 bytes.|
 
-### Format conversions support table
+### Format Conversion Support Tables
+
+Note: Unless stated otherwise, we can infer the value of `--output_format` from the
+value of `--input_format`. So the `--output_format` flag can be omitted in
+most cases.
 
 #### Python-to-JavaScript
 
