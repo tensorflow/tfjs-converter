@@ -125,7 +125,7 @@ export class TensorArray {
       this.elementShape = tensor.shape;
     }
 
-    util.assertShapesMatch(
+    this.assertShapesMatchAllowUndefinedSize(
         this.elementShape, tensor.shape,
         `TensorArray ${this.name}: Could not write to TensorArray index ${
             index}.`);
@@ -192,7 +192,7 @@ export class TensorArray {
     // their memory.
     const tensors = this.readMany(indices);
 
-    util.assertShapesMatch(
+    this.assertShapesMatchAllowUndefinedSize(
         this.elementShape, tensors[0].shape, 'TensorArray shape mismatch: ');
 
     return stack(tensors, 0);
@@ -218,7 +218,7 @@ export class TensorArray {
     // Collect all the tensors from the tensors array.
     const tensors = this.readMany(indices);
 
-    util.assertShapesMatch(
+    this.assertShapesMatchAllowUndefinedSize(
         this.elementShape, tensors[0].shape,
         `TensorArray shape mismatch: tensor array shape (${
             this.elementShape}) vs first tensor shape (${tensors[0].shape})`);
@@ -300,5 +300,30 @@ export class TensorArray {
       indices[i] = i;
     }
     this.writeMany(indices, tensors);
+  }
+
+  /**
+   * This differs from util.assertShapesMatch in that it allows values of
+   * negative one, an undefined size of a dimensinon, in a shape to match
+   * anything.
+   */
+  private assertShapesMatchAllowUndefinedSize(
+      shapeA: number[], shapeB: number[], errorMessagePrefix = ''): void {
+    util.assert(
+        this.shapesEqualAllowUndefinedSize(shapeA, shapeB),
+        () =>
+            errorMessagePrefix + ` Shapes ${shapeA} and ${shapeB} must match`);
+  }
+
+  private shapesEqualAllowUndefinedSize(n1: number[], n2: number[]) {
+    if (n1.length !== n2.length) {
+      return false;
+    }
+    for (let i = 0; i < n1.length; i++) {
+      if (n1[i] !== -1 && n2[i] !== -1 && n1[i] !== n2[i]) {
+        return false;
+      }
+    }
+    return true;
   }
 }
