@@ -172,7 +172,7 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
     print('Saved Keras model to HDF5 file: %s' % h5_path)
 
 
-def _standardize_input_output_foramts(input_format, output_format):
+def _standardize_input_output_formats(input_format, output_format):
   """Standardize input and output formats.
 
   Args:
@@ -334,7 +334,7 @@ def main():
         'Error: The input_path argument must be set. '
         'Run with --help flag for usage information.')
 
-  input_format, output_format = _standardize_input_output_foramts(
+  input_format, output_format = _standardize_input_output_formats(
       FLAGS.input_format, FLAGS.output_format)
 
   quantization_dtype = (
