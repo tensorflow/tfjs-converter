@@ -410,33 +410,6 @@ class APIAndShellTest(tf.test.TestCase):
         glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
     self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
-  def testConvertTFHubModuleToPbWithCommandLineWorks(self):
-    output_dir = os.path.join(self._tmp_dir)
-    process = subprocess.Popen([
-        'tensorflowjs_converter', '--input_format', 'tf_hub',
-        self.tf_hub_module_dir, output_dir
-    ])
-    process.communicate()
-    self.assertEqual(0, process.returncode)
-
-    weights = [{
-        'paths': ['group1-shard1of1.bin'],
-        'weights': [{
-            'shape': [2],
-            'name': 'module/Variable',
-            'dtype': 'float32'
-        }]
-    }]
-    # Load the saved weights as a JSON string.
-    output_json = json.load(
-        open(os.path.join(output_dir, 'weights_manifest.json'), 'rt'))
-    self.assertEqual(output_json, weights)
-
-    # Check the content of the output directory.
-    self.assertTrue(
-        glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
-    self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
-
   def testConvertTFSavedModelWithCommandLineWorks(self):
     output_dir = os.path.join(self._tmp_dir)
     process = subprocess.Popen([
