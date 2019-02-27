@@ -108,13 +108,20 @@ def optimize_graph(graph,
                    output_graph,
                    quantization_dtype=None,
                    skip_op_check=False,
-                   strip_debug_ops=False):
+                   strip_debug_ops=False,
+                   graph_def=None):
   """Takes a Python Graph object and optimizes the graph.
 
   Args:
     graph: tf.Graph TensorFlow dataflow graph.
-    strip_debug_ops: Bool whether to strip out debug ops.
+    quantization_dtype: An optional numpy dtype to quantize weights to for
+      compression. Only np.uint8 and np.uint16 are supported.
+    skip_op_check: Bool whether to skip the op check.
+    strip_debug_ops: Bool whether to strip debug ops.
+    graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
+      the model topology.
   """
+
   unsupported = validate(graph.as_graph_def().node, skip_op_check,
                          strip_debug_ops)
   if unsupported:
