@@ -17,13 +17,12 @@
 
 import * as tfc from '@tensorflow/tfjs-core';
 import {tensorflow} from '../data/compiled_api';
-import * as tfconv from '../index';
-import * as fm from './frozen_model';
+import {GraphModel, loadGraphModel} from './graph_model';
 
 const HOST = 'http://example.org';
 const MODEL_URL = `${HOST}/model.json`;
 const RELATIVE_MODEL_URL = '/path/model.pb';
-let model: fm.FrozenModel;
+let model: GraphModel;
 const bias = tfc.tensor1d([1], 'int32');
 
 const weightsManifest: tfc.io.WeightsManifestEntry[] =
@@ -116,22 +115,27 @@ describe('loadGraphModel', () => {
         };
       }
     };
-    const model = await tfconv.loadGraphModel(customLoader);
+    const model = await loadGraphModel(customLoader);
     expect(model).toBeDefined();
     const bias = model.weights['Const'][0];
     expect(bias.dtype).toBe('int32');
     expect(bias.dataSync()).toEqual(new Int32Array([5]));
   });
 
-  it('Expect an error when moderUrl is null', () => {
-    expect(() => tfconv.loadGraphModel(null))
-        .toThrowError(/modelUrl in loadGraphModel\(\) cannot be null/);
+  it('Expect an error when moderUrl is null', async () => {
+    let errorMsg = 'no error';
+    try {
+      await loadGraphModel(null);
+    } catch (err) {
+      errorMsg = err.message;
+    }
+    expect(errorMsg).toMatch(/modelUrl in loadGraphModel\(\) cannot be null/);
   });
 });
 
 describe('Model', () => {
   beforeEach(() => {
-    model = new fm.FrozenModel(MODEL_URL);
+    model = new GraphModel(MODEL_URL);
   });
 
   describe('simple model', () => {
@@ -235,7 +239,7 @@ describe('Model', () => {
     describe('dispose', () => {
       it('should dispose the weights', async () => {
         const numOfTensors = tfc.memory().numTensors;
-        model = new fm.FrozenModel(MODEL_URL);
+        model = new GraphModel(MODEL_URL);
 
         await model.load();
         model.dispose();
@@ -253,7 +257,7 @@ describe('Model', () => {
 
     describe('relative path', () => {
       beforeEach(() => {
-        model = new fm.FrozenModel(RELATIVE_MODEL_URL);
+        model = new GraphModel(RELATIVE_MODEL_URL);
       });
 
       it('load', async () => {
@@ -262,23 +266,23 @@ describe('Model', () => {
       });
     });
 
-    it('should loadFrozenModel', async () => {
-      const model = await fm.loadFrozenModel(MODEL_URL);
+    it('should loadGraphModel', async () => {
+      const model = await loadGraphModel(MODEL_URL);
       expect(model).not.toBeUndefined();
     });
 
-    it('should loadFrozenModel with request options', async () => {
-      const model =
-          await fm.loadFrozenModel(MODEL_URL, {credentials: 'include'});
+    it('should loadGraphModel with request options', async () => {
+      const model = await loadGraphModel(
+          MODEL_URL, {requestInit: {credentials: 'include'}});
       expect(tfc.io.browserHTTPRequest)
           .toHaveBeenCalledWith(
               MODEL_URL, {credentials: 'include'}, null, null, undefined);
       expect(model).not.toBeUndefined();
     });
 
-    it('should call loadFrozenModel for loadTfHubModule', async () => {
+    it('should call loadGraphModel for TfHub Module', async () => {
       const url = `${HOST}/model/1`;
-      const model = await fm.loadTfHubModule(url);
+      const model = await loadGraphModel(url, {fromTFHub: true});
       expect(model).toBeDefined();
     });
 
