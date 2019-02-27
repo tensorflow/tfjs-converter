@@ -209,34 +209,6 @@ class APIAndShellTest(tf.test.TestCase):
           model1_weight_values, model2_weight_values):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
-  def testConvertTensorFlowSavedModelToPb(self):
-    output_dir = os.path.join(self._tmp_dir, 'tensorflowjs_model')
-    tfjs.converters.tf_saved_model_conversion_pb.convert_tf_saved_model(
-        self.tf_saved_model_dir,
-        'a/Softmax',
-        output_dir,
-        saved_model_tags='serve'
-    )
-
-    weights = [{
-        'paths': ['group1-shard1of1.bin'],
-        'weights': [{
-            'shape': [2, 2],
-            'name': 'a/Softmax',
-            'dtype': 'float32'
-        }]
-    }]
-    # Load the saved weights as a JSON string.
-    with open(os.path.join(output_dir, 'weights_manifest.json'),
-              'rt') as f:
-      output_json = json.load(f)
-    self.assertEqual(output_json, weights)
-
-    # Check the content of the output directory.
-    self.assertTrue(
-        glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
-    self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
-
   def testConvertTensorFlowSavedModel(self):
     output_dir = os.path.join(self._tmp_dir, 'tensorflowjs_model')
     tfjs.converters.convert_tf_saved_model(
