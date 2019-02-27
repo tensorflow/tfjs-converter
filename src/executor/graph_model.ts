@@ -312,7 +312,7 @@ export async function loadGraphModel(
   if (options.fromTFHub) {
     if ((modelUrl as io.IOHandler).load == null) {
       if (!(modelUrl as string).endsWith('/')) {
-        modelUrl = modelUrl + '/';
+        modelUrl = (modelUrl as string) + '/';
       }
       modelUrl = `${modelUrl}${DEFAULT_MODEL_NAME}${TFHUB_SEARCH_PARAM}`;
     }
