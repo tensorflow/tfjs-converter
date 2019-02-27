@@ -138,7 +138,7 @@ export class GraphModel implements tfc.InferenceModel {
    * input type. For example, given the graph
    *    InputNode => Intermediate => OutputNode,
    * you can execute the subgraph Intermediate => OutputNode by calling
-   *    frozenModel.execute('IntermediateNode' : tf.tensor(...));
+   *    model.execute('IntermediateNode' : tf.tensor(...));
    *
    * This is useful for models that uses tf.dynamic_rnn, where the intermediate
    * state needs to be fed manually.
@@ -150,7 +150,7 @@ export class GraphModel implements tfc.InferenceModel {
    * in the shape of [100, 244, 244, 3].
    *
    * @param config Prediction configuration for specifying the batch size and
-   * output node names. Currently the batch size option is ignored for frozen
+   * output node names. Currently the batch size option is ignored for graph
    * model.
    *
    * @returns Inference result tensors. The output would be single `tf.Tensor`
@@ -169,7 +169,7 @@ export class GraphModel implements tfc.InferenceModel {
     if (inputArray.length !== this.inputNodes.length) {
       throw new Error(
           'Input tensor count mismatch,' +
-          `the frozen model has ${this.inputNodes.length} placeholders, ` +
+          `the graph model has ${this.inputNodes.length} placeholders, ` +
           `while there are ${inputArray.length} input tensors.`);
     }
     return this.inputNodes.reduce((map, inputName, i) => {

@@ -147,7 +147,7 @@ following location:
 
 ## Step 2: Loading and running in the browser
 
-Instantiate the [FrozenModel class](./src/executor/frozen_model.ts) and run inference.
+Instantiate the [GraphModel class](./src/executor/graph_model.ts) and run inference.
 
 ```typescript
 import * as tf from '@tensorflow/tfjs';
@@ -181,7 +181,7 @@ to the model files:
 
 ```js
 // Load the tfjs-node binding
-import '@tensorflow/tfjs-node';
+import * as tf from '@tensorflow/tfjs-node';
 
 const MODEL_PATH = 'file:///tmp/mobilenet/model.json';
 const model = await tf.loadGraphModel(MODEL_PATH);
@@ -208,7 +208,7 @@ import * as tf from '@tensorflow/tfjs';
 const modelUrl = "https://example.org/model/model.json";
 
 const model = await fetch(modelUrl);
-this.weightManifest = await model.json()['weightsManifest'];
+this.weightManifest = (await model.json())['weightsManifest'];
 const weightMap = await tf.io.loadWeights(
         this.weightManifest, "https://example.org/model");
 ```
@@ -217,7 +217,7 @@ const weightMap = await tf.io.loadWeights(
 
 1. What TensorFlow models does the converter currently support?
 
-Image-based models (MobileNet, SqueezeNet, add more if you tested) are the most supported. Models with control flow ops (e.g. RNNs) are not yet supported. The tensorflowjs_converter script will validate the model you have and show a list of unsupported ops in your model. See [this list](./docs/supported_ops.md) for which ops are currently supported.
+Image-based models (MobileNet, SqueezeNet, add more if you tested) are the most supported. Models with control flow ops (e.g. RNNs) are also supported. The tensorflowjs_converter script will validate the model you have and show a list of unsupported ops in your model. See [this list](./docs/supported_ops.md) for which ops are currently supported.
 
 2. Will model with large weights work?
 
@@ -235,7 +235,7 @@ an example of 8-bit quantization:
 ```
 tensorflowjs_converter \
     --input_format=tf_hub \
-    --quantization_byptes=1
+    --quantization_bytes=1
     'https://tfhub.dev/google/imagenet/mobilenet_v1_100_224/classification/1' \
     /mobilenet/web_model
 ```
