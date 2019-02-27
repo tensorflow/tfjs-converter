@@ -382,34 +382,6 @@ class APIAndShellTest(tf.test.TestCase):
         b'The --output_node_names flag is applicable only to',
         tf.compat.as_bytes(stderr))
 
-  def testConvertTFSavedModelToPbWithCommandLineWorks(self):
-    output_dir = os.path.join(self._tmp_dir)
-    process = subprocess.Popen([
-        'tensorflowjs_converter', '--input_format', 'tf_saved_model',
-        '--output_node_names', 'a/Softmax', '--saved_model_tags', 'serve',
-        self.tf_saved_model_dir, output_dir
-    ])
-    process.communicate()
-    self.assertEqual(0, process.returncode)
-
-    weights = [{
-        'paths': ['group1-shard1of1.bin'],
-        'weights': [{
-            'shape': [2, 2],
-            'name': 'a/Softmax',
-            'dtype': 'float32'
-        }]
-    }]
-    # Load the saved weights as a JSON string.
-    output_json = json.load(
-        open(os.path.join(output_dir, 'weights_manifest.json'), 'rt'))
-    self.assertEqual(output_json, weights)
-
-    # Check the content of the output directory.
-    self.assertTrue(
-        glob.glob(os.path.join(output_dir, 'tensorflowjs_model.pb')))
-    self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
-
   def testConvertTFSavedModelWithCommandLineWorks(self):
     output_dir = os.path.join(self._tmp_dir)
     process = subprocess.Popen([
