@@ -415,7 +415,7 @@ class APIAndShellTest(tf.test.TestCase):
     process = subprocess.Popen([
         'tensorflowjs_converter', '--input_format', 'tf_saved_model',
         '--output_node_names', 'a/Softmax', '--saved_model_tags', 'serve',
-        '--output_json', 'true', self.tf_saved_model_dir, output_dir
+        self.tf_saved_model_dir, output_dir
     ])
     process.communicate()
     self.assertEqual(0, process.returncode)
@@ -440,7 +440,7 @@ class APIAndShellTest(tf.test.TestCase):
     output_dir = os.path.join(self._tmp_dir)
     process = subprocess.Popen([
         'tensorflowjs_converter', '--input_format', 'tf_hub',
-        '--output_json', 'true', self.tf_hub_module_dir, output_dir
+        self.tf_hub_module_dir, output_dir
     ])
     process.communicate()
     self.assertEqual(0, process.returncode)
