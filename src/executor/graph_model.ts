@@ -276,7 +276,7 @@ export class GraphModel implements tfc.InferenceModel {
  *
  * ```js
  * const modelUrl =
- *    'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/tensorflowjs_model.pb';
+ *    'https://storage.googleapis.com/tfjs-models/savedmodel/mobilenet_v2_1.0_224/model.json';
  * const model = await tf.loadGraphModel(modelUrl);
  * const zeros = tf.zeros([1, 224, 224, 3]);
  * model.predict(zeros).print();
