@@ -216,7 +216,7 @@ class ConvertTest(unittest.TestCase):
     with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
       model_json = json.load(f)
 
-    # Check meta-data in the artifact JSON
+    # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
     self.assertEqual(
         model_json['convertedBy'],

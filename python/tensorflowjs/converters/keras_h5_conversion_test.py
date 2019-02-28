@@ -132,7 +132,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
       model_json = json.load(f)
 
-    # Check meta-data in the artifact JSON
+    # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'layers-model')
     self.assertEqual(model_json['generatedBy'], 'keras v%s' % keras.__version__)
     self.assertEqual(
