@@ -56,7 +56,7 @@ class ConvertTest(unittest.TestCase):
       # Create a builder
       saver = tf.train.Saver()
 
-      with tf.Session() as sess:
+      with tf.compact.v1.Session() as sess:
         # Run the initializer on `w`.
         sess.run(init_op)
         softmax.op.run()
@@ -76,7 +76,7 @@ class ConvertTest(unittest.TestCase):
       builder = tf.saved_model.builder.SavedModelBuilder(
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR))
 
-      with tf.Session() as sess:
+      with tf.compact.v1.Session() as sess:
         # Run the initializer on `w`.
         sess.run(init_op)
 
@@ -102,7 +102,7 @@ class ConvertTest(unittest.TestCase):
       builder = tf.saved_model.builder.SavedModelBuilder(
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR))
 
-      with tf.Session() as sess:
+      with tf.compact.v1.Session() as sess:
         # Run the initializer on `w`.
         sess.run(init_op)
 
@@ -127,7 +127,7 @@ class ConvertTest(unittest.TestCase):
       builder = tf.saved_model.builder.SavedModelBuilder(
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR))
 
-      with tf.Session() as sess:
+      with tf.compact.v1.Session() as sess:
         sess.run(w.initializer)
         builder.add_meta_graph_and_variables(
             sess, [tf.saved_model.tag_constants.SERVING],
@@ -147,7 +147,7 @@ class ConvertTest(unittest.TestCase):
       spec = hub.create_module_spec(double_module_fn)
       m = hub.Module(spec)
     # Export the module.
-    with tf.Session(graph=graph) as sess:
+    with tf.compact.v1.Session(graph=graph) as sess:
       sess.run(tf.global_variables_initializer())
       m.export(os.path.join(self._tmp_dir, HUB_MODULE_DIR), sess)
 
@@ -164,7 +164,7 @@ class ConvertTest(unittest.TestCase):
       # Create a builder
       builder = tf.saved_model.builder.SavedModelBuilder(saved_model_dir)
 
-      with tf.Session() as sess:
+      with tf.compact.v1.Session() as sess:
         # Run the initializer on `w`.
         sess.run(init_op)
 

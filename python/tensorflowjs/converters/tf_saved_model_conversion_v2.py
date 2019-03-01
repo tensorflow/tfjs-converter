@@ -23,52 +23,84 @@ import os
 import numpy as np
 
 import tensorflow as tf
-from tensorflow.python.framework import convert_to_constants
+from tensorflow.core.protobuf import device_properties_pb2
+from tensorflow.core.protobuf import meta_graph_pb2
 from tensorflow.core.protobuf import config_pb2
+from tensorflow.python.framework import convert_to_constants
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
-from tensorflowjs import write_weights
-from tensorflowjs.converters import tf_saved_model_conversion
 from tensorflow.python.saved_model.load import load
+from tensorflow.python.tools import freeze_graph
+from tensorflow.python.training.saver import export_meta_graph
+from google.protobuf.json_format import MessageToDict
 
-def load_graph(graph_filename, output_node_names):
-  """Loads GraphDef. Returns Python Graph object.
+from tensorflowjs import write_weights
+
+DEFAULT_MODEL_FILENAME = 'model.json'
+# JSON string keys for fields of the indexing JSON.
+ARTIFACT_MODEL_TOPOLOGY_KEY = 'modelTopology'
+ARTIFACT_WEIGHTS_MANIFEST_KEY = 'weightsManifest'
+
+CLEARED_TENSOR_FIELDS = (
+    'tensor_content', 'half_val', 'float_val', 'double_val', 'int_val',
+    'string_val', 'scomplex_val', 'int64_val', 'bool_val',
+    'resource_handle_val', 'variant_val', 'uint32_val', 'uint64_val')
+
+
+def get_cluster():
+  """Grappler optimization configuration for GPU."""
+  named_device = device_properties_pb2.NamedDevice()
+  named_device.name = '/GPU:0'
+  named_device.properties.type = 'GPU'
+  named_device.properties.environment['architecture'] = '4'
+  cluster = gcluster.Cluster(devices=[named_device])
+  return cluster
+
+def validate(nodes, skip_op_check, strip_debug_ops):
+  """Validate if the node's op is compatible with TensorFlow.js.
 
   Args:
-    graph_filename: string File name for the frozen graph.
+    nodes: tf.NodeDef TensorFlow NodeDef objects from GraphDef.
+    skip_op_check: Bool whether to skip the op check.
+    strip_debug_ops: Bool whether to allow unsupported debug ops.
   """
-  with tf.gfile.Open(graph_filename, 'rb') as f:
-    graph_def = tf.GraphDef()
-    graph_def.ParseFromString(f.read())
+  if skip_op_check:
+    return set()
+  ops = []
+  op_list_path = os.path.join(
+      os.path.dirname(os.path.abspath(__file__)), '../op_list/')
+  for filename in os.listdir(op_list_path):
+    if os.path.splitext(filename)[1] == '.json':
+      with open(os.path.join(op_list_path, filename)) as json_data:
+        ops += json.load(json_data)
 
-  with tf.Graph().as_default() as graph:
-    # Set name to empty to avoid using the default name 'import'.
-    tf.import_graph_def(graph_def, name='')
+  names = {x['tfOpName'] for x in ops}
+  if strip_debug_ops:
+    names = names.union({'Assert', 'CheckNumerics', 'Print'})
+  not_supported = {x.op for x in [x for x in nodes if x.op not in names]}
+  return not_supported
 
-  for node in output_node_names.split(','):
-    graph.add_to_collection('train_op',
-                            graph.get_operation_by_name(node.strip()))
-
-  return graph
-
-def optimize_graph(graph, graph_def,
+def optimize_graph(graph,
                    output_graph,
                    quantization_dtype=None,
                    skip_op_check=False,
-                   strip_debug_ops=False):
+                   strip_debug_ops=False,
+                   graph_def=None):
   """Takes a Python Graph object and optimizes the graph.
 
   Args:
     graph: tf.Graph TensorFlow dataflow graph.
-    graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
-      the model topology.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
     skip_op_check: Bool whether to skip the op check.
     strip_debug_ops: Bool whether to strip debug ops.
+    graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
+      the model topology.
   """
-  unsupported = tf_saved_model_conversion.validate(graph.as_graph_def().node, skip_op_check,
+  if graph_def is None:
+    graph_def = graph.as_graph_def()
+  unsupported = validate(graph_def.node, skip_op_check,
                          strip_debug_ops)
   if unsupported:
     raise ValueError('Unsupported Ops in the model before optimization\n' +
@@ -82,20 +114,98 @@ def optimize_graph(graph, graph_def,
   ]
   if strip_debug_ops:
     rewriter_config.optimizers.insert(0, 'debug_stripper')
-  meta_graph = tf.train.export_meta_graph(
-      graph_def=graph.as_graph_def(), graph=graph)
-  optimized_graph = tf_optimizer.OptimizeGraph(
-      config, meta_graph, cluster=tf_saved_model_conversion.get_cluster())
+  meta_graph = export_meta_graph(
+      graph_def=graph_def, graph=graph)
 
-  unsupported = tf_saved_model_conversion.validate(optimized_graph.node, skip_op_check,
+  # Add a collection 'train_op' so that Grappler knows the outputs.
+  fetch_collection = meta_graph_pb2.CollectionDef()
+  for array in ['x', 'Identity']:
+    fetch_collection.node_list.value.append(array)
+  meta_graph.collection_def["train_op"].CopyFrom(fetch_collection)
+
+  optimized_graph = tf_optimizer.OptimizeGraph(
+      config, meta_graph, cluster=get_cluster())
+
+  unsupported = validate(optimized_graph.node, skip_op_check,
                          strip_debug_ops)
 
   if unsupported:
     raise ValueError('Unsupported Ops in the model after optimization\n' +
                      ', '.join(unsupported))
 
-  tf_saved_model_conversion.extract_weights(optimized_graph, output_graph, quantization_dtype)
+  extract_weights(optimized_graph, output_graph, quantization_dtype)
   return optimize_graph
+
+
+def extract_weights(graph_def,
+                    output_graph,
+                    quantization_dtype=None):
+  """Takes a Python GraphDef object and extract the weights.
+
+  Args:
+    graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
+      the model topology.
+    quantization_dtype: An optional numpy dtype to quantize weights to for
+        compression. Only np.uint8 and np.uint16 are supported.
+  """
+  constants = [node for node in graph_def.node if node.op == 'Const']
+  const_inputs = {}
+  # removed the conditional inputs for constants
+  for const in constants:
+    const_inputs[const.name] = const.input[:]
+    del const.input[:]
+
+  print('Writing weight file ' + output_graph + '...')
+  const_manifest = []
+
+  graph = tf.Graph()
+  with tf.compat.v1.Session(graph=graph) as sess:
+    tf.import_graph_def(graph_def, name='')
+    for const in constants:
+      tensor = graph.get_tensor_by_name(const.name + ':0')
+      value = tensor.eval(session=sess)
+      if not isinstance(value, np.ndarray):
+        value = np.array(value)
+
+      # Restore the conditional inputs
+      const_manifest.append({'name': const.name, 'data': value})
+      const.input[:] = const_inputs[const.name]
+
+      # Remove the binary array from tensor and save it to the external file.
+      for field_name in CLEARED_TENSOR_FIELDS:
+        const.attr["value"].tensor.ClearField(field_name)
+
+  write_artifacts(MessageToDict(graph_def), [const_manifest], output_graph,
+                  quantization_dtype=quantization_dtype)
+
+
+def write_artifacts(topology,
+                    weights,
+                    output_graph,
+                    quantization_dtype=None):
+  """Writes weights and topology to the output_dir.
+
+  If `topology` is Falsy (e.g., `None`), only emit weights to output_dir.
+
+  Args:
+    topology: tf.GraphDef TensorFlow GraphDef proto object, which represents
+      the model topology.
+    weights: an array of weight groups (as defined in tfjs write_weights).
+    output_graph: the output file name to hold all the contents.
+    quantization_dtype: An optional numpy dtype to quantize weights to for
+      compression. Only np.uint8 and np.uint16 are supported.
+  """
+  model_json = {}
+
+  model_json[ARTIFACT_MODEL_TOPOLOGY_KEY] = topology or None
+  weights_manifest = write_weights.write_weights(
+      weights, os.path.dirname(output_graph), write_manifest=False,
+      quantization_dtype=quantization_dtype)
+  assert isinstance(weights_manifest, list)
+  model_json[ARTIFACT_WEIGHTS_MANIFEST_KEY] = weights_manifest
+
+  with open(output_graph, 'wt') as f:
+    json.dump(model_json, f)
 
 def convert_tf_saved_model(saved_model_dir,
                            output_dir, signature_def='serving_default',
@@ -120,15 +230,15 @@ def convert_tf_saved_model(saved_model_dir,
     skip_op_check: Bool whether to skip the op check.
     strip_debug_ops: Bool whether to strip debug ops.
   """
-
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
-  output_graph = os.path.join(output_dir, tf_saved_model_conversion.DEFAULT_MODEL_FILENAME)
+  output_graph = os.path.join(
+      output_dir, DEFAULT_MODEL_FILENAME)
 
   model = load(saved_model_dir)
   concrete_func = model.signatures[signature_def]
   graph_def = convert_to_constants.convert_variables_to_constants_v2(
-        concrete_func)
+      concrete_func)
 
-  optimize_graph(concrete_func.graph, graph_def, output_graph, quantization_dtype=quantization_dtype,
-                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
+  optimize_graph(concrete_func.graph, output_graph, quantization_dtype=quantization_dtype,
+                                           skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops, graph_def=graph_def)

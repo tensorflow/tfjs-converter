@@ -25,7 +25,8 @@ import numpy as np
 import tensorflow as tf
 
 from tensorflow.core.protobuf import device_properties_pb2
-from tensorflow.core.protobuf import rewriter_config_pb2
+from tensorflow.core.protobuf import meta_graph_pb2
+from tensorflow.core.protobuf import config_pb2
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
@@ -121,14 +122,17 @@ def optimize_graph(graph,
     graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
       the model topology.
   """
+  if graph_def is None:
+    graph_def = graph.as_graph_def()
 
-  unsupported = validate(graph.as_graph_def().node, skip_op_check,
+  unsupported = validate(graph_def.node, skip_op_check,
                          strip_debug_ops)
   if unsupported:
     raise ValueError('Unsupported Ops in the model before optimization\n' +
                      ', '.join(unsupported))
 
-  rewriter_config = rewriter_config_pb2.RewriterConfig()
+  config = config_pb2.ConfigProto()
+  rewriter_config = config.graph_options.rewrite_options
   rewriter_config.optimizers[:] = [
       'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning', 'remap',
       'constfold', 'arithmetic', 'dependency'
@@ -136,9 +140,16 @@ def optimize_graph(graph,
   if strip_debug_ops:
     rewriter_config.optimizers.insert(0, 'debug_stripper')
   meta_graph = tf.train.export_meta_graph(
-      graph_def=graph.as_graph_def(), graph=graph)
+      graph_def=graph_def, graph=graph)
+
+  # Add a collection 'train_op' so that Grappler knows the outputs.
+  fetch_collection = meta_graph_pb2.CollectionDef()
+  for array in ['x', 'Identity']:
+    fetch_collection.node_list.value.append(array)
+  meta_graph.collection_def["train_op"].CopyFrom(fetch_collection)
+
   optimized_graph = tf_optimizer.OptimizeGraph(
-      rewriter_config, meta_graph, cluster=get_cluster())
+      config, meta_graph, cluster=get_cluster())
 
   unsupported = validate(optimized_graph.node, skip_op_check,
                          strip_debug_ops)
@@ -173,7 +184,7 @@ def extract_weights(graph_def,
   const_manifest = []
 
   graph = tf.Graph()
-  with tf.Session(graph=graph) as sess:
+  with tf.compact.v1.Session(graph=graph) as sess:
     tf.import_graph_def(graph_def, name='')
     for const in constants:
       tensor = graph.get_tensor_by_name(const.name + ':0')
@@ -403,7 +414,7 @@ def load_and_initialize_hub_module(module_path, signature='default'):
 
     outputs = module(inputs=inputs, signature=signature, as_dict=True)
 
-    session = tf.Session(graph=graph)
+    session = tf.compact.v1.Session(graph=graph)
     session.run(tf.global_variables_initializer())
     session.run(tf.tables_initializer())
 
