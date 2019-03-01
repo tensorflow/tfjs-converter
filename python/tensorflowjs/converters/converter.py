@@ -264,16 +264,10 @@ def setup_arugments():
                    'tensorflowjs']),
       help='Output format. Default: tfjs_graph_model.')
   parser.add_argument(
-      '--output_node_names',
-      type=str,
-      help='The names of the output nodes, separated by commas. E.g., '
-      '"logits,activations". Applicable only if input format is '
-      '"tf_saved_model" or "tf_session_bundle".')
-  parser.add_argument(
       '--signature_name',
       type=str,
-      help='Signature of the TF-Hub module to load. Applicable only if input'
-      ' format is "tf_hub".')
+      help='Signature of the SavedModel Graph or TF-Hub module to load. '
+      'Applicable only if input format is "tf_hub" or "tf_saved_model".')
   parser.add_argument(
       '--saved_model_tags',
       type=str,
@@ -334,18 +328,12 @@ def main():
       quantization.QUANTIZATION_BYTES_TO_DTYPES[FLAGS.quantization_bytes]
       if FLAGS.quantization_bytes else None)
 
-  if (FLAGS.output_node_names and
-      input_format not in
-      ('tf_saved_model', 'tf_session_bundle', 'tf_frozen_model')):
+  if (FLAGS.signature_name and input_format not in
+      ('tf_saved_model', 'tf_hub')):
     raise ValueError(
-        'The --output_node_names flag is applicable only to input formats '
-        '"tf_saved_model", "tf_session_bundle" and "tf_frozen_model", '
-        'but the current input format is "%s".' % FLAGS.input_format)
-
-  if FLAGS.signature_name and input_format != 'tf_hub':
-    raise ValueError(
-        'The --signature_name is applicable only to "tf_hub" input format, '
-        'but the current input format is "%s".' % input_format)
+        'The --signature_name is applicable only to "tf_saved_model" and '
+        '"tf_hub" input format, but the current input format is '
+        '"%s".' % input_format)
 
   # TODO(cais, piyu): More conversion logics can be added as additional
   #   branches below.
@@ -362,26 +350,21 @@ def main():
         split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (input_format == 'tf_saved_model' and
         output_format == 'tfjs_graph_model'):
-    tf_saved_model_conversion.convert_tf_saved_model(
-        FLAGS.input_path, FLAGS.output_node_names,
-        FLAGS.output_path, saved_model_tags=FLAGS.saved_model_tags,
-        quantization_dtype=quantization_dtype,
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
-  elif (input_format == 'tf_session_bundle' and
-        output_format == 'tfjs_graph_model'):
-    tf_saved_model_conversion.convert_tf_session_bundle(
-        FLAGS.input_path, FLAGS.output_node_names,
-        FLAGS.output_path, quantization_dtype=quantization_dtype,
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
-  elif (input_format == 'tf_frozen_model' and
-        output_format == 'tfjs_graph_model'):
-    tf_saved_model_conversion.convert_tf_frozen_model(
-        FLAGS.input_path, FLAGS.output_node_names,
-        FLAGS.output_path, quantization_dtype=quantization_dtype,
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+    if FLAGS.signature_name:
+      tf_saved_model_conversion.convert_tf_saved_model(
+          FLAGS.input_path, FLAGS.output_path,
+          signature_def=FLAGS.signature_name,
+          saved_model_tags=FLAGS.saved_model_tags,
+          quantization_dtype=quantization_dtype,
+          skip_op_check=FLAGS.skip_op_check,
+          strip_debug_ops=FLAGS.strip_debug_ops)
+    else
+      tf_saved_model_conversion.convert_tf_saved_model(
+          FLAGS.input_path, FLAGS.output_path,
+          saved_model_tags=FLAGS.saved_model_tags,
+          quantization_dtype=quantization_dtype,
+          skip_op_check=FLAGS.skip_op_check,
+          strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
     if FLAGS.signature_name:
