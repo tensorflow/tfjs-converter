@@ -20,8 +20,7 @@ set -e
 
 SCRIPTS_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-#TEST_FILES="$(find "${SCRIPTS_DIR}" -name '*_test.py')"
-TEST_FILES="./tensorflowjs/converters/tf_saved_model_conversion_v2_test.py"
+TEST_FILES="$(find "${SCRIPTS_DIR}" -name '*_test.py')"
 pip install -r "${SCRIPTS_DIR}/requirements.txt"
 
 cd "${SCRIPTS_DIR}"

@@ -22,7 +22,7 @@ import json
 import os
 import uuid
 
-import keras
+from tensorflow import keras
 import six
 import tensorflow as tf
 

@@ -26,7 +26,7 @@ import shutil
 import tempfile
 import unittest
 
-import keras
+from tensorflow import keras
 import numpy as np
 import tensorflow as tf
 
