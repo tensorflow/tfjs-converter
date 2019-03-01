@@ -201,8 +201,7 @@ def write_artifacts(topology,
   """
   model_json = {
       common.FORMAT_KEY: common.TFJS_GRAPH_MODEL_FORMAT,
-      # TODO(cais, piyu): Is there a way to get the versoin of tensorflow from
-      # SavedModels?
+      # TODO(piyu): Add tensorflow version below by using `meta_info_def`.
       common.GENERATED_BY_KEY: None,
       common.CONVERTED_BY_KEY: common.get_converted_by(),
   }
