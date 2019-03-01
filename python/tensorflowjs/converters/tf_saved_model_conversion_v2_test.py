@@ -87,9 +87,9 @@ class ConvertTest(unittest.TestCase):
     def exported_function(x):
       root.x = constant_op.constant([[37.0, -23.0], [1.0, 4.0]])
       root.y = tf.matmul(root.x, root.w)
-      tf.print(root.x, [root.x])
-      #tf.Assert(tf.greater(tf.reduce_max(root.x), 0), [root.x])
-      tf.debugging.check_numerics(root.x, 'NaN found')
+      tf.compat.v1.Print(root.x, [root.x])
+      tf.compat.v1.Assert(tf.greater(tf.reduce_max(root.x), 0), [root.x])
+      tf.compat.v1.check_numerics(root.x, 'NaN found')
       return root.y * x
 
     root.f = exported_function
