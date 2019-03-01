@@ -33,8 +33,10 @@ from tensorflow.python.training.tracking import tracking
 from tensorflow.python.saved_model.save import save
 from tensorflowjs.converters import tf_saved_model_conversion_v2
 
-SAVED_MODEL_DIR = 'saved_model'
+import tensorflow_hub as hub
 
+SAVED_MODEL_DIR = 'saved_model'
+HUB_MODULE_DIR = 'hub_module'
 
 class ConvertTest(unittest.TestCase):
   def setUp(self):
@@ -96,6 +98,21 @@ class ConvertTest(unittest.TestCase):
 
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
+
+  def create_hub_module(self):
+    # Module function that doubles its input.
+    def double_module_fn():
+      w = tf.Variable([2.0, 4.0])
+      x = tf.compat.v1.placeholder(dtype=tf.float32)
+      hub.add_signature(inputs=x, outputs=x*w)
+    graph = tf.Graph()
+    with graph.as_default():
+      spec = hub.create_module_spec(double_module_fn)
+      m = hub.Module(spec)
+    # Export the module.
+    with tf.compat.v1.Session(graph=graph) as sess:
+      sess.run(tf.compat.v1.global_variables_initializer())
+      m.export(os.path.join(self._tmp_dir, HUB_MODULE_DIR), sess)
 
   def test_convert_saved_model(self):
     self.create_saved_model()
@@ -198,6 +215,36 @@ class ConvertTest(unittest.TestCase):
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
+  def test_convert_hub_module(self):
+    self.create_hub_module()
+    print(glob.glob(
+        os.path.join(self._tmp_dir, HUB_MODULE_DIR, '*')))
+
+    tf_saved_model_conversion_v2.convert_tf_hub_module(
+        os.path.join(self._tmp_dir, HUB_MODULE_DIR),
+        os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
+        'default'
+    )
+
+    weights = [{
+        'paths': ['group1-shard1of1.bin'],
+        'weights': [{
+            'shape': [2],
+            'name': 'module/Variable',
+            'dtype': 'float32'
+        }]
+    }]
+    tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
+    # Check model.json and weights manifest.
+    with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
+      model_json = json.load(f)
+    self.assertTrue(model_json['modelTopology'])
+    weights_manifest = model_json['weightsManifest']
+    self.assertEqual(weights_manifest, weights)
+
+    self.assertTrue(
+        glob.glob(
+            os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
 if __name__ == '__main__':
   unittest.main()

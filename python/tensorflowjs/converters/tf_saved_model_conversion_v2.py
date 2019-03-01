@@ -26,6 +26,7 @@ import tensorflow as tf
 from tensorflow.core.protobuf import device_properties_pb2
 from tensorflow.core.protobuf import meta_graph_pb2
 from tensorflow.core.protobuf import config_pb2
+from tensorflow.python.eager import function
 from tensorflow.python.framework import convert_to_constants
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
@@ -34,6 +35,8 @@ from tensorflow.python.saved_model.load import load
 from tensorflow.python.tools import freeze_graph
 from tensorflow.python.training.saver import export_meta_graph
 from google.protobuf.json_format import MessageToDict
+
+import tensorflow_hub as hub
 
 from tensorflowjs import write_weights
 
@@ -47,6 +50,25 @@ CLEARED_TENSOR_FIELDS = (
     'string_val', 'scomplex_val', 'int64_val', 'bool_val',
     'resource_handle_val', 'variant_val', 'uint32_val', 'uint64_val')
 
+def load_graph(graph_filename, output_node_names):
+  """Loads GraphDef. Returns Python Graph object.
+
+  Args:
+    graph_filename: string File name for the frozen graph.
+  """
+  with tf.compat.v1.gfile.Open(graph_filename, 'rb') as f:
+    graph_def = tf.compat.v1.GraphDef()
+    graph_def.ParseFromString(f.read())
+
+  with tf.Graph().as_default() as graph:
+    # Set name to empty to avoid using the default name 'import'.
+    tf.import_graph_def(graph_def, name='')
+
+  for node in output_node_names.split(','):
+    graph.add_to_collection('train_op',
+                            graph.get_operation_by_name(node.strip()))
+
+  return graph
 
 def get_cluster():
   """Grappler optimization configuration for GPU."""
@@ -85,7 +107,8 @@ def optimize_graph(func,
                    output_graph,
                    quantization_dtype=None,
                    skip_op_check=False,
-                   strip_debug_ops=False):
+                   strip_debug_ops=False,
+                   graph=None):
   """Takes a Python Graph object and optimizes the graph.
 
   Args:
@@ -97,7 +120,8 @@ def optimize_graph(func,
     graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
       the model topology.
   """
-  graph = func.graph
+  if graph is None:
+    graph = func.graph
   graph_def = graph.as_graph_def()
   unsupported = validate(graph_def.node, skip_op_check,
                          strip_debug_ops)
@@ -118,9 +142,10 @@ def optimize_graph(func,
 
   # Add a collection 'train_op' so that Grappler knows the outputs.
   fetch_collection = meta_graph_pb2.CollectionDef()
-  for array in func.inputs + func.outputs:
-    fetch_collection.node_list.value.append(array.name)
-  meta_graph.collection_def["train_op"].CopyFrom(fetch_collection)
+  if func is not None:
+    for array in func.inputs + func.outputs:
+      fetch_collection.node_list.value.append(array.name)
+    meta_graph.collection_def["train_op"].CopyFrom(fetch_collection)
 
   optimized_graph = tf_optimizer.OptimizeGraph(
       config, meta_graph, cluster=get_cluster())
@@ -241,3 +266,104 @@ def convert_tf_saved_model(saved_model_dir,
 
   optimize_graph(frozen_func, output_graph, quantization_dtype=quantization_dtype,
                  skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
+
+def load_and_initialize_hub_module(module_path, signature='default'):
+  """Loads graph of a TF-Hub module and initializes it into a session.
+
+  Args:
+    module_path: string Path to TF-Hub module.
+    signature: string Signature to use when creating the apply graph.
+
+  Return:
+    graph: tf.Graph Graph of the module.
+    session: tf.Session Session with initialized variables and tables.
+    inputs: dict Dictionary of input tensors.
+    outputs: dict Dictionary of output tensors.
+
+  Raises:
+    ValueError: If signature contains a SparseTensor on input or output.
+  """
+  graph = tf.Graph()
+  with graph.as_default():
+    tf.compat.v1.logging.info('Importing %s', module_path)
+    module = hub.Module(module_path)
+
+    signature_inputs = module.get_input_info_dict(signature)
+    signature_outputs = module.get_output_info_dict(signature)
+    # First check there are no SparseTensors in input or output.
+    for key, info in list(signature_inputs.items()) + list(
+        signature_outputs.items()):
+      if info.is_sparse:
+        raise ValueError(
+            'Signature "%s" has a SparseTensor on input/output "%s".'
+            ' SparseTensors are not supported.' % (signature, key))
+
+    # Create placeholders to represent the input of the provided signature.
+    inputs = {}
+    for input_key, input_info in signature_inputs.items():
+      inputs[input_key] = tf.compat.v1.placeholder(
+          shape=input_info.get_shape(), dtype=input_info.dtype, name=input_key)
+
+    outputs = module(inputs=inputs, signature=signature, as_dict=True)
+
+    session = tf.compat.v1.Session(graph=graph)
+    session.run(tf.compat.v1.global_variables_initializer())
+    session.run(tf.compat.v1.tables_initializer())
+
+  return graph, session, inputs, outputs
+
+
+def convert_tf_hub_module(module_path, output_dir,
+                          signature='default', quantization_dtype=None,
+                          skip_op_check=False, strip_debug_ops=False):
+  """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
+
+  Optimize and convert the TF-Hub module to Tensorflow.js format, if it passes
+  the compatiblity check.
+
+  Args:
+    module_path: string Path to the module.
+    output_dir: string The name of the output directory. The directory
+      will consist of
+      - a file named 'model.json'
+      - possibly sharded binary weight files.
+    signature: string Signature to load.
+    skip_op_check: Bool whether to skip the op check.
+    strip_debug_ops: Bool whether to strip debug ops.
+  """
+
+  if not os.path.exists(output_dir):
+    os.makedirs(output_dir)
+
+  graph, sess, inputs, outputs = load_and_initialize_hub_module(
+      module_path, signature)
+
+  input_node_names = []
+  output_node_names = []
+
+  for _, input_tensor in inputs.items():
+    input_node_names.append(input_tensor.name.split(':')[0])
+  for _, output_tensor in outputs.items():
+    output_node_names.append(output_tensor.name.split(':')[0])
+
+  print('Creating a model with inputs %s and outputs %s.' % (input_node_names,
+                                                             output_node_names))
+
+  frozen_graph_def = graph_util.convert_variables_to_constants(
+      sess, graph.as_graph_def(), output_node_names)
+
+  output_graph = os.path.join(output_dir, DEFAULT_MODEL_FILENAME)
+  frozen_file = output_graph + '.frozen'
+  try:
+    with tf.compat.v1.gfile.GFile(frozen_file, 'wb') as f:
+      f.write(frozen_graph_def.SerializeToString())
+
+    graph = load_graph(frozen_file, ','.join(output_node_names))
+    optimize_graph(None, output_graph,
+                   quantization_dtype=quantization_dtype,
+                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops,
+                   graph=graph)
+  finally:
+    # Clean up the temp files.
+    if os.path.exists(frozen_file):
+      os.remove(frozen_file)
