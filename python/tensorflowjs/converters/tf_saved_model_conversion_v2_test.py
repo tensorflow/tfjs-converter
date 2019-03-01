@@ -58,7 +58,6 @@ class ConvertTest(unittest.TestCase):
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
 
-
   def create_unsupported_saved_model(self):
     root = tracking.AutoTrackable()
     root.w = variables.Variable(tf.random.uniform([2, 2]))
@@ -69,10 +68,11 @@ class ConvertTest(unittest.TestCase):
       root.y = tf.matmul(root.x, root.w)
       # unsupported op: linalg.diag
       root.z = tf.linalg.diag(root.y)
-      return root.z
+      return root.z * x
 
     root.f = exported_function
-    to_save = root.f.get_concrete_function(tensor_spec.TensorSpec([], dtypes.float32))
+    to_save = root.f.get_concrete_function(
+        tensor_spec.TensorSpec([], dtypes.float32))
 
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
@@ -88,12 +88,12 @@ class ConvertTest(unittest.TestCase):
       tf.print(root.x, [root.x])
       tf.Assert(tf.greater(tf.reduce_max(root.x), 0), [root.x])
       tf.debugging.check_numerics(root.x, 'NaN found')
-      return root.y
+      return root.y * x
 
     root.f = exported_function
-    to_save = root.f.get_concrete_function(tensor_spec.TensorSpec([], dtypes.float32))
+    to_save = root.f.get_concrete_function(
+        tensor_spec.TensorSpec([], dtypes.float32))
 
-    print(to_save.graph.as_graph_def())
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
 
@@ -109,12 +109,15 @@ class ConvertTest(unittest.TestCase):
 
     weights = [{
         'paths': ['group1-shard1of1.bin'],
-        'weights': [{
-            'shape': [],
-            'name': 'StatefulPartitionedCall/mul',
-            'dtype': 'float32'
-        }]
-    }]
+        'weights': [{'dtype': 'float32',
+                     'name': 'statefulpartitionedcall_args_2',
+                     'shape': []},
+                    {'dtype': 'float32',
+                     'name': 'statefulpartitionedcall_args_1',
+                     'shape': []},
+                    {'dtype': 'float32',
+                     'name': 'StatefulPartitionedCall/mul',
+                     'shape': []}]}]
 
     tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     # Check model.json and weights manifest.
@@ -133,7 +136,7 @@ class ConvertTest(unittest.TestCase):
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
-        ValueError, r'^Unsupported Ops'):
+            ValueError, r'^Unsupported Ops'):
       tf_saved_model_conversion_v2.convert_tf_saved_model(
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
@@ -151,12 +154,12 @@ class ConvertTest(unittest.TestCase):
 
     weights = [{
         'paths': ['group1-shard1of1.bin'],
-        'weights': [{
-            'shape': [2, 2, 2],
-            'name': 'Identity',
-            'dtype': 'float32'
-        }]
-    }]
+        'weights': [{'dtype': 'float32',
+                     'name': 'statefulpartitionedcall_args_1',
+                     'shape': [2, 2]},
+                    {'dtype': 'float32',
+                     'name': 'StatefulPartitionedCall/MatrixDiag',
+                     'shape': [2, 2, 2]}]}]
     tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     # Check model.json and weights manifest.
     with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
@@ -194,6 +197,7 @@ class ConvertTest(unittest.TestCase):
     self.assertTrue(
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
+
 
 if __name__ == '__main__':
   unittest.main()

@@ -81,16 +81,15 @@ def validate(nodes, skip_op_check, strip_debug_ops):
   not_supported = {x.op for x in [x for x in nodes if x.op not in names]}
   return not_supported
 
-def optimize_graph(graph,
+def optimize_graph(func,
                    output_graph,
                    quantization_dtype=None,
                    skip_op_check=False,
-                   strip_debug_ops=False,
-                   graph_def=None):
+                   strip_debug_ops=False):
   """Takes a Python Graph object and optimizes the graph.
 
   Args:
-    graph: tf.Graph TensorFlow dataflow graph.
+    func: ConcreteFunction TensorFlow function def.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
     skip_op_check: Bool whether to skip the op check.
@@ -98,8 +97,8 @@ def optimize_graph(graph,
     graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
       the model topology.
   """
-  if graph_def is None:
-    graph_def = graph.as_graph_def()
+  graph = func.graph
+  graph_def = graph.as_graph_def()
   unsupported = validate(graph_def.node, skip_op_check,
                          strip_debug_ops)
   if unsupported:
@@ -119,8 +118,8 @@ def optimize_graph(graph,
 
   # Add a collection 'train_op' so that Grappler knows the outputs.
   fetch_collection = meta_graph_pb2.CollectionDef()
-  for array in ['x', 'Identity']:
-    fetch_collection.node_list.value.append(array)
+  for array in func.inputs + func.outputs:
+    fetch_collection.node_list.value.append(array.name)
   meta_graph.collection_def["train_op"].CopyFrom(fetch_collection)
 
   optimized_graph = tf_optimizer.OptimizeGraph(
@@ -237,8 +236,8 @@ def convert_tf_saved_model(saved_model_dir,
 
   model = load(saved_model_dir)
   concrete_func = model.signatures[signature_def]
-  graph_def = convert_to_constants.convert_variables_to_constants_v2(
+  frozen_func = convert_to_constants.convert_variables_to_constants_v2(
       concrete_func)
 
-  optimize_graph(concrete_func.graph, output_graph, quantization_dtype=quantization_dtype,
-                                           skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops, graph_def=graph_def)
+  optimize_graph(frozen_func, output_graph, quantization_dtype=quantization_dtype,
+                 skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
