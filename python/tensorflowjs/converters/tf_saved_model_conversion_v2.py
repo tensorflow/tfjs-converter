@@ -39,11 +39,8 @@ from google.protobuf.json_format import MessageToDict
 import tensorflow_hub as hub
 
 from tensorflowjs import write_weights
+from tensorflowjs.converters import common
 
-DEFAULT_MODEL_FILENAME = 'model.json'
-# JSON string keys for fields of the indexing JSON.
-ARTIFACT_MODEL_TOPOLOGY_KEY = 'modelTopology'
-ARTIFACT_WEIGHTS_MANIFEST_KEY = 'weightsManifest'
 
 CLEARED_TENSOR_FIELDS = (
     'tensor_content', 'half_val', 'float_val', 'double_val', 'int_val',
@@ -219,14 +216,19 @@ def write_artifacts(topology,
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
   """
-  model_json = {}
+  model_json = {
+      common.FORMAT_KEY: common.TFJS_GRAPH_MODEL_FORMAT,
+      # TODO(piyu): Add tensorflow version below by using `meta_info_def`.
+      common.GENERATED_BY_KEY: None,
+      common.CONVERTED_BY_KEY: common.get_converted_by(),
+  }
 
-  model_json[ARTIFACT_MODEL_TOPOLOGY_KEY] = topology or None
+  model_json[common.ARTIFACT_MODEL_TOPOLOGY_KEY] = topology or None
   weights_manifest = write_weights.write_weights(
       weights, os.path.dirname(output_graph), write_manifest=False,
       quantization_dtype=quantization_dtype)
   assert isinstance(weights_manifest, list)
-  model_json[ARTIFACT_WEIGHTS_MANIFEST_KEY] = weights_manifest
+  model_json[common.ARTIFACT_WEIGHTS_MANIFEST_KEY] = weights_manifest
 
   with open(output_graph, 'wt') as f:
     json.dump(model_json, f)
@@ -257,7 +259,7 @@ def convert_tf_saved_model(saved_model_dir,
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_graph = os.path.join(
-      output_dir, DEFAULT_MODEL_FILENAME)
+      output_dir, common.ARTIFACT_MODEL_JSON_FILE_NAME)
 
   model = load(saved_model_dir)
   concrete_func = model.signatures[signature_def]
@@ -352,7 +354,7 @@ def convert_tf_hub_module(module_path, output_dir,
   frozen_graph_def = graph_util.convert_variables_to_constants(
       sess, graph.as_graph_def(), output_node_names)
 
-  output_graph = os.path.join(output_dir, DEFAULT_MODEL_FILENAME)
+  output_graph = os.path.join(output_dir, common.ARTIFACT_MODEL_JSON_FILE_NAME)
   frozen_file = output_graph + '.frozen'
   try:
     with tf.compat.v1.gfile.GFile(frozen_file, 'wb') as f:
