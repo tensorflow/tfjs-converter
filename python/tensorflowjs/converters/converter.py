@@ -31,7 +31,7 @@ from tensorflowjs import quantization
 from tensorflowjs import version
 from tensorflowjs.converters import keras_h5_conversion as conversion
 from tensorflowjs.converters import keras_tfjs_loader
-from tensorflowjs.converters import tf_saved_model_conversion
+from tensorflowjs.converters import tf_saved_model_conversion_v2
 
 def dispatch_keras_h5_to_tensorflowjs_conversion(
     h5_path, output_dir=None, quantization_dtype=None,
@@ -103,7 +103,7 @@ def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     keras_saved_model_path: path to a folder in which the
       assets/saved_model.json can be found. This is usually a subfolder
       that is under the folder passed to
-      `tf.contrib.saved_model.save_keras_model()` and has a Unix epoch time
+      `tf.keras.experimental.export_saved_model()` and has a Unix epoch time
       as its name (e.g., 1542212752).
     output_dir: Output directory to which the TensorFlow.js-format model JSON
       file and weights files will be written. If the directory does not exist,
@@ -114,8 +114,8 @@ def dispatch_keras_saved_model_to_tensorflowjs_conversion(
       groups (corresponding to separate binary weight files) layer by layer
       (Default: `False`).
   """
-  with tf.Graph().as_default(), tf.Session():
-    model = tf.contrib.saved_model.load_keras_model(keras_saved_model_path)
+  with tf.Graph().as_default(), tf.compat.v1.Session():
+    model = tf.keras.experimental.load_from_saved_model(keras_saved_model_path)
 
     # Save model temporarily in HDF5 format.
     temp_h5_path = tempfile.mktemp(suffix='.h5')
@@ -165,7 +165,7 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
           'the input path is expected to contain valid JSON content, '
           'but cannot read valid JSON content from %s.' % config_json_path)
 
-  with tf.Graph().as_default(), tf.Session():
+  with tf.Graph().as_default(), tf.compat.v1.Session():
     model = keras_tfjs_loader.load_keras_model(config_json_path)
     model.save(h5_path)
     print('Saved Keras model to HDF5 file: %s' % h5_path)
@@ -312,7 +312,7 @@ def main():
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
-    print('  keras %s' % keras.__version__)
+    print('  keras %s' % tf.keras.__version__)
     print('  tensorflow %s' % tf.__version__)
     return
 
@@ -358,7 +358,7 @@ def main():
           quantization_dtype=quantization_dtype,
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
-    else
+    else:
       tf_saved_model_conversion.convert_tf_saved_model(
           FLAGS.input_path, FLAGS.output_path,
           saved_model_tags=FLAGS.saved_model_tags,

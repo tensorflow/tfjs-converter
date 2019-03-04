@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # ==============================================================================
-"""Unit tests for artifact conversion to and from Python Keras."""
+"""Unit tests for artifact conversion to and from Python tf.keras."""
 
 from __future__ import absolute_import
 from __future__ import division
@@ -44,13 +44,13 @@ class ConvertH5WeightsTest(unittest.TestCase):
     super(ConvertH5WeightsTest, self).tearDown()
 
   def testConvertWeightsFromSimpleModelNoSplitByLayer(self):
-    input_tensor = keras.layers.Input((3,))
-    dense1 = keras.layers.Dense(
+    input_tensor = tf.keras.layers.Input((3,))
+    dense1 = tf.keras.layers.Dense(
         4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
         name='MyDense10')(input_tensor)
-    output = keras.layers.Dense(
+    output = tf.keras.layers.Dense(
         2, use_bias=False, kernel_initializer='ones', name='MyDense20')(dense1)
-    model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+    model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
     h5_path = os.path.join(self._tmp_dir, 'MyModel.h5')
     model.save_weights(h5_path)
 
@@ -79,13 +79,13 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertTrue(np.allclose(np.ones([4, 2]), kernel2['data']))
 
   def testConvertWeightsFromSimpleModelSplitByLayer(self):
-    input_tensor = keras.layers.Input((3,))
-    dense1 = keras.layers.Dense(
+    input_tensor = tf.keras.layers.Input((3,))
+    dense1 = tf.keras.layers.Dense(
         4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
         name='MyDense30')(input_tensor)
-    output = keras.layers.Dense(
+    output = tf.keras.layers.Dense(
         2, use_bias=False, kernel_initializer='ones', name='MyDense40')(dense1)
-    model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+    model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
     h5_path = os.path.join(self._tmp_dir, 'MyModel.h5')
     model.save_weights(h5_path)
 
@@ -117,13 +117,13 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertTrue(np.allclose(np.ones([4, 2]), kernel2['data']))
 
   def testConvertModelWithNestedLayerNames(self):
-    model = keras.Sequential()
+    model = tf.keras.Sequential()
 
     # Add a layer with a nested layer name, i.e., a layer name with slash(es)
     # in it.
-    model.add(keras.layers.Dense(2, input_shape=[12], name='dense'))
-    model.add(keras.layers.Dense(8, name='foo/dense'))
-    model.add(keras.layers.Dense(4, name='foo/bar/dense'))
+    model.add(tf.keras.layers.Dense(2, input_shape=[12], name='dense'))
+    model.add(tf.keras.layers.Dense(8, name='foo/dense'))
+    model.add(tf.keras.layers.Dense(4, name='foo/bar/dense'))
     tfjs_path = os.path.join(self._tmp_dir, 'nested_layer_names_model')
     conversion.save_keras_model(model, tfjs_path)
 
@@ -149,14 +149,14 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertEqual([4], weight_shapes['foo/bar/dense/bias'])
 
   def testConvertMergedModelFromSimpleModelNoSplitByLayer(self):
-    input_tensor = keras.layers.Input((3,))
-    dense1 = keras.layers.Dense(
+    input_tensor = tf.keras.layers.Input((3,))
+    dense1 = tf.keras.layers.Dense(
         4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
         name='MergedDense10')(input_tensor)
-    output = keras.layers.Dense(
+    output = tf.keras.layers.Dense(
         2, use_bias=False,
         kernel_initializer='ones', name='MergedDense20')(dense1)
-    model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+    model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
     h5_path = os.path.join(self._tmp_dir, 'MyModelMerged.h5')
     model.save(h5_path)
     config_json = json.loads(model.to_json(), encoding='utf8')
@@ -174,7 +174,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     # By default, all weights of the model ought to be put in the same group.
     self.assertEqual(1, len(groups))
 
-    self.assertEqual(keras.__version__, out['keras_version'])
+    self.assertEqual(tf.keras.__version__, out['keras_version'])
     self.assertEqual('tensorflow', out['backend'])
     weight_group = groups[0]
     self.assertEqual(3, len(weight_group))
@@ -195,14 +195,14 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertTrue(np.allclose(np.ones([4, 2]), kernel2['data']))
 
   def testConvertMergedModelFromSimpleModelSplitByLayer(self):
-    input_tensor = keras.layers.Input((3,))
-    dense1 = keras.layers.Dense(
+    input_tensor = tf.keras.layers.Input((3,))
+    dense1 = tf.keras.layers.Dense(
         4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
         name='MergedDense30')(input_tensor)
-    output = keras.layers.Dense(
+    output = tf.keras.layers.Dense(
         2, use_bias=False,
         kernel_initializer='ones', name='MergedDense40')(dense1)
-    model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+    model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
     h5_path = os.path.join(self._tmp_dir, 'MyModelMerged.h5')
     model.save(h5_path)
     config_json = json.loads(model.to_json(), encoding='utf8')
@@ -221,7 +221,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
     # because the model has two layers.
     self.assertEqual(2, len(groups))
 
-    self.assertEqual(keras.__version__, out['keras_version'])
+    self.assertEqual(tf.keras.__version__, out['keras_version'])
     self.assertEqual('tensorflow', out['backend'])
     self.assertEqual(2, len(groups[0]))
     kernel1 = groups[0][0]
@@ -242,11 +242,11 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertTrue(np.allclose(np.ones([4, 2]), kernel2['data']))
 
   def testConvertWeightsFromSequentialModelNoSplitByLayer(self):
-    sequential_model = keras.models.Sequential([
-        keras.layers.Dense(
+    sequential_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(
             3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
             name='Dense10'),
-        keras.layers.Dense(
+        tf.keras.layers.Dense(
             1, use_bias=False, kernel_initializer='ones', name='Dense20')])
     h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
     sequential_model.save_weights(h5_path)
@@ -276,11 +276,11 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertTrue(np.allclose(np.ones([3, 1]).tolist(), kernel2['data']))
 
   def testConvertWeightsFromSequentialModelSplitByLayer(self):
-    sequential_model = keras.models.Sequential([
-        keras.layers.Dense(
+    sequential_model = tf.keras.models.Sequential([
+        tf.keras.layers.Dense(
             3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
             name='Dense30'),
-        keras.layers.Dense(
+        tf.keras.layers.Dense(
             1, use_bias=False, kernel_initializer='ones', name='Dense40')])
     h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
     sequential_model.save_weights(h5_path)
@@ -313,10 +313,10 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertTrue(np.allclose(np.ones([3, 1]).tolist(), kernel2['data']))
 
   def testSaveModelSucceedsForNonSequentialModel(self):
-    t_input = keras.Input([2])
-    dense_layer = keras.layers.Dense(3)
+    t_input = tf.keras.Input([2])
+    dense_layer = tf.keras.layers.Dense(3)
     t_output = dense_layer(t_input)
-    model = keras.Model(t_input, t_output)
+    model = tf.keras.Model(t_input, t_output)
     conversion.save_keras_model(model, self._tmp_dir)
 
     # Verify the content of the artifacts output directory.
@@ -363,12 +363,12 @@ class ConvertH5WeightsTest(unittest.TestCase):
     self.assertIn('paths', weights_manifest[0])
 
   def testSaveModelSucceedsForNestedKerasModel(self):
-    inner_model = keras.Sequential([
-        keras.layers.Dense(4, input_shape=[3], activation='relu'),
-        keras.layers.Dense(3, activation='tanh')])
-    outer_model = keras.Sequential()
+    inner_model = tf.keras.Sequential([
+        tf.keras.layers.Dense(4, input_shape=[3], activation='relu'),
+        tf.keras.layers.Dense(3, activation='tanh')])
+    outer_model = tf.keras.Sequential()
     outer_model.add(inner_model)
-    outer_model.add(keras.layers.Dense(1, activation='sigmoid'))
+    outer_model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
 
     conversion.save_keras_model(outer_model, self._tmp_dir)
 
@@ -418,8 +418,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
   def testSavedModelSucceedsForExistingDirAndSequential(self):
     artifacts_dir = os.path.join(self._tmp_dir, 'artifacts')
     os.makedirs(artifacts_dir)
-    model = keras.Sequential()
-    model.add(keras.layers.Dense(3, input_shape=[2]))
+    model = tf.keras.Sequential()
+    model.add(tf.keras.layers.Dense(3, input_shape=[2]))
     conversion.save_keras_model(model, artifacts_dir)
 
     # Verify the content of the artifacts output directory.
@@ -442,10 +442,10 @@ class ConvertH5WeightsTest(unittest.TestCase):
     artifacts_dir = os.path.join(self._tmp_dir, 'artifacts')
     with open(artifacts_dir, 'wt') as f:
       f.write('foo\n')
-    t_input = keras.Input([2])
-    dense_layer = keras.layers.Dense(3)
+    t_input = tf.keras.Input([2])
+    dense_layer = tf.keras.layers.Dense(3)
     t_output = dense_layer(t_input)
-    model = keras.Model(t_input, t_output)
+    model = tf.keras.Model(t_input, t_output)
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'already exists as a file'):
       conversion.save_keras_model(model, artifacts_dir)
