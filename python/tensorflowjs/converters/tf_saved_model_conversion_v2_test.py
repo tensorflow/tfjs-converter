@@ -219,6 +219,7 @@ class ConvertTest(unittest.TestCase):
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
+  @unittest.skip('not supported')
   def test_convert_hub_module(self):
     self.create_hub_module()
     print(glob.glob(
