@@ -24,11 +24,16 @@ import {GraphExecutor} from './graph_executor';
 
 export const TFHUB_SEARCH_PARAM = '?tfjs-format=file';
 export const DEFAULT_MODEL_NAME = 'model.json';
+
 /**
  * A `tf.GraphModel` is a directed, acyclic graph of built from
  * SavedModel GraphDef and allows inference exeuction.
+ *
+ * A `tf.GraphModel` can only be created by loading from a model converted from
+ * a TensorFlow python model using the command line converter tool and loaded
+ * via `tf.loadGraphModel`.
  */
-
+/** @doc {heading: 'Models', subheading: 'Classes'} */
 export class GraphModel implements tfc.InferenceModel {
   private executor: GraphExecutor;
   private version = 'n/a';
@@ -159,6 +164,7 @@ export class GraphModel implements tfc.InferenceModel {
    * if model has single output node, otherwise Tensor[] or NamedTensorMap[]
    * will be returned for model with multiple outputs.
    */
+  /** @doc {heading: 'Models', subheading: 'Classes'} */
   predict(
       inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
       config?: tfc.ModelPredictConfig): tfc.Tensor
@@ -193,6 +199,7 @@ export class GraphModel implements tfc.InferenceModel {
    * tensor array. The order of the tensor array is the same as the outputs
    * if provided, otherwise the order of outputNodes attribute of the model.
    */
+  /** @doc {heading: 'Models', subheading: 'Classes'} */
   execute(
       inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
       outputs?: string|string[]): tfc.Tensor|tfc.Tensor[] {
@@ -233,6 +240,7 @@ export class GraphModel implements tfc.InferenceModel {
    * no outputs are provided and there is only one default output, otherwise
    * return a tensor map.
    */
+  /** @doc {heading: 'Models', subheading: 'Classes'} */
   async executeAsync(
       inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
       outputs?: string|string[]): Promise<tfc.Tensor|tfc.Tensor[]> {
@@ -262,9 +270,11 @@ export class GraphModel implements tfc.InferenceModel {
       return newMap;
     }, {});
   }
+
   /**
    * Releases the memory used by the weight tensors.
    */
+  /** @doc {heading: 'Models', subheading: 'Classes'} */
   dispose() {
     this.executor.dispose();
   }
