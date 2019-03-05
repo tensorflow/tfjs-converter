@@ -70,9 +70,10 @@ class ConvertTest(unittest.TestCase):
             sess, [tf.compat.v1.saved_model.tag_constants.SERVING],
             signature_def_map={
                 "serving_default":
-                    tf.compat.v1.saved_model.signature_def_utils.predict_signature_def(
-                        inputs={"x": x},
-                        outputs={"output": output})
+                    tf.compat.v1.saved_model \
+                        .signature_def_utils.predict_signature_def(
+                            inputs={"x": x},
+                            outputs={"output": output})
             },
             assets_collection=None)
 
