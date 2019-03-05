@@ -70,6 +70,40 @@ def _createKerasModel(layer_name_prefix, h5_path=None):
     model.save(h5_path)
   return model
 
+def _createTensorFlowSavedModelV1(name_scope, save_path):
+  """Create a TensorFlow SavedModel for testing.
+  Args:
+    name_scope: Name scope to create the model under. This helps avoid
+      op and variable name clashes between different test methods.
+    save_path: The directory path in which to save the model.
+  """
+
+  with tf.compat.v1.name_scope(name_scope):
+    x = tf.compat.v1.constant([[37.0, -23.0], [1.0, 4.0]])
+    w = tf.compat.v1.get_variable('w', shape=[2, 2])
+    y = tf.compat.v1.matmul(x, w)
+    output = tf.compat.v1.nn.softmax(y)
+    init_op = w.initializer
+
+    # Create a builder.
+    builder = tf.compat.v1.saved_model.builder.SavedModelBuilder(save_path)
+
+    with tf.compat.v1.Session() as sess:
+      # Run the initializer on `w`.
+      sess.run(init_op)
+
+      builder.compat.v1.add_meta_graph_and_variables(
+          sess, [tf.saved_model.tag_constants.SERVING],
+          signature_def_map= {
+              "serving_default":
+                  tf.saved_model.signature_def_utils.predict_signature_def(
+                      inputs= {"x": x},
+                      outputs= {"output": output})
+          },
+          assets_collection=None)
+
+    builder.save()
+
 def _createTensorFlowSavedModel(name_scope, save_path):
   """Create a TensorFlow SavedModel for testing.
 
@@ -116,7 +150,10 @@ class APIAndShellTest(tf.test.TestCase):
   def setUpClass(cls):
     cls.class_tmp_dir = tempfile.mkdtemp()
     cls.tf_saved_model_dir = os.path.join(cls.class_tmp_dir, 'tf_saved_model')
+    cls.tf_saved_model_v1_dir = os.path.join(
+                cls.class_tmp_dir, 'tf_saved_model_v1')
     _createTensorFlowSavedModel('a', cls.tf_saved_model_dir)
+    _createTensorFlowSavedModelV1('b', cls.tf_saved_model_v1_dir)
     cls.tf_hub_module_dir = os.path.join(cls.class_tmp_dir, 'tf_hub_module')
     _create_hub_module(cls.tf_hub_module_dir)
 
@@ -352,6 +389,58 @@ class APIAndShellTest(tf.test.TestCase):
     self.assertIn(
         b'The --saved_model_tags flag is applicable only to',
         tf.compat.as_bytes(stderr))
+
+  def testConvertTFSavedModelV1WithCommandLineWorks(self):
+    output_dir = os.path.join(self._tmp_dir)
+    process = subprocess.Popen([
+        'tensorflowjs_converter', '--input_format', 'tf_saved_model',
+        '--output_format', 'tfjs_graph_model',
+        self.tf_saved_model_v1_dir, output_dir
+    ])
+    process.communicate()
+    self.assertEqual(0, process.returncode)
+
+    weights = [{
+        'paths': ['group1-shard1of1.bin'],
+        'weights': [{
+            'shape': [2, 2],
+            'name': 'a/Softmax',
+            'dtype': 'float32'
+        }]
+    }]
+    # Load the saved weights as a JSON string.
+    output_json = json.load(
+        open(os.path.join(output_dir, 'model.json'), 'rt'))
+    self.assertEqual(output_json['weightsManifest'], weights)
+
+    # Check the content of the output directory.
+    self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
+
+
+  def testConvertTFHubModuleWithCommandLineWorks(self):
+    output_dir = os.path.join(self._tmp_dir)
+    process = subprocess.Popen([
+        'tensorflowjs_converter', '--input_format', 'tf_hub',
+        self.tf_hub_module_dir, output_dir
+    ])
+    process.communicate()
+    self.assertEqual(0, process.returncode)
+
+    weights = [{
+        'paths': ['group1-shard1of1.bin'],
+        'weights': [{
+            'shape': [2],
+            'name': 'module/Variable',
+            'dtype': 'float32'
+        }]
+    }]
+    # Load the saved weights as a JSON string.
+    output_json = json.load(
+        open(os.path.join(output_dir, 'model.json'), 'rt'))
+    self.assertEqual(output_json['weightsManifest'], weights)
+
+    # Check the content of the output directory.
+    self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
   def testConvertTFSavedModelWithCommandLineWorks(self):
     output_dir = os.path.join(self._tmp_dir)
