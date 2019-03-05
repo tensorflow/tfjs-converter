@@ -204,7 +204,7 @@ class APIAndShellTest(tf.test.TestCase):
         self.assertAllClose(model1_weight_value, model2_weight_value)
 
     # Check the content of the output directory.
-    self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
+    self.assertTrue(glob.glob(os.path.join(self._tmp_dir, 'group*-*')))
 
   def testInvalidInputFormatRaisesError(self):
     process = subprocess.Popen(
@@ -341,7 +341,7 @@ class APIAndShellTest(tf.test.TestCase):
     process = subprocess.Popen(
         [
             'tensorflowjs_converter', '--input_format', 'keras',
-            '--output_node_names', 'foo,bar',
+            '--saved_model_tags', 'foo,bar',
             os.path.join(self._tmp_dir, 'foo.h5'),
             os.path.join(self._tmp_dir, 'output')
         ],
@@ -350,19 +350,18 @@ class APIAndShellTest(tf.test.TestCase):
     _, stderr = process.communicate()
     self.assertGreater(process.returncode, 0)
     self.assertIn(
-        b'The --output_node_names flag is applicable only to',
+        b'The --saved_model_tags flag is applicable only to',
         tf.compat.as_bytes(stderr))
 
   def testConvertTFSavedModelWithCommandLineWorks(self):
     output_dir = os.path.join(self._tmp_dir)
     process = subprocess.Popen([
         'tensorflowjs_converter', '--input_format', 'tf_saved_model',
-        '--saved_model_tags', 'serve',
+        '--output_format', 'tfjs_graph_model',
         self.tf_saved_model_dir, output_dir
     ])
     process.communicate()
     self.assertEqual(0, process.returncode)
-
 
     weights = [{
         'paths': ['group1-shard1of1.bin'],
