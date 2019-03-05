@@ -31,8 +31,8 @@ export const DEFAULT_MODEL_NAME = 'model.json';
  * SavedModel GraphDef and allows inference exeuction.
  *
  * A `tf.GraphModel` can only be created by loading from a model converted from
- * a TensorFlow python model using the command line converter tool and loaded
- * via `tf.loadGraphModel`.
+ * a [TensorFlow SavedModel](https://www.tensorflow.org/guide/saved_model) using
+ * the command line converter tool and loaded via `tf.loadGraphModel`.
  */
 /** @doc {heading: 'Models', subheading: 'Classes'} */
 export class GraphModel implements InferenceModel {
