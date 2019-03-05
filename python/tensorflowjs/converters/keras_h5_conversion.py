@@ -270,7 +270,7 @@ def save_keras_model(model, artifacts_dir, quantization_dtype=None):
   r"""Save a Keras model and its weights in TensorFlow.js format.
 
   Args:
-    model: An instance of `tf.keras.Model`.
+    model: An instance of `keras.Model`.
     artifacts_dir: The directory in which the artifacts will be saved.
       The artifacts to be saved include:
         - model.json: A JSON representing the model. It has the following

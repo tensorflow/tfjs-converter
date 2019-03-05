@@ -25,6 +25,7 @@ import tempfile
 
 import h5py
 import tensorflow as tf
+from tensorflow import keras
 
 from tensorflowjs import quantization
 from tensorflowjs import version
@@ -93,16 +94,16 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
 def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     keras_saved_model_path, output_dir, quantization_dtype=None,
     split_weights_by_layer=False):
-  """Converts tf.keras model saved in the SavedModel format to tfjs format.
+  """Converts keras model saved in the SavedModel format to tfjs format.
 
-  Note that the SavedModel format exists in tf.keras, but not in
+  Note that the SavedModel format exists in keras, but not in
   keras-team/keras.
 
   Args:
     keras_saved_model_path: path to a folder in which the
       assets/saved_model.json can be found. This is usually a subfolder
       that is under the folder passed to
-      `tf.keras.experimental.export_saved_model()` and has a Unix epoch time
+      `keras.experimental.export_saved_model()` and has a Unix epoch time
       as its name (e.g., 1542212752).
     output_dir: Output directory to which the TensorFlow.js-format model JSON
       file and weights files will be written. If the directory does not exist,
@@ -114,7 +115,7 @@ def dispatch_keras_saved_model_to_tensorflowjs_conversion(
       (Default: `False`).
   """
   with tf.Graph().as_default(), tf.compat.v1.Session():
-    model = tf.keras.experimental.load_from_saved_model(keras_saved_model_path)
+    model = keras.experimental.load_from_saved_model(keras_saved_model_path)
 
     # Save model temporarily in HDF5 format.
     temp_h5_path = tempfile.mktemp(suffix='.h5')
@@ -249,7 +250,7 @@ def setup_arugments():
       'under the saved model folder that is passed as the argument '
       'to tf.contrib.save_model.save_keras_model(). '
       'The subfolder is generated automatically by tensorflow when '
-      'saving tf.keras model in the SavedModel format. It is usually named '
+      'saving keras model in the SavedModel format. It is usually named '
       'as a Unix epoch time (e.g., 1542212752).\n'
       'For "tf" formats, a SavedModel, frozen model, session bundle model, '
       ' or TF-Hub module is expected.')
@@ -309,7 +310,7 @@ def main():
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
-    print('  keras %s' % tf.keras.__version__)
+    print('  keras %s' % keras.__version__)
     print('  tensorflow %s' % tf.__version__)
     return
 

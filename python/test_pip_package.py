@@ -498,24 +498,24 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
     super(ConvertTfKerasSavedModelTest, self).tearDown()
 
   def _createSimpleSequentialModel(self):
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Reshape([2, 3], input_shape=[6]))
-    model.add(tf.keras.layers.LSTM(10))
-    model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
+    model = keras.Sequential()
+    model.add(keras.layers.Reshape([2, 3], input_shape=[6]))
+    model.add(keras.layers.LSTM(10))
+    model.add(keras.layers.Dense(1, activation='sigmoid'))
     return model
 
   def _createNestedSequentialModel(self):
-    model = tf.keras.Sequential()
-    model.add(tf.keras.layers.Dense(6, input_shape=[10], activation='relu'))
+    model = keras.Sequential()
+    model.add(keras.layers.Dense(6, input_shape=[10], activation='relu'))
     model.add(self._createSimpleSequentialModel())
     return model
 
   def _createFunctionalModelWithWeights(self):
-    input1 = tf.keras.Input(shape=[8])
-    input2 = tf.keras.Input(shape=[10])
-    y = tf.keras.layers.Concatenate()([input1, input2])
-    y = tf.keras.layers.Dense(4, activation='softmax')(y)
-    model = tf.keras.Model([input1, input2], y)
+    input1 = keras.Input(shape=[8])
+    input2 = keras.Input(shape=[10])
+    y = keras.layers.Concatenate()([input1, input2])
+    y = keras.layers.Dense(4, activation='softmax')(y)
+    model = keras.Model([input1, input2], y)
     return model
 
   def testConvertTfKerasNestedSequentialSavedModelIntoTfjsFormat(self):
@@ -527,7 +527,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       model = self._createNestedSequentialModel()
       y = model.predict(x)
 
-      tf.keras.experimental.export_saved_model(model, self._tmp_dir)
+      keras.experimental.export_saved_model(model, self._tmp_dir)
 
       # 2. Convert the keras saved model to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
@@ -554,7 +554,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
 
       # 4. Load the model back and assert on the equality of the predict
       #    results.
-      model_prime = tf.keras.models.load_model(new_h5_path)
+      model_prime = keras.models.load_model(new_h5_path)
       new_y = model_prime.predict(x)
       self.assertAllClose(y, new_y)
 
@@ -568,7 +568,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       model = self._createFunctionalModelWithWeights()
       y = model.predict([x1, x2])
 
-      tf.keras.experimental.export_saved_model(model, self._tmp_dir)
+      keras.experimental.export_saved_model(model, self._tmp_dir)
       self._tmp_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
       # 2. Convert the keras saved model to tfjs format.
@@ -597,7 +597,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
 
       # 4. Load the model back and assert on the equality of the predict
       #    results.
-      model_prime = tf.keras.models.load_model(new_h5_path)
+      model_prime = keras.models.load_model(new_h5_path)
       new_y = model_prime.predict([x1, x2])
       self.assertAllClose(y, new_y)
 
@@ -610,7 +610,7 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       model = self._createNestedSequentialModel()
       y = model.predict(x)
 
-      tf.keras.experimental.export_saved_model(model, self._tmp_dir)
+      keras.experimental.export_saved_model(model, self._tmp_dir)
       self._tmp_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
       # 2. Convert the keras saved model to tfjs format.
