@@ -15,11 +15,12 @@
  * =============================================================================
  */
 
-import * as tfc from '@tensorflow/tfjs-core';
-import {io} from '@tensorflow/tfjs-core';
+import {InferenceModel, io, ModelPredictConfig, NamedTensorMap, Tensor} from '@tensorflow/tfjs-core';
+
 import {tensorflow} from '../data/compiled_api';
 import {NamedTensorsMap, TensorInfo} from '../data/types';
 import {OperationMapper} from '../operations/operation_mapper';
+
 import {GraphExecutor} from './graph_executor';
 
 export const TFHUB_SEARCH_PARAM = '?tfjs-format=file';
@@ -34,10 +35,10 @@ export const DEFAULT_MODEL_NAME = 'model.json';
  * via `tf.loadGraphModel`.
  */
 /** @doc {heading: 'Models', subheading: 'Classes'} */
-export class GraphModel implements tfc.InferenceModel {
+export class GraphModel implements InferenceModel {
   private executor: GraphExecutor;
   private version = 'n/a';
-  private handler: tfc.io.IOHandler;
+  private handler: io.IOHandler;
   // Returns the version information for the tensorflow model GraphDef.
   get modelVersion(): string {
     return this.version;
@@ -86,16 +87,14 @@ export class GraphModel implements tfc.InferenceModel {
       // Path is an IO Handler.
       this.handler = path as io.IOHandler;
     } else if (this.loadOptions.requestInit != null) {
-      this.handler =
-          tfc.io.browserHTTPRequest(path as string, this.loadOptions);
+      this.handler = io.browserHTTPRequest(path as string, this.loadOptions);
     } else {
       const handlers =
-          tfc.io.getLoadHandlers(path as string, this.loadOptions.onProgress);
+          io.getLoadHandlers(path as string, this.loadOptions.onProgress);
       if (handlers.length === 0) {
         // For backward compatibility: if no load handler can be found,
         // assume it is a relative http path.
-        handlers.push(
-            tfc.io.browserHTTPRequest(path as string, this.loadOptions));
+        handlers.push(io.browserHTTPRequest(path as string, this.loadOptions));
       } else if (handlers.length > 1) {
         throw new Error(
             `Found more than one (${handlers.length}) load handlers for ` +
@@ -121,7 +120,7 @@ export class GraphModel implements tfc.InferenceModel {
 
     this.version = `${graph.versions.producer}.${graph.versions.minConsumer}`;
     const weightMap =
-        tfc.io.decodeWeights(artifacts.weightData, artifacts.weightSpecs);
+        io.decodeWeights(artifacts.weightData, artifacts.weightSpecs);
     this.executor =
         new GraphExecutor(OperationMapper.Instance.transformGraph(graph));
     this.executor.weightMap = this.convertTensorMapToTensorsMap(weightMap);
@@ -165,15 +164,13 @@ export class GraphModel implements tfc.InferenceModel {
    * will be returned for model with multiple outputs.
    */
   /** @doc {heading: 'Models', subheading: 'Classes'} */
-  predict(
-      inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
-      config?: tfc.ModelPredictConfig): tfc.Tensor
-      |tfc.Tensor[]|tfc.NamedTensorMap {
+  predict(inputs: Tensor|Tensor[]|NamedTensorMap, config?: ModelPredictConfig):
+      Tensor|Tensor[]|NamedTensorMap {
     return this.execute_(inputs, true, this.outputNodes);
   }
 
-  private constructTensorMap(inputs: tfc.Tensor|tfc.Tensor[]) {
-    const inputArray = inputs instanceof tfc.Tensor ? [inputs] : inputs;
+  private constructTensorMap(inputs: Tensor|Tensor[]) {
+    const inputArray = inputs instanceof Tensor ? [inputs] : inputs;
     if (inputArray.length !== this.inputNodes.length) {
       throw new Error(
           'Input tensor count mismatch,' +
@@ -183,7 +180,7 @@ export class GraphModel implements tfc.InferenceModel {
     return this.inputNodes.reduce((map, inputName, i) => {
       map[inputName] = inputArray[i];
       return map;
-    }, {} as tfc.NamedTensorMap);
+    }, {} as NamedTensorMap);
   }
   /**
    * Executes inference for the model for given input tensors.
@@ -200,18 +197,16 @@ export class GraphModel implements tfc.InferenceModel {
    * if provided, otherwise the order of outputNodes attribute of the model.
    */
   /** @doc {heading: 'Models', subheading: 'Classes'} */
-  execute(
-      inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
-      outputs?: string|string[]): tfc.Tensor|tfc.Tensor[] {
+  execute(inputs: Tensor|Tensor[]|NamedTensorMap, outputs?: string|string[]):
+      Tensor|Tensor[] {
     return this.execute_(inputs, false, outputs);
   }
 
   private execute_(
-      inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
-      strictInputCheck = true, outputs?: string|string[]): tfc.Tensor
-      |tfc.Tensor[] {
+      inputs: Tensor|Tensor[]|NamedTensorMap, strictInputCheck = true,
+      outputs?: string|string[]): Tensor|Tensor[] {
     outputs = outputs || this.outputNodes;
-    if (inputs instanceof tfc.Tensor || Array.isArray(inputs)) {
+    if (inputs instanceof Tensor || Array.isArray(inputs)) {
       inputs = this.constructTensorMap(inputs);
     }
     if (this.executor.isControlFlowModel || this.executor.isDynamicShapeModel) {
@@ -242,8 +237,8 @@ export class GraphModel implements tfc.InferenceModel {
    */
   /** @doc {heading: 'Models', subheading: 'Classes'} */
   async executeAsync(
-      inputs: tfc.Tensor|tfc.Tensor[]|tfc.NamedTensorMap,
-      outputs?: string|string[]): Promise<tfc.Tensor|tfc.Tensor[]> {
+      inputs: Tensor|Tensor[]|NamedTensorMap,
+      outputs?: string|string[]): Promise<Tensor|Tensor[]> {
     if (!(this.executor.isControlFlowModel ||
           this.executor.isDynamicShapeModel)) {
       throw new Error(
@@ -251,7 +246,7 @@ export class GraphModel implements tfc.InferenceModel {
           'please use execute method for better performance.');
     }
     outputs = outputs || this.outputNodes;
-    if (inputs instanceof tfc.Tensor || Array.isArray(inputs)) {
+    if (inputs instanceof Tensor || Array.isArray(inputs)) {
       inputs = this.constructTensorMap(inputs);
     }
 
@@ -263,8 +258,7 @@ export class GraphModel implements tfc.InferenceModel {
         result[keys[0]];
   }
 
-  private convertTensorMapToTensorsMap(map: tfc.NamedTensorMap):
-      NamedTensorsMap {
+  private convertTensorMapToTensorsMap(map: NamedTensorMap): NamedTensorsMap {
     return Object.keys(map).reduce((newMap: NamedTensorsMap, key) => {
       newMap[key] = [map[key]];
       return newMap;
