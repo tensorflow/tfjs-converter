@@ -24,7 +24,6 @@ import os
 import tempfile
 
 import h5py
-import keras
 import tensorflow as tf
 
 from tensorflowjs import quantization
@@ -65,7 +64,7 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
   """
   if not os.path.exists(h5_path):
     raise ValueError('Nonexistent path to HDF5 file: %s' % h5_path)
-  elif os.path.isdir(h5_path):
+  if os.path.isdir(h5_path):
     raise ValueError(
         'Expected path to point to an HDF5 file, but it points to a '
         'directory: %s' % h5_path)
@@ -83,7 +82,7 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
     if os.path.isfile(output_dir):
       raise ValueError(
           'Output path "%s" already exists as a file' % output_dir)
-    elif not os.path.isdir(output_dir):
+    if not os.path.isdir(output_dir):
       os.makedirs(output_dir)
     conversion.write_artifacts(
         model_json, groups, output_dir, quantization_dtype)
@@ -191,11 +190,9 @@ def _standardize_input_output_formats(input_format, output_format):
         'Use --input_format=tfjs_layers_model instead.')
 
   input_format_is_keras = (
-      input_format == 'keras' or input_format == 'keras_saved_model')
+      input_format in ['keras', 'keras_saved_model'])
   input_format_is_tf = (
-      input_format == 'tf_frozen_model' or input_format == 'tf_hub' or
-      input_format == 'tf_saved_model' or
-      input_format == 'tf_session_bundle')
+      input_format in ['tf_frozen_model', 'tf_hub'])
   if output_format is None:
     # If no explicit output_format is provided, infer it from input format.
     if input_format_is_keras:
@@ -213,7 +210,7 @@ def _standardize_input_output_formats(input_format, output_format):
           '--output_format=tensorflowjs has been deprecated under '
           '--input_format=%s. Use --output_format=tfjs_layers_model '
           'instead.' % input_format)
-    elif input_format_is_tf:
+    if input_format_is_tf:
       raise ValueError(
           '--output_format=tensorflowjs has been deprecated under '
           '--input_format=%s. Use --output_format=tfjs_graph_model '
@@ -351,7 +348,7 @@ def main():
   elif (input_format == 'tf_saved_model' and
         output_format == 'tfjs_graph_model'):
     if FLAGS.signature_name:
-      tf_saved_model_conversion.convert_tf_saved_model(
+      tf_saved_model_conversion_v2.convert_tf_saved_model(
           FLAGS.input_path, FLAGS.output_path,
           signature_def=FLAGS.signature_name,
           saved_model_tags=FLAGS.saved_model_tags,
@@ -359,7 +356,7 @@ def main():
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
     else:
-      tf_saved_model_conversion.convert_tf_saved_model(
+      tf_saved_model_conversion_v2.convert_tf_saved_model(
           FLAGS.input_path, FLAGS.output_path,
           saved_model_tags=FLAGS.saved_model_tags,
           quantization_dtype=quantization_dtype,
@@ -368,12 +365,12 @@ def main():
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
     if FLAGS.signature_name:
-      tf_saved_model_conversion.convert_tf_hub_module(
+      tf_saved_model_conversion_v2.convert_tf_hub_module(
           FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
     else:
-      tf_saved_model_conversion.convert_tf_hub_module(
+      tf_saved_model_conversion_v2.convert_tf_hub_module(
           FLAGS.input_path,
           FLAGS.output_path,
           skip_op_check=FLAGS.skip_op_check,

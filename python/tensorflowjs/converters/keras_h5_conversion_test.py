@@ -133,7 +133,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'layers-model')
-    self.assertEqual(model_json['generatedBy'], 'keras v%s' % tf.keras.__version__)
+    self.assertEqual(model_json['generatedBy'],
+                     'keras v%s' % tf.keras.__version__)
     self.assertEqual(
         model_json['convertedBy'],
         'TensorFlow.js Converter v%s' % version.version)

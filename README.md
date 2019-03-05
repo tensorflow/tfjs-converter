@@ -6,7 +6,7 @@
 TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models) or [TensorFlow Hub module](https://www.tensorflow.org/hub/)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
-(Note: Session bundle and Fozen model formats have been deprecated in TensorFlow.js 1.0, please use TensorFlow.js 0.15.x version to convert these formats.)
+(Note: Session bundle and Fozen model formats have been deprecated in TensorFlow.js 1.0. Please use TensorFlow.js 0.15.x version to convert these formats.)
 
 A 2-step process to import your model:
 
@@ -82,6 +82,8 @@ saved a tf.keras model in the SavedModel format.
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
 |`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
+Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions tensorflowjs pip package.
+i.e. `pip install tensorfowjs==0.8.0`
 
 ### Format Conversion Support Tables
 

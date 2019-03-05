@@ -22,21 +22,20 @@ import tempfile
 import unittest
 
 import tensorflow as tf
-from tensorflow.python.grappler import tf_optimizer
 from tensorflow.python.eager import def_function
 from tensorflow.python.framework import constant_op
 from tensorflow.python.framework import dtypes
 from tensorflow.python.framework import tensor_spec
 from tensorflow.python.ops import variables
-from tensorflow.python.saved_model.load import load
 from tensorflow.python.training.tracking import tracking
 from tensorflow.python.saved_model.save import save
-from tensorflowjs.converters import tf_saved_model_conversion_v2
-
 import tensorflow_hub as hub
+
+from tensorflowjs.converters import tf_saved_model_conversion_v2
 
 SAVED_MODEL_DIR = 'saved_model'
 HUB_MODULE_DIR = 'hub_module'
+
 
 class ConvertTest(unittest.TestCase):
   def setUp(self):
@@ -48,7 +47,7 @@ class ConvertTest(unittest.TestCase):
       shutil.rmtree(self._tmp_dir)
     super(ConvertTest, self).tearDown()
 
-  def create_saved_model(self):
+  def _create_saved_model(self):
     """Test a basic model with functions to make sure functions are inlined."""
     input_data = constant_op.constant(1., shape=[1])
     root = tracking.AutoTrackable()
@@ -60,7 +59,7 @@ class ConvertTest(unittest.TestCase):
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
 
-  def create_unsupported_saved_model(self):
+  def _create_unsupported_saved_model(self):
     root = tracking.AutoTrackable()
     root.w = variables.Variable(tf.random.uniform([2, 2]))
 
@@ -79,7 +78,7 @@ class ConvertTest(unittest.TestCase):
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
 
-  def create_saved_model_with_debug_ops(self):
+  def _create_saved_model_with_debug_ops(self):
     root = tracking.AutoTrackable()
     root.w = variables.Variable(tf.random.uniform([2, 2]))
 
@@ -99,7 +98,7 @@ class ConvertTest(unittest.TestCase):
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
 
-  def create_hub_module(self):
+  def _create_hub_module(self):
     # Module function that doubles its input.
     def double_module_fn():
       w = tf.Variable([2.0, 4.0])
@@ -115,9 +114,7 @@ class ConvertTest(unittest.TestCase):
       m.export(os.path.join(self._tmp_dir, HUB_MODULE_DIR), sess)
 
   def test_convert_saved_model(self):
-    self.create_saved_model()
-    print(glob.glob(
-        os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
+    self._create_saved_model()
 
     tf_saved_model_conversion_v2.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
@@ -149,18 +146,18 @@ class ConvertTest(unittest.TestCase):
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
   def test_optimizer_add_unsupported_op(self):
-    self.create_unsupported_saved_model()
+    self._create_unsupported_saved_model()
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
-            ValueError, r'^Unsupported Ops'):
+        ValueError, r'^Unsupported Ops'):
       tf_saved_model_conversion_v2.convert_tf_saved_model(
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
           os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
       )
 
   def test_convert_saved_model_skip_op_check(self):
-    self.create_unsupported_saved_model()
+    self._create_unsupported_saved_model()
     print(glob.glob(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
 
@@ -188,12 +185,11 @@ class ConvertTest(unittest.TestCase):
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
-
   # (TODO: piyu) disable this test, need to change
   # convert_variables_to_constants_v2 to set function_optimization=aggressive.
   @unittest.skip('not supported')
   def test_convert_saved_model_strip_debug_ops(self):
-    self.create_saved_model_with_debug_ops()
+    self._create_saved_model_with_debug_ops()
 
     tf_saved_model_conversion_v2.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
@@ -219,9 +215,8 @@ class ConvertTest(unittest.TestCase):
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
 
-  @unittest.skip('not supported')
   def test_convert_hub_module(self):
-    self.create_hub_module()
+    self._create_hub_module()
     print(glob.glob(
         os.path.join(self._tmp_dir, HUB_MODULE_DIR, '*')))
 
@@ -250,6 +245,7 @@ class ConvertTest(unittest.TestCase):
     self.assertTrue(
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
+
 
 if __name__ == '__main__':
   unittest.main()

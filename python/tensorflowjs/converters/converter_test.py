@@ -48,13 +48,13 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
   def testWeightsOnly(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      input_tensor =tf.keras.layers.Input((3,))
-      dense1 =tf.keras.layers.Dense(
+      input_tensor = tf.keras.layers.Input((3,))
+      dense1 = tf.keras.layers.Dense(
           4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
           name='MyDense1')(input_tensor)
-      output =tf.keras.layers.Dense(
+      output = tf.keras.layers.Dense(
           2, use_bias=False, kernel_initializer='ones', name='MyDense2')(dense1)
-      model =tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
+      model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
       h5_path = os.path.join(self._tmp_dir, 'MyModel.h5')
       model.save_weights(h5_path)
 
@@ -78,14 +78,14 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
   def testConvertSavedKerasModelNoSplitByLayer(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      input_tensor =tf.keras.layers.Input((3,))
-      dense1 =tf.keras.layers.Dense(
+      input_tensor = tf.keras.layers.Input((3,))
+      dense1 = tf.keras.layers.Dense(
           4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
           name='MergedDense1')(input_tensor)
-      output =tf.keras.layers.Dense(
+      output = tf.keras.layers.Dense(
           2, use_bias=False,
           kernel_initializer='ones', name='MergedDense2')(dense1)
-      model =tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
+      model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
       h5_path = os.path.join(self._tmp_dir, 'MyModelMerged.h5')
       model.save(h5_path)
 
@@ -114,14 +114,14 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
   def testConvertSavedKerasModelSplitByLayer(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      input_tensor =tf.keras.layers.Input((3,))
-      dense1 =tf.keras.layers.Dense(
+      input_tensor = tf.keras.layers.Input((3,))
+      dense1 = tf.keras.layers.Dense(
           4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
           name='MergedDense1')(input_tensor)
-      output =tf.keras.layers.Dense(
+      output = tf.keras.layers.Dense(
           2, use_bias=False,
           kernel_initializer='ones', name='MergedDense2')(dense1)
-      model =tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
+      model = tf.keras.models.Model(inputs=[input_tensor], outputs=[output])
       h5_path = os.path.join(self._tmp_dir, 'MyModelMerged.h5')
       model.save(h5_path)
 
@@ -151,11 +151,11 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
   def testConvertWeightsFromSequentialModel(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      sequential_model =tf.keras.models.Sequential([
-         tf.keras.layers.Dense(
+      sequential_model = tf.keras.models.Sequential([
+          tf.keras.layers.Dense(
               3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
               name='Dense1'),
-         tf.keras.layers.Dense(
+          tf.keras.layers.Dense(
               1, use_bias=False, kernel_initializer='ones', name='Dense2')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
       sequential_model.save_weights(h5_path)
@@ -181,8 +181,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
   def testConvertModelForNonexistentDirCreatesDir(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
       output_dir = os.path.join(self._tmp_dir, 'foo_model')
-      sequential_model =tf.keras.models.Sequential([
-         tf.keras.layers.Dense(
+      sequential_model = tf.keras.models.Sequential([
+          tf.keras.layers.Dense(
               3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
               name='Dense1')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
@@ -203,8 +203,8 @@ class ConvertH5WeightsTest(unittest.TestCase):
       f.write('\n')
 
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      sequential_model =tf.keras.models.Sequential([
-         tf.keras.layers.Dense(
+      sequential_model = tf.keras.models.Sequential([
+          tf.keras.layers.Dense(
               3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
               name='Dense1')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
@@ -217,11 +217,11 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
   def testTensorflowjsToKerasConversionSucceeds(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      sequential_model =tf.keras.models.Sequential([
-         tf.keras.layers.Dense(
+      sequential_model = tf.keras.models.Sequential([
+          tf.keras.layers.Dense(
               3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
               name='Dense1'),
-         tf.keras.layers.Dense(
+          tf.keras.layers.Dense(
               1, use_bias=False, kernel_initializer='ones', name='Dense2')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
       sequential_model.save(h5_path)
@@ -236,7 +236,7 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
     # Load the new H5 and compare the model JSONs.
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      new_model =tf.keras.models.load_model(new_h5_path)
+      new_model = tf.keras.models.load_model(new_h5_path)
       self.assertEqual(old_model_json, new_model.to_json())
 
   def testTensorflowjsToKerasConversionFailsOnDirInputPath(self):
@@ -247,11 +247,11 @@ class ConvertH5WeightsTest(unittest.TestCase):
 
   def testTensorflowjsToKerasConversionFailsOnExistingDirOutputPath(self):
     with tf.Graph().as_default(), tf.compat.v1.Session():
-      sequential_model =tf.keras.models.Sequential([
-         tf.keras.layers.Dense(
+      sequential_model = tf.keras.models.Sequential([
+          tf.keras.layers.Dense(
               3, input_shape=(2,), use_bias=True, kernel_initializer='ones',
               name='Dense1'),
-         tf.keras.layers.Dense(
+          tf.keras.layers.Dense(
               1, use_bias=False, kernel_initializer='ones', name='Dense2')])
       h5_path = os.path.join(self._tmp_dir, 'SequentialModel.h5')
       sequential_model.save(h5_path)
@@ -340,8 +340,9 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
     with tf.Graph().as_default(), tf.compat.v1.Session():
       model = self._createSimpleSequentialModel()
       # Compile the model before saving.
-      model.compile(loss='binary_crossentropy',
-                    optimizer=tf.compat.v1.train.GradientDescentOptimizer(2.5e-3))
+      model.compile(
+          loss='binary_crossentropy',
+          optimizer=tf.compat.v1.train.GradientDescentOptimizer(2.5e-3))
 
       old_model_json = json.loads(model.to_json())
       old_weights = model.get_weights()

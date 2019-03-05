@@ -26,13 +26,11 @@ import tensorflow as tf
 from tensorflow.core.protobuf import device_properties_pb2
 from tensorflow.core.protobuf import meta_graph_pb2
 from tensorflow.core.protobuf import config_pb2
-from tensorflow.python.eager import function
 from tensorflow.python.framework import convert_to_constants
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
 from tensorflow.python.saved_model.load import load
-from tensorflow.python.tools import freeze_graph
 from tensorflow.python.training.saver import export_meta_graph
 from google.protobuf.json_format import MessageToDict
 
@@ -235,6 +233,7 @@ def write_artifacts(topology,
 
 def convert_tf_saved_model(saved_model_dir,
                            output_dir, signature_def='serving_default',
+                           saved_model_tags='serve',
                            quantization_dtype=None,
                            skip_op_check=False,
                            strip_debug_ops=False):
@@ -250,7 +249,8 @@ def convert_tf_saved_model(saved_model_dir,
       will consist of
       - a file named 'model.json'
       - possibly sharded binary weight files.
-    signature_def: string Tagset of the SignatureDef to load. Defaulted to 'serving_default'
+    signature_def: string Tagset of the SignatureDef to load. Defaulted to
+      'serving_default'
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
     skip_op_check: Bool whether to skip the op check.
@@ -261,12 +261,14 @@ def convert_tf_saved_model(saved_model_dir,
   output_graph = os.path.join(
       output_dir, common.ARTIFACT_MODEL_JSON_FILE_NAME)
 
-  model = load(saved_model_dir)
+  saved_model_tags = saved_model_tags.split(', ')
+  model = load(saved_model_dir, saved_model_tags)
   concrete_func = model.signatures[signature_def]
   frozen_func = convert_to_constants.convert_variables_to_constants_v2(
       concrete_func)
 
-  optimize_graph(frozen_func, output_graph, quantization_dtype=quantization_dtype,
+  optimize_graph(frozen_func, output_graph,
+                 quantization_dtype=quantization_dtype,
                  skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
 def load_and_initialize_hub_module(module_path, signature='default'):
