@@ -26,7 +26,6 @@ import unittest
 
 import h5py
 import numpy as np
-import tensorflow as tf
 from tensorflow import keras
 
 from tensorflowjs import version
@@ -459,7 +458,6 @@ class ConvertH5WeightsTest(unittest.TestCase):
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'already exists as a file'):
       conversion.save_keras_model(model, artifacts_dir)
-
 
 
 if __name__ == '__main__':

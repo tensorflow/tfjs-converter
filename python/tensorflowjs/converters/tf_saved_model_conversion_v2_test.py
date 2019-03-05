@@ -140,7 +140,10 @@ class ConvertTest(unittest.TestCase):
     self.assertTrue(model_json['modelTopology'])
     weights_manifest = model_json['weightsManifest']
     self.assertEqual(weights_manifest, weights)
-
+    # Check meta-data in the artifact JSON.
+    self.assertEqual(model_json['format'], 'graph-model')
+    self.assertEqual(model_json['generatedBy'],
+                     None)
     self.assertTrue(
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
@@ -239,6 +242,7 @@ class ConvertTest(unittest.TestCase):
     with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
       model_json = json.load(f)
     self.assertTrue(model_json['modelTopology'])
+
     weights_manifest = model_json['weightsManifest']
     self.assertEqual(weights_manifest, weights)
 

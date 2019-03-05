@@ -6,11 +6,11 @@
 TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models) or [TensorFlow Hub module](https://www.tensorflow.org/hub/)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
-(Note: Session bundle and Fozen model formats have been deprecated in TensorFlow.js 1.0. Please use TensorFlow.js 0.15.x version to convert these formats.)
+(Note: Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use TensorFlow.js 0.15.x version to convert these formats.)
 
 A 2-step process to import your model:
 
-1. A python pip package to convert a TensorFlow SavedModel/Frozen Model/Session Bundle to a web friendly format. If you already have a converted model, or are using an already hosted model (e.g. MobileNet), skip this step.
+1. A python pip package to convert a TensorFlow SavedModel or TensorFlow Hub module to a web friendly format. If you already have a converted model, or are using an already hosted model (e.g. MobileNet), skip this step.
 2. [Javascript API](./src/executor/tf_model.ts), for loading and running inference.
 
 ## Step 1: Converting a [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md), [Keras h5](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model), [tf.keras SavedModel](https://www.tensorflow.org/api_docs/python/tf/contrib/saved_model/save_keras_model) or [TensorFlow Hub module](https://www.tensorflow.org/hub/) to a web-friendly format
@@ -83,7 +83,7 @@ saved a tf.keras model in the SavedModel format.
 |`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
 Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions tensorflowjs pip package.
-i.e. `pip install tensorfowjs==0.8.0`
+i.e. `pip install tensorflowjs==0.8.0`
 
 ### Format Conversion Support Tables
 
