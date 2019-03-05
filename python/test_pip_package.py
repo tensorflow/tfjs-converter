@@ -77,32 +77,33 @@ def _createTensorFlowSavedModelV1(name_scope, save_path):
       op and variable name clashes between different test methods.
     save_path: The directory path in which to save the model.
   """
+  graph = tf.Graph()
+  with graph.as_default():
+    with tf.compat.v1.name_scope(name_scope):
+      x = tf.compat.v1.constant([[37.0, -23.0], [1.0, 4.0]])
+      w = tf.compat.v1.get_variable('w', shape=[2, 2])
+      y = tf.compat.v1.matmul(x, w)
+      output = tf.compat.v1.nn.softmax(y)
+      init_op = w.initializer
 
-  with tf.compat.v1.name_scope(name_scope):
-    x = tf.compat.v1.constant([[37.0, -23.0], [1.0, 4.0]])
-    w = tf.compat.v1.get_variable('w', shape=[2, 2])
-    y = tf.compat.v1.matmul(x, w)
-    output = tf.compat.v1.nn.softmax(y)
-    init_op = w.initializer
+      # Create a builder.
+      builder = tf.compat.v1.saved_model.builder.SavedModelBuilder(save_path)
 
-    # Create a builder.
-    builder = tf.compat.v1.saved_model.builder.SavedModelBuilder(save_path)
+      with tf.compat.v1.Session() as sess:
+        # Run the initializer on `w`.
+        sess.run(init_op)
 
-    with tf.compat.v1.Session() as sess:
-      # Run the initializer on `w`.
-      sess.run(init_op)
+        builder.add_meta_graph_and_variables(
+            sess, [tf.compat.v1.saved_model.tag_constants.SERVING],
+            signature_def_map={
+                "serving_default":
+                    tf.compat.v1.saved_model.signature_def_utils.predict_signature_def(
+                        inputs={"x": x},
+                        outputs={"output": output})
+            },
+            assets_collection=None)
 
-      builder.compat.v1.add_meta_graph_and_variables(
-          sess, [tf.saved_model.tag_constants.SERVING],
-          signature_def_map= {
-              "serving_default":
-                  tf.saved_model.signature_def_utils.predict_signature_def(
-                      inputs= {"x": x},
-                      outputs= {"output": output})
-          },
-          assets_collection=None)
-
-    builder.save()
+      builder.save()
 
 def _createTensorFlowSavedModel(name_scope, save_path):
   """Create a TensorFlow SavedModel for testing.
@@ -402,12 +403,8 @@ class APIAndShellTest(tf.test.TestCase):
 
     weights = [{
         'paths': ['group1-shard1of1.bin'],
-        'weights': [{
-            'shape': [2, 2],
-            'name': 'a/Softmax',
-            'dtype': 'float32'
-        }]
-    }]
+        'weights': [{'dtype': 'float32', 'name': 'w', 'shape': [2, 2]}]}]
+
     # Load the saved weights as a JSON string.
     output_json = json.load(
         open(os.path.join(output_dir, 'model.json'), 'rt'))
@@ -698,7 +695,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       y = model.predict(x)
 
       keras.experimental.export_saved_model(model, self._tmp_dir)
-      self._tmp_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
       # 2. Convert the keras saved model to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')
