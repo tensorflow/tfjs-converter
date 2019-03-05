@@ -374,11 +374,11 @@ class APIAndShellTest(tf.test.TestCase):
       self.assertEqual(
           2, len(glob.glob(os.path.join(self._tmp_dir, 'group*'))))
 
-  def testKerasH5ConversionWithOutputNodeNamesErrors(self):
+  def testKerasH5ConversionWithSignatureNameErrors(self):
     process = subprocess.Popen(
         [
             'tensorflowjs_converter', '--input_format', 'keras',
-            '--saved_model_tags', 'foo,bar',
+            '--signature_name', 'bar',
             os.path.join(self._tmp_dir, 'foo.h5'),
             os.path.join(self._tmp_dir, 'output')
         ],
@@ -387,7 +387,7 @@ class APIAndShellTest(tf.test.TestCase):
     _, stderr = process.communicate()
     self.assertGreater(process.returncode, 0)
     self.assertIn(
-        b'The --saved_model_tags flag is applicable only to',
+        b'The --signature_name flag is applicable only to',
         tf.compat.as_bytes(stderr))
 
   def testConvertTFSavedModelV1WithCommandLineWorks(self):
@@ -657,7 +657,6 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       y = model.predict([x1, x2])
 
       keras.experimental.export_saved_model(model, self._tmp_dir)
-      self._tmp_dir = glob.glob(os.path.join(self._tmp_dir, '*'))[0]
 
       # 2. Convert the keras saved model to tfjs format.
       tfjs_output_dir = os.path.join(self._tmp_dir, 'tfjs')

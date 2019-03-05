@@ -329,7 +329,7 @@ def main():
   if (FLAGS.signature_name and input_format not in
       ('tf_saved_model', 'tf_hub')):
     raise ValueError(
-        'The --signature_name is applicable only to "tf_saved_model" and '
+        'The --signature_name flag is applicable only to "tf_saved_model" and '
         '"tf_hub" input format, but the current input format is '
         '"%s".' % input_format)
 
