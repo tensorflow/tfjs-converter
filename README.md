@@ -30,7 +30,7 @@ SavedModel example:
 ```bash
 $ tensorflowjs_converter \
     --input_format=tf_saved_model \
-    --signature_def=serving_default \
+    --signature_name=serving_default \
     --saved_model_tags=serve \
     /mobilenet/saved_model \
     /mobilenet/web_model
@@ -82,7 +82,7 @@ saved a tf.keras model in the SavedModel format.
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
 |`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
-Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.0`.
+Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions of the tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.0`.
 
 ### Format Conversion Support Tables
 

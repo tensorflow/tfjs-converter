@@ -264,6 +264,7 @@ def setup_arugments():
   parser.add_argument(
       '--signature_name',
       type=str,
+      default=None,
       help='Signature of the SavedModel Graph or TF-Hub module to load. '
       'Applicable only if input format is "tf_hub" or "tf_saved_model".')
   parser.add_argument(
@@ -348,7 +349,6 @@ def main():
         split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (input_format == 'tf_saved_model' and
         output_format == 'tfjs_graph_model'):
-    if FLAGS.signature_name:
       tf_saved_model_conversion_v2.convert_tf_saved_model(
           FLAGS.input_path, FLAGS.output_path,
           signature_def=FLAGS.signature_name,
@@ -356,24 +356,10 @@ def main():
           quantization_dtype=quantization_dtype,
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
-    else:
-      tf_saved_model_conversion_v2.convert_tf_saved_model(
-          FLAGS.input_path, FLAGS.output_path,
-          saved_model_tags=FLAGS.saved_model_tags,
-          quantization_dtype=quantization_dtype,
-          skip_op_check=FLAGS.skip_op_check,
-          strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
-    if FLAGS.signature_name:
       tf_saved_model_conversion_v2.convert_tf_hub_module(
           FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
-          skip_op_check=FLAGS.skip_op_check,
-          strip_debug_ops=FLAGS.strip_debug_ops)
-    else:
-      tf_saved_model_conversion_v2.convert_tf_hub_module(
-          FLAGS.input_path,
-          FLAGS.output_path,
           skip_op_check=FLAGS.skip_op_check,
           strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tfjs_layers_model' and

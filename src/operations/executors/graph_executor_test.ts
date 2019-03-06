@@ -73,7 +73,7 @@ describe('graph', () => {
             input1[0]);
       });
     });
-    describe('Identity', () => {
+    describe('IdentityN', () => {
       it('should return inputs', () => {
         node.inputNames = ['input1', 'input3'];
         node.inputParams.x = createTensorsAttr(0, 0);

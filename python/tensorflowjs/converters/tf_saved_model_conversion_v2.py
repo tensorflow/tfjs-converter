@@ -256,6 +256,9 @@ def convert_tf_saved_model(saved_model_dir,
     skip_op_check: Bool whether to skip the op check.
     strip_debug_ops: Bool whether to strip debug ops.
   """
+  if signature_def is None:
+    signature_def = 'serving_default'
+
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_graph = os.path.join(
@@ -335,6 +338,9 @@ def convert_tf_hub_module(module_path, output_dir,
     skip_op_check: Bool whether to skip the op check.
     strip_debug_ops: Bool whether to strip debug ops.
   """
+
+  if signature is None:
+    signature = 'default'
 
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
