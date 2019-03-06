@@ -209,8 +209,6 @@ class ConvertTest(unittest.TestCase):
 
   def test_optimizer_add_unsupported_op(self):
     self._create_unsupported_saved_model()
-    print(glob.glob(
-        os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
     with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
         ValueError, r'^Unsupported Ops'):
       tf_saved_model_conversion_v2.convert_tf_saved_model(
@@ -220,8 +218,6 @@ class ConvertTest(unittest.TestCase):
 
   def test_convert_saved_model_skip_op_check(self):
     self._create_unsupported_saved_model()
-    print(glob.glob(
-        os.path.join(self._tmp_dir, SAVED_MODEL_DIR, '*')))
 
     tf_saved_model_conversion_v2.convert_tf_saved_model(
         os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
@@ -279,8 +275,6 @@ class ConvertTest(unittest.TestCase):
 
   def test_convert_hub_module(self):
     self._create_hub_module()
-    print(glob.glob(
-        os.path.join(self._tmp_dir, HUB_MODULE_DIR, '*')))
 
     tf_saved_model_conversion_v2.convert_tf_hub_module(
         os.path.join(self._tmp_dir, HUB_MODULE_DIR),
