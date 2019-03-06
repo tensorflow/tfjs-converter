@@ -168,7 +168,7 @@ class ConvertTest(unittest.TestCase):
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
     self.assertEqual(model_json['generatedBy'],
-                     None)
+                     tf.__version__)
     self.assertTrue(
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
@@ -206,7 +206,7 @@ class ConvertTest(unittest.TestCase):
         model_json['convertedBy'],
         'TensorFlow.js Converter v%s' % version.version)
     self.assertEqual(model_json['generatedBy'],
-                     None)
+                     tf.__version__)
     self.assertTrue(
         glob.glob(
             os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))

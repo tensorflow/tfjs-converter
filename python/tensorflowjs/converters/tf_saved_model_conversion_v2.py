@@ -217,7 +217,7 @@ def write_artifacts(topology,
   model_json = {
       common.FORMAT_KEY: common.TFJS_GRAPH_MODEL_FORMAT,
       # TODO(piyu): Add tensorflow version below by using `meta_info_def`.
-      common.GENERATED_BY_KEY: None,
+      common.GENERATED_BY_KEY: tf.__version__,
       common.CONVERTED_BY_KEY: common.get_converted_by(),
   }
 
