@@ -31,6 +31,7 @@ from tensorflow.python.training.tracking import tracking
 from tensorflow.python.saved_model.save import save
 import tensorflow_hub as hub
 
+from tensorflowjs import version
 from tensorflowjs.converters import tf_saved_model_conversion_v2
 
 SAVED_MODEL_DIR = 'saved_model'
@@ -201,6 +202,9 @@ class ConvertTest(unittest.TestCase):
     self.assertEqual(weights_manifest, weights)
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
+    self.assertEqual(
+        model_json['convertedBy'],
+        'TensorFlow.js Converter v%s' % version.version)
     self.assertEqual(model_json['generatedBy'],
                      None)
     self.assertTrue(
