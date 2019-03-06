@@ -349,19 +349,19 @@ def main():
         split_weights_by_layer=FLAGS.split_weights_by_layer)
   elif (input_format == 'tf_saved_model' and
         output_format == 'tfjs_graph_model'):
-      tf_saved_model_conversion_v2.convert_tf_saved_model(
-          FLAGS.input_path, FLAGS.output_path,
-          signature_def=FLAGS.signature_name,
-          saved_model_tags=FLAGS.saved_model_tags,
-          quantization_dtype=quantization_dtype,
-          skip_op_check=FLAGS.skip_op_check,
-          strip_debug_ops=FLAGS.strip_debug_ops)
+    tf_saved_model_conversion_v2.convert_tf_saved_model(
+        FLAGS.input_path, FLAGS.output_path,
+        signature_def=FLAGS.signature_name,
+        saved_model_tags=FLAGS.saved_model_tags,
+        quantization_dtype=quantization_dtype,
+        skip_op_check=FLAGS.skip_op_check,
+        strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
-      tf_saved_model_conversion_v2.convert_tf_hub_module(
-          FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
-          skip_op_check=FLAGS.skip_op_check,
-          strip_debug_ops=FLAGS.strip_debug_ops)
+    tf_saved_model_conversion_v2.convert_tf_hub_module(
+        FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
+        skip_op_check=FLAGS.skip_op_check,
+        strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tfjs_layers_model' and
         output_format == 'keras'):
     dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
