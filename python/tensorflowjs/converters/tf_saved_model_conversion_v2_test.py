@@ -167,6 +167,9 @@ class ConvertTest(unittest.TestCase):
     self.assertEqual(weights_manifest, weights)
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
+    self.assertEqual(
+        model_json['convertedBy'],
+        'TensorFlow.js Converter v%s' % version.version)
     self.assertEqual(model_json['generatedBy'],
                      tf.__version__)
     self.assertTrue(
