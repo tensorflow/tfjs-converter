@@ -135,9 +135,9 @@ def _ensure_json_dict(item):
 # This issue should be fixed in later releases. But we include the logic
 # to translate them anyway, for users who use those versions of tensorflow.
 _CLASS_NAME_MAP = {
-  'BatchNormalizationV1': 'BatchNormalization',
-  'UnifiedGRU': 'GRU',
-  'UnifiedLSTM': 'LSTM'
+    'BatchNormalizationV1': 'BatchNormalization',
+    'UnifiedGRU': 'GRU',
+    'UnifiedLSTM': 'LSTM'
 }
 
 
