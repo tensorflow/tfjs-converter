@@ -22,6 +22,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import copy
 import json
 import os
 import tempfile
@@ -101,6 +102,7 @@ def _check_version(h5file):
     raise ValueError(
         'Expected Keras version 2; got Keras version %s' % keras_version)
 
+
 def _initialize_output_dictionary(h5file):
   """Prepopulate required fields for all data foramts.
 
@@ -125,6 +127,33 @@ def _ensure_h5file(h5file):
 
 def _ensure_json_dict(item):
   return item if isinstance(item, dict) else json.loads(as_text(item))
+
+
+# https://github.com/tensorflow/tfjs/issues/1255, b/124791387
+# In tensorflow version 1.13 and some alpha and nightly-preview versions,
+# the following layers have different class names in their serialization.
+# This issue should be fixed in later releases. But we include the logic
+# to translate them anyway, for users who use those versions of tensorflow.
+_CLASS_NAME_MAP = {
+  'BatchNormalizationV1': 'BatchNormalization',
+  'UnifiedGRU': 'GRU',
+  'UnifiedLSTM': 'LSTM'
+}
+
+
+def translate_class_names(input_object):
+  if not isinstance(input_object, dict):
+    return input_object
+  out = copy.copy(input_object)
+  for key in out:
+    value = out[key]
+    if key == 'class_name' and value in _CLASS_NAME_MAP:
+      out[key] = _CLASS_NAME_MAP[value]
+    elif isinstance(value, dict):
+      out[key] = translate_class_names(value)
+    elif isinstance(value, (tuple, list)):
+      out[key] = [translate_class_names(item) for item in value]
+  return out
 
 
 def h5_merged_saved_model_to_tfjs_format(h5file, split_by_layer=False):
@@ -154,8 +183,8 @@ def h5_merged_saved_model_to_tfjs_format(h5file, split_by_layer=False):
   _check_version(h5file)
   model_json = _initialize_output_dictionary(h5file)
 
-  model_json['model_config'] = _ensure_json_dict(
-      h5file.attrs['model_config'])
+  model_json['model_config'] = translate_class_names(_ensure_json_dict(
+      h5file.attrs['model_config']))
   if 'training_config' in h5file.attrs:
     model_json['training_config'] = _ensure_json_dict(
         h5file.attrs['training_config'])
