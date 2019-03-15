@@ -22,7 +22,6 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
-import copy
 import json
 import os
 import tempfile
@@ -156,7 +155,7 @@ def translate_class_names(input_object):
       translate_class_names(value)
     elif isinstance(value, (tuple, list)):
       for item in value:
-        translate_class_names(item) 
+        translate_class_names(item)
 
 
 def h5_merged_saved_model_to_tfjs_format(h5file, split_by_layer=False):
