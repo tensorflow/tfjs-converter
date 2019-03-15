@@ -142,9 +142,13 @@ _CLASS_NAME_MAP = {
 
 
 def translate_class_names(input_object):
+  """Perform class name replacement.
+
+  Beware that this method modifies the input object in-place.
+  """
   if not isinstance(input_object, dict):
     return input_object
-  out = copy.copy(input_object)
+  out = input_object
   for key in out:
     value = out[key]
     if key == 'class_name' and value in _CLASS_NAME_MAP:
