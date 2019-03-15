@@ -147,17 +147,16 @@ def translate_class_names(input_object):
   Beware that this method modifies the input object in-place.
   """
   if not isinstance(input_object, dict):
-    return input_object
-  out = input_object
-  for key in out:
-    value = out[key]
+    return
+  for key in input_object:
+    value = input_object[key]
     if key == 'class_name' and value in _CLASS_NAME_MAP:
-      out[key] = _CLASS_NAME_MAP[value]
+      input_object[key] = _CLASS_NAME_MAP[value]
     elif isinstance(value, dict):
-      out[key] = translate_class_names(value)
+      translate_class_names(value)
     elif isinstance(value, (tuple, list)):
-      out[key] = [translate_class_names(item) for item in value]
-  return out
+      for item in value:
+        translate_class_names(item) 
 
 
 def h5_merged_saved_model_to_tfjs_format(h5file, split_by_layer=False):
@@ -187,8 +186,9 @@ def h5_merged_saved_model_to_tfjs_format(h5file, split_by_layer=False):
   _check_version(h5file)
   model_json = _initialize_output_dictionary(h5file)
 
-  model_json['model_config'] = translate_class_names(_ensure_json_dict(
-      h5file.attrs['model_config']))
+  model_json['model_config'] = _ensure_json_dict(
+      h5file.attrs['model_config'])
+  translate_class_names(model_json['model_config'])
   if 'training_config' in h5file.attrs:
     model_json['training_config'] = _ensure_json_dict(
         h5file.attrs['training_config'])
