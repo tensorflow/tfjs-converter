@@ -25,7 +25,7 @@ import numpy as np
 import tensorflow as tf
 
 from tensorflow.core.protobuf import device_properties_pb2
-from tensorflow.core.protobuf import rewriter_config_pb2
+from tensorflow.core.protobuf import config_pb2
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
@@ -121,7 +121,8 @@ def optimize_graph(graph,
     raise ValueError('Unsupported Ops in the model before optimization\n' +
                      ', '.join(unsupported))
 
-  rewriter_config = rewriter_config_pb2.RewriterConfig()
+  config = config_pb2.ConfigProto()
+  rewriter_config = config.graph_options.rewrite_options
   rewriter_config.optimizers[:] = [
       'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning', 'remap',
       'constfold', 'arithmetic', 'dependency'
@@ -131,7 +132,7 @@ def optimize_graph(graph,
   meta_graph = tf.train.export_meta_graph(
       graph_def=graph.as_graph_def(), graph=graph)
   optimized_graph = tf_optimizer.OptimizeGraph(
-      rewriter_config, meta_graph, cluster=get_cluster())
+      config, meta_graph, cluster=get_cluster())
 
   unsupported = validate(optimized_graph.node, skip_op_check,
                          strip_debug_ops)
