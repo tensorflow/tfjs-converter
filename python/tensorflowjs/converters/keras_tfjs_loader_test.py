@@ -95,7 +95,7 @@ class LoadKerasModelTest(tf.test.TestCase):
     buff_writer.seek(0)
 
     with tf.Graph().as_default(), tf.Session():
-      model2 = keras_tfjs_loader.deserialize_keras_model(buff)
+      model2 = keras_tfjs_loader.deserialize_keras_model(buff.read())
 
       # The two model JSONs should match exactly.
       self.assertEqual(model1.to_json(), model2.to_json())
@@ -108,7 +108,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model1 = self._saveKerasModelForTest(tfjs_path)
 
     # Read the content of model.json into a BytesIO
-    with open(os.path.join(tfjs_path, 'model.json'), 'rb') as f:
+    with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
       config_json = json.load(f)
 
     with tf.Graph().as_default(), tf.Session():
@@ -158,7 +158,7 @@ class LoadKerasModelTest(tf.test.TestCase):
       model1_weight_values = model1.get_weights()
 
     # Read the content of model.json into a file object.
-    json_file = open(os.path.join(tfjs_path, 'model.json'), 'rb')
+    json_file = open(os.path.join(tfjs_path, 'model.json'), 'rt')
 
     weight_paths = sorted(glob.glob(os.path.join(tfjs_path, 'group*')))
     weight_files = [open(path, 'rb') for path in weight_paths]
