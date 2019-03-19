@@ -315,6 +315,7 @@ export async function loadGraphModel(
     options = {};
   }
 
+  const originModelUrl = modelUrl;
   if (options.fromTFHub) {
     if ((modelUrl as io.IOHandler).load == null) {
       if (!(modelUrl as string).endsWith('/')) {
@@ -324,6 +325,17 @@ export async function loadGraphModel(
     }
   }
   const model = new GraphModel(modelUrl, options);
-  await model.load();
-  return model;
+  try {
+    await model.load();
+    return model;
+  } catch (error) {
+    // TFHub model that is not converted will return 404 error.
+    if (options.fromTFHub && error &&
+        error.message.indexOf('status code 404') !== -1) {
+      throw new Error(
+          `TFHub model at ${originModelUrl} has not been` +
+          ' converted to TensorFlow.js yet.');
+    }
+    throw error;
+  }
 }

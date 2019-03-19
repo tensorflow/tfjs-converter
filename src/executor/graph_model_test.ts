@@ -104,6 +104,12 @@ const SIMPLE_HTTP_MODEL_LOADER = {
   }
 };
 
+const HTTP_MODEL_LOADER_WITH_404_ERROR = {
+  load: async () => {
+    throw new Error('status code 404');
+  }
+};
+
 describe('loadGraphModel', () => {
   it('Pass a custom io handler', async () => {
     const customLoader: tfc.io.IOHandler = {
@@ -130,6 +136,23 @@ describe('loadGraphModel', () => {
       errorMsg = err.message;
     }
     expect(errorMsg).toMatch(/modelUrl in loadGraphModel\(\) cannot be null/);
+  });
+
+  it('should throw error for not converted TfHub Module', async () => {
+    let errorMsg = 'no error';
+    spyOn(tfc.io, 'getLoadHandlers').and.returnValue([
+      HTTP_MODEL_LOADER_WITH_404_ERROR
+    ]);
+    spyOn(tfc.io, 'browserHTTPRequest')
+        .and.returnValue(HTTP_MODEL_LOADER_WITH_404_ERROR);
+
+    const url = `${HOST}/model/1`;
+    try {
+      await loadGraphModel(url, {fromTFHub: true});
+    } catch (err) {
+      errorMsg = err.message;
+    }
+    expect(errorMsg).toMatch(/has not been converted to TensorFlow.js yet/);
   });
 });
 
@@ -301,6 +324,7 @@ describe('Model', () => {
       });
     });
   });
+
   const CONTROL_FLOW_HTTP_MODEL_LOADER = {
     load: async () => {
       return {
