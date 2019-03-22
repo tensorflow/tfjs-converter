@@ -190,7 +190,7 @@ const weightMap = await tf.io.loadWeights(
         this.weightManifest, "https://example.org/model");
 ```
 
-`weightMap` maps a tensor name to a tensor. You can use it to manually implement the forward pass of the model:
+`weightMap` maps a weight name to a tensor. You can use it to manually implement the forward pass of the model:
 
 ```js
 const input = tf.tensor(...);
