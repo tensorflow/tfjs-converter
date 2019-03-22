@@ -175,9 +175,9 @@ If your model uses unsupported ops, the `tensorflowjs_converter` script will fai
 produce a list of the unsupported ops in your model. Please file issues to let us
 know what ops you need support with.
 
-## Manual forward pass and direct weights loading 
+## Manual forward pass and direct weights loading
 
-If you want to manually write the forward pass with the ops API, you can load the weights directly as a map from tensor names to tensors:
+If you want to manually write the forward pass with the ops API, you can load the weights directly as a map from weight names to tensors:
 
 ```js
 import * as tf from '@tensorflow/tfjs';
