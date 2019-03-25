@@ -187,10 +187,10 @@ class ConvertTest(unittest.TestCase):
     weights = [{
         'paths': ['group1-shard1of1.bin'],
         'weights': [{'dtype': 'float32',
-                     'name': 'statefulpartitionedcall_args_2',
+                     'name': 'statefulpartitionedcall_args_1',
                      'shape': []},
                     {'dtype': 'float32',
-                     'name': 'statefulpartitionedcall_args_1',
+                     'name': 'statefulpartitionedcall_args_2',
                      'shape': []},
                     {'dtype': 'float32',
                      'name': 'StatefulPartitionedCall/mul',
@@ -202,6 +202,7 @@ class ConvertTest(unittest.TestCase):
       model_json = json.load(f)
     self.assertTrue(model_json['modelTopology'])
     weights_manifest = model_json['weightsManifest']
+    print(weights_manifest)
     self.assertEqual(weights_manifest, weights)
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
