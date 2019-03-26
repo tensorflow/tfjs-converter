@@ -476,6 +476,7 @@ class APIAndShellTest(tf.test.TestCase):
                             weights[0]['paths'])
       self.assertCountEqual(weights_manifest[0]['weights'],
                             weights[0]['weights']
+
     # Check the content of the output directory.
     self.assertTrue(glob.glob(os.path.join(output_dir, 'group*-*')))
 
