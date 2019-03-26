@@ -202,7 +202,6 @@ class ConvertTest(unittest.TestCase):
       model_json = json.load(f)
     self.assertTrue(model_json['modelTopology'])
     weights_manifest = model_json['weightsManifest']
-    print(weights_manifest)
     self.assertEqual(weights_manifest, weights)
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
