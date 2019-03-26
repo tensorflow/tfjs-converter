@@ -18,6 +18,7 @@ import glob
 import json
 import os
 import shutil
+import sys
 import tempfile
 import unittest
 
@@ -187,10 +188,10 @@ class ConvertTest(unittest.TestCase):
     weights = [{
         'paths': ['group1-shard1of1.bin'],
         'weights': [{'dtype': 'float32',
-                     'name': 'statefulpartitionedcall_args_1',
+                     'name': 'statefulpartitionedcall_args_2',
                      'shape': []},
                     {'dtype': 'float32',
-                     'name': 'statefulpartitionedcall_args_2',
+                     'name': 'statefulpartitionedcall_args_1',
                      'shape': []},
                     {'dtype': 'float32',
                      'name': 'StatefulPartitionedCall/mul',
@@ -202,7 +203,18 @@ class ConvertTest(unittest.TestCase):
       model_json = json.load(f)
     self.assertTrue(model_json['modelTopology'])
     weights_manifest = model_json['weightsManifest']
-    self.assertEqual(weights_manifest, weights)
+    self.assertEqual(len(weights_manifest), len(weights))
+    if sys.version_info[0] < 3:
+      self.assertItemsEqual(weights_manifest[0]['paths'],
+                            weights[0]['paths'])
+      self.assertItemsEqual(weights_manifest[0]['weights'],
+                            weights[0]['weights'])
+    else:
+      self.assertCountEqual(weights_manifest[0]['paths'],
+                            weights[0]['paths'])
+      self.assertCountEqual(weights_manifest[0]['weights'],
+                            weights[0]['weights'])
+
     # Check meta-data in the artifact JSON.
     self.assertEqual(model_json['format'], 'graph-model')
     self.assertEqual(
