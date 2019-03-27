@@ -24,6 +24,7 @@ import os
 import tempfile
 
 import h5py
+import numpy as np
 import tensorflow as tf
 from tensorflow import keras
 
@@ -32,6 +33,7 @@ from tensorflowjs import version
 from tensorflowjs.converters import keras_h5_conversion as conversion
 from tensorflowjs.converters import keras_tfjs_loader
 from tensorflowjs.converters import tf_saved_model_conversion_v2
+
 
 def dispatch_keras_h5_to_tensorflowjs_conversion(
     h5_path, output_dir=None, quantization_dtype=None,
@@ -177,12 +179,17 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
 def dispatch_tensorflowjs_to_tensorflowjs_conversion(
     config_json_path,
     output_dir_path,
+    quantization_dtype=None,
     weight_shard_size_bytes=1024 * 1024 * 4):
   """Converts a Keras Model from tensorflowjs format to H5.
 
   Args:
     config_json_path: Path to the JSON file that includes the model's
       topology and weights manifest, in tensorflowjs format.
+    output_dir_path: Path to output directory in which the result of the
+      conversion will be saved.
+    quantization_dtype: The quantized data type to store the weights in
+      (Default: `None`).
     output_dir_path: Path to the directory in which the converted
       model will be saved. This includes the model.json file and the
       possibly sharded binary weight files. The directory will be
@@ -221,6 +228,7 @@ def dispatch_tensorflowjs_to_tensorflowjs_conversion(
   with tf.Graph().as_default(), tf.compat.v1.Session():
     dispatch_keras_h5_to_tensorflowjs_conversion(
         temp_h5_path, output_dir_path,
+        quantization_dtype=quantization_dtype,
         weight_shard_size_bytes=weight_shard_size_bytes)
     # TODO(cais): Support weight quantization.
 
@@ -275,6 +283,17 @@ def _standardize_input_output_formats(input_format, output_format):
           'instead.' % input_format)
 
   return (input_format, output_format)
+
+
+def _parse_quantization_bytes(quantization_bytes):
+  if quantization_bytes is None:
+    return None
+  elif quantization_bytes == 1:
+    return np.uint8
+  elif quantization_bytes == 2:
+    return np.uint16
+  else:
+    raise ValueError('Unsupported quantization bytes: %s' % quantization_bytes)
 
 
 def setup_arugments():
@@ -432,6 +451,7 @@ def main():
         output_format == 'tfjs_layers_model'):
     dispatch_tensorflowjs_to_tensorflowjs_conversion(
         FLAGS.input_path, FLAGS.output_path,
+        quantization_dtype=_parse_quantization_bytes(FLAGS.quantization_bytes),
         weight_shard_size_bytes=FLAGS.weight_shard_size_bytes)
     # TODO(cais): Add quantization support.
 
