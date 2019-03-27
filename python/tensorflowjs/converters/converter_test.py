@@ -580,7 +580,8 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       sharded_model_path = os.path.join(self._tmp_dir, 'sharded_model')
       converter.dispatch_tensorflowjs_to_tensorflowjs_conversion(
           os.path.join(tfjs_output_dir, 'model.json'), sharded_model_path,
-          quantization_dtype=np.uint16)
+          quantization_dtype=np.uint16,
+          weight_shard_size_bytes=weight_shard_size_bytes)
 
       # Check the number of quantized files and their sizes.
       weight_files = sorted(
@@ -588,8 +589,8 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       self.assertEqual(len(weight_files), 1)
       weight_file_size = os.path.getsize(weight_files[0])
 
-      # The size of the saved weight file should reflect the result of the uint16
-      # quantization.
+      # The size of the saved weight file should reflect the result of the
+      # uint16 quantization.
       self.assertEqual(weight_file_size, total_weight_bytes / 2)
 
   def testConvertTfjsLayersModelWithUint8Quantization(self):
@@ -614,7 +615,8 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       sharded_model_path = os.path.join(self._tmp_dir, 'sharded_model')
       converter.dispatch_tensorflowjs_to_tensorflowjs_conversion(
           os.path.join(tfjs_output_dir, 'model.json'), sharded_model_path,
-          quantization_dtype=np.uint8)
+          quantization_dtype=np.uint8,
+          weight_shard_size_bytes=weight_shard_size_bytes)
 
       # Check the number of quantized files and their sizes.
       weight_files = sorted(
@@ -622,8 +624,8 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       self.assertEqual(len(weight_files), 1)
       weight_file_size = os.path.getsize(weight_files[0])
 
-      # The size of the saved weight file should reflect the result of the uint16
-      # quantization.
+      # The size of the saved weight file should reflect the result of the
+      # uint16 quantization.
       self.assertEqual(weight_file_size, total_weight_bytes / 4)
 
 
