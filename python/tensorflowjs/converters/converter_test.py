@@ -554,7 +554,8 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
       with open(sharded_model_path, 'wt') as f:
         # Create a fie at the path to elicit the error.
         f.write('hello')
-      with self.assertRaisesRegexp(ValueError, r'already exists as a file'):
+      with self.assertRaisesRegexp(  # pylint: disable=deprecated-method
+          ValueError, r'already exists as a file'):
         converter.dispatch_tensorflowjs_to_tensorflowjs_conversion(
             os.path.join(tfjs_output_dir, 'model.json'), sharded_model_path)
 
