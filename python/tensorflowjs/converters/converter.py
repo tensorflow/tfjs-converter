@@ -152,12 +152,12 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
   """
   if os.path.isdir(config_json_path):
     raise ValueError(
-        'For input_type=tensorflowjs & output_format=keras, '
+        'For input_type=tfjs_layers_model & output_format=keras, '
         'the input path should be a model.json '
         'file, but received a directory.')
   if os.path.isdir(h5_path):
     raise ValueError(
-        'For input_type=tensorflowjs & output_format=keras, '
+        'For input_type=tfjs_layers_model & output_format=keras, '
         'the output path should be the path to an HDF5 file, '
         'but received an existing directory (%s).' % h5_path)
 
@@ -167,7 +167,7 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
       json.load(f)
     except (ValueError, IOError):
       raise ValueError(
-          'For input_type=tensorflowjs & output_format=keras, '
+          'For input_type=tfjs_layers_model & output_format=keras, '
           'the input path is expected to contain valid JSON content, '
           'but cannot read valid JSON content from %s.' % config_json_path)
 
@@ -203,7 +203,7 @@ def dispatch_tensorflowjs_to_tensorflowjs_conversion(
   """
   if os.path.isdir(config_json_path):
     raise ValueError(
-        'For input_type=tensorflowjs & output_format=keras, '
+        'For input_type=tfjs_layers_model, '
         'the input path should be a model.json '
         'file, but received a directory.')
   # TODO(cais): Assert output_dir_path doesn't exist or is the path to
@@ -215,7 +215,7 @@ def dispatch_tensorflowjs_to_tensorflowjs_conversion(
       json.load(f)
     except (ValueError, IOError):
       raise ValueError(
-          'For input_type=tensorflowjs & output_format=keras, '
+          'For input_type=tfjs_layers_model, '
           'the input path is expected to contain valid JSON content, '
           'but cannot read valid JSON content from %s.' % config_json_path)
 
@@ -382,8 +382,9 @@ def setup_arugments():
   parser.add_argument(
       '--weight_shard_size_bytes',
       type=int,
-      default=1024 * 1024 * 4,
-      help='Shard size (in bytes) of the weight files.')
+      default=None,
+      help='Shard size (in bytes) of the weight files. Curently applicable '
+      'only to output_format=tfjs_layers_model.')
   return parser.parse_args()
 
 
@@ -395,6 +396,14 @@ def main():
     print('  keras %s' % keras.__version__)
     print('  tensorflow %s' % tf.__version__)
     return
+
+  weight_shard_size_bytes = 1024 * 1024 * 4
+  if FLAGS.weight_shard_size_bytes:
+    if  FLAGS.output_format != 'tfjs_layers_model':
+      raise ValueError(
+          'The --weight_shard_size_byte flag is only supported under '
+          'output_format=tfjs_layers_model.')
+    weight_shard_size_bytes = FLAGS.weight_shard_size_bytes
 
   if FLAGS.input_path is None:
     raise ValueError(
@@ -452,10 +461,7 @@ def main():
     dispatch_tensorflowjs_to_tensorflowjs_conversion(
         FLAGS.input_path, FLAGS.output_path,
         quantization_dtype=_parse_quantization_bytes(FLAGS.quantization_bytes),
-        weight_shard_size_bytes=FLAGS.weight_shard_size_bytes)
-    # TODO(cais): Add quantization support.
-
-
+        weight_shard_size_bytes=weight_shard_size_bytes)
   else:
     raise ValueError(
         'Unsupported input_format - output_format pair: %s - %s' %
