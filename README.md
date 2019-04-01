@@ -112,7 +112,8 @@ purposes:
 1. It allows you to shard the binary weight file into multiple small shards
    to facilitate browser caching. This step is necessary for models with
    large-sized weights saved from TensorFlow.js (either browser or Node.js),
-   because TensorFlow.js puts all weights in a single weight file ('group1-shard1of1.bin'). To shard the weight file, do
+   because TensorFlow.js puts all weights in a single weight file
+   ('group1-shard1of1.bin'). To shard the weight file, do
    
    ```sh
    tensorflowjs_converter \
@@ -121,7 +122,11 @@ purposes:
        original_model/model.json \
        sharded_model/
    ```
-2. It allows you to shrink the on-the-wire size of the weights through
+    The command above creates shards of size 4 MB (4194304 bytes) by default.
+    Alternative shard sizes can be specified using the
+    `--weight_shard_size_bytes` flag.
+
+2. It allows you to reduce the on-the-wire size of the weights through
    16- or 8-bit quantization. For example:
 
    ```sh
@@ -129,7 +134,7 @@ purposes:
       --input_format tfjs_layers_model \
       --output_format tfjs_layers_model \
       --quantization_bytes 2 \
-      model/model.json
+      original_model/model.json
       quantized_model/
    ```
 
