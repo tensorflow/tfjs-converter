@@ -1,5 +1,6 @@
 .rpt2_cache
 .travis.yml
+cloudbuild.yml
 .pylintrc
 .vscode
 .DS_Store

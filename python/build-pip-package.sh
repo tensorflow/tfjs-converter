@@ -17,7 +17,7 @@
 # Build pip package for keras_model_converter.
 #
 # Run this script outside a virtualenv, as this script will activate virtualenvs
-# for python2 and python3 to generate the wheel files.
+# for python and generate the wheel files.
 #
 # Usage:
 #   build-pip-package.sh \
@@ -127,11 +127,6 @@ for PY_FILE in ${PY_FILES}; do
   cp "${PY_FILE}" "${TMP_DIR}/${PY_DIR}"
 done
 
-# Generate json files from ts files in src/operations/op_list/.
-pushd ".." > /dev/null
-yarn && yarn gen-json
-popd > /dev/null
-
 # Copy .json files under op_list
 OP_LIST_DIR="tensorflowjs/op_list"
 JSON_FILES=$(find -L "${SCRIPTS_DIR}/${OP_LIST_DIR}" -name '*.json')
@@ -164,91 +159,90 @@ cp "${SCRIPTS_DIR}/setup.cfg" "${TMP_DIR}/"
 
 echo
 
+if [[ -z "$(which python)" ]]; then
+  echo "ERROR: Unable to find python on path."
+  exit 1
+fi
+
+pip install virtualenv
+
 # Check virtualenv is on path.
 if [[ -z "$(which virtualenv)" ]]; then
   echo "ERROR: Cannot find virtualenv on path. Install virtualenv first."
   exit 1
 fi
 
-# Create virtualenvs for python2 and python3; build (and test) the wheels inside
-# them.
-VENV_PYTHON_BINS="python2 python3"
-for VENV_PYTHON_BIN in ${VENV_PYTHON_BINS}; do
-  if [[ -z "$(which "${VENV_PYTHON_BIN}")" ]]; then
-    echo "ERROR: Unable to find ${VENV_PYTHON_BIN} on path."
-    exit 1
-  fi
+# Create virtualenv and build (and test) the wheels inside them.
 
-  TMP_VENV_DIR="$(mktemp -d)"
-  virtualenv -p "${VENV_PYTHON_BIN}" "${TMP_VENV_DIR}"
-  source "${TMP_VENV_DIR}/bin/activate"
+TMP_VENV_DIR="$(mktemp -d)"
+virtualenv -p "python" "${TMP_VENV_DIR}"
+source "${TMP_VENV_DIR}/bin/activate"
+
+echo
+echo "Building wheel for python: $(python --version 2>&1) ..."
+echo
+
+pip install -r "${SCRIPTS_DIR}/requirements.txt"
+
+pushd "${TMP_DIR}" > /dev/null
+echo
+
+echo "Building wheel for $(python --version 2>&1) ..."
+echo
+
+python setup.py bdist_wheel
+WHEELS=$(ls dist/*.whl)
+mv dist/*.whl "${DEST_DIR}/"
+
+WHEEL_PATH=""
+echo
+echo "Generated wheel file(s) in ${DEST_DIR} :"
+for WHEEL in ${WHEELS}; do
+  WHEEL_BASE_NAME="$(basename "${WHEEL}")"
+  echo "  ${WHEEL_BASE_NAME}"
+  WHEEL_PATH="${DEST_DIR}/${WHEEL_BASE_NAME}"
+done
+
+# Run test on install.
+if [[ "${RUN_TEST}" == "1" ]]; then
+  echo
+  echo "Running test-on-install for $(python --version 2>&1) ..."
+  echo
+
+  pip uninstall -y tensorflowjs || \
+    echo "It appears that tensorflowjs is not installed."
 
   echo
-  echo "Building wheel for ${VENV_PYTHON_BIN}: $(python --version 2>&1) ..."
+  echo "Installing tensorflowjs from wheel at path: ${WHEEL_PATH} ..."
   echo
 
-  pip install -r "${SCRIPTS_DIR}/requirements.txt"
+  TEST_ON_INSTALL_DIR="$(mktemp -d)"
 
-  pushd "${TMP_DIR}" > /dev/null
+  cp "${SCRIPTS_DIR}/test_pip_package.py" "${TEST_ON_INSTALL_DIR}"
+
+  pushd "${TEST_ON_INSTALL_DIR}" > /dev/null
+
+  pip install "${WHEEL_PATH}"
+  echo "Successfully installed ${WHEEL_PATH} for $(python --version 2>&1)."
   echo
 
-  echo "Building wheel for $(python --version 2>&1) ..."
-  echo
-
-  python setup.py bdist_wheel
-  WHEELS=$(ls dist/*.whl)
-  mv dist/*.whl "${DEST_DIR}/"
-
-  WHEEL_PATH=""
-  echo
-  echo "Generated wheel file(s) in ${DEST_DIR} :"
-  for WHEEL in ${WHEELS}; do
-    WHEEL_BASE_NAME="$(basename "${WHEEL}")"
-    echo "  ${WHEEL_BASE_NAME}"
-    WHEEL_PATH="${DEST_DIR}/${WHEEL_BASE_NAME}"
-  done
-
-  # Run test on install.
-  if [[ "${RUN_TEST}" == "1" ]]; then
-    echo
-    echo "Running test-on-install for $(python --version 2>&1) ..."
-    echo
-
-    pip uninstall -y tensorflowjs || \
-      echo "It appears that tensorflowjs is not installed."
-
-    echo
-    echo "Installing tensorflowjs from wheel at path: ${WHEEL_PATH} ..."
-    echo
-
-    TEST_ON_INSTALL_DIR="$(mktemp -d)"
-
-    cp "${SCRIPTS_DIR}/test_pip_package.py" "${TEST_ON_INSTALL_DIR}"
-
-    pushd "${TEST_ON_INSTALL_DIR}" > /dev/null
-
-    pip install "${WHEEL_PATH}"
-    echo "Successfully installed ${WHEEL_PATH} for $(python --version 2>&1)."
-    echo
-
-    python test_pip_package.py
-
-    popd > /dev/null
-
-    rm -rf "${TEST_ON_INSTALL_DIR}"
-
-    echo
-    echo "Test-on-install for $(python --version 2>&1) PASSED."
-    echo
-    echo "Your pip wheel for $(python --version 2>&1) is at:"
-    echo "  ${WHEEL_PATH}"
-  fi
+  python test_pip_package.py
 
   popd > /dev/null
 
-  deactivate
-  rm -rf "${TMP_VENV_DIR}"
-done
+  rm -rf "${TEST_ON_INSTALL_DIR}"
+
+  echo
+  echo "Test-on-install for $(python --version 2>&1) PASSED."
+  echo
+  echo "Your pip wheel for $(python --version 2>&1) is at:"
+  echo "  ${WHEEL_PATH}"
+fi
+
+popd > /dev/null
+
+deactivate
+rm -rf "${TMP_VENV_DIR}"
 
 if [[ "${UPLOAD_TO_PROD_PYPI}" == 1 || "${UPLOAD_TO_TEST_PYPI}" == 1 ]]; then
   if [[ "${UPLOAD_TO_PROD_PYPI}" == 1 ]]; then
@@ -282,7 +276,7 @@ if [[ "${UPLOAD_TO_PROD_PYPI}" == 1 || "${UPLOAD_TO_TEST_PYPI}" == 1 ]]; then
 
     # Create a virtualenv and install twine in it for uploading.
     TMP_VENV_DIR="$(mktemp -d)"
-    virtualenv -p "${VENV_PYTHON_BIN}" "${TMP_VENV_DIR}"
+    virtualenv -p "python" "${TMP_VENV_DIR}"
     source "${TMP_VENV_DIR}/bin/activate"
     pip install twine
 
