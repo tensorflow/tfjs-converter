@@ -132,6 +132,7 @@ OP_LIST_DIR="tensorflowjs/op_list"
 JSON_FILES=$(find -L "${SCRIPTS_DIR}/${OP_LIST_DIR}" -name '*.json')
 if [[ -z "${JSON_FILES}" ]]; then
   echo "ERROR: Failed to find any .json files in ${SCRIPTS_DIR}/${OP_LIST_DIR}"
+  echo "You need to run 'yarn gen-json' first."
   exit 1
 fi
 
