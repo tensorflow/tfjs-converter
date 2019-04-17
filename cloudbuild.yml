@@ -15,17 +15,12 @@ steps:
   id: 'gen-json'
   args: ['gen-json']
   waitFor: ['yarn']
-- name: 'python:2'
+- name: 'gcr.io/google-appengine/python'
   dir: 'python'
   entrypoint: 'bash'
-  args: ['./run-python-tests.sh']
+  args: ['./build-pip-package.sh', '--test', '/tmp/tfjs-pips']
   waitFor: ['gen-json']
 - name: 'python:2'
-  dir: 'python'
-  entrypoint: 'bash'
-  args: ['./build-pip-package.sh', '--test', '/tmp/tfjs-pips2']
-  waitFor: ['gen-json']
-- name: 'python:3.6'
   dir: 'python'
   entrypoint: 'bash'
   args: ['./run-python-tests.sh']
@@ -33,7 +28,7 @@ steps:
 - name: 'python:3.6'
   dir: 'python'
   entrypoint: 'bash'
-  args: ['./build-pip-package.sh', '--test', '/tmp/tfjs-pips3']
+  args: ['./run-python-tests.sh']
   waitFor: ['gen-json']
 secrets:
 - kmsKeyName: projects/learnjs-174218/locations/global/keyRings/tfjs/cryptoKeys/enc
