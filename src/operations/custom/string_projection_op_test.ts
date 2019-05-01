@@ -28,24 +28,23 @@ describe('StringProjectionOp', () => {
     expect(op).toBeDefined();
   });
   it('should be fast', () => {
-    const hash = tf.ones<tf.Rank.R2>([90, 14], 'float32');
+    const hash = [].fill(1, 0, 90 * 14);
     const input = tf.tensor1d(
         [
           'i would like to find a flight from charlotte to las vegas that makes a stop in st. louis'
         ],
         'string');
     console.time('start');
-    op.compute(input, hash, 'dense', 2, 1, true, true, false, true);
+    op.compute(input, hash, 'dense', 2, 90, 14, 1, true, true, false, true);
     console.timeEnd('start');
   });
 
   it('should generate dense projection', () => {
-    const hash = tf.tensor2d(
-        [0.123, 0.456, -0.321, 1.234, 5.678, -4.321], [3, 2], 'float32');
+    const hash = [0.123, 0.456, -0.321, 1.234, 5.678, -4.321];
     const input = tf.tensor1d(
         ['hello world abc def ghi', 'hello world abc def ghi1'], 'string');
     const output =
-        op.compute(input, hash, 'dense', 2, 1, true, true, false, true);
+        op.compute(input, hash, 'dense', 2, 3, 2, 1, true, true, false, true);
     // First checks dimensions.
     expect(output.rank).toEqual(2);
     expect(output.shape).toEqual([2, 6]);
@@ -53,12 +52,11 @@ describe('StringProjectionOp', () => {
   });
 
   it('should generate sparse projection', () => {
-    const hash = tf.tensor2d(
-        [0.123, 0.456, -0.321, 1.234, 5.678, -4.321], [3, 2], 'float32');
+    const hash = [0.123, 0.456, -0.321, 1.234, 5.678, -4.321];
     const input = tf.tensor1d(
         ['hello world abc def ghi', 'hello world abc def ghi1'], 'string');
     const output =
-        op.compute(input, hash, 'sparse', 2, 1, true, true, false, true);
+        op.compute(input, hash, 'sparse', 2, 3, 2, 1, true, true, false, true);
 
     // First checks dimensions.
     expect(output.rank).toEqual(2);
@@ -67,12 +65,11 @@ describe('StringProjectionOp', () => {
   });
 
   it('should generate sparseDense projection', () => {
-    const hash = tf.tensor2d(
-        [0.123, 0.456, -0.321, 1.234, 5.678, -4.321], [3, 2], 'float32');
+    const hash = [0.123, 0.456, -0.321, 1.234, 5.678, -4.321];
     const input = tf.tensor1d(
         ['hello world abc def ghi', 'hello world abc def ghi1'], 'string');
-    const output =
-        op.compute(input, hash, 'sparse_dense', 2, 1, true, true, false, true);
+    const output = op.compute(
+        input, hash, 'sparse_dense', 2, 3, 2, 1, true, true, false, true);
 
     // First checks dimensions.
     expect(output.rank).toEqual(2);

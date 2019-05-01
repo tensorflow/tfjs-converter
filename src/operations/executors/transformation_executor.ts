@@ -89,11 +89,14 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
           blockSize, dataFormat)];
     }
     case 'stringProjection': {
-      const hash =
-          getParamValue('hash', node, tensorMap, context) as tfc.Tensor2D;
+      const hash = getParamValue('hash', node, tensorMap, context) as number[];
       const x = getParamValue('x', node, tensorMap, context) as tfc.Tensor;
-      const nGramSize =
-          getParamValue('nGramSize', node, tensorMap, context) as number;
+      const numHash =
+          getParamValue('numHash', node, tensorMap, context) as number;
+      const numBits =
+          getParamValue('numBits', node, tensorMap, context) as number;
+      const ngramSize =
+          getParamValue('ngramSize', node, tensorMap, context) as number;
       const maxSkipSize =
           getParamValue('maxSkipSize', node, tensorMap, context) as number;
       const includeAllNGrams =
@@ -106,13 +109,16 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
       const binaryProjection =
           getParamValue('binaryProjection', node, tensorMap, context) as
           boolean;
+      const removePunctuation =
+          getParamValue('removePunctuation', node, tensorMap, context) as
+          boolean;
       const method =
           getParamValue('method', node, tensorMap, context) as string;
-
       return [
         new StringProjectionOp().compute(
-            x, hash, method, nGramSize, maxSkipSize, includeAllNGrams,
-            preprocess, charLevel, binaryProjection) as tfc.Tensor
+            x, hash, method, ngramSize, numHash, numBits, maxSkipSize,
+            includeAllNGrams, preprocess, charLevel, binaryProjection,
+            removePunctuation) as tfc.Tensor
       ];
     }
     default:

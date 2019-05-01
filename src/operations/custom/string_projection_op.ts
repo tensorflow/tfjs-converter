@@ -32,11 +32,13 @@ export function stripTrailingAsciiPunctuation(str: string): string {
   return str.slice(0, i + 1);
 }
 
-export function preProcessString(text: string) {
+export function preProcessString(text: string, removePunctuation: boolean) {
   let outputStr = text.toLowerCase();
 
   // Remove trailing punctuation
-  outputStr = stripTrailingAsciiPunctuation(outputStr);
+  if (removePunctuation) {
+    outputStr = stripTrailingAsciiPunctuation(outputStr);
+  }
 
   return (outputStr.length === 0 || text === kStartToken ||
           text === kEndToken) ?
@@ -46,7 +48,8 @@ export function preProcessString(text: string) {
 
 export function extractSkipGrams(
     input: string, ngramSize: number, maxSkipSize: number,
-    includeAllNgrams: boolean, preprocess: boolean, charLevel: boolean) {
+    includeAllNgrams: boolean, preprocess: boolean, charLevel: boolean,
+    removePunctuation: boolean) {
   // Split sentence to words.
   let tokens = [];
   if (charLevel) {
@@ -61,7 +64,7 @@ export function extractSkipGrams(
   // Process tokens
   for (let i = 0; i < tokens.length; ++i) {
     if (preprocess) {
-      tokens[i] = preProcessString(tokens[i]);
+      tokens[i] = preProcessString(tokens[i], removePunctuation);
     }
   }
 
@@ -151,9 +154,10 @@ export class StringProjectionOp {
   constructor() {}
 
   compute(
-      inputTensor: tf.Tensor, hashFunction: tf.Tensor2D, method: string,
-      ngramSize = 1, maxSkipSize = 1, includeAllNgrams = true,
-      preprocess = false, charLevel = false, binaryProjection = true) {
+      inputTensor: tf.Tensor, hashFunction: number[], method: string,
+      ngramSize = 1, numHash = 1, numBits = 1, maxSkipSize = 1,
+      includeAllNgrams = true, preprocess = false, charLevel = false,
+      binaryProjection = true, removePunctuation = true) {
     if (inputTensor.rank !== 1)
       throw new Error(
           `input must be a vector, got shape: #{inputTensor.shape}`);
@@ -166,27 +170,30 @@ export class StringProjectionOp {
     for (let i = 0; i < batchSize; ++i) {
       const featureCounts = extractSkipGrams(
           inputValue[i], ngramSize, maxSkipSize, includeAllNgrams, preprocess,
-          charLevel);
+          charLevel, removePunctuation);
       getFeatureWeights(featureCounts, batchIds, batchWeights);
     }
 
     if (method === 'dense') {
       return this.denseLshProjection(
-          batchSize, hashFunction, batchIds, batchWeights, binaryProjection);
+          batchSize, hashFunction, numHash, numBits, batchIds, batchWeights,
+          binaryProjection);
     } else if (method === 'sparse') {
-      if (hashFunction.shape[1] > 32) {
-        throw new Error(`Hash function should have less than 32 bits: ${
-            hashFunction.shape[1]}`);
+      if (numBits > 32) {
+        throw new Error(
+            `Hash function should have less than 32 bits: ${numBits}`);
       }
       return this.sparseLshProjection(
-          batchSize, hashFunction, batchIds, batchWeights, binaryProjection);
+          batchSize, hashFunction, numHash, numBits, batchIds, batchWeights,
+          binaryProjection);
     } else if (method === 'sparse_dense') {
-      if (hashFunction.shape[1] > 32) {
-        throw new Error(`Hash function should have less than 32 bits: ${
-            hashFunction.shape[1]}`);
+      if (numBits > 32) {
+        throw new Error(
+            `Hash function should have less than 32 bits: ${numBits}`);
       }
       return this.sparseDenseLshProjection(
-          batchSize, hashFunction, batchIds, batchWeights, binaryProjection);
+          batchSize, hashFunction, numHash, numBits, batchIds, batchWeights,
+          binaryProjection);
     } else {
       throw new Error(`Unsupported method: ${method}`);
     }
@@ -238,16 +245,16 @@ export class StringProjectionOp {
   }
 
   sparseLshProjection(
-      batchSize: number, hash: tf.Tensor2D, batchIds: number[][],
-      batchWeights: number[][], binaryProjection: boolean): tf.Tensor {
-    const [numHash, numBits] = hash.shape;
+      batchSize: number, hash: number[], numHash: number, numBits: number,
+      batchIds: number[][], batchWeights: number[][],
+      binaryProjection: boolean): tf.Tensor {
     const outputValues = tf.buffer([batchSize, numHash], 'int32');
-    const hashValues = hash.dataSync();
+    const hashValues = hash;
     for (let b = 0; b < batchSize; ++b) {
       for (let i = 0; i < numHash; i++) {
         let hashSignature = 0;
         for (let j = 0; j < numBits; j++) {
-          const seed = hashValues[i * hash.shape[1] + j];
+          const seed = hashValues[i * numBits + j];
           const bit = this.runningSignBit(
               batchIds[b], batchWeights[b], seed, binaryProjection);
           hashSignature = (hashSignature << 1) | bit;
@@ -260,11 +267,11 @@ export class StringProjectionOp {
   }
 
   denseLshProjection(
-      batchSize: number, hash: tf.Tensor2D, batchIds: number[][],
-      batchWeights: number[][], binaryProjection: boolean): tf.Tensor {
-    const [numHash, numBits] = hash.shape;
-    const outputValues = tf.buffer([batchSize, hash.size], 'int32');
-    const hashValues = hash.dataSync();
+      batchSize: number, hash: number[], numHash: number, numBits: number,
+      batchIds: number[][], batchWeights: number[][],
+      binaryProjection: boolean): tf.Tensor {
+    const outputValues = tf.buffer([batchSize, numHash * numBits], 'int32');
+    const hashValues = hash;
 
     for (let b = 0; b < batchSize; ++b) {
       for (let i = 0; i < numHash; i++) {
@@ -280,10 +287,10 @@ export class StringProjectionOp {
   }
 
   sparseDenseLshProjection(
-      batchSize: number, hash: tf.Tensor2D, batchIds: number[][],
-      batchWeights: number[][], binaryProjection: boolean): tf.Tensor {
-    const [numHash, numBits] = hash.shape;
-    const hashValues = hash.dataSync();
+      batchSize: number, hash: number[], numHash: number, numBits: number,
+      batchIds: number[][], batchWeights: number[][],
+      binaryProjection: boolean): tf.Tensor {
+    const hashValues = hash;
     const sparseBatchIds = [];
     const sparseBatchWeights = [];
 
@@ -294,7 +301,7 @@ export class StringProjectionOp {
       for (let i = 0; i < numHash; i++) {
         let hashSignature = 0;
         for (let j = 0; j < numBits; j++) {
-          const seed = hashValues[i * hash.shape[1] + j];
+          const seed = hashValues[i * numBits + j];
           const bit = this.runningSignBit(
               batchIds[b], batchWeights[b], seed, binaryProjection);
           hashSignature = (hashSignature << 1) | bit;
@@ -310,6 +317,8 @@ export class StringProjectionOp {
     return this.denseLshProjection(
         batchSize,
         hash,
+        numHash,
+        numBits,
         sparseBatchIds,
         sparseBatchWeights,
         binaryProjection,

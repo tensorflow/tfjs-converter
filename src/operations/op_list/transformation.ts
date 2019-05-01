@@ -135,14 +135,43 @@ export const json = [
     'dlOpName': 'stringProjection',
     'category': 'transformation',
     'params': [
-      {'tfInputIndex': 0, 'dlParamName': 'hash', 'type': 'tensor'},
-      {'tfInputIndex': 1, 'dlParamName': 'x', 'type': 'tensor'},
-      {'tfInputIndex': 2, 'dlParamName': 'nGramSize', 'type': 'number'},
-      {'tfInputIndex': 3, 'dlParamName': 'maxSkipSize', 'type': 'number'},
-      {'tfInputIndex': 4, 'dlParamName': 'includeAllNGrame', 'type': 'bool'},
-      {'tfInputIndex': 5, 'dlParamName': 'preprocess', 'type': 'bool'},
-      {'tfInputIndex': 6, 'dlParamName': 'charLevel', 'type': 'bool'},
-      {'tfInputIndex': 7, 'dlParamName': 'binaryProjection', 'type': 'bool'},
+      {'tfInputIndex': 0, 'dlParamName': 'x', 'type': 'tensor'}, {
+        'tfParamName': 'hash_function',
+        'dlParamName': 'hash',
+        'type': 'number[]'
+      },
+      {'tfParamName': 'num_hash', 'dlParamName': 'numHash', 'type': 'number'},
+      {'tfParamName': 'num_bits', 'dlParamName': 'numBits', 'type': 'number'}, {
+        'tfParamName': 'max_skip_size',
+        'dlParamName': 'maxSkipSize',
+        'type': 'number'
+      },
+      {
+        'tfParamName': 'ngram_size',
+        'dlParamName': 'ngramSize',
+        'type': 'number'
+      },
+      {
+        'tfParamName': 'include_all_ngrams',
+        'dlParamName': 'includeAllNGrams',
+        'type': 'bool'
+      },
+      {
+        'tfParamName': 'preprocess',
+        'dlParamName': 'preprocess',
+        'type': 'bool'
+      },
+      {'tfParamName': 'char_level', 'dlParamName': 'charLevel', 'type': 'bool'},
+      {
+        'tfParamName': 'binary_projection',
+        'dlParamName': 'binaryProjection',
+        'type': 'bool'
+      },
+      {
+        'tfParamName': 'remove_punctuation',
+        'dlParamName': 'removePunctuation',
+        'type': 'bool'
+      },
       {'tfParamName': 'method', 'dlParamName': 'method', 'type': 'string'}
     ]
   }
