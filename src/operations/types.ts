@@ -18,6 +18,7 @@ import {Tensor} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
+import {NodeValue} from './custom_op/node_value';
 
 export type ParamType =
     'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
@@ -82,7 +83,7 @@ export declare interface OpMapper {
   category?: Category;
   inputs?: InputParamMapper[];
   attrs?: AttrParamMapper[];
-  customExecutor?: OpExecutor;
+  customExecutor?: CustomOpExecutor;
 }
 
 export declare interface Node {
@@ -116,4 +117,8 @@ export declare interface ParamValue {
 export declare interface InputParamValue extends ParamValue {
   inputIndexStart?: number;
   inputIndexEnd?: number;
+}
+
+export interface CustomOpExecutor {
+  (node: NodeValue): Tensor|Tensor[]|Promise<Tensor[]>;
 }

@@ -14,5 +14,5 @@
  * limitations under the License.
  * =============================================================================
  */
-export {GraphModel, loadGraphModel} from './executor/graph_model';
+export {deregisterCustomOp, GraphModel, loadGraphModel, registerCustomOp} from './executor/graph_model';
 export {version as version_converter} from './version';

@@ -20,12 +20,13 @@ import {InferenceModel, io, ModelPredictConfig, NamedTensorMap, Tensor} from '@t
 import * as tensorflow from '../data/compiled_api';
 import {NamedTensorsMap, TensorInfo} from '../data/types';
 import {OperationMapper} from '../operations/operation_mapper';
+import {OpMapper} from '../operations/types';
 
 import {GraphExecutor} from './graph_executor';
 
 export const TFHUB_SEARCH_PARAM = '?tfjs-format=file';
 export const DEFAULT_MODEL_NAME = 'model.json';
-
+const CUSTOM_OPS: {[key: string]: OpMapper} = {};
 /**
  * A `tf.GraphModel` is a directed, acyclic graph of built from
  * SavedModel GraphDef and allows inference exeuction.
@@ -326,4 +327,25 @@ export async function loadGraphModel(
   const model = new GraphModel(modelUrl, options);
   await model.load();
   return model;
+}
+
+export function registerCustomOp(name: string, customOp: OpMapper) {
+  if (customOp.customExecutor == null) {
+    throw new Error(
+        `Custom op mapper ($(name)) is missing the customExecutor field.`);
+  }
+  customOp.tfOpName = customOp.tfOpName || name;
+  customOp.category = 'custom';
+  customOp.inputs = customOp.inputs || [];
+  customOp.attrs = customOp.attrs || [];
+
+  CUSTOM_OPS[name] = customOp;
+}
+
+export function getCustomOp(name: string): OpMapper {
+  return CUSTOM_OPS[name];
+}
+
+export function deregisterCustomOp(name: string) {
+  delete CUSTOM_OPS[name];
 }

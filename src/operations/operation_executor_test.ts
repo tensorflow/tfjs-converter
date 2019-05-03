@@ -15,7 +15,10 @@
  * =============================================================================
  */
 
+import {scalar, Tensor, test_util} from '@tensorflow/tfjs-core';
+
 import {ExecutionContext} from '../executor/execution_context';
+import {deregisterCustomOp, registerCustomOp} from '../executor/graph_model';
 
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';
@@ -64,5 +67,29 @@ describe('OperationExecutor', () => {
             expect(category.executeOp).toHaveBeenCalledWith(node, {}, context);
           });
         });
+  });
+
+  describe('custom op executeOp', () => {
+    it('should throw exception if custom op is not registered', () => {
+      node.category = 'custom';
+      expect(() => executeOp(node, {}, context))
+          .toThrowError('Custom op const is not registered.');
+    });
+  });
+
+  describe('custom op executeOp', () => {
+    it('should call the registered custom op', async () => {
+      registerCustomOp('const', {
+        tfOpName: 'const',
+        customExecutor: () => [scalar(1)],
+        category: 'custom'
+      });
+      registerCustomOp('const2', {customExecutor: () => [scalar(2)]});
+      node.category = 'custom';
+      const result = executeOp(node, {}, context) as Tensor[];
+      test_util.expectArraysClose(await result[0].data(), [1]);
+      deregisterCustomOp('const');
+      deregisterCustomOp('const2');
+    });
   });
 });
