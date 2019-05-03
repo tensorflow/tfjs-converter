@@ -41,6 +41,7 @@ HUB_MODULE_DIR = 'hub_module'
 
 class ConvertTest(unittest.TestCase):
   def setUp(self):
+    self.maxDiff = None
     super(ConvertTest, self).setUp()
     self._tmp_dir = tempfile.mkdtemp()
 
@@ -89,6 +90,22 @@ class ConvertTest(unittest.TestCase):
     root.v2 = variables.Variable(2.)
     root.f = def_function.function(lambda x: root.v1 * root.v2 * x)
     to_save = root.f.get_concrete_function(input_data)
+
+    save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
+    save(root, save_dir, to_save)
+
+  def _create_saved_model_with_control_flow(self):
+    """Test a basic model with control flow to inlined."""
+    @tf.function
+    def find_next_odd(v):
+      v1 = v + 1
+      if tf.equal(v1 % 2, 0):
+        v1 = v1 + 1
+      return v1
+    root = tracking.AutoTrackable()
+    root.f = find_next_odd
+    to_save = root.f.get_concrete_function(
+        tensor_spec.TensorSpec([], dtypes.int32))
 
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save(root, save_dir, to_save)
@@ -190,6 +207,58 @@ class ConvertTest(unittest.TestCase):
         'weights': [{'dtype': 'float32',
                      'name': 'StatefulPartitionedCall/mul',
                      'shape': []}]}]
+
+    tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
+    # Check model.json and weights manifest.
+    with open(os.path.join(tfjs_path, 'model.json'), 'rt') as f:
+      model_json = json.load(f)
+    self.assertTrue(model_json['modelTopology'])
+    weights_manifest = model_json['weightsManifest']
+    self.assertEqual(len(weights_manifest), len(weights))
+    if sys.version_info[0] < 3:
+      self.assertItemsEqual(weights_manifest[0]['paths'],
+                            weights[0]['paths'])
+      self.assertItemsEqual(weights_manifest[0]['weights'],
+                            weights[0]['weights'])
+    else:
+      self.assertCountEqual(weights_manifest[0]['paths'],
+                            weights[0]['paths'])
+      self.assertCountEqual(weights_manifest[0]['weights'],
+                            weights[0]['weights'])
+
+    # Check meta-data in the artifact JSON.
+    self.assertEqual(model_json['format'], 'graph-model')
+    self.assertEqual(
+        model_json['convertedBy'],
+        'TensorFlow.js Converter v%s' % version.version)
+    self.assertEqual(model_json['generatedBy'],
+                     tf.__version__)
+    self.assertTrue(
+        glob.glob(
+            os.path.join(self._tmp_dir, SAVED_MODEL_DIR, 'group*-*')))
+
+  def test_convert_saved_model_with_control_flow(self):
+    self._create_saved_model_with_control_flow()
+
+    tf_saved_model_conversion_v2.convert_tf_saved_model(
+        os.path.join(self._tmp_dir, SAVED_MODEL_DIR),
+        os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
+    )
+
+    weights = [{
+        'paths': ['group1-shard1of1.bin'],
+        'weights': [{'shape': [], 'dtype': 'int32',
+                     'name': 'StatefulPartitionedCall/Equal/y'},
+                    {'shape': [], 'dtype': 'int32',
+                     'name': 'StatefulPartitionedCall/mod/y'},
+                    {'shape': [], 'dtype': 'int32',
+                     'name': 'StatefulPartitionedCall/add/y'},
+                    {'shape': [], 'dtype': 'bool',
+                     'name': 'StatefulPartitionedCall/cond/pivot_f/_6'},
+                    {'shape': [], 'dtype': 'bool',
+                     'name': 'StatefulPartitionedCall/cond/pivot_t/_7'},
+                    {'shape': [], 'dtype': 'int32',
+                     'name': 'StatefulPartitionedCall/cond/then/_3/add/y'}]}]
 
     tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     # Check model.json and weights manifest.
