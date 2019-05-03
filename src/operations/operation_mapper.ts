@@ -123,7 +123,7 @@ export class OperationMapper {
   }
 
   private mapNode(node: tensorflow.INodeDef): Node {
-    const mapper = this.opMappers[node.op] || getCustomOp(node.op);
+    const mapper = getCustomOp(node.op) || this.opMappers[node.op];
     if (mapper === undefined) {
       throw new Error('Tensorflow Op is not supported: ' + node.op);
     }
