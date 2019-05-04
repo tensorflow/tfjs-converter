@@ -19,9 +19,9 @@ import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
-import {getCustomOp} from '../executor/graph_model';
 
-import {NodeValue} from './custom_op/node_value';
+import {NodeValueImpl} from './custom_op/node_value_impl';
+import {getCustomOp} from './custom_op/register';
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basicMath from './executors/basic_math_executor';
 import * as control from './executors/control_executor';
@@ -87,7 +87,7 @@ export function executeOp(
             const opMapper = getCustomOp(node.op);
             if (opMapper && opMapper.customExecutor) {
               return opMapper.customExecutor(
-                  new NodeValue(node, tensorMap, context));
+                  new NodeValueImpl(node, tensorMap, context));
             } else {
               throw TypeError(`Custom op ${node.op} is not registered.`);
             }

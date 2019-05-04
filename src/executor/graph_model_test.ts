@@ -19,9 +19,9 @@ import * as tfc from '@tensorflow/tfjs-core';
 import {scalar} from '@tensorflow/tfjs-core';
 
 import * as tensorflow from '../data/compiled_api';
-import {NodeValue} from '../operations/custom_op/node_value';
-
-import {deregisterCustomOp, GraphModel, loadGraphModel, registerCustomOp} from './graph_model';
+import {NodeValue} from '../operations/types';
+import {GraphModel, loadGraphModel} from './graph_model';
+import { deregisterCustomOp, registerCustomOp } from '../operations/custom_op/register';
 
 const HOST = 'http://example.org';
 const MODEL_URL = `${HOST}/model.json`;
@@ -196,7 +196,6 @@ describe('Model', () => {
         inputs: [{name: 'x', start: 0, type: 'tensor'}],
         customExecutor: (nodeValue: NodeValue) => {
           const x = nodeValue.get('x') as tfc.Tensor;
-          console.log(x);
           return [tfc.add(x, scalar(1, 'int32'))];
         }
       });

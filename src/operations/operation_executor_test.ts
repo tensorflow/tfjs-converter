@@ -18,7 +18,7 @@
 import {scalar, Tensor, test_util} from '@tensorflow/tfjs-core';
 
 import {ExecutionContext} from '../executor/execution_context';
-import {deregisterCustomOp, registerCustomOp} from '../executor/graph_model';
+import {deregisterCustomOp, registerCustomOp} from './custom_op/register';
 
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';

@@ -18,7 +18,6 @@ import {Tensor} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
-import {NodeValue} from './custom_op/node_value';
 
 export type ParamType =
     'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
@@ -121,4 +120,8 @@ export declare interface InputParamValue extends ParamValue {
 
 export interface CustomOpExecutor {
   (node: NodeValue): Tensor|Tensor[]|Promise<Tensor[]>;
+}
+
+export interface NodeValue {
+  get(name: string): ValueType;
 }
