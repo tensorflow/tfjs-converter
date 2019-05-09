@@ -41,7 +41,6 @@ HUB_MODULE_DIR = 'hub_module'
 
 class ConvertTest(unittest.TestCase):
   def setUp(self):
-    self.maxDiff = None
     super(ConvertTest, self).setUp()
     self._tmp_dir = tempfile.mkdtemp()
 
@@ -99,7 +98,7 @@ class ConvertTest(unittest.TestCase):
     @tf.function
     def find_next_odd(v):
       v1 = v + 1
-      if tf.equal(v1 % 2, 0):
+      while tf.equal(v1 % 2, 0):
         v1 = v1 + 1
       return v1
     root = tracking.AutoTrackable()
@@ -247,18 +246,19 @@ class ConvertTest(unittest.TestCase):
 
     weights = [{
         'paths': ['group1-shard1of1.bin'],
-        'weights': [{'shape': [], 'dtype': 'int32',
-                     'name': 'StatefulPartitionedCall/Equal/y'},
-                    {'shape': [], 'dtype': 'int32',
-                     'name': 'StatefulPartitionedCall/mod/y'},
-                    {'shape': [], 'dtype': 'int32',
-                     'name': 'StatefulPartitionedCall/add/y'},
-                    {'shape': [], 'dtype': 'bool',
-                     'name': 'StatefulPartitionedCall/cond/pivot_f/_6'},
-                    {'shape': [], 'dtype': 'bool',
-                     'name': 'StatefulPartitionedCall/cond/pivot_t/_7'},
-                    {'shape': [], 'dtype': 'int32',
-                     'name': 'StatefulPartitionedCall/cond/then/_3/add/y'}]}]
+        'weights': [{'dtype': 'int32', 'shape': [],
+                     'name': 'StatefulPartitionedCall/while/loop_counter'},
+                    {'dtype': 'int32', 'shape': [],
+                     'name': 'StatefulPartitionedCall/while/maximum_iterations'
+                    },
+                    {'dtype': 'int32', 'shape': [],
+                     'name': 'StatefulPartitionedCall/while/cond/_3/mod/y'},
+                    {'dtype': 'int32', 'shape': [],
+                     'name': 'StatefulPartitionedCall/while/cond/_3/Equal/y'},
+                    {'dtype': 'int32', 'shape': [],
+                     'name': 'StatefulPartitionedCall/while/body/_4/add_1/y'},
+                    {'name': 'StatefulPartitionedCall/add/y',
+                     'dtype': 'int32', 'shape': []}]}]
 
     tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     # Check model.json and weights manifest.
