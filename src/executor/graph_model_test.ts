@@ -19,9 +19,10 @@ import * as tfc from '@tensorflow/tfjs-core';
 import {scalar} from '@tensorflow/tfjs-core';
 
 import * as tensorflow from '../data/compiled_api';
+import {deregisterCustomOp, registerCustomOp} from '../operations/custom_op/register';
 import {NodeValue} from '../operations/types';
+
 import {GraphModel, loadGraphModel} from './graph_model';
-import { deregisterCustomOp, registerCustomOp } from '../operations/custom_op/register';
 
 const HOST = 'http://example.org';
 const MODEL_URL = `${HOST}/model.json`;
@@ -136,7 +137,7 @@ const CUSTOM_OP_MODEL: tensorflow.IGraphDef = {
       }
     },
     {name: 'Add1', op: 'Add', input: ['Input', 'Const'], attr: {}},
-    {name: 'Const2', op: 'Const2', input: ['Add1'], attr: {}}
+    {name: 'CustomOp', op: 'CustomOp', input: ['Add1'], attr: {}}
   ],
   versions: {producer: 1.0, minConsumer: 3}
 };
@@ -190,17 +191,12 @@ describe('Model', () => {
       spyOn(tfc.io, 'getLoadHandlers').and.returnValue([
         CUSTOM_HTTP_MODEL_LOADER
       ]);
-      spyOn(tfc.io, 'browserHTTPRequest')
-          .and.returnValue(CUSTOM_HTTP_MODEL_LOADER);
-      registerCustomOp('Const2', {
-        inputs: [{name: 'x', start: 0, type: 'tensor'}],
-        customExecutor: (nodeValue: NodeValue) => {
-          const x = nodeValue.get('x') as tfc.Tensor;
-          return [tfc.add(x, scalar(1, 'int32'))];
-        }
+      registerCustomOp('CustomOp', (nodeValue: NodeValue) => {
+        const x = nodeValue.getInput(0);
+        return [tfc.add(x, scalar(1, 'int32'))];
       });
     });
-    afterEach(() => deregisterCustomOp('const2'));
+    afterEach(() => deregisterCustomOp('CustomOp'));
     it('load', async () => {
       const loaded = await model.load();
       expect(loaded).toBe(true);

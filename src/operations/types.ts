@@ -16,6 +16,7 @@
  */
 import {Tensor} from '@tensorflow/tfjs-core';
 
+import * as tensorflow from '../data/compiled_api';
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
 
@@ -78,8 +79,8 @@ export interface OpExecutor {
 }
 
 export declare interface OpMapper {
-  tfOpName?: string;
-  category?: Category;
+  tfOpName: string;
+  category: Category;
   inputs?: InputParamMapper[];
   attrs?: AttrParamMapper[];
   customExecutor?: CustomOpExecutor;
@@ -94,6 +95,7 @@ export declare interface Node {
   inputParams: {[key: string]: InputParamValue};
   attrParams: {[key: string]: ParamValue};
   children: Node[];
+  rawAttrs?: {[k: string]: tensorflow.IAttrValue};
 }
 
 export declare interface Graph {
@@ -123,5 +125,6 @@ export interface CustomOpExecutor {
 }
 
 export interface NodeValue {
-  get(name: string): ValueType;
+  getInput(index: number): Tensor;
+  getAttr(name: string): tensorflow.IAttrValue|Tensor;
 }

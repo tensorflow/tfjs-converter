@@ -15,11 +15,12 @@
  * =============================================================================
  */
 
-import {scalar, Tensor, test_util} from '@tensorflow/tfjs-core';
+import {add, mul, scalar, Tensor, test_util} from '@tensorflow/tfjs-core';
 
+import {IAttrValue} from '../data/compiled_api';
 import {ExecutionContext} from '../executor/execution_context';
-import {deregisterCustomOp, registerCustomOp} from './custom_op/register';
 
+import {deregisterCustomOp, registerCustomOp} from './custom_op/register';
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';
 import * as convolution from './executors/convolution_executor';
@@ -79,15 +80,33 @@ describe('OperationExecutor', () => {
 
   describe('custom op executeOp', () => {
     it('should call the registered custom op', async () => {
-      registerCustomOp('const', {
-        tfOpName: 'const',
-        customExecutor: () => [scalar(1)],
-        category: 'custom'
-      });
-      registerCustomOp('const2', {customExecutor: () => [scalar(2)]});
+      registerCustomOp('const', () => [scalar(1)]);
+      registerCustomOp('const2', () => [scalar(2)]);
       node.category = 'custom';
       const result = executeOp(node, {}, context) as Tensor[];
       test_util.expectArraysClose(await result[0].data(), [1]);
+      deregisterCustomOp('const');
+      deregisterCustomOp('const2');
+    });
+
+    it('should handle custom op with inputs and attrs', async () => {
+      registerCustomOp('const', (node) => {
+        const attrA = node.getInput(0);
+        const attrB = node.getInput(1);
+        const attrC = node.getAttr('c') as Tensor;
+        const attrD = node.getAttr('d') as IAttrValue;
+        return [add(mul(attrC.dataSync()[0], attrA), mul(attrD.i, attrB))];
+      });
+      registerCustomOp('const2', () => [scalar(2)]);
+
+      node.category = 'custom';
+      node.inputNames = ['a', 'b'];
+      node.rawAttrs = {c: {tensor: {}}, d: {i: 3}};
+      const result = executeOp(
+                         node, {a: [scalar(1)], b: [scalar(2)], c: [scalar(2)]},
+                         context) as Tensor[];
+      // result = 2 * 1 + 3 * 2
+      test_util.expectArraysClose(await result[0].data(), [8]);
       deregisterCustomOp('const');
       deregisterCustomOp('const2');
     });

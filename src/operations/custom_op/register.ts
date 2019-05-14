@@ -16,21 +16,20 @@
  * =============================================================================
  */
 
-import {OpMapper} from '../types';
+import {CustomOpExecutor, OpMapper} from '../types';
 
 const CUSTOM_OPS: {[key: string]: OpMapper} = {};
 
-export function registerCustomOp(name: string, customOp: OpMapper) {
-  if (customOp.customExecutor == null) {
-    throw new Error(
-        `Custom op mapper (${name}) is missing the customExecutor field.`);
-  }
-  customOp.tfOpName = customOp.tfOpName || name;
-  customOp.category = 'custom';
-  customOp.inputs = customOp.inputs || [];
-  customOp.attrs = customOp.attrs || [];
+export function registerCustomOp(name: string, customOp: CustomOpExecutor) {
+  const opMapper: OpMapper = {
+    tfOpName: name,
+    category: 'custom',
+    inputs: [],
+    attrs: [],
+    customExecutor: customOp
+  };
 
-  CUSTOM_OPS[name] = customOp;
+  CUSTOM_OPS[name] = opMapper;
 }
 
 export function getCustomOp(name: string): OpMapper {

@@ -22,24 +22,21 @@ import {deregisterCustomOp} from './register';
 
 describe('register custom op', () => {
   describe('registerCustomOp', () => {
-    it('should throw error if customExecutor is not defined', () => {
-      expect(() => registerCustomOp('newOp', {}))
-          .toThrowError(
-              'Custom op mapper (newOp) is missing the customExecutor field.');
-    });
     it('should auto fill missing fields', () => {
-      registerCustomOp('newOp', {customExecutor: () => scalar(1)});
+      const executor = () => scalar(1);
+      registerCustomOp('newOp', executor);
       const opMapper = getCustomOp('newOp');
       expect(opMapper.tfOpName).toEqual('newOp');
       expect(opMapper.category).toEqual('custom');
       expect(opMapper.inputs).toEqual([]);
       expect(opMapper.attrs).toEqual([]);
+      expect(opMapper.customExecutor).toEqual(executor);
       deregisterCustomOp('newOp');
     });
   });
   describe('deRegisterCustomOp', () => {
     it('should remove the custom op', () => {
-      registerCustomOp('newOp', {customExecutor: () => scalar(1)});
+      registerCustomOp('newOp', () => scalar(1));
       expect(getCustomOp('newOp')).toBeDefined();
       deregisterCustomOp('newOp');
       expect(getCustomOp('newOp')).not.toBeDefined();

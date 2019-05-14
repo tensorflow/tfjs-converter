@@ -15,10 +15,13 @@
  * =============================================================================
  */
 
+import {Tensor} from '@tensorflow/tfjs-core';
+
+import {IAttrValue} from '../../data/compiled_api';
 import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
-import {getParamValue} from '../executors/utils';
-import {Node, NodeValue, ValueType} from '../types';
+import {getTensor} from '../executors/utils';
+import {Node, NodeValue} from '../types';
 
 /**
  * Helper class for lookup inputs and params for nodes in the model graph.
@@ -32,7 +35,19 @@ export class NodeValueImpl implements NodeValue {
    * Return the value of the attribute or input param.
    * @param name String: name of attribute or input param.
    */
-  get(name: string): ValueType {
-    return getParamValue(name, this.node, this.tensorMap, this.context);
+  getInput(index: number): Tensor {
+    return getTensor(this.node.inputNames[index], this.tensorMap, this.context);
+  }
+
+  /**
+   * Return the value of the attribute or input param.
+   * @param name String: name of attribute or input param.
+   */
+  getAttr(name: string): IAttrValue|Tensor {
+    const value = this.node.rawAttrs[name];
+    if (value.tensor != null) {
+      return getTensor(name, this.tensorMap, this.context);
+    }
+    return value;
   }
 }

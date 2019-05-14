@@ -127,6 +127,10 @@ export class OperationMapper {
     if (mapper === undefined) {
       throw new Error('Tensorflow Op is not supported: ' + node.op);
     }
+    if (node.attr == null) {
+      node.attr = {};
+    }
+
     const newNode: Node = {
       name: node.name,
       op: node.op,
@@ -137,11 +141,9 @@ export class OperationMapper {
       inputs: [],
       children: [],
       inputParams: {},
-      attrParams: {}
+      attrParams: {},
+      rawAttrs: node.attr
     };
-    if (node.attr == null) {
-      node.attr = {};
-    }
 
     if (mapper.inputs != null) {
       newNode.inputParams =
