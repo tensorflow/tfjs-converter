@@ -20,8 +20,8 @@ import * as tensorflow from '../data/compiled_api';
 import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
 
-export type ParamType =
-    'number'|'string'|'number[]'|'bool'|'shape'|'tensor'|'tensors'|'dtype';
+export type ParamType = 'number'|'string'|'string[]'|'number[]'|'bool'|'bool[]'|
+    'shape'|'shape[]'|'tensor'|'tensors'|'dtype'|'dtype[]';
 export type Category =
     'arithmetic'|'basic_math'|'control'|'convolution'|'custom'|'dynamic'|
     'evaluation'|'image'|'creation'|'graph'|'logical'|'matrices'|
@@ -32,7 +32,7 @@ export declare interface ParamMapper {
   // tensorflow.js name for the field, it should be in camelcase format.
   name: string;
   type: ParamType;
-  defaultValue?: string|string[]|number|number[]|boolean|boolean[];
+  defaultValue?: ValueType;
   notSupported?: boolean;
 }
 
@@ -126,5 +126,5 @@ export interface CustomOpExecutor {
 
 export interface NodeValue {
   getInput(index: number): Tensor;
-  getAttr(name: string): tensorflow.IAttrValue|Tensor;
+  getAttr(name: string): ValueType;
 }

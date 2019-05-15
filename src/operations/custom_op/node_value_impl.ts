@@ -15,13 +15,13 @@
  * =============================================================================
  */
 
-import {Tensor} from '@tensorflow/tfjs-core';
+import {DataType, Tensor} from '@tensorflow/tfjs-core';
 
-import {IAttrValue} from '../../data/compiled_api';
 import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
 import {getTensor} from '../executors/utils';
-import {Node, NodeValue} from '../types';
+import {getBoolArrayParam, getBoolParam, getDtypeArrayParam, getDtypeParam, getNumberParam, getNumericArrayParam, getStringArrayParam, getStringParam, getTensorShapeArrayParam, getTensorShapeParam} from '../operation_mapper';
+import {Node, NodeValue, ValueType} from '../types';
 
 /**
  * Helper class for lookup inputs and params for nodes in the model graph.
@@ -43,11 +43,45 @@ export class NodeValueImpl implements NodeValue {
    * Return the value of the attribute or input param.
    * @param name String: name of attribute or input param.
    */
-  getAttr(name: string): IAttrValue|Tensor {
+  getAttr(name: string, defaultValue?: ValueType): ValueType {
     const value = this.node.rawAttrs[name];
     if (value.tensor != null) {
       return getTensor(name, this.tensorMap, this.context);
     }
-    return value;
+    if (value.i || value.f)
+      return getNumberParam(this.node.rawAttrs, name, defaultValue as number);
+    if (value.s)
+      return getStringParam(this.node.rawAttrs, name, defaultValue as string);
+    if (value.b)
+      return getBoolParam(this.node.rawAttrs, name, defaultValue as boolean);
+    if (value.shape)
+      return getTensorShapeParam(
+          this.node.rawAttrs, name, defaultValue as number[]);
+    if (value.type)
+      return getDtypeParam(this.node.rawAttrs, name, defaultValue as DataType);
+    if (value.list) {
+      if (value.list.i || value.list.f) {
+        return getNumericArrayParam(
+            this.node.rawAttrs, name, defaultValue as number[]);
+      }
+      if (value.list.s) {
+        return getStringArrayParam(
+            this.node.rawAttrs, name, defaultValue as string[]);
+      }
+      if (value.list.shape) {
+        return getTensorShapeArrayParam(
+            this.node.rawAttrs, name, defaultValue as number[][]);
+      }
+      if (value.list.b) {
+        return getBoolArrayParam(
+            this.node.rawAttrs, name, defaultValue as boolean[]);
+      }
+      if (value.list.type) {
+        return getDtypeArrayParam(
+            this.node.rawAttrs, name, defaultValue as DataType[]);
+      }
+    }
+
+    return defaultValue;
   }
 }

@@ -17,7 +17,6 @@
 
 import {add, mul, scalar, Tensor, test_util} from '@tensorflow/tfjs-core';
 
-import {IAttrValue} from '../data/compiled_api';
 import {ExecutionContext} from '../executor/execution_context';
 
 import {deregisterCustomOp, registerCustomOp} from './custom_op/register';
@@ -91,13 +90,12 @@ describe('OperationExecutor', () => {
 
     it('should handle custom op with inputs and attrs', async () => {
       registerCustomOp('const', (node) => {
-        const attrA = node.getInput(0);
-        const attrB = node.getInput(1);
+        const a = node.getInput(0);
+        const b = node.getInput(1);
         const attrC = node.getAttr('c') as Tensor;
-        const attrD = node.getAttr('d') as IAttrValue;
-        return [add(mul(attrC.dataSync()[0], attrA), mul(attrD.i, attrB))];
+        const attrD = node.getAttr('d') as number;
+        return [add(mul(attrC.dataSync()[0], a), mul(attrD, b))];
       });
-      registerCustomOp('const2', () => [scalar(2)]);
 
       node.category = 'custom';
       node.inputNames = ['a', 'b'];
@@ -108,7 +106,6 @@ describe('OperationExecutor', () => {
       // result = 2 * 1 + 3 * 2
       test_util.expectArraysClose(await result[0].data(), [8]);
       deregisterCustomOp('const');
-      deregisterCustomOp('const2');
     });
   });
 });
