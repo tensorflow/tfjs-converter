@@ -331,7 +331,8 @@ export function parseDtypeParam(value: string|tensorflow.DataType): DataType {
     case tensorflow.DataType.DT_BOOL:
       return 'bool';
     default:
-      throw new Error('Unsupported data type: ' + value);
+      throw new Error(`Unsupported data type: ${
+          tensorflow.DataType[value as tensorflow.DataType]}`);
   }
 }
 
