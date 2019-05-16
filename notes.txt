@@ -3,6 +3,6 @@ tensorflowjs_converter \
     --output_format=tfjs_graph_model \
     --signature_name=serving_default \
     --saved_model_tags=serve \
-    --skip_op_check=True \
+    --skip_op_check \
     /usr/local/google/home/smilkov/Downloads/ \
     /usr/local/google/home/smilkov/Downloads/automl_web_model
