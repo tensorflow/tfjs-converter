@@ -15,5 +15,5 @@
  * =============================================================================
  */
 export {GraphModel, loadGraphModel} from './executor/graph_model';
-export {deregisterOp, registerOp as registerCustomOp} from './operations/custom_op/register';
+export {deregisterOp, registerOp} from './operations/custom_op/register';
 export {version as version_converter} from './version';
