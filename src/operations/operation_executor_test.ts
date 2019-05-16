@@ -19,7 +19,7 @@ import {add, mul, scalar, Tensor, test_util} from '@tensorflow/tfjs-core';
 
 import {ExecutionContext} from '../executor/execution_context';
 
-import {deregisterCustomOp, registerCustomOp} from './custom_op/register';
+import {deregisterOp, registerOp} from './custom_op/register';
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basic_math from './executors/basic_math_executor';
 import * as convolution from './executors/convolution_executor';
@@ -79,21 +79,21 @@ describe('OperationExecutor', () => {
 
   describe('custom op executeOp', () => {
     it('should call the registered custom op', async () => {
-      registerCustomOp('const', () => [scalar(1)]);
-      registerCustomOp('const2', () => [scalar(2)]);
+      registerOp('const', () => [scalar(1)]);
+      registerOp('const2', () => [scalar(2)]);
       node.category = 'custom';
       const result = executeOp(node, {}, context) as Tensor[];
       test_util.expectArraysClose(await result[0].data(), [1]);
-      deregisterCustomOp('const');
-      deregisterCustomOp('const2');
+      deregisterOp('const');
+      deregisterOp('const2');
     });
 
     it('should handle custom op with inputs and attrs', async () => {
-      registerCustomOp('const', (node) => {
-        const a = node.getInput(0);
-        const b = node.getInput(1);
-        const attrC = node.getAttr('c') as Tensor;
-        const attrD = node.getAttr('d') as number;
+      registerOp('const', (node) => {
+        const a = node.inputs[0];
+        const b = node.inputs[1];
+        const attrC = node.attrs['c'] as Tensor;
+        const attrD = node.attrs['d'] as number;
         return [add(mul(attrC.dataSync()[0], a), mul(attrD, b))];
       });
 
@@ -105,7 +105,7 @@ describe('OperationExecutor', () => {
                          context) as Tensor[];
       // result = 2 * 1 + 3 * 2
       test_util.expectArraysClose(await result[0].data(), [8]);
-      deregisterCustomOp('const');
+      deregisterOp('const');
     });
   });
 });

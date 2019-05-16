@@ -121,10 +121,10 @@ export declare interface InputParamValue extends ParamValue {
 }
 
 export interface CustomOpExecutor {
-  (node: NodeValue): Tensor|Tensor[]|Promise<Tensor[]>;
+  (node: NodeValue): Tensor|Tensor[]|Promise<Tensor|Tensor[]>;
 }
 
 export interface NodeValue {
-  getInput(index: number): Tensor;
-  getAttr(name: string): ValueType;
+  inputs: Tensor[];
+  attrs: {[key: string]: ValueType};
 }

@@ -18,7 +18,7 @@
 import {DataType, ENV} from '@tensorflow/tfjs-core';
 
 import * as tensorflow from '../data/compiled_api';
-import {getCustomOp} from './custom_op/register';
+import {getRegisteredOp} from './custom_op/register';
 
 import {getNodeNameAndIndex} from './executors/utils';
 import * as arithmetic from './op_list/arithmetic';
@@ -123,7 +123,7 @@ export class OperationMapper {
   }
 
   private mapNode(node: tensorflow.INodeDef): Node {
-    const mapper = getCustomOp(node.op) || this.opMappers[node.op];
+    const mapper = getRegisteredOp(node.op) || this.opMappers[node.op];
     if (mapper === undefined) {
       throw new Error('Tensorflow Op is not supported: ' + node.op);
     }

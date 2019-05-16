@@ -20,7 +20,15 @@ import {CustomOpExecutor, OpMapper} from '../types';
 
 const CUSTOM_OPS: {[key: string]: OpMapper} = {};
 
-export function registerCustomOp(name: string, customOp: CustomOpExecutor) {
+/**
+ * Register an Op for graph model executor. This allow you to register
+ * TensorFlow custom op or override existing op.
+ *
+ * @param name The Tensorflow Op name.
+ * @param customOp node execution function of type `CustomOpExecutor`.
+ */
+/** @doc {heading: 'Models', subheading: 'op registry'} */
+export function registerOp(name: string, customOp: CustomOpExecutor) {
   const opMapper: OpMapper = {
     tfOpName: name,
     category: 'custom',
@@ -32,10 +40,23 @@ export function registerCustomOp(name: string, customOp: CustomOpExecutor) {
   CUSTOM_OPS[name] = opMapper;
 }
 
-export function getCustomOp(name: string): OpMapper {
+/**
+ * Retrieve the OpMapper object for the registered op.
+ *
+ * @param name The Tensorflow Op name.
+ */
+/** @doc {heading: 'Models', subheading: 'op registry'} */
+
+export function getRegisteredOp(name: string): OpMapper {
   return CUSTOM_OPS[name];
 }
 
-export function deregisterCustomOp(name: string) {
+/**
+ * Deregister the Op for graph model executor.
+ *
+ * @param name The Tensorflow Op name.
+ */
+/** @doc {heading: 'Models', subheading: 'op registry'} */
+export function deregisterOp(name: string) {
   delete CUSTOM_OPS[name];
 }

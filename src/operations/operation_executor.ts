@@ -21,7 +21,7 @@ import {NamedTensorsMap} from '../data/types';
 import {ExecutionContext} from '../executor/execution_context';
 
 import {NodeValueImpl} from './custom_op/node_value_impl';
-import {getCustomOp} from './custom_op/register';
+import {getRegisteredOp} from './custom_op/register';
 import * as arithmetic from './executors/arithmetic_executor';
 import * as basicMath from './executors/basic_math_executor';
 import * as control from './executors/control_executor';
@@ -84,7 +84,7 @@ export function executeOp(
           case 'transformation':
             return transformation.executeOp(node, tensorMap, context);
           case 'custom':
-            const opMapper = getCustomOp(node.op);
+            const opMapper = getRegisteredOp(node.op);
             if (opMapper && opMapper.customExecutor) {
               return opMapper.customExecutor(
                   new NodeValueImpl(node, tensorMap, context));

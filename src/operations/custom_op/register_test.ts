@@ -17,29 +17,28 @@
 
 import {scalar} from '@tensorflow/tfjs-core';
 
-import {getCustomOp, registerCustomOp} from './register';
-import {deregisterCustomOp} from './register';
+import {deregisterOp, getRegisteredOp, registerOp} from './register';
 
 describe('register custom op', () => {
   describe('registerCustomOp', () => {
     it('should auto fill missing fields', () => {
       const executor = () => scalar(1);
-      registerCustomOp('newOp', executor);
-      const opMapper = getCustomOp('newOp');
+      registerOp('newOp', executor);
+      const opMapper = getRegisteredOp('newOp');
       expect(opMapper.tfOpName).toEqual('newOp');
       expect(opMapper.category).toEqual('custom');
       expect(opMapper.inputs).toEqual([]);
       expect(opMapper.attrs).toEqual([]);
       expect(opMapper.customExecutor).toEqual(executor);
-      deregisterCustomOp('newOp');
+      deregisterOp('newOp');
     });
   });
-  describe('deRegisterCustomOp', () => {
+  describe('deregisterOp', () => {
     it('should remove the custom op', () => {
-      registerCustomOp('newOp', () => scalar(1));
-      expect(getCustomOp('newOp')).toBeDefined();
-      deregisterCustomOp('newOp');
-      expect(getCustomOp('newOp')).not.toBeDefined();
+      registerOp('newOp', () => scalar(1));
+      expect(getRegisteredOp('newOp')).toBeDefined();
+      deregisterOp('newOp');
+      expect(getRegisteredOp('newOp')).not.toBeDefined();
     });
   });
 });

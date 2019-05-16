@@ -27,23 +27,34 @@ import {Node, NodeValue, ValueType} from '../types';
  * Helper class for lookup inputs and params for nodes in the model graph.
  */
 export class NodeValueImpl implements NodeValue {
+  public readonly inputs: Tensor[] = [];
+  public readonly attrs: {[key: string]: ValueType} = {};
   constructor(
       private node: Node, private tensorMap: NamedTensorsMap,
-      private context: ExecutionContext) {}
-
-  /**
-   * Return the value of the attribute or input param.
-   * @param name String: name of attribute or input param.
-   */
-  getInput(index: number): Tensor {
-    return getTensor(this.node.inputNames[index], this.tensorMap, this.context);
+      private context: ExecutionContext) {
+    this.inputs = node.inputNames.map(name => this.getInput(name));
+    if (node.rawAttrs != null) {
+      this.attrs = Object.keys(node.rawAttrs)
+                       .reduce((attrs: {[key: string]: ValueType}, key) => {
+                         attrs[key] = this.getAttr(key);
+                         return attrs;
+                       }, {});
+    }
   }
 
   /**
    * Return the value of the attribute or input param.
    * @param name String: name of attribute or input param.
    */
-  getAttr(name: string, defaultValue?: ValueType): ValueType {
+  private getInput(name: string): Tensor {
+    return getTensor(name, this.tensorMap, this.context);
+  }
+
+  /**
+   * Return the value of the attribute or input param.
+   * @param name String: name of attribute or input param.
+   */
+  private getAttr(name: string, defaultValue?: ValueType): ValueType {
     const value = this.node.rawAttrs[name];
     if (value.tensor != null) {
       return getTensor(name, this.tensorMap, this.context);
