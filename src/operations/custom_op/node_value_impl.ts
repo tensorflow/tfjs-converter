@@ -21,12 +21,12 @@ import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
 import {getTensor} from '../executors/utils';
 import {getBoolArrayParam, getBoolParam, getDtypeArrayParam, getDtypeParam, getNumberParam, getNumericArrayParam, getStringArrayParam, getStringParam, getTensorShapeArrayParam, getTensorShapeParam} from '../operation_mapper';
-import {Node, NodeValue, ValueType} from '../types';
+import {GraphNode, Node, ValueType} from '../types';
 
 /**
  * Helper class for lookup inputs and params for nodes in the model graph.
  */
-export class NodeValueImpl implements NodeValue {
+export class NodeValueImpl implements GraphNode {
   public readonly inputs: Tensor[] = [];
   public readonly attrs: {[key: string]: ValueType} = {};
   constructor(

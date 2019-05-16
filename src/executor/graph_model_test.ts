@@ -20,7 +20,7 @@ import {scalar} from '@tensorflow/tfjs-core';
 
 import * as tensorflow from '../data/compiled_api';
 import {deregisterOp, registerOp} from '../operations/custom_op/register';
-import {NodeValue} from '../operations/types';
+import {GraphNode} from '../operations/types';
 
 import {GraphModel, loadGraphModel} from './graph_model';
 
@@ -191,7 +191,7 @@ describe('Model', () => {
       spyOn(tfc.io, 'getLoadHandlers').and.returnValue([
         CUSTOM_HTTP_MODEL_LOADER
       ]);
-      registerOp('CustomOp', (nodeValue: NodeValue) => {
+      registerOp('CustomOp', (nodeValue: GraphNode) => {
         const x = nodeValue.inputs[0];
         return [tfc.add(x, scalar(1, 'int32'))];
       });

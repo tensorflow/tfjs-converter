@@ -16,7 +16,7 @@
  * =============================================================================
  */
 
-import {CustomOpExecutor, OpMapper} from '../types';
+import {OpExecutor, OpMapper} from '../types';
 
 const CUSTOM_OPS: {[key: string]: OpMapper} = {};
 
@@ -24,17 +24,35 @@ const CUSTOM_OPS: {[key: string]: OpMapper} = {};
  * Register an Op for graph model executor. This allow you to register
  * TensorFlow custom op or override existing op.
  *
+ * Here is an example of registering a new MatMul Op.
+ * ```js
+ * const matmulOpExecutor = (node) => {
+ *    return tf.matMul(
+ *        node.inputs[0] as tfc.Tensor2D,
+ *        node.inputs[1] as tfc.Tensor2D,
+ *        node.attrs['transpose_a'] as boolean,
+ *        node.attrs['transpose_b'] as boolean);
+ * }
+ * tf.registerOp('MatMul', matmulOpExecutor);
+ * ```
+ * The inputs and attrs of the node object is based on the TensorFlow op
+ * registry.
+ *
  * @param name The Tensorflow Op name.
- * @param customOp node execution function of type `CustomOpExecutor`.
+ * @param opFunc An op function which is called with the current graph node
+ * during execution and needs to return a tensor or a list of tensors. The node
+ * has the following attributes:
+ *    - attr: A map from attribute name to its value
+ *    - inputs: A list of input tensors
  */
-/** @doc {heading: 'Models', subheading: 'op registry'} */
-export function registerOp(name: string, customOp: CustomOpExecutor) {
+/** @doc {heading: 'Models', subheading: 'Op Registry'} */
+export function registerOp(name: string, opFunc: OpExecutor) {
   const opMapper: OpMapper = {
     tfOpName: name,
     category: 'custom',
     inputs: [],
     attrs: [],
-    customExecutor: customOp
+    customExecutor: opFunc
   };
 
   CUSTOM_OPS[name] = opMapper;
@@ -45,7 +63,7 @@ export function registerOp(name: string, customOp: CustomOpExecutor) {
  *
  * @param name The Tensorflow Op name.
  */
-/** @doc {heading: 'Models', subheading: 'op registry'} */
+/** @doc {heading: 'Models', subheading: 'Op Registry'} */
 
 export function getRegisteredOp(name: string): OpMapper {
   return CUSTOM_OPS[name];
@@ -56,7 +74,7 @@ export function getRegisteredOp(name: string): OpMapper {
  *
  * @param name The Tensorflow Op name.
  */
-/** @doc {heading: 'Models', subheading: 'op registry'} */
+/** @doc {heading: 'Models', subheading: 'Op Registry'} */
 export function deregisterOp(name: string) {
   delete CUSTOM_OPS[name];
 }

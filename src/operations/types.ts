@@ -73,7 +73,7 @@ export declare interface AttrParamMapper extends ParamMapper {
   tfDeprecatedName?: string;
 }
 
-export interface OpExecutor {
+export interface InternalOpExecutor {
   (node: Node, tensorMap: NamedTensorsMap, context: ExecutionContext): Tensor
       |Tensor[]|Promise<Tensor|Tensor[]>;
 }
@@ -83,7 +83,7 @@ export declare interface OpMapper {
   category: Category;
   inputs?: InputParamMapper[];
   attrs?: AttrParamMapper[];
-  customExecutor?: CustomOpExecutor;
+  customExecutor?: OpExecutor;
 }
 
 export declare interface Node {
@@ -120,11 +120,11 @@ export declare interface InputParamValue extends ParamValue {
   inputIndexEnd?: number;
 }
 
-export interface CustomOpExecutor {
-  (node: NodeValue): Tensor|Tensor[]|Promise<Tensor|Tensor[]>;
+export interface OpExecutor {
+  (node: GraphNode): Tensor|Tensor[]|Promise<Tensor|Tensor[]>;
 }
 
-export interface NodeValue {
+export interface GraphNode {
   inputs: Tensor[];
   attrs: {[key: string]: ValueType};
 }
