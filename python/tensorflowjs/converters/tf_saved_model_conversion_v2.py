@@ -26,6 +26,7 @@ import tensorflow as tf
 from tensorflow.core.protobuf import device_properties_pb2
 from tensorflow.core.protobuf import meta_graph_pb2
 from tensorflow.core.protobuf import config_pb2
+from tensorflow.core.framework import types_pb2
 from tensorflow.python.framework import convert_to_constants
 from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
@@ -185,8 +186,11 @@ def extract_weights(graph_def,
       if not isinstance(value, np.ndarray):
         value = np.array(value)
 
+      # Do not include string tensors.
+      if const.attr['dtype'].type != types_pb2.DT_STRING:
+        const_manifest.append({'name': const.name, 'data': value})
+
       # Restore the conditional inputs
-      const_manifest.append({'name': const.name, 'data': value})
       const.input[:] = const_inputs[const.name]
 
       # Remove the binary array from tensor and save it to the external file.
