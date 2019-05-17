@@ -98,7 +98,8 @@ def validate(nodes, skip_op_check, strip_debug_ops):
   return not_supported
 
 def optimize_graph(func,
-                   output_graph, tf_version,
+                   output_graph,
+                   tf_version,
                    quantization_dtype=None,
                    skip_op_check=False,
                    strip_debug_ops=False,
@@ -157,13 +158,15 @@ def optimize_graph(func,
 
 
 def extract_weights(graph_def,
-                    output_graph, tf_version,
+                    output_graph,
+                    tf_version,
                     quantization_dtype=None):
   """Takes a Python GraphDef object and extract the weights.
 
   Args:
     graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
       the model topology.
+    tf_version: Tensorflow version of the input graph.
     quantization_dtype: An optional numpy dtype to quantize weights to for
         compression. Only np.uint8 and np.uint16 are supported.
   """
@@ -200,7 +203,8 @@ def extract_weights(graph_def,
 
 def write_artifacts(topology,
                     weights,
-                    output_graph, tf_version,
+                    output_graph,
+                    tf_version,
                     quantization_dtype=None):
   """Writes weights and topology to the output_dir.
 
@@ -211,6 +215,7 @@ def write_artifacts(topology,
       the model topology.
     weights: an array of weight groups (as defined in tfjs write_weights).
     output_graph: the output file name to hold all the contents.
+    tf_version: Tensorflow version of the input graph.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
   """
