@@ -100,6 +100,7 @@ def validate(nodes, skip_op_check, strip_debug_ops):
 
 def optimize_graph(func,
                    output_graph,
+                   tf_version,
                    quantization_dtype=None,
                    skip_op_check=False,
                    strip_debug_ops=False,
@@ -108,6 +109,7 @@ def optimize_graph(func,
 
   Args:
     func: ConcreteFunction TensorFlow function def.
+    tf_version: Tensorflow version of the input graph.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
     skip_op_check: Bool whether to skip the op check.
@@ -152,18 +154,20 @@ def optimize_graph(func,
     raise ValueError('Unsupported Ops in the model after optimization\n' +
                      ', '.join(unsupported))
 
-  extract_weights(optimized_graph, output_graph, quantization_dtype)
+  extract_weights(optimized_graph, output_graph, tf_version, quantization_dtype)
   return optimize_graph
 
 
 def extract_weights(graph_def,
                     output_graph,
+                    tf_version,
                     quantization_dtype=None):
   """Takes a Python GraphDef object and extract the weights.
 
   Args:
     graph_def: tf.GraphDef TensorFlow GraphDef proto object, which represents
       the model topology.
+    tf_version: Tensorflow version of the input graph.
     quantization_dtype: An optional numpy dtype to quantize weights to for
         compression. Only np.uint8 and np.uint16 are supported.
   """
@@ -198,12 +202,13 @@ def extract_weights(graph_def,
         const.attr["value"].tensor.ClearField(field_name)
 
   write_artifacts(MessageToDict(graph_def), [const_manifest], output_graph,
-                  quantization_dtype=quantization_dtype)
+                  tf_version, quantization_dtype=quantization_dtype)
 
 
 def write_artifacts(topology,
                     weights,
                     output_graph,
+                    tf_version,
                     quantization_dtype=None):
   """Writes weights and topology to the output_dir.
 
@@ -214,13 +219,14 @@ def write_artifacts(topology,
       the model topology.
     weights: an array of weight groups (as defined in tfjs write_weights).
     output_graph: the output file name to hold all the contents.
+    tf_version: Tensorflow version of the input graph.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
   """
   model_json = {
       common.FORMAT_KEY: common.TFJS_GRAPH_MODEL_FORMAT,
       # TODO(piyu): Add tensorflow version below by using `meta_info_def`.
-      common.GENERATED_BY_KEY: tf.__version__,
+      common.GENERATED_BY_KEY: tf_version,
       common.CONVERTED_BY_KEY: common.get_converted_by(),
   }
 
@@ -273,7 +279,7 @@ def convert_tf_saved_model(saved_model_dir,
   frozen_func = convert_to_constants.convert_variables_to_constants_v2(
       concrete_func)
 
-  optimize_graph(frozen_func, output_graph,
+  optimize_graph(frozen_func, output_graph, model.tensorflow_version,
                  quantization_dtype=quantization_dtype,
                  skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
@@ -372,7 +378,7 @@ def convert_tf_hub_module(module_path, output_dir,
       f.write(frozen_graph_def.SerializeToString())
 
     graph = load_graph(frozen_file, ','.join(output_node_names))
-    optimize_graph(None, output_graph,
+    optimize_graph(None, output_graph, tf.__version__,
                    quantization_dtype=quantization_dtype,
                    skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops,
                    graph=graph)
