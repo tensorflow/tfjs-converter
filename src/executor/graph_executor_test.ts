@@ -127,24 +127,23 @@ describe('GraphExecutor', () => {
       describe('execute', () => {
         it('should execute the op', async () => {
           const inputTensor = tfc.scalar(1);
-          const result = executor.execute({input: [inputTensor]}, ['output']);
-          tfc.test_util.expectArraysClose(await result['output'].data(), [5.0]);
+          const result = executor.execute({input: inputTensor}, ['output']);
+          tfc.test_util.expectArraysClose(await result[0].data(), [5.0]);
         });
 
         it('should allow output intermediate nodes', async () => {
           const inputTensor = tfc.scalar(1);
           const result = executor.execute(
-              {input: [inputTensor]}, ['output', 'intermediate']);
-          tfc.test_util.expectArraysClose(
-              await result['intermediate'].data(), [3.0]);
-          tfc.test_util.expectArraysClose(await result['output'].data(), [5.0]);
+              {input: inputTensor}, ['output', 'intermediate']);
+          tfc.test_util.expectArraysClose(await result[1].data(), [3.0]);
+          tfc.test_util.expectArraysClose(await result[0].data(), [5.0]);
         });
 
         it('should allow feed intermediate nodes', async () => {
           const intermediateTensor = tfc.scalar(1);
-          const result = executor.execute(
-              {intermediate: [intermediateTensor]}, ['output']);
-          tfc.test_util.expectArraysClose(await result['output'].data(), [3.0]);
+          const result =
+              executor.execute({intermediate: intermediateTensor}, ['output']);
+          tfc.test_util.expectArraysClose(await result[0].data(), [3.0]);
         });
 
         describe('strict input check', () => {
@@ -159,7 +158,7 @@ describe('GraphExecutor', () => {
             const inputTensor = tfc.scalar(1);
             expect(
                 () => executor.execute(
-                    {test: [inputTensor], input: [inputTensor]}, ['output']))
+                    {test: inputTensor, input: inputTensor}, ['output']))
                 .toThrowError(
                     'The dict provided in model.execute(dict) has keys: ' +
                     '[test] that are not part of graph');
@@ -168,7 +167,7 @@ describe('GraphExecutor', () => {
           it('should throw exception if inputs shapes mismatch', () => {
             inputNode.attrParams['shape'] = {value: [1, 1], type: 'shape'};
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['output']))
+            expect(() => executor.execute({input: inputTensor}, ['output']))
                 .toThrow(new Error(
                     'The shape of dict[\'input\'] provided' +
                     ' in model.execute(dict) must be [1,1], but was [1]'));
@@ -177,7 +176,7 @@ describe('GraphExecutor', () => {
           it('should throw exception for dtype mismatch', () => {
             inputNode.attrParams['dtype'] = {value: 'int32', type: 'dtype'};
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['output']))
+            expect(() => executor.execute({input: inputTensor}, ['output']))
                 .toThrow(new Error(
                     'The dtype of dict[\'input\'] provided' +
                     ' in model.execute(dict) must be int32, but was float32'));
@@ -187,28 +186,27 @@ describe('GraphExecutor', () => {
         describe('outputs check', () => {
           it('should reject missing outputs', () => {
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['missing']))
+            expect(() => executor.execute({input: inputTensor}, ['missing']))
                 .toThrowError(/The output 'missing' is not found in the graph/);
           });
 
           it('should reject missing outputs with child tensors', () => {
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(
-                () => executor.execute({input: [inputTensor]}, ['missing:0']))
+            expect(() => executor.execute({input: inputTensor}, ['missing:0']))
                 .toThrowError(
                     /The output 'missing:0' is not found in the graph/);
           });
 
           it('should accept existing outputs', (done) => {
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['output']))
+            expect(() => executor.execute({input: inputTensor}, ['output']))
                 .not.toThrow();
             done();
           });
 
           it('should accept existing outputs with child tensors', (done) => {
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['output:0']))
+            expect(() => executor.execute({input: inputTensor}, ['output:0']))
                 .not.toThrow();
             done();
           });
@@ -227,7 +225,7 @@ describe('GraphExecutor', () => {
             const inputTensor = tfc.scalar(1);
             expect(
                 () => executor.execute(
-                    {intermediate: [inputTensor], input: [inputTensor]},
+                    {intermediate: inputTensor, input: inputTensor},
                     ['output']))
                 .not.toThrow(new Error(
                     'The dict provided in model.execute(dict)' +
@@ -239,7 +237,7 @@ describe('GraphExecutor', () => {
                const inputTensor = tfc.scalar(1);
                expect(
                    () => executor.execute(
-                       {test: [inputTensor], input: [inputTensor]}, ['output']))
+                       {test: inputTensor, input: inputTensor}, ['output']))
                    .not.toThrow(new Error(
                        'The dict provided in model.execute(dict)' +
                        ' has unused keys: [test]. Please provide' +
@@ -248,7 +246,7 @@ describe('GraphExecutor', () => {
           it('should throw exception if inputs shapes mismatch', () => {
             inputNode.attrParams['shape'] = {value: [1, 1], type: 'shape'};
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['output']))
+            expect(() => executor.execute({input: inputTensor}, ['output']))
                 .toThrow(new Error(
                     'The shape of dict[\'input\'] provided' +
                     ' in model.execute(dict) must be [1,1], but was [1]'));
@@ -257,7 +255,7 @@ describe('GraphExecutor', () => {
           it('should throw exception dtype mismatch', () => {
             inputNode.attrParams['dtype'] = {value: 'int32', type: 'dtype'};
             const inputTensor = tfc.tensor1d([1], 'float32');
-            expect(() => executor.execute({input: [inputTensor]}, ['output']))
+            expect(() => executor.execute({input: inputTensor}, ['output']))
                 .toThrow(new Error(
                     'The dtype of dict[\'input\'] provided' +
                     ' in model.execute(dict) must be int32, but was float32'));
@@ -267,7 +265,7 @@ describe('GraphExecutor', () => {
         it('should not throw exception if inputs shapes is dynamic', () => {
           inputNode.attrParams['shape'] = {value: [-1, 1, 1, 1], type: 'shape'};
           const inputTensor = tfc.tensor4d([1, 1], [2, 1, 1, 1], 'float32');
-          expect(() => executor.execute({input: [inputTensor]}, ['output']))
+          expect(() => executor.execute({input: inputTensor}, ['output']))
               .not.toThrow();
         });
       });
@@ -351,18 +349,16 @@ describe('GraphExecutor', () => {
           const inputTensor = tfc.scalar(1);
 
           const result =
-              await executor.executeAsync({input: [inputTensor]}, ['output:1']);
-          tfc.test_util.expectArraysClose(
-              await result['output:1'].data(), [0.57735]);
+              await executor.executeAsync({input: inputTensor}, ['output:1']);
+          tfc.test_util.expectArraysClose(await result[0].data(), [0.57735]);
           done();
         });
 
         it('should allow output intermediate nodes', async (done: DoneFn) => {
           const inputTensor = tfc.scalar(1);
           const result = await executor.executeAsync(
-              {input: [inputTensor]}, ['intermediate']);
-          tfc.test_util.expectArraysClose(
-              await result['intermediate'].data(), [3.0]);
+              {input: inputTensor}, ['intermediate']);
+          tfc.test_util.expectArraysClose(await result[0].data(), [3.0]);
           done();
         });
 
@@ -372,13 +368,11 @@ describe('GraphExecutor', () => {
              const inputTensor = tfc.scalar(1);
 
              const result = await executor.executeAsync(
-                 {intermediate: [inputTensor]}, ['output:1']);
-             tfc.test_util.expectArraysClose(
-                 await result['output:1'].data(), [1]);
+                 {intermediate: inputTensor}, ['output:1']);
+             tfc.test_util.expectArraysClose(await result[0].data(), [1]);
              const result2 = await executor.executeAsync(
-                 {intermediate: [inputTensor]}, ['output:1']);
-             tfc.test_util.expectArraysClose(
-                 await result2['output:1'].data(), [1]);
+                 {intermediate: inputTensor}, ['output:1']);
+             tfc.test_util.expectArraysClose(await result2[0].data(), [1]);
 
              done();
            });
@@ -387,7 +381,7 @@ describe('GraphExecutor', () => {
           const inputTensor = tfc.scalar(1);
           const numTensors: number = tfc.memory().numTensors;
 
-          await executor.executeAsync({input: [inputTensor]}, ['output:1']);
+          await executor.executeAsync({input: inputTensor}, ['output:1']);
           expect(tfc.memory().numTensors).toEqual(numTensors + 1);
           done();
         });

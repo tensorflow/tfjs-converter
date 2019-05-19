@@ -211,12 +211,8 @@ export class GraphModel implements InferenceModel {
       Tensor|Tensor[] {
     inputs = this.normalizeInputs(inputs);
     outputs = this.normalizeOutputs(outputs);
-    const result = this.executor.execute(
-        this.convertTensorMapToTensorsMap(inputs), outputs);
-    const keys = Object.keys(result);
-    return (Array.isArray(outputs) && outputs.length > 1) ?
-        outputs.map(node => result[node]) :
-        result[keys[0]];
+    const result = this.executor.execute(inputs, outputs);
+    return result.length > 1 ? result : result[0];
   }
   /**
    * Executes inference for the model for given input tensors in async
@@ -238,12 +234,8 @@ export class GraphModel implements InferenceModel {
       outputs?: string|string[]): Promise<Tensor|Tensor[]> {
     inputs = this.normalizeInputs(inputs);
     outputs = this.normalizeOutputs(outputs);
-    const result = await this.executor.executeAsync(
-        this.convertTensorMapToTensorsMap(inputs), outputs);
-    const keys = Object.keys(result);
-    return Array.isArray(outputs) && outputs.length > 1 ?
-        outputs.map(node => result[node]) :
-        result[keys[0]];
+    const result = await this.executor.executeAsync(inputs, outputs);
+    return result.length > 1 ? result : result[0];
   }
 
   private convertTensorMapToTensorsMap(map: NamedTensorMap): NamedTensorsMap {
