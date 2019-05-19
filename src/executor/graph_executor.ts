@@ -16,10 +16,7 @@
  */
 
 import {DataType, Tensor, tidy, util} from '@tensorflow/tfjs-core';
-
-// tslint:disable-next-line:max-line-length
 import {NamedTensorMap, NamedTensorsMap, TensorArrayMap, TensorInfo} from '../data/types';
-// tslint:disable-next-line:max-line-length
 import {getNodeNameAndIndex, getParamValue, getTensor, getTensorsForCurrentContenxt, parseNodeName} from '../operations/executors/utils';
 import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
@@ -29,6 +26,18 @@ import {ExecutionContext, ExecutionContextInfo} from './execution_context';
 interface NodeWithContexts {
   contexts: ExecutionContextInfo[];
   node: Node;
+}
+
+const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
+const DYNAMIC_SHAPE_OPS =
+    ['NonMaxSuppressionV2', 'NonMaxSuppressionV3', 'Where'];
+
+function isControlFlow(node: Node) {
+  return CONTROL_FLOW_OPS.indexOf(node.op) >= 0;
+}
+
+function isDynamicShape(node: Node) {
+  return DYNAMIC_SHAPE_OPS.indexOf(node.op) >= 0;
 }
 
 export class GraphExecutor {
@@ -87,49 +96,99 @@ export class GraphExecutor {
   constructor(private graph: Graph) {
     this.placeholders = graph.placeholders;
     this._outputs = graph.outputs;
-    this.compile();
-  }
-
-  get isControlFlowModel(): boolean {
-    return this.graph.withControlFlow;
-  }
-
-  get isDynamicShapeModel(): boolean {
-    return this.graph.withDynamicShape;
   }
 
   /**
    * Compiles the inference graph to generate the topology order of op nodes,
    * cache the result for inference execution.
    */
-  private compile(startNodes?: Node[]) {
-    // Do not compile for graph with control flow, since the execution order
-    // requires runtime evaluation of the output tensors.
-    if (this.graph.withControlFlow || this.graph.withDynamicShape) {
-      return;
-    }
-    const compiledOrder = [];
-    const inputs = startNodes || this.graph.placeholders;
-    const sortedNodeNames = inputs.map(node => node.name).sort();
-    const nameKey = sortedNodeNames.join(this.SEPERATOR);
+  private compile(inputs: Node[], outputs: Node[]) {
+    const sortedInputs = inputs.map(node => node.name).sort();
+    const sortedOutputs = outputs.map(node => node.name).sort();
+    const nameKey = sortedInputs.join(this.SEPERATOR) + '--' +
+        sortedOutputs.join(this.SEPERATOR);
 
-    // do nothing is the compiled graph cache contains the input.
+    // do nothing if the compiled graph cache contains the input.
     if (this.compiledMap.get(nameKey)) {
       return;
     }
 
-    const stack = [...inputs, ...this.graph.weights];
-    const visited: {[key: string]: boolean} = {};
-    while (stack.length > 0) {
-      const node = stack.pop();
-      visited[node.name] = true;
-      compiledOrder.push(node);
-      node.children.forEach((childNode) => {
-        if (!visited[childNode.name] && childNode.inputNames.every(name => {
-              const [nodeName, ] = getNodeNameAndIndex(name);
-              return visited[nodeName];
-            })) {
-          stack.push(childNode);
+    // Start with the outputs, going backwards and find all the nodes that are
+    // needed to compute those outputs.
+    const needed: string[] = [];
+    let seen = new Set<string>();
+    let frontier = [...outputs];
+    const nodesToCompute = new Set<string>();
+    while (frontier.length > 0) {
+      const node = frontier.pop();
+      if (isControlFlow(node) || isDynamicShape(node)) {
+        const reason =
+            isControlFlow(node) ? 'control flow' : 'dynamic output shape';
+        const alternativeInputs = node.children.map(child => child.name)
+                                      .filter(name => nodesToCompute.has(name));
+        throw new Error(
+            `The model contains the node '${node.name}', which has the ` +
+            `${reason} op '${node.op}'. Please use model.executeAsync(). ` +
+            `Alternatively specify the nodes that come after this node ` +
+            `as inputs: [${alternativeInputs}].`);
+      }
+      nodesToCompute.add(node.name);
+
+      // Weights are dead end since we already have their values.
+      if (this.weightMap[node.name] != null) {
+        continue;
+      }
+      // This node is a dead end since it's one of the user-provided inputs.
+      if (inputs.some(input => input.name === node.name)) {
+        continue;
+      }
+      if (node.inputs.length === 0) {
+        needed.push(node.name);
+        continue;
+      }
+      node.inputs.forEach(input => {
+        // Don't add to the frontier if it is already there.
+        if (seen.has(input.name)) {
+          return;
+        }
+        seen.add(input.name);
+        frontier.push(input);
+      });
+    }
+    if (needed.length > 0) {
+      const outNames = outputs.map(n => n.name);
+      const inNames = inputs.map(n => n.name);
+      throw new Error(
+          `Cannot compute the outputs [${outNames}] from the provided inputs ` +
+          `[${inNames}]. Missing the following inputs: [${needed}]`);
+    }
+
+    // Above, we guaranteed that the output can be computed from the provided
+    // inputs. Now start from the inputs, going forward in order to get a
+    // topological order.
+    frontier = [];
+    inputs.forEach(input => {
+      if (nodesToCompute.has(input.name)) {
+        frontier.push(input);
+      }
+    });
+    this.graph.weights.forEach(weight => {
+      if (nodesToCompute.has(weight.name)) {
+        frontier.push(weight);
+      }
+    });
+    seen = new Set<string>();
+    const compiledOrder: Node[] = [];
+    while (frontier.length > 0) {
+      const node = frontier.pop();
+      seen.add(node.name);
+      if (!this.weightMap[node.name]) {
+        compiledOrder.push(node);
+      }
+      node.children.forEach(child => {
+        if (!seen.has(child.name) && nodesToCompute.has(child.name) &&
+            child.inputs.every(input => seen.has(input.name))) {
+          frontier.push(child);
         }
       });
     }
@@ -145,18 +204,14 @@ export class GraphExecutor {
    * inspect intermediate nodes of the model by adding them to the outputs
    * array.
    */
-  execute(
-      inputs: NamedTensorsMap, strictInputCheck = true,
-      outputs?: string|string[]): NamedTensorMap {
+  execute(inputs: NamedTensorsMap, outputs: string[]): NamedTensorMap {
     const names = Object.keys(inputs).sort();
-    this.checkInput(inputs, strictInputCheck);
-    this.checkInputShapeAndType(inputs, strictInputCheck);
-
-    this.compile(names.map(name => this.graph.nodes[name]));
-    const outputNames = this.calculateOutputs(outputs);
-    this.checkOutput(
-        this.compiledMap.get(names.join(this.SEPERATOR)), outputNames);
-
+    this.checkInputs(inputs);
+    this.checkInputShapeAndType(inputs);
+    this.checkOutputs(outputs);
+    const outputNodes =
+        outputs.map(name => this.graph.nodes[parseNodeName(name)[0]]);
+    this.compile(names.map(name => this.graph.nodes[name]), outputNodes);
     const tensorArrayMap: TensorArrayMap = {};
     const result = tidy(() => {
       const context = new ExecutionContext(this._weightMap, tensorArrayMap);
@@ -168,18 +223,17 @@ export class GraphExecutor {
       for (let i = 0; i < compiledNodes.length; i++) {
         const node = compiledNodes[i];
         if (!tensorMap[node.name]) {
-          tensorMap[node.name] =
-              executeOp(node, tensorMap, context) as Tensor[];
+          const tensors = executeOp(node, tensorMap, context) as Tensor[];
+          if (tensors instanceof Promise) {
+            console.warn('Should not happen');
+          }
+          tensorMap[node.name] = tensors;
           this.checkTensorForDisposal(
-              node.name, node, tensorMap, context, tensorsToKeep, outputNames,
+              node.name, node, tensorMap, context, tensorsToKeep, outputs,
               intermediateTensorConsumerCount);
         }
-        // stop the execution if all outputs are found.
-        if (outputNames.every(name => !!tensorMap[name])) {
-          break;
-        }
       }
-      return this.findOutputs(tensorMap, context, outputNames);
+      return this.findOutputs(tensorMap, context, outputs);
     });
     return result;
   }
@@ -243,18 +297,16 @@ export class GraphExecutor {
    * inspect intermediate nodes of the model by adding them to the outputs
    * array.
    */
-  async executeAsync(inputs: NamedTensorsMap, outputs?: string|string[]):
+  async executeAsync(inputs: NamedTensorsMap, outputs: string[]):
       Promise<NamedTensorMap> {
-    this.checkInput(inputs, false);
-    this.checkInputShapeAndType(inputs, false);
+    this.checkInputs(inputs);
+    this.checkInputShapeAndType(inputs);
     const tensorArrayMap: TensorArrayMap = {};
     const context = new ExecutionContext(this._weightMap, tensorArrayMap);
-    const outputNames = this.calculateOutputs(outputs);
     // Graph with control flow op requires runtime evaluation of the execution
     // order, while without control flow the execution order is pre-determined
     // in the compile method.
-    const tensors =
-        await this.executeWithControlFlow(inputs, context, outputNames);
+    const tensors = await this.executeWithControlFlow(inputs, context, outputs);
     const results = this.findOutputs(tensors, context, outputs);
 
     // dispose all the intermediate tensors
@@ -295,21 +347,7 @@ export class GraphExecutor {
     const intermediateTensorConsumerCount: {[key: number]: number} = {};
     const tensorsToKeep = this.getFrozenTensorIds(tensorMap);
     const added: {[key: string]: boolean} = {};
-    while (stack.length > 0) {
-      const promises = this.processStack(
-          inputNodes, stack, context, tensorMap, added, tensorsToKeep,
-          outputNames, intermediateTensorConsumerCount);
-      await Promise.all(promises);
-    }
-    return tensorMap;
-  }
-
-  private processStack(
-      inputNodes: Node[], stack: NodeWithContexts[], context: ExecutionContext,
-      tensorMap: NamedTensorsMap, added: {[key: string]: boolean},
-      tensorsToKeep: Set<number>, outputNames: string[],
-      intermediateTensorConsumerCount: {[key: number]: number}) {
-    const promises: Array<Promise<Tensor[]>> = [];
+    let hasControlFlowOrDynamicShape = false;
     while (stack.length > 0) {
       const item = stack.pop();
       context.currentContext = item.contexts;
@@ -324,33 +362,30 @@ export class GraphExecutor {
 
       // only process nodes that are not provided as input nodes.
       if (inputNodes.indexOf(item.node) === -1) {
-        const tensors = executeOp(item.node, tensorMap, context);
+        if (isControlFlow(item.node) || isDynamicShape(item.node)) {
+          hasControlFlowOrDynamicShape = true;
+        }
+        let tensors = executeOp(item.node, tensorMap, context);
         if (!nodeName) {
           [nodeName] = getNodeNameAndIndex(item.node.name, context);
         }
-        const currentContext = context.currentContext;
         if (tensors instanceof Promise) {
-          promises.push(tensors.then(t => {
-            tensorMap[nodeName] = t;
-            context.currentContext = currentContext;
-            this.checkTensorForDisposal(
-                nodeName, item.node, tensorMap, context, tensorsToKeep,
-                outputNames, intermediateTensorConsumerCount);
-            this.processChildNodes(item.node, stack, context, tensorMap, added);
-            return t;
-          }));
-        } else {
-          tensorMap[nodeName] = tensors;
-          this.checkTensorForDisposal(
-              nodeName, item.node, tensorMap, context, tensorsToKeep,
-              outputNames, intermediateTensorConsumerCount);
-          this.processChildNodes(item.node, stack, context, tensorMap, added);
+          tensors = await tensors;
         }
-      } else {
-        this.processChildNodes(item.node, stack, context, tensorMap, added);
+        tensorMap[nodeName] = tensors;
+        this.checkTensorForDisposal(
+            nodeName, item.node, tensorMap, context, tensorsToKeep, outputNames,
+            intermediateTensorConsumerCount);
       }
+      this.processChildNodes(item.node, stack, context, tensorMap, added);
     }
-    return promises;
+    if (!hasControlFlowOrDynamicShape) {
+      console.warn(
+          `This model execution did not contain any nodes with control flow ` +
+          `or dynamic output shapes. You can use model.execute()
+          instead.`);
+    }
+    return tensorMap;
   }
 
   private processChildNodes(
@@ -378,18 +413,10 @@ export class GraphExecutor {
     });
   }
 
-  private calculateOutputs(outputs?: string|string[]): string[] {
-    if (outputs && !(outputs instanceof Array)) {
-      outputs = [outputs];
-    }
-    return (outputs || this.graph.outputs.map(node => node.name)) as string[];
-  }
-
   private findOutputs(
       tensorMap: NamedTensorsMap, context: ExecutionContext,
-      outputs?: string|string[]): NamedTensorMap {
-    const requestedOutputs = this.calculateOutputs(outputs);
-    return requestedOutputs.reduce<NamedTensorMap>((map, name) => {
+      outputs: string[]): NamedTensorMap {
+    return outputs.reduce<NamedTensorMap>((map, name) => {
       map[name] = getTensor(name, tensorMap, context);
       return map;
     }, {});
@@ -403,17 +430,10 @@ export class GraphExecutor {
             key => this.weightMap[key].forEach(tensor => tensor.dispose()));
   }
 
-  private checkInputShapeAndType(
-      inputs: NamedTensorsMap, strictInputCheck = true) {
-    this.placeholders.forEach(node => {
-      const inputTensors = inputs[node.name];
-      // do nothing if not strict input check and input tensors is not for
-      // the placeholders.
-      if (!strictInputCheck && !inputTensors) {
-        return;
-      }
-
-      const input = inputTensors[0];
+  private checkInputShapeAndType(inputs: NamedTensorsMap) {
+    Object.keys(inputs).forEach(name => {
+      const input = inputs[name][0];
+      const node = this.graph.nodes[name];
       if (node.attrParams['shape'] && node.attrParams['shape'].value) {
         const shape = node.attrParams['shape'].value as number[];
         const match = shape.length === input.shape.length &&
@@ -435,53 +455,22 @@ export class GraphExecutor {
     });
   }
 
-  private checkInput(inputs: NamedTensorsMap, strictInputCheck = true) {
-    const inputKeys = Object.keys(inputs);
-    const missing: string[] = [];
-    const extra: string[] = [];
-
-    this.inputNodes.forEach(name => {
-      if (inputKeys.indexOf(name) === -1) missing.push(name);
-    });
-
-    inputKeys.forEach(name => {
-      if (this.inputNodes.indexOf(name) === -1) extra.push(name);
-    });
-
-    const notInGraph = extra.filter(name => !this.graph.nodes[name]);
-
-    if (missing.length > 0 && strictInputCheck) {
-      throw new Error(
-          `The dict provided in model.execute(dict) has the keys ` +
-          `[${inputKeys}], but is missing the required keys: [${missing}].`);
-    }
-
-    if (extra.length > 0 && strictInputCheck) {
-      throw new Error(
-          `The dict provided in model.execute(dict) has ` +
-          `unused keys: [${extra}]. Please provide only the following keys: ` +
-          `[${this.inputNodes}].`);
-    }
-
+  private checkInputs(inputs: NamedTensorsMap) {
+    const notInGraph =
+        Object.keys(inputs).filter(name => !this.graph.nodes[name]);
     if (notInGraph.length > 0) {
       throw new Error(
           `The dict provided in model.execute(dict) has ` +
-          `keys: [${notInGraph}] not part of model graph.`);
+          `keys: [${notInGraph}] that are not part of graph`);
     }
   }
 
-  private checkOutput(compiledNodes: Node[], outputs: string[]) {
-    const compiledNodeNames = compiledNodes.map(node => node.name);
-    const extra: string[] = [];
+  private checkOutputs(outputs: string[]): void {
     outputs.forEach(name => {
-      const [nodeName] = parseNodeName(name);
-      if (compiledNodeNames.indexOf(nodeName) === -1) extra.push(nodeName);
+      const [normalizedName] = parseNodeName(name);
+      if (!this.graph.nodes[normalizedName]) {
+        throw new Error(`The output '${name}' is not found in the graph`);
+      }
     });
-
-    if (extra.length > 0) {
-      throw new Error(
-          `The following outputs are not generated by the execution: ` +
-          `[${extra}].`);
-    }
   }
 }

@@ -262,12 +262,6 @@ describe('Model', () => {
         const input = tfc.tensor1d([1], 'float32');
         expect(() => model.predict([input])).toThrow();
       });
-
-      it('should not allow feed intermediate node', async () => {
-        await model.load();
-        const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-        expect(() => model.predict({'Add1': input})).toThrow();
-      });
     });
 
     describe('execute', () => {
