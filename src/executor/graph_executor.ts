@@ -18,7 +18,7 @@
 import {DataType, NamedTensorMap, Tensor, tidy, util} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap, TensorArrayMap, TensorInfo} from '../data/types';
-import {getNodeNameAndIndex, getParamValue, getTensor, getTensorsForCurrentContenxt, parseNodeName} from '../operations/executors/utils';
+import {getNodeNameAndIndex, getTensor, getTensorsForCurrentContenxt, parseNodeName} from '../operations/executors/utils';
 import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
@@ -107,41 +107,49 @@ export class GraphExecutor {
   }
 
   /**
-   * Compiles the inference graph and returns the minimal set of nodes that are
-   * required for execution, in the correct execution order.
+   * Given graph inputs and desired outputs, find the minimal set of nodes
+   * to execute in order to compute the outputs. In addition return other useful
+   * info such:
+   * - Missing inputs needed to compute the output.
+   * - Whether the subgraph contains dynamic ops (control flow, dynamic shape).
+   * - Alternative inputs in order to avoid async (dynamic op) execution.
    */
-  private compile(inputs: Node[], outputs: Node[]): Node[] {
+  private findNeededNodes(inputs: NamedTensorMap, outputs: Node[]): {
+    nodes: Set<string>,
+    missingInputs: string[],
+    dynamicNode: Node,
+    syncInputs: string[]
+  } {
+    const nodes = new Set<string>();
+    const missingInputs: string[] = [];
+    let dynamicNode: Node = null;
+    let syncInputs: string[] = null;
+
     // Start with the outputs, going backwards and find all the nodes that are
     // needed to compute those outputs.
-    const needed: string[] = [];
-    let seen = new Set<string>();
-    let frontier = [...outputs];
-    const nodesToCompute = new Set<string>();
+    const seen = new Set<string>();
+    const frontier = [...outputs];
     while (frontier.length > 0) {
       const node = frontier.pop();
       if (isControlFlow(node) || isDynamicShape(node)) {
-        const reason =
-            isControlFlow(node) ? 'control flow' : 'dynamic output shape';
-        const alternativeInputs = node.children.map(child => child.name)
-                                      .filter(name => nodesToCompute.has(name));
-        throw new Error(
-            `The model contains the node '${node.name}', which has the ` +
-            `${reason} op '${node.op}'. Please use model.executeAsync(). ` +
-            `Alternatively specify the nodes that come after this node ` +
-            `as inputs: [${alternativeInputs}].`);
+        if (dynamicNode == null) {
+          dynamicNode = node;
+          syncInputs = dynamicNode.children.map(child => child.name)
+                           .filter(name => nodes.has(name));
+        }
       }
-      nodesToCompute.add(node.name);
+      nodes.add(node.name);
 
       // Weights are dead end since we already have their values.
       if (this.weightMap[node.name] != null) {
         continue;
       }
       // This node is a dead end since it's one of the user-provided inputs.
-      if (inputs.some(input => input.name === node.name)) {
+      if (inputs[node.name] != null) {
         continue;
       }
       if (node.inputs.length === 0) {
-        needed.push(node.name);
+        missingInputs.push(node.name);
         continue;
       }
       node.inputs.forEach(input => {
@@ -153,29 +161,48 @@ export class GraphExecutor {
         frontier.push(input);
       });
     }
-    if (needed.length > 0) {
+    return {nodes, missingInputs, dynamicNode, syncInputs};
+  }
+
+  /**
+   * Compiles the inference graph and returns the minimal set of nodes that are
+   * required for execution, in the correct execution order.
+   */
+  private compile(inputs: NamedTensorMap, outputs: Node[]): Node[] {
+    const {nodes, missingInputs, dynamicNode, syncInputs} =
+        this.findNeededNodes(inputs, outputs);
+    if (dynamicNode != null) {
+      throw new Error(
+          `This execution contains the node '${dynamicNode.name}', which has ` +
+          `the dynamic op '${dynamicNode.op}'. Please use ` +
+          `model.executeAsync() instead. Alternatively, to avoid the ` +
+          `dynamic ops, specify the inputs [${syncInputs}]`);
+    }
+
+    if (missingInputs.length > 0) {
       const outNames = outputs.map(n => n.name);
-      const inNames = inputs.map(n => n.name);
+      const inNames = Object.keys(inputs);
       throw new Error(
           `Cannot compute the outputs [${outNames}] from the provided inputs ` +
-          `[${inNames}]. Missing the following inputs: [${needed}]`);
+          `[${inNames}]. Missing the following inputs: [${missingInputs}]`);
     }
 
     // Above, we guaranteed that the output can be computed from the provided
-    // inputs. Now start from the inputs, going forward in order to get a
-    // topological order.
-    frontier = [];
-    inputs.forEach(input => {
-      if (nodesToCompute.has(input.name)) {
+    // inputs. Now start from the inputs, moving forward in the graph, obtaining
+    // nodes in topological order.
+    const frontier: Node[] = [];
+    const inputNodes = Object.keys(inputs).map(name => this.graph.nodes[name]);
+    inputNodes.forEach(input => {
+      if (nodes.has(input.name)) {
         frontier.push(input);
       }
     });
     this.graph.weights.forEach(weight => {
-      if (nodesToCompute.has(weight.name)) {
+      if (nodes.has(weight.name)) {
         frontier.push(weight);
       }
     });
-    seen = new Set<string>();
+    const seen = new Set<string>();
     const compiledOrder: Node[] = [];
     while (frontier.length > 0) {
       const node = frontier.pop();
@@ -184,7 +211,7 @@ export class GraphExecutor {
         compiledOrder.push(node);
       }
       node.children.forEach(child => {
-        if (!seen.has(child.name) && nodesToCompute.has(child.name) &&
+        if (!seen.has(child.name) && nodes.has(child.name) &&
             child.inputs.every(input => seen.has(input.name))) {
           frontier.push(child);
         }
@@ -214,7 +241,7 @@ export class GraphExecutor {
     // Do nothing if the compiled graph cache contains the input.
     let orderedNodes = this.compiledMap.get(compilationKey);
     if (orderedNodes == null) {
-      orderedNodes = this.compile(inputNodes, outputNodes);
+      orderedNodes = this.compile(inputs, outputNodes);
       this.compiledMap.set(compilationKey, orderedNodes);
     }
     const tensorArrayMap: TensorArrayMap = {};
@@ -345,6 +372,11 @@ export class GraphExecutor {
       outputNames: string[]): Promise<NamedTensorsMap> {
     const names = Object.keys(inputs);
     const inputNodes = names.map(name => this.graph.nodes[name]);
+    const outputNodes =
+        outputNames.map(name => this.graph.nodes[parseNodeName(name)[0]]);
+    const {nodes, missingInputs, dynamicNode, syncInputs} =
+        this.findNeededNodes(inputs, outputNodes);
+
     const stack: NodeWithContexts[] =
         [...inputNodes, ...this.graph.weights].map(node => {
           return {node, contexts: context.currentContext};
@@ -356,28 +388,13 @@ export class GraphExecutor {
     const intermediateTensorConsumerCount: {[key: number]: number} = {};
     const tensorsToKeep = this.getFrozenTensorIds(tensorsMap);
     const added: {[key: string]: boolean} = {};
-    let hasControlFlowOrDynamicShape = false;
     while (stack.length > 0) {
       const item = stack.pop();
       context.currentContext = item.contexts;
-      let nodeName = '';
-      // The tensor of the Enter op with isConstant set should be set
-      // in the parent scope, so it will be available as constant for the
-      // whole loop.
-      if (item.node.op === 'Enter' &&
-          getParamValue('isConstant', item.node, tensorsMap, context)) {
-        [nodeName] = getNodeNameAndIndex(item.node.name, context);
-      }
-
       // only process nodes that are not provided as input nodes.
       if (inputNodes.indexOf(item.node) === -1) {
-        if (isControlFlow(item.node) || isDynamicShape(item.node)) {
-          hasControlFlowOrDynamicShape = true;
-        }
         let tensors = executeOp(item.node, tensorsMap, context);
-        if (!nodeName) {
-          [nodeName] = getNodeNameAndIndex(item.node.name, context);
-        }
+        const [nodeName] = getNodeNameAndIndex(item.node.name, context);
         if (tensors instanceof Promise) {
           tensors = await tensors;
         }
@@ -386,38 +403,58 @@ export class GraphExecutor {
             nodeName, item.node, tensorsMap, context, tensorsToKeep,
             outputNames, intermediateTensorConsumerCount);
       }
-      this.processChildNodes(item.node, stack, context, tensorsMap, added);
+      this.processChildNodes(
+          item.node, stack, context, tensorsMap, added, nodes);
     }
-    if (!hasControlFlowOrDynamicShape) {
+    if (dynamicNode == null) {
       console.warn(
           `This model execution did not contain any nodes with control flow ` +
-          `or dynamic output shapes. You can use model.execute()
-          instead.`);
+          `or dynamic output shapes. You can use model.execute() instead.`);
+    }
+    const missingOutputs =
+        outputNodes
+            .filter(
+                node => !isControlFlow(node) &&
+                    !getTensor(node.name, tensorsMap, context))
+            .map(node => node.name);
+    if (missingOutputs.length > 0) {
+      let alternativeMsg = '';
+      if (dynamicNode != null) {
+        alternativeMsg =
+            `Alternatively, to avoid the dynamic ops, use model.execute() ` +
+            `and specify the inputs [${syncInputs}]`;
+      }
+      throw new Error(
+          `Cannot compute the outputs [${missingOutputs}] from the provided ` +
+          `inputs [${names}]. Consider providing the following inputs: ` +
+          `[${missingInputs}]. ${alternativeMsg}`);
     }
     return tensorsMap;
   }
 
   private processChildNodes(
       node: Node, stack: NodeWithContexts[], context: ExecutionContext,
-      tensorMap: NamedTensorsMap, added: {[key: string]: boolean}) {
+      tensorMap: NamedTensorsMap, added: {[key: string]: boolean},
+      nodesToCompute: Set<string>) {
     node.children.forEach((childNode) => {
       const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
-      if (!added[nodeName]) {
-        // Merge op can be pushed if any of its inputs has value.
-        if (childNode.op === 'Merge') {
-          if (childNode.inputNames.some(name => {
-                return !!getTensor(name, tensorMap, context);
-              })) {
-            added[nodeName] = true;
-            stack.push({contexts: context.currentContext, node: childNode});
-          }
-        } else  // Otherwise all inputs must to have value.
-            if (childNode.inputNames.every(name => {
-                  return !!getTensor(name, tensorMap, context);
-                })) {
+      if (added[nodeName] || !nodesToCompute.has(nodeName)) {
+        return;
+      }
+      // Merge op can be pushed if any of its inputs has value.
+      if (childNode.op === 'Merge') {
+        if (childNode.inputNames.some(name => {
+              return !!getTensor(name, tensorMap, context);
+            })) {
           added[nodeName] = true;
           stack.push({contexts: context.currentContext, node: childNode});
         }
+      } else  // Otherwise all inputs must to have value.
+          if (childNode.inputNames.every(name => {
+                return !!getTensor(name, tensorMap, context);
+              })) {
+        added[nodeName] = true;
+        stack.push({contexts: context.currentContext, node: childNode});
       }
     });
   }

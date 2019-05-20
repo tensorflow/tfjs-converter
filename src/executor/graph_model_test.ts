@@ -78,7 +78,7 @@ const CONTROL_FLOW_MODEL: tensorflow.IGraphDef = {
         shape: {shape: {dim: [{size: -1}, {size: 1}]}}
       }
     },
-    {name: 'Enter', op: 'Enter', attr: {}},
+    {name: 'Enter', op: 'Enter', attr: {}, input: ['Input']},
   ],
   versions: {producer: 1.0, minConsumer: 3}
 };
@@ -90,12 +90,12 @@ const DYNAMIC_SHAPE_MODEL: tensorflow.IGraphDef = {
       op: 'Placeholder',
       attr: {
         dtype: {
-          type: tensorflow.DataType.DT_INT32,
+          type: tensorflow.DataType.DT_BOOL,
         },
         shape: {shape: {dim: [{size: -1}, {size: 1}]}}
       }
     },
-    {name: 'Where', op: 'Where', attr: {}}
+    {name: 'Where', op: 'Where', attr: {}, input: ['Input']}
   ],
   versions: {producer: 1.0, minConsumer: 3}
 };
@@ -405,15 +405,13 @@ describe('Model', () => {
     it('should be success if call executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-
-      expect(() => model.executeAsync([input])).not.toThrow();
+      await model.executeAsync([input]);
     });
 
     it('should allow feed intermediate node with executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-
-      expect(() => model.executeAsync({Enter: input})).not.toThrow();
+      await model.executeAsync({Enter: input});
     });
   });
   const DYNAMIC_HTTP_MODEL_LOADER = {
@@ -450,16 +448,14 @@ describe('Model', () => {
 
     it('should be success if call executeAsync', async () => {
       await model.load();
-      const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-
-      expect(() => model.executeAsync([input])).not.toThrow();
+      const input = tfc.tensor2d([1, 1], [2, 1], 'bool');
+      await model.executeAsync([input]);
     });
 
     it('should allow feed intermediate node with executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-
-      expect(() => model.executeAsync({Where: input})).not.toThrow();
+      await model.executeAsync({Where: input});
     });
   });
 });
