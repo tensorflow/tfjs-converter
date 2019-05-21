@@ -18,6 +18,19 @@ import os
 import setuptools
 from tensorflowjs import version
 
+try:
+  import tensorflow as tf
+  if tf.version.startswith('0.') or tf.version.startswith('1.'):
+    raise ValueError(
+        'It appears that you have a version of tensorflow older than ' +
+        '2.x installed in your Python environmnet. ' +
+        'Installing tensorflowjs v%s will overwrite your old version ' +
+        'and that is generally undesriable. ' +
+        'Please install tensorflowjs in a clean virtualenv or pipenv, ' +
+        'or alternatively, upgrade your tensorflow install to 2.x first.')
+except ImportError:
+  pass
+
 DIR_NAME = os.path.dirname(__file__)
 
 def _get_requirements(file):
