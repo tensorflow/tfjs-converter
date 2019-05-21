@@ -15,8 +15,31 @@
 """Build pip wheel for model_converter."""
 
 import os
+
 import setuptools
+from pip._vendor import pkg_resources
+
+def _is_correct_tensorflow_installed():
+    "Checks if the current TensorFlow installation is of version at least 2.0"
+    return next(
+        (
+            pkg.version >= '2'
+            for pkg in pkg_resources.working_set
+            if pkg.project_name.lower() == "tensorflow"
+        ),
+        True
+    )
+
+if not _is_correct_tensorflow_installed():
+    raise ImportError(
+      (
+        "Please install TensorFlow.js in a virtual environment,"
+        " or set up TensorFlow >= 2.0 manually."
+      )
+    )
+
 from tensorflowjs import version
+
 
 DIR_NAME = os.path.dirname(__file__)
 
