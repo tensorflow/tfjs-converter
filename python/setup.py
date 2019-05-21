@@ -26,14 +26,14 @@ try:
   import tensorflow as tf
   if tf.version.startswith('0.') or tf.version.startswith('1.'):
     raise ValueError(
-        'It appears that you have a version of tensorflow older than '
+        '\nIt appears that you have a version of tensorflow older than '
         '2.x (%s) installed in your Python environment. '
         'Therefore we have halted the tensorflowjs installation. '
         'Installing tensorflowjs %s would overwrite your old version '
-        'of tensorflow and that is generally undesriable. '
+        'of tensorflow and that is generally undesriable.\n\n'
         'Please install tensorflowjs in a clean virtualenv or pipenv, '
         'or alternatively, upgrade your tensorflow install to 2.x before '
-        'installing tensorflowjs.' % (tf.version, version))
+        'installing tensorflowjs.' % (tf.__version__, version))
 except ImportError:
   pass
 
