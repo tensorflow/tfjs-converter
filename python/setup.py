@@ -18,6 +18,10 @@ import os
 import setuptools
 from tensorflowjs import version
 
+
+DIR_NAME = os.path.dirname(__file__)
+
+
 try:
   import tensorflow as tf
   if tf.version.startswith('0.') or tf.version.startswith('1.'):
@@ -33,7 +37,6 @@ try:
 except ImportError:
   pass
 
-DIR_NAME = os.path.dirname(__file__)
 
 def _get_requirements(file):
     "Reads the requirements file and returns the packages"
