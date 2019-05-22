@@ -4,7 +4,7 @@
 TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models) or [TensorFlow Hub module](https://www.tensorflow.org/hub/)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
-(Note: Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use TensorFlow.js 0.15.x version to convert these formats.)
+__Note__: _Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use the TensorFlow.js 0.15.x backend to convert these formats, available in `tfjs-converter` [0.8.4](https://github.com/tensorflow/tfjs-converter/releases/tag/v0.8.4). You can then convert the model to the new JSON format with the`pb2json_converter` [helper script](./tools/pb2json_converter.ts), as explained below._
 
 A 2-step process to import your model:
 
