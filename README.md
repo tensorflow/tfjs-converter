@@ -13,19 +13,10 @@ A 2-step process to import your model:
 
 ## Step 1: Converting a [SavedModel](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/saved_model/README.md), [Keras h5](https://keras.io/getting-started/faq/#how-can-i-save-a-keras-model), [tf.keras SavedModel](https://www.tensorflow.org/api_docs/python/tf/contrib/saved_model/save_keras_model) or [TensorFlow Hub module](https://www.tensorflow.org/hub/) to a web-friendly format
 
-0. Please make sure that you run in a Docker container or a virtual environment. The script pulls its own subset of TensorFlow,which might conflict with the existing TensorFlow/Keras installation.
-
-For example, create and activate a `venv` virtual environment in your current folder:
-
-```bash
-$ virtualenv venv
-$ . venv/bin/activate
-```
-
 1. Install the TensorFlow.js pip package:
 
 ```bash
-$ pip install tensorflowjs
+  $ pip install tensorflowjs
 ```
 
 2. Run the converter script provided by the pip package:
@@ -75,20 +66,20 @@ Note that the input path used above is a subfolder that has a Unix epoch
 time (1542211770) and is generated automatically by tensorflow when it
 saved a tf.keras model in the SavedModel format.
 
-| Positional Arguments | Description                                                                                                                  |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `input_path`         | Full path of the saved model directory, session bundle directory, frozen model file or TensorFlow Hub module handle or path. |
-| `output_path`        | Path for all output artifacts.                                                                                               |
+|Positional Arguments | Description |
+|---|---|
+|`input_path`  | Full path of the saved model directory, session bundle directory, frozen model file or TensorFlow Hub module handle or path.|
+|`output_path` | Path for all output artifacts.|
 
 
-| Options                           | Description                                                                                                                                                                                                                                                               |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--input_format`                  | The format of input model, use `tf_saved_model` for SavedModel, `tf_frozen_model` for frozen model, `tf_session_bundle` for session bundle, `tf_hub` for TensorFlow Hub module, `tfjs_layers_model` for TensorFlow.js JSON format, and `keras` for Keras HDF5.            |
-| `--output_format`                 | The desired output format.  Must be `tfjs_layers_model`, `tfjs_graph_model` or `keras`. Not all pairs of input-output formats are supported.  Please file a [github issue](https://github.com/tensorflow/tfjs/issues) if your desired input-output pair is not supported. |
-| <nobr>`--saved_model_tags`</nobr> | Only applicable to SavedModel conversion. Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.                                                                                                                                               |
-| `--signature_name`                | Only applicable to TensorFlow SavedModel and Hub module conversion, signature to load. Defaults to `serving_default` for SavedModel and `default` for Hub module. See https://www.tensorflow.org/hub/common_signatures/.                                                  |
-| `--strip_debug_ops`               | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.                                                                                                                                                                            |
-| `--quantization_bytes`            | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.                                                                   |
+| Options | Description
+|---|---|
+|`--input_format`     | The format of input model, use `tf_saved_model` for SavedModel, `tf_frozen_model` for frozen model, `tf_session_bundle` for session bundle, `tf_hub` for TensorFlow Hub module, `tfjs_layers_model` for TensorFlow.js JSON format, and `keras` for Keras HDF5. |
+|`--output_format`| The desired output format.  Must be `tfjs_layers_model`, `tfjs_graph_model` or `keras`. Not all pairs of input-output formats are supported.  Please file a [github issue](https://github.com/tensorflow/tfjs/issues) if your desired input-output pair is not supported.|
+|<nobr>`--saved_model_tags`</nobr> | Only applicable to SavedModel conversion. Tags of the MetaGraphDef to load, in comma separated format. Defaults to `serve`.|
+|`--signature_name`   | Only applicable to TensorFlow SavedModel and Hub module conversion, signature to load. Defaults to `serving_default` for SavedModel and `default` for Hub module. See https://www.tensorflow.org/hub/common_signatures/.|
+|`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
+|`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
 Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions of the tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.0`.
 
@@ -100,18 +91,18 @@ most cases.
 
 #### Python-to-JavaScript
 
-| `--input_format`    | `--output_format`   | Description                                                                                                                                                                                                                                                                                                                                |
-| ------------------- | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `keras`             | `tfjs_layers_model` | Convert a keras or tf.keras HDF5 model file to TensorFlow.js Layers model format. Use [`tf.loadLayersModel()`](https://js.tensorflow.org/api/latest/#loadLayersModel) to load the model in JavaScript.                                                                                                                                     |
+| `--input_format` | `--output_format` | Description |
+|---|---|---|
+| `keras` | `tfjs_layers_model` | Convert a keras or tf.keras HDF5 model file to TensorFlow.js Layers model format. Use [`tf.loadLayersModel()`](https://js.tensorflow.org/api/latest/#loadLayersModel) to load the model in JavaScript. |
 | `keras_saved_model` | `tfjs_layers_model` | Convert a tf.keras SavedModel model file (from [`tf.contrib.saved_model.save_keras_model`](https://www.tensorflow.org/api_docs/python/tf/contrib/saved_model/save_keras_model)) to TensorFlow.js Layers model format. Use [`tf.loadLayersModel()`](https://js.tensorflow.org/api/latest/#loadLayersModel) to load the model in JavaScript. |
-| `tf_hub`            | `tfjs_graph_model`  | Convert a [TF-Hub](https://www.tensorflow.org/hub) model file to TensorFlow.js graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript.                                                                                                            |
-| `tf_saved_model`    | `tfjs_graph_model`  | Convert a [TensorFlow SavedModel](https://www.tensorflow.org/guide/saved_model#build_and_load_a_savedmodel) to TensorFlow.js graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript.                                                              |
+| `tf_hub` | `tfjs_graph_model` | Convert a [TF-Hub](https://www.tensorflow.org/hub) model file to TensorFlow.js graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript. |
+| `tf_saved_model` | `tfjs_graph_model` | Convert a [TensorFlow SavedModel](https://www.tensorflow.org/guide/saved_model#build_and_load_a_savedmodel) to TensorFlow.js graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript. |
 
 #### JavaScript-to-Python
 
-| `--input_format`    | `--output_format` | Description                                                                                                                                                                                                                                                                                                                                                                               |
-| ------------------- | ----------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `tfjs_layers_model` | `keras`           | Convert a TensorFlow.js Layers model (JSON + binary weight file(s)) to a Keras HDF5 model file. Use [`keras.model.load_model()`](https://keras.io/getting-started/faq/#savingloading-whole-models-architecture-weights-optimizer-state) or [`tf.keras.models.load_model()`](https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model) to load the converted model in Python. |
+| `--input_format` | `--output_format` | Description |
+|---|---|---|
+| `tfjs_layers_model` | `keras` | Convert a TensorFlow.js Layers model (JSON + binary weight file(s)) to a Keras HDF5 model file. Use [`keras.model.load_model()`](https://keras.io/getting-started/faq/#savingloading-whole-models-architecture-weights-optimizer-state) or [`tf.keras.models.load_model()`](https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model) to load the converted model in Python. |
 
 #### JavaScript-to-JavaScript
 
