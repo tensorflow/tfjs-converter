@@ -18,7 +18,7 @@ A 2-step process to import your model:
 For example, [create and activate](https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/) a `venv` virtual environment in your current folder:
 
 ```bash
-$ virtualenv venv
+$ virtualenv --no-site-packages venv
 $ . venv/bin/activate
 ```
 
