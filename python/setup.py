@@ -16,25 +16,33 @@
 
 import os
 import setuptools
+from setuptools.command.install import install as InstallCommandBase
 from tensorflowjs import version
 
 
+class InstallCommand(InstallCommandBase):
+  """Override the dir where the headers go."""
+
+  def initialize_options(self):
+    ret = InstallCommandBase.initialize_options(self)
+
+    try:
+      import tensorflow as tf
+      if tf.__version__.startswith('0.') or tf.__version__.startswith('1.'):
+        raise ValueError(
+            '\nIt appears that you have a version of tensorflow older than '
+            '2.x (%s) installed in your Python environment. '
+            'Therefore we have halted the tensorflowjs installation '
+            'to avoid overwriting your existing tensorflow install.\n\n'
+            'Please install tensorflowjs in a clean virtualenv or pipenv, '
+            'or alternatively, upgrade your tensorflow install to 2.x before '
+            'installing tensorflowjs.' % (tf.__version__, version))
+    except ImportError:
+      pass
+    return ret
+
+
 DIR_NAME = os.path.dirname(__file__)
-
-
-try:
-  import tensorflow as tf
-  if tf.__version__.startswith('0.') or tf.__version__.startswith('1.'):
-    raise ValueError(
-        '\nIt appears that you have a version of tensorflow older than '
-        '2.x (%s) installed in your Python environment. '
-        'Therefore we have halted the tensorflowjs installation '
-        'to avoid overwriting your existing tensorflow install.\n\n'
-        'Please install tensorflowjs in a clean virtualenv or pipenv, '
-        'or alternatively, upgrade your tensorflow install to 2.x before '
-        'installing tensorflowjs.' % (tf.__version__, version))
-except ImportError:
-  pass
 
 
 def _get_requirements(file):
@@ -69,6 +77,9 @@ setuptools.setup(
         'Topic :: Software Development :: Libraries',
         'Topic :: Software Development :: Libraries :: Python Modules',
     ],
+    cmdclass={
+        'install': InstallCommand,
+    },
     py_modules=[
         'tensorflowjs',
         'tensorflowjs.version',
