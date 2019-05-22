@@ -28,9 +28,8 @@ try:
     raise ValueError(
         '\nIt appears that you have a version of tensorflow older than '
         '2.x (%s) installed in your Python environment. '
-        'Therefore we have halted the tensorflowjs installation. '
-        'Installing tensorflowjs %s would overwrite your old version '
-        'of tensorflow and that is generally undesriable.\n\n'
+        'Therefore we have halted the tensorflowjs installation '
+        'to avoid overwriting your existing tensorflow install.\n\n'
         'Please install tensorflowjs in a clean virtualenv or pipenv, '
         'or alternatively, upgrade your tensorflow install to 2.x before '
         'installing tensorflowjs.' % (tf.__version__, version))
