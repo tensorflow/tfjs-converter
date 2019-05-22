@@ -105,6 +105,8 @@ export class OperationMapper {
   }
 
   private mapNode(node: tensorflow.INodeDef): Node {
+    // Unsupported ops will cause an error at run-time (not parse time), since
+    // they may not be used by the actual execution subgraph.
     const mapper =
         getRegisteredOp(node.op) || this.opMappers[node.op] || {} as OpMapper;
     if (node.attr == null) {
@@ -313,7 +315,11 @@ export function parseDtypeParam(value: string|tensorflow.DataType): DataType {
       return 'bool';
     case tensorflow.DataType.DT_DOUBLE:
       return 'float32';
+    case tensorflow.DataType.DT_STRING:
+      return 'string';
     default:
+      // Uknown dtype error will happen at runtime (instead of parse time),
+      // since these nodes might not be used by the actual subgraph execution.
       return null;
   }
 }

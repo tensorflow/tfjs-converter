@@ -459,3 +459,64 @@ describe('Model', () => {
     });
   });
 });
+
+describe('Graph execution gives actionable errors', () => {
+  it('executeAsync warns when there are no dynamic ops', async () => {
+    const customLoader: tfc.io.IOHandler = {
+      load: async () => ({
+        modelTopology: SIMPLE_MODEL,
+        weightSpecs: weightsManifest,
+        weightData: new Int32Array([5]).buffer,
+      })
+    };
+    const model = await loadGraphModel(customLoader);
+    spyOn(console, 'warn');
+    const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
+    await model.executeAsync(input);
+    expect(console.warn).toHaveBeenCalledTimes(1);
+  });
+
+  it('executeAsync does not warn when there are dynamic ops', async () => {
+    const customLoader: tfc.io.IOHandler = {
+      load: async () => ({
+        modelTopology: CONTROL_FLOW_MODEL,
+        weightSpecs: weightsManifest,
+        weightData: new Int32Array([5]).buffer,
+      })
+    };
+    const model = await loadGraphModel(customLoader);
+    spyOn(console, 'warn');
+    const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
+    await model.executeAsync(input);
+    expect(console.warn).toHaveBeenCalledTimes(0);
+  });
+
+  it('execute fails when there are dynamic ops', async () => {
+    const customLoader: tfc.io.IOHandler = {
+      load: async () => ({
+        modelTopology: CONTROL_FLOW_MODEL,
+        weightSpecs: weightsManifest,
+        weightData: new Int32Array([5]).buffer,
+      })
+    };
+    const model = await loadGraphModel(customLoader);
+    const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
+    expect(() => model.execute(input))
+        .toThrowError(/This execution contains the node 'Enter'/);
+  });
+
+  it('execute does not warn when there are no dynamic ops', async () => {
+    const customLoader: tfc.io.IOHandler = {
+      load: async () => ({
+        modelTopology: SIMPLE_MODEL,
+        weightSpecs: weightsManifest,
+        weightData: new Int32Array([5]).buffer,
+      })
+    };
+    const model = await loadGraphModel(customLoader);
+    spyOn(console, 'warn');
+    const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
+    model.execute(input);
+    expect(console.warn).toHaveBeenCalledTimes(0);
+  });
+});

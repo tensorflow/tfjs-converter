@@ -190,7 +190,8 @@ def extract_weights(graph_def,
       if not isinstance(value, np.ndarray):
         value = np.array(value)
 
-      # Do not include string tensors.
+      # TODO(https://github.com/tensorflow/tfjs/issues/1598):
+      # Support weight serialization of string tensors.
       if const.attr['dtype'].type != types_pb2.DT_STRING:
         const_manifest.append({'name': const.name, 'data': value})
 

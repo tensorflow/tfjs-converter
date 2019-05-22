@@ -23,22 +23,11 @@ import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
+import {getExecutionSubgraph, getNodesInTopologicalOrder, isControlFlow} from './model_analysis';
 
 interface NodeWithContexts {
   contexts: ExecutionContextInfo[];
   node: Node;
-}
-
-const CONTROL_FLOW_OPS = ['Switch', 'Merge', 'Enter', 'Exit', 'NextIteration'];
-const DYNAMIC_SHAPE_OPS =
-    ['NonMaxSuppressionV2', 'NonMaxSuppressionV3', 'Where'];
-
-function isControlFlow(node: Node) {
-  return CONTROL_FLOW_OPS.indexOf(node.op) >= 0;
-}
-
-function isDynamicShape(node: Node) {
-  return DYNAMIC_SHAPE_OPS.indexOf(node.op) >= 0;
 }
 
 export class GraphExecutor {
@@ -107,70 +96,12 @@ export class GraphExecutor {
   }
 
   /**
-   * Given graph inputs and desired outputs, find the minimal set of nodes
-   * to execute in order to compute the outputs. In addition return other useful
-   * info such:
-   * - Missing inputs needed to compute the output.
-   * - Whether the subgraph contains dynamic ops (control flow, dynamic shape).
-   * - Alternative inputs in order to avoid async (dynamic op) execution.
-   */
-  private findNeededNodes(inputs: NamedTensorMap, outputs: Node[]): {
-    nodes: Set<string>,
-    missingInputs: string[],
-    dynamicNode: Node,
-    syncInputs: string[]
-  } {
-    const nodes = new Set<string>();
-    const missingInputs: string[] = [];
-    let dynamicNode: Node = null;
-    let syncInputs: string[] = null;
-
-    // Start with the outputs, going backwards and find all the nodes that are
-    // needed to compute those outputs.
-    const seen = new Set<string>();
-    const frontier = [...outputs];
-    while (frontier.length > 0) {
-      const node = frontier.pop();
-      if (isControlFlow(node) || isDynamicShape(node)) {
-        if (dynamicNode == null) {
-          dynamicNode = node;
-          syncInputs = dynamicNode.children.map(child => child.name)
-                           .filter(name => nodes.has(name));
-        }
-      }
-      nodes.add(node.name);
-
-      // Weights are dead end since we already have their values.
-      if (this.weightMap[node.name] != null) {
-        continue;
-      }
-      // This node is a dead end since it's one of the user-provided inputs.
-      if (inputs[node.name] != null) {
-        continue;
-      }
-      if (node.inputs.length === 0) {
-        missingInputs.push(node.name);
-        continue;
-      }
-      node.inputs.forEach(input => {
-        // Don't add to the frontier if it is already there.
-        if (seen.has(input.name)) {
-          return;
-        }
-        seen.add(input.name);
-        frontier.push(input);
-      });
-    }
-    return {nodes, missingInputs, dynamicNode, syncInputs};
-  }
-
-  /**
    * Compiles the inference graph and returns the minimal set of nodes that are
    * required for execution, in the correct execution order.
    */
   private compile(inputs: NamedTensorMap, outputs: Node[]): Node[] {
-    const {nodes, missingInputs, dynamicNode, syncInputs} =
-        this.findNeededNodes(inputs, outputs);
+    const executionInfo = getExecutionSubgraph(inputs, outputs, this.weightMap);
+    const {missingInputs, dynamicNode, syncInputs} = executionInfo;
     if (dynamicNode != null) {
       throw new Error(
           `This execution contains the node '${dynamicNode.name}', which has ` +
@@ -187,37 +118,8 @@ export class GraphExecutor {
           `[${inNames}]. Missing the following inputs: [${missingInputs}]`);
     }
 
-    // Above, we guaranteed that the output can be computed from the provided
-    // inputs. Now start from the inputs, moving forward in the graph, obtaining
-    // nodes in topological order.
-    const frontier: Node[] = [];
-    const inputNodes = Object.keys(inputs).map(name => this.graph.nodes[name]);
-    inputNodes.forEach(input => {
-      if (nodes.has(input.name)) {
-        frontier.push(input);
-      }
-    });
-    this.graph.weights.forEach(weight => {
-      if (nodes.has(weight.name)) {
-        frontier.push(weight);
-      }
-    });
-    const seen = new Set<string>();
-    const compiledOrder: Node[] = [];
-    while (frontier.length > 0) {
-      const node = frontier.pop();
-      seen.add(node.name);
-      if (!this.weightMap[node.name]) {
-        compiledOrder.push(node);
-      }
-      node.children.forEach(child => {
-        if (!seen.has(child.name) && nodes.has(child.name) &&
-            child.inputs.every(input => seen.has(input.name))) {
-          frontier.push(child);
-        }
-      });
-    }
-    return compiledOrder;
+    return getNodesInTopologicalOrder(
+        this.graph, this.weightMap, executionInfo);
   }
 
   /**
@@ -374,8 +276,8 @@ export class GraphExecutor {
     const inputNodes = names.map(name => this.graph.nodes[name]);
     const outputNodes =
         outputNames.map(name => this.graph.nodes[parseNodeName(name)[0]]);
-    const {nodes, missingInputs, dynamicNode, syncInputs} =
-        this.findNeededNodes(inputs, outputNodes);
+    const {usedNodes: nodes, missingInputs, dynamicNode, syncInputs} =
+        getExecutionSubgraph(inputs, outputNodes, this.weightMap);
 
     const stack: NodeWithContexts[] =
         [...inputNodes, ...this.graph.weights].map(node => {
