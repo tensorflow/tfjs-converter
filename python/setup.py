@@ -24,7 +24,7 @@ DIR_NAME = os.path.dirname(__file__)
 
 try:
   import tensorflow as tf
-  if tf.version.startswith('0.') or tf.version.startswith('1.'):
+  if tf.__version__.startswith('0.') or tf.__version__.startswith('1.'):
     raise ValueError(
         '\nIt appears that you have a version of tensorflow older than '
         '2.x (%s) installed in your Python environment. '
