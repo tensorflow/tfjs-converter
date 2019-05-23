@@ -318,7 +318,7 @@ export function parseDtypeParam(value: string|tensorflow.DataType): DataType {
     case tensorflow.DataType.DT_STRING:
       return 'string';
     default:
-      // Uknown dtype error will happen at runtime (instead of parse time),
+      // Unknown dtype error will happen at runtime (instead of parse time),
       // since these nodes might not be used by the actual subgraph execution.
       return null;
   }
