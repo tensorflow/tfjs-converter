@@ -4,7 +4,7 @@
 TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models) or [TensorFlow Hub module](https://www.tensorflow.org/hub/)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
-__Note__: _Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use the TensorFlow.js 0.15.x backend to convert these formats, available in `tfjs-converter` [0.8.4](https://github.com/tensorflow/tfjs-converter/releases/tag/v0.8.4). You can then convert the model to the new JSON format with the`pb2json_converter` [helper script](./tools/pb2json_converter.ts), as explained below._
+__Note__: _Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use the TensorFlow.js 0.15.x backend to convert these formats, available in `tfjs-converter` [0.8.5](https://pypi.org/project/tensorflowjs/0.8.5/)._
 
 A 2-step process to import your model:
 
@@ -81,7 +81,7 @@ saved a tf.keras model in the SavedModel format.
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
 |`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
-Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions of the tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.0`.
+__Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions of the tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.5`.__
 
 ### Format Conversion Support Tables
 
@@ -276,16 +276,14 @@ yarn ts-node tools/pb2json_converter.ts pb_model_directory/ json_model_directory
 
 __7. I have a model formatted as a Session bundle or Frozen model. How do I convert it to TensorFlow.js?__
 
-You can install a previous version of TensorFlow.js in a virtual environment to convert the model to .pb format, and then follow the instructions above.
-
-Here is how you can achieve this.
+You can install a previous version of TensorFlow.js in a virtual environment to convert the model to the JSON format. Here is how you can achieve this.
 
 * Set up the virtual environment:
 
 ```bash
 virtualenv --no-site-packages venv
 . venv/bin/activate
-pip install tensorflowjs==0.8
+pip install tensorflowjs==0.8.5
 ```
 
 `venv` is the name of the virtual environment.
@@ -295,6 +293,7 @@ pip install tensorflowjs==0.8
 ```bash
 tensorflowjs_converter \
     --input_format=tf_session_bundle \
+    --output_json=true \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
     /mobilenet/session_bundle \
     /mobilenet/web_model
@@ -305,6 +304,7 @@ tensorflowjs_converter \
 ```bash
 tensorflowjs_converter \
     --input_format=tf_frozen_model \
+    --output_json=true \
     --output_node_names='MobilenetV1/Predictions/Reshape_1' \
     --saved_model_tags=serve \
     /mobilenet/frozen_model.pb \
