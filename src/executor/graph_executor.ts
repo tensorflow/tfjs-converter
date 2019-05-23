@@ -291,9 +291,10 @@ export class GraphExecutor {
     const tensorsToKeep = this.getFrozenTensorIds(tensorsMap);
     const added: {[key: string]: boolean} = {};
     while (stack.length > 0) {
-      await this.processStack(
+      const promises = this.processStack(
           inputNodes, stack, context, tensorsMap, added, tensorsToKeep,
           outputNames, intermediateTensorConsumerCount, usedNodes);
+      await Promise.all(promises);
     }
     if (dynamicNode == null) {
       console.warn(
@@ -321,47 +322,65 @@ export class GraphExecutor {
     return tensorsMap;
   }
 
-  private async processStack(
+  private processStack(
       inputNodes: Node[], stack: NodeWithContexts[], context: ExecutionContext,
       tensorMap: NamedTensorsMap, added: {[key: string]: boolean},
       tensorsToKeep: Set<number>, outputNames: string[],
       intermediateTensorConsumerCount: {[key: number]: number},
       usedNodes: Set<string>) {
-    const item = stack.pop();
-    context.currentContext = item.contexts;
-    let nodeName = '';
-    // The tensor of the Enter op with isConstant set should be set
-    // in the parent scope, so it will be available as constant for the
-    // whole loop.
-    if (item.node.op === 'Enter' &&
-        getParamValue('isConstant', item.node, tensorMap, context)) {
-      [nodeName] = getNodeNameAndIndex(item.node.name, context);
-    }
-    // only process nodes that are not provided as input nodes.
-    if (inputNodes.indexOf(item.node) === -1) {
-      let tensors = executeOp(item.node, tensorMap, context);
-      if (!nodeName) {
+    const promises: Array<Promise<Tensor[]>> = [];
+    while (stack.length > 0) {
+      const item = stack.pop();
+      context.currentContext = item.contexts;
+      let nodeName = '';
+      // The tensor of the Enter op with isConstant set should be set
+      // in the parent scope, so it will be available as constant for the
+      // whole loop.
+      if (item.node.op === 'Enter' &&
+          getParamValue('isConstant', item.node, tensorMap, context)) {
         [nodeName] = getNodeNameAndIndex(item.node.name, context);
       }
-      if (tensors instanceof Promise) {
-        tensors = await tensors;
+      // only process nodes that are not provided as input nodes.
+      if (inputNodes.indexOf(item.node) === -1) {
+        const tensors = executeOp(item.node, tensorMap, context);
+        if (!nodeName) {
+          [nodeName] = getNodeNameAndIndex(item.node.name, context);
+        }
+        const currentContext = context.currentContext;
+        if (tensors instanceof Promise) {
+          promises.push(tensors.then(t => {
+            tensorMap[nodeName] = t;
+            context.currentContext = currentContext;
+            this.checkTensorForDisposal(
+                nodeName, item.node, tensorMap, context, tensorsToKeep,
+                outputNames, intermediateTensorConsumerCount);
+            this.processChildNodes(
+                item.node, stack, context, tensorMap, added, usedNodes);
+            return t;
+          }));
+        } else {
+          tensorMap[nodeName] = tensors;
+          this.checkTensorForDisposal(
+              nodeName, item.node, tensorMap, context, tensorsToKeep,
+              outputNames, intermediateTensorConsumerCount);
+          this.processChildNodes(
+              item.node, stack, context, tensorMap, added, usedNodes);
+        }
+      } else {
+        this.processChildNodes(
+            item.node, stack, context, tensorMap, added, usedNodes);
       }
-      tensorMap[nodeName] = tensors;
-      this.checkTensorForDisposal(
-          nodeName, item.node, tensorMap, context, tensorsToKeep, outputNames,
-          intermediateTensorConsumerCount);
     }
-    this.processChildNodes(
-        item.node, stack, context, tensorMap, added, usedNodes);
+    return promises;
   }
 
   private processChildNodes(
       node: Node, stack: NodeWithContexts[], context: ExecutionContext,
       tensorMap: NamedTensorsMap, added: {[key: string]: boolean},
-      nodesToCompute: Set<string>) {
+      usedNodes: Set<string>) {
     node.children.forEach((childNode) => {
       const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
-      if (added[nodeName] || !nodesToCompute.has(childNode.name)) {
+      if (added[nodeName] || !usedNodes.has(childNode.name)) {
         return;
       }
       // Merge op can be pushed if any of its inputs has value.
