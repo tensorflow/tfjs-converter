@@ -91,16 +91,16 @@ export function getExecutionSubgraph(
 export function getNodesInTopologicalOrder(
     graph: Graph, weightMap: NamedTensorsMap,
     executionInfo: ExecutionInfo): Node[] {
-  const {usedNodes: nodes, inputs} = executionInfo;
+  const {usedNodes, inputs} = executionInfo;
   const frontier: Node[] = [];
   const inputNodes = Object.keys(inputs).map(name => graph.nodes[name]);
   inputNodes.forEach(input => {
-    if (nodes.has(input.name)) {
+    if (usedNodes.has(input.name)) {
       frontier.push(input);
     }
   });
   graph.weights.forEach(weight => {
-    if (nodes.has(weight.name)) {
+    if (usedNodes.has(weight.name)) {
       frontier.push(weight);
     }
   });
@@ -113,7 +113,7 @@ export function getNodesInTopologicalOrder(
       orderedNodes.push(node);
     }
     node.children.forEach(child => {
-      if (!seen.has(child.name) && nodes.has(child.name) &&
+      if (!seen.has(child.name) && usedNodes.has(child.name) &&
           child.inputs.every(input => seen.has(input.name))) {
         frontier.push(child);
       }

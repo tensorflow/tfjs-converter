@@ -22,8 +22,7 @@ import {OperationMapper} from '../operations/operation_mapper';
 
 import {getExecutionSubgraph} from './model_analysis';
 
-// tslint:disable-next-line: ban
-fdescribe('getExecutionInfo', () => {
+describe('getExecutionInfo', () => {
   it('2 disconnected subgraphs, no dynamic ops', () => {
     const weightMap = {};
     const graphDef: IGraphDef = {
@@ -113,25 +112,26 @@ fdescribe('getExecutionInfo', () => {
       node: [
         {name: 'input', op: 'Placeholder'},
         {name: 'intermediate', op: 'Enter', input: ['input']},
-        {name: 'output', op: 'Square', input: ['intermediate']},
+        {name: 'intermediate2', op: 'Const', input: ['intermediate']},
+        {name: 'output', op: 'Square', input: ['intermediate2']},
       ],
       versions: {producer: 1.0, minConsumer: 3}
     };
     const graph = OperationMapper.Instance.transformGraph(graphDef);
 
-
     // input --> output
-    let inputs: NamedTensorMap = {'input': scalar(0)};
-    let outputs = [graph.nodes['output']];
-    let executionInfo = getExecutionSubgraph(inputs, outputs, weightMap);
+    const inputs: NamedTensorMap = {'input': scalar(0)};
+    const outputs = [graph.nodes['output']];
+    const executionInfo = getExecutionSubgraph(inputs, outputs, weightMap);
     expect(executionInfo.inputs).toBe(inputs);
     expect(executionInfo.outputs).toBe(outputs);
     expect(executionInfo.dynamicNode).toBe(graph.nodes['intermediate']);
     expect(executionInfo.missingInputs).toEqual([]);
-    expect(executionInfo.syncInputs).toEqual([]);
+    expect(executionInfo.syncInputs).toEqual(['intermediate2']);
     expect(executionInfo.usedNodes).toContain('input');
     expect(executionInfo.usedNodes).toContain('intermediate');
+    expect(executionInfo.usedNodes).toContain('intermediate2');
     expect(executionInfo.usedNodes).toContain('output');
-    expect(executionInfo.usedNodes.size).toBe(3);
+    expect(executionInfo.usedNodes.size).toBe(4);
   });
 });

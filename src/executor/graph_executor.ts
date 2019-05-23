@@ -340,7 +340,7 @@ export class GraphExecutor {
       nodesToCompute: Set<string>) {
     node.children.forEach((childNode) => {
       const [nodeName, ] = getNodeNameAndIndex(childNode.name, context);
-      if (added[nodeName] || !nodesToCompute.has(nodeName)) {
+      if (added[nodeName] || !nodesToCompute.has(childNode.name)) {
         return;
       }
       // Merge op can be pushed if any of its inputs has value.
