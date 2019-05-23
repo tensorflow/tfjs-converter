@@ -340,6 +340,7 @@ export class GraphExecutor {
           getParamValue('isConstant', item.node, tensorMap, context)) {
         [nodeName] = getNodeNameAndIndex(item.node.name, context);
       }
+
       // only process nodes that are not provided as input nodes.
       if (inputNodes.indexOf(item.node) === -1) {
         const tensors = executeOp(item.node, tensorMap, context);
