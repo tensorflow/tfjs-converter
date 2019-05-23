@@ -18,7 +18,7 @@
 import {DataType, NamedTensorMap, Tensor, tidy, util} from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap, TensorArrayMap, TensorInfo} from '../data/types';
-import {getNodeNameAndIndex, getTensor, getTensorsForCurrentContenxt, parseNodeName} from '../operations/executors/utils';
+import {getNodeNameAndIndex, getParamValue, getTensor, getTensorsForCurrentContenxt, parseNodeName} from '../operations/executors/utils';
 import {executeOp} from '../operations/operation_executor';
 import {Graph, Node} from '../operations/types';
 
@@ -276,7 +276,7 @@ export class GraphExecutor {
     const inputNodes = names.map(name => this.graph.nodes[name]);
     const outputNodes =
         outputNames.map(name => this.graph.nodes[parseNodeName(name)[0]]);
-    const {usedNodes: nodes, missingInputs, dynamicNode, syncInputs} =
+    const {usedNodes, missingInputs, dynamicNode, syncInputs} =
         getExecutionSubgraph(inputs, outputNodes, this.weightMap);
 
     const stack: NodeWithContexts[] =
@@ -291,22 +291,9 @@ export class GraphExecutor {
     const tensorsToKeep = this.getFrozenTensorIds(tensorsMap);
     const added: {[key: string]: boolean} = {};
     while (stack.length > 0) {
-      const item = stack.pop();
-      context.currentContext = item.contexts;
-      // only process nodes that are not provided as input nodes.
-      if (inputNodes.indexOf(item.node) === -1) {
-        let tensors = executeOp(item.node, tensorsMap, context);
-        const [nodeName] = getNodeNameAndIndex(item.node.name, context);
-        if (tensors instanceof Promise) {
-          tensors = await tensors;
-        }
-        tensorsMap[nodeName] = tensors;
-        this.checkTensorForDisposal(
-            nodeName, item.node, tensorsMap, context, tensorsToKeep,
-            outputNames, intermediateTensorConsumerCount);
-      }
-      this.processChildNodes(
-          item.node, stack, context, tensorsMap, added, nodes);
+      await this.processStack(
+          inputNodes, stack, context, tensorsMap, added, tensorsToKeep,
+          outputNames, intermediateTensorConsumerCount, usedNodes);
     }
     if (dynamicNode == null) {
       console.warn(
@@ -332,6 +319,40 @@ export class GraphExecutor {
           `[${missingInputs}]. ${alternativeMsg}`);
     }
     return tensorsMap;
+  }
+
+  private async processStack(
+      inputNodes: Node[], stack: NodeWithContexts[], context: ExecutionContext,
+      tensorMap: NamedTensorsMap, added: {[key: string]: boolean},
+      tensorsToKeep: Set<number>, outputNames: string[],
+      intermediateTensorConsumerCount: {[key: number]: number},
+      usedNodes: Set<string>) {
+    const item = stack.pop();
+    context.currentContext = item.contexts;
+    let nodeName = '';
+    // The tensor of the Enter op with isConstant set should be set
+    // in the parent scope, so it will be available as constant for the
+    // whole loop.
+    if (item.node.op === 'Enter' &&
+        getParamValue('isConstant', item.node, tensorMap, context)) {
+      [nodeName] = getNodeNameAndIndex(item.node.name, context);
+    }
+    // only process nodes that are not provided as input nodes.
+    if (inputNodes.indexOf(item.node) === -1) {
+      let tensors = executeOp(item.node, tensorMap, context);
+      if (!nodeName) {
+        [nodeName] = getNodeNameAndIndex(item.node.name, context);
+      }
+      if (tensors instanceof Promise) {
+        tensors = await tensors;
+      }
+      tensorMap[nodeName] = tensors;
+      this.checkTensorForDisposal(
+          nodeName, item.node, tensorMap, context, tensorsToKeep, outputNames,
+          intermediateTensorConsumerCount);
+    }
+    this.processChildNodes(
+        item.node, stack, context, tensorMap, added, usedNodes);
   }
 
   private processChildNodes(
