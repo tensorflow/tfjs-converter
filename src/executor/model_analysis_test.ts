@@ -37,7 +37,6 @@ describe('getExecutionInfo', () => {
     };
     const graph = OperationMapper.Instance.transformGraph(graphDef);
 
-
     // input --> output
     let inputs: NamedTensorMap = {'input': scalar(0)};
     let outputs = [graph.nodes['output']];
