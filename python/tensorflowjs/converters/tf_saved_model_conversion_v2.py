@@ -195,7 +195,7 @@ def extract_weights(graph_def,
       # TODO(https://github.com/tensorflow/tfjs/issues/1598):
       # Skip weight serialization of string tensors when we skip op checks.
       can_skip_weight = (skip_op_check and
-                            const.attr['dtype'].type == types_pb2.DT_STRING)
+                         const.attr['dtype'].type == types_pb2.DT_STRING)
       if not can_skip_weight:
         const_manifest.append({'name': const.name, 'data': value})
 

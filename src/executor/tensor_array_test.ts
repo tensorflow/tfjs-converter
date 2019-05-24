@@ -194,7 +194,9 @@ describe('TensorArray', () => {
           NAME, DTYPE, SIZE, [-1, 1], IDENTICAL_SHAPE, DYNAMIC_SIZE,
           CLEAR_AFTER_READ);
       const input = tensor3d([1, 2, 3], [3, 1, 1], 'int32');
-      expect(() => tensorArray.scatter([1, 2, 3], input)).not.toThrow();
+      tensorArray.scatter([1, 2, 3], input);
+      const res = tensorArray.gather([1]);
+      expect(res).not.toBeNull();
     });
 
     it('should fail if max index > array max size', () => {
