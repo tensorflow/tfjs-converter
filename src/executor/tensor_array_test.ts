@@ -81,6 +81,7 @@ describe('TensorArray', () => {
           CLEAR_AFTER_READ);
       const tensor = tensor2d([1, 2], [2, 1], 'int32');
       tensorArray.write(0, tensor);
+      expect(tensorArray.read(0)).not.toBeNull();
     });
     it('should fail if the index has already been written', () => {
       tensorArray.write(0, tensor);
@@ -193,7 +194,7 @@ describe('TensorArray', () => {
           NAME, DTYPE, SIZE, [-1, 1], IDENTICAL_SHAPE, DYNAMIC_SIZE,
           CLEAR_AFTER_READ);
       const input = tensor3d([1, 2, 3], [3, 1, 1], 'int32');
-      tensorArray.scatter([1, 2, 3], input);
+      expect(() => tensorArray.scatter([1, 2, 3], input)).not.toThrow();
     });
 
     it('should fail if max index > array max size', () => {

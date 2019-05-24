@@ -405,13 +405,15 @@ describe('Model', () => {
     it('should be success if call executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-      await model.executeAsync([input]);
+      const res = await model.executeAsync([input]);
+      expect(res).not.toBeNull();
     });
 
     it('should allow feed intermediate node with executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-      await model.executeAsync({Enter: input});
+      const res = await model.executeAsync({Enter: input});
+      expect(res).not.toBeNull();
     });
   });
   const DYNAMIC_HTTP_MODEL_LOADER = {
@@ -449,13 +451,15 @@ describe('Model', () => {
     it('should be success if call executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'bool');
-      await model.executeAsync([input]);
+      const res = await model.executeAsync([input]);
+      expect(res).not.toBeNull();
     });
 
     it('should allow feed intermediate node with executeAsync', async () => {
       await model.load();
       const input = tfc.tensor2d([1, 1], [2, 1], 'int32');
-      await model.executeAsync({Where: input});
+      const res = await model.executeAsync({Where: input});
+      expect(res).not.toBeNull();
     });
   });
 });

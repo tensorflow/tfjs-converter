@@ -154,14 +154,16 @@ def optimize_graph(func,
     raise ValueError('Unsupported Ops in the model after optimization\n' +
                      ', '.join(unsupported))
 
-  extract_weights(optimized_graph, output_graph, tf_version, quantization_dtype)
+  extract_weights(
+      optimized_graph, output_graph, tf_version, quantization_dtype,
+      skip_op_check)
   return optimize_graph
 
 
 def extract_weights(graph_def,
                     output_graph,
                     tf_version,
-                    quantization_dtype=None):
+                    quantization_dtype=None, skip_op_check=False):
   """Takes a Python GraphDef object and extract the weights.
 
   Args:
@@ -191,8 +193,10 @@ def extract_weights(graph_def,
         value = np.array(value)
 
       # TODO(https://github.com/tensorflow/tfjs/issues/1598):
-      # Support weight serialization of string tensors.
-      if const.attr['dtype'].type != types_pb2.DT_STRING:
+      # Skip weight serialization of string tensors when we skip op checks.
+      can_skip_weight = (skip_op_check and
+                            const.attr['dtype'].type == types_pb2.DT_STRING)
+      if not can_skip_weight:
         const_manifest.append({'name': const.name, 'data': value})
 
       # Restore the conditional inputs

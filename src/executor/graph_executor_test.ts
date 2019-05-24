@@ -199,19 +199,22 @@ describe('GraphExecutor', () => {
 
           it('should accept existing outputs', () => {
             const inputTensor = tfc.tensor1d([1], 'float32');
-            executor.execute({input: inputTensor}, ['output']);
+            const res = executor.execute({input: inputTensor}, ['output']);
+            expect(res).not.toBeNull();
           });
 
           it('should accept existing outputs with child tensors', () => {
             const inputTensor = tfc.tensor1d([1], 'float32');
-            executor.execute({input: inputTensor}, ['output:0']);
+            const res = executor.execute({input: inputTensor}, ['output:0']);
+            expect(res).not.toBeNull();
           });
         });
 
         it('should not throw exception if inputs shapes is dynamic', () => {
           inputNode.attrParams['shape'] = {value: [-1, 1, 1, 1], type: 'shape'};
           const inputTensor = tfc.tensor4d([1, 1], [2, 1, 1, 1], 'float32');
-          executor.execute({input: inputTensor}, ['output']);
+          const res = executor.execute({input: inputTensor}, ['output']);
+          expect(res).not.toBeNull();
         });
       });
 
