@@ -288,8 +288,6 @@ class ConvertKerasToTfGraphModelTest(tf.test.TestCase):
     super(ConvertKerasToTfGraphModelTest, self).tearDown()
 
   def testConvertKerasModelToTfGraphModel(self):
-    print('### Start')  # DEBUG
-
     output_dir = os.path.join(self._tmp_dir, 'foo_model')
     sequential_model = keras.models.Sequential([
         keras.layers.Dense(
