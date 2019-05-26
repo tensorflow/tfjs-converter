@@ -129,7 +129,7 @@ def dispatch_keras_h5_to_tfjs_graph_model_conversion(
   keras.experimental.export_saved_model(
       model, temp_savedmodel_dir, serving_only=True)
 
-  # NOTE(cais): This test cannot use `tf.compat.v1` because
+  # NOTE(cais): This cannot use `tf.compat.v1` because
   #   `convert_tf_saved_model()` works only in v2.
   tf_saved_model_conversion_v2.convert_tf_saved_model(
       temp_savedmodel_dir, output_dir,
