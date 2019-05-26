@@ -21,6 +21,7 @@ from __future__ import print_function
 import argparse
 import json
 import os
+import shutil
 import tempfile
 
 import h5py
@@ -35,7 +36,7 @@ from tensorflowjs.converters import keras_tfjs_loader
 from tensorflowjs.converters import tf_saved_model_conversion_v2
 
 
-def dispatch_keras_h5_to_tensorflowjs_conversion(
+def dispatch_keras_h5_to_tfjs_layers_model_conversion(
     h5_path, output_dir=None, quantization_dtype=None,
     split_weights_by_layer=False,
     weight_shard_size_bytes=1024 * 1024 * 4):
@@ -97,6 +98,51 @@ def dispatch_keras_h5_to_tensorflowjs_conversion(
   return model_json, groups
 
 
+def dispatch_keras_h5_to_tfjs_graph_model_conversion(
+    h5_path, output_dir=None,
+    quantization_dtype=None,
+    skip_op_check=False,
+    strip_debug_ops=False):
+  """
+  Convert a keras HDF5-format model to tfjs GraphModel artifacts.
+
+  Args:
+    h5_path: Path to the HDF5-format file that contains the model saved from
+      keras or tf.keras.
+    output_dir: The destination to which the tfjs GraphModel artifacts will be
+      written.
+    quantization_dtype: The quantized data type to store the weights in
+      (Default: `None`).
+    skip_op_check: Bool whether to skip the op check.
+    strip_debug_ops: Bool whether to allow unsupported debug ops.
+  """
+
+  if not os.path.exists(h5_path):
+    raise ValueError('Nonexistent path to HDF5 file: %s' % h5_path)
+  if os.path.isdir(h5_path):
+    raise ValueError(
+        'Expected path to point to an HDF5 file, but it points to a '
+        'directory: %s' % h5_path)
+
+  temp_savedmodel_dir = tempfile.mktemp(suffix='.savedmodel')
+  model = keras.models.load_model(h5_path)
+  keras.experimental.export_saved_model(
+      model, temp_savedmodel_dir, serving_only=True)
+
+  # NOTE(cais): This test cannot use `tf.compat.v1` because
+  #   `convert_tf_saved_model()` works only in v2.
+  tf_saved_model_conversion_v2.convert_tf_saved_model(
+      temp_savedmodel_dir, output_dir,
+      signature_def='serving_default',
+      saved_model_tags='serve',
+      quantization_dtype=quantization_dtype,
+      skip_op_check=skip_op_check,
+      strip_debug_ops=strip_debug_ops)
+
+  # Clean up the temporary SavedModel directory.
+  shutil.rmtree(temp_savedmodel_dir)
+
+
 def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     keras_saved_model_path, output_dir, quantization_dtype=None,
     split_weights_by_layer=False):
@@ -128,7 +174,7 @@ def dispatch_keras_saved_model_to_tensorflowjs_conversion(
     model.save(temp_h5_path)
     assert os.path.isfile(temp_h5_path)
 
-    dispatch_keras_h5_to_tensorflowjs_conversion(
+    dispatch_keras_h5_to_tfjs_layers_model_conversion(
         temp_h5_path,
         output_dir,
         quantization_dtype=quantization_dtype,
@@ -226,7 +272,7 @@ def dispatch_tensorflowjs_to_tensorflowjs_conversion(
     dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, temp_h5_path)
 
   with tf.Graph().as_default(), tf.compat.v1.Session():
-    dispatch_keras_h5_to_tensorflowjs_conversion(
+    dispatch_keras_h5_to_tfjs_layers_model_conversion(
         temp_h5_path, output_dir_path,
         quantization_dtype=quantization_dtype,
         weight_shard_size_bytes=weight_shard_size_bytes)
@@ -426,10 +472,16 @@ def main():
   # TODO(cais, piyu): More conversion logics can be added as additional
   #   branches below.
   if input_format == 'keras' and output_format == 'tfjs_layers_model':
-    dispatch_keras_h5_to_tensorflowjs_conversion(
+    dispatch_keras_h5_to_tfjs_layers_model_conversion(
         FLAGS.input_path, output_dir=FLAGS.output_path,
         quantization_dtype=quantization_dtype,
         split_weights_by_layer=FLAGS.split_weights_by_layer)
+  elif input_format == 'keras' and output_format == 'tfjs_graph_model':
+    dispatch_keras_h5_to_tfjs_graph_model_conversion(
+        FLAGS.input_path, output_dir=FLAGS.output_path,
+        quantization_dtype=quantization_dtype,
+        skip_op_check=FLAGS.skip_op_check,
+        strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'keras_saved_model' and
         output_format == 'tfjs_layers_model'):
     dispatch_keras_saved_model_to_tensorflowjs_conversion(
