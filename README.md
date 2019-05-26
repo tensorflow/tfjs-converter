@@ -151,7 +151,7 @@ purposes:
 
 ##### Converting tfjs_layers_model to tfjs_graph_model
 
-Converting a tfjs_layers_model to a tfjs_graph_model can usually often lead to
+Converting a tfjs_layers_model to a tfjs_graph_model can usually often leads to
 faster speed of inference in the browser and Node.js, thanks to the graph
 optimization that goes into generating the tfjs_graph_models. For more details,
 refer to
