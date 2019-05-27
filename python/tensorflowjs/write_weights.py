@@ -177,12 +177,12 @@ def _quantize_entry(entry, quantization_dtype):
   return quantized_entry
 
 
-def _serialize_string_array(data):
+def _serialize_string_array(data, delimiter):
   unicode_strings = [
       x.decode('utf-8') if isinstance(x, bytes) else x
       for x in data.flatten().tolist()
   ]
-  return STRING_DELIMITER.join(unicode_strings).encode('utf-8')
+  return delimiter.join(unicode_strings).encode('utf-8')
 
 def _serialize_numeric_array(data):
   return data.tobytes()
@@ -210,7 +210,7 @@ def _stack_group_bytes(group):
     data = entry['data']
 
     if data.dtype == np.object:
-      data_bytes = _serialize_string_array(data)
+      data_bytes = _serialize_string_array(data, STRING_DELIMITER)
       entry['byte_length'] = len(data_bytes)
     else:
       data_bytes = _serialize_numeric_array(data)

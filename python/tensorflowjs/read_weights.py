@@ -23,7 +23,6 @@ import os
 
 import numpy as np
 from tensorflowjs import quantization
-from tensorflowjs import write_weights
 
 _INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.object]
 
@@ -71,10 +70,11 @@ def read_weights(weights_manifest, base_path, flatten=False):
   return decode_weights(weights_manifest, data_buffers, flatten=flatten)
 
 
-def _deserialize_string_array(data_buffer, offset, byte_length, shape):
+def _deserialize_string_array(
+    data_buffer, offset, byte_length, shape, delimiter):
   decoded = data_buffer[offset : offset + byte_length].decode('utf-8')
   return np.array(
-      decoded.split(write_weights.STRING_DELIMITER), 'object').reshape(shape)
+      decoded.split(delimiter), 'object').reshape(shape)
 
 
 def _deserialize_numeric_array(data_buffer, offset, dtype, shape):
@@ -148,8 +148,9 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
         raise NotImplementedError('Unsupported data type: %s' % dtype)
       if dtype == np.object:
         weight_bytes = weight['byte_length']
-        value = _deserialize_string_array(data_buffer, offset,
-                                          weight_bytes, shape)
+        delimiter = weight['delimiter']
+        value = _deserialize_string_array(
+            data_buffer, offset, weight_bytes, shape, delimiter)
 
       else:
         value = _deserialize_numeric_array(data_buffer, offset, dtype, shape)
