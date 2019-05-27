@@ -95,6 +95,136 @@ class TestWriteWeights(unittest.TestCase):
     np.testing.assert_array_equal(
         weight1, np.array([True, False, True], 'bool'))
 
+  def test_1_group_1_weight_string(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([['hello', 'end'], ['test', 'a']], 'object')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(
+        groups, TMP_DIR, shard_size_bytes=4 * 1024 * 1024)
+
+    self.assertTrue(
+        os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
+        'weights_manifest.json does not exist')
+
+    self.assertEqual(
+        manifest,
+        [{
+            'paths': ['group1-shard1of1.bin'],
+            'weights': [{
+                'name': 'weight1',
+                'delimiter': '\x00',
+                'byte_length': 16,
+                'shape': [2, 2],
+                'dtype': 'string'
+            }]
+        }])
+
+    weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
+    with open(weights_path, 'rb') as f:
+      weight_bytes = f.read()
+      self.assertEqual(weight_bytes, b'hello\x00end\x00test\x00a')
+
+  def test_1_group_1_weight_string_sharded(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array(['hello', 'a', 'b'], 'object')
+        }]
+    ]
+
+    # The array takes up 9 bytes, requiring 3 shards when shard size is 4 bytes.
+    manifest = write_weights.write_weights(
+        groups, TMP_DIR, shard_size_bytes=4)
+
+    self.assertTrue(
+        os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
+        'weights_manifest.json does not exist')
+
+    self.assertEqual(
+        manifest,
+        [{
+            'paths': [
+                'group1-shard1of3.bin',
+                'group1-shard2of3.bin',
+                'group1-shard3of3.bin'
+            ],
+            'weights': [{
+                'name': 'weight1',
+                'delimiter': '\x00',
+                'byte_length': 9,
+                'shape': [3],
+                'dtype': 'string'
+            }]
+        }])
+
+    weight_bytes = bytes()
+    with open(os.path.join(TMP_DIR, 'group1-shard1of3.bin'), 'rb') as f:
+      weight_bytes += f.read()
+    with open(os.path.join(TMP_DIR, 'group1-shard2of3.bin'), 'rb') as f:
+      weight_bytes += f.read()
+    with open(os.path.join(TMP_DIR, 'group1-shard3of3.bin'), 'rb') as f:
+      weight_bytes += f.read()
+      self.assertEqual(weight_bytes, b'hello\x00a\x00b')
+
+  def test_1_group_3_weights_packed_multi_dtype(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([1, 2, 3], 'float32')
+        }, {
+            'name': 'weight2',
+            'data': np.array(['hello', 'end', 'test'], 'object')
+        }, {
+            'name': 'weight3',
+            'data': np.array([4, 5, 6], 'float32')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(
+        groups, TMP_DIR, shard_size_bytes=4 * 1024 * 1024)
+
+    self.assertTrue(
+        os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
+        'weights_manifest.json does not exist')
+
+    self.assertEqual(
+        manifest,
+        [{
+            'paths': ['group1-shard1of1.bin'],
+            'weights': [{
+                'name': 'weight1',
+                'shape': [3],
+                'dtype': 'float32'
+            }, {
+                'name': 'weight2',
+                'delimiter': '\x00',
+                'byte_length': 14,
+                'shape': [3],
+                'dtype': 'string'
+            }, {
+                'name': 'weight3',
+                'shape': [3],
+                'dtype': 'float32'
+            }]
+        }])
+
+    weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
+    with open(weights_path, 'rb') as f:
+      weight_bytes = f.read()
+
+      weight1 = np.frombuffer(weight_bytes[:12], 'float32')
+      np.testing.assert_array_equal(weight1, np.array([1, 2, 3], 'float32'))
+
+
+      self.assertEqual(weight_bytes[12:-12], b'hello\x00end\x00test')
+
+      weight3 = np.frombuffer(weight_bytes[-12:], 'float32')
+      np.testing.assert_array_equal(weight3, np.array([4, 5, 6], 'float32'))
+
   def test_1_group_1_weight_sharded(self):
     groups = [
         [{

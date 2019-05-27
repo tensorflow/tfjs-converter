@@ -57,6 +57,43 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertTrue(
         np.allclose(groups[0][0]['data'], read_output[0][0]['data']))
 
+  def testReadOneGroupString(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([['test', 'a'], ['b', 'c']], 'object')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
+
+    # Read the weights using `read_weights`.
+    read_output = read_weights.read_weights(manifest, self._tmp_dir)
+    self.assertEqual(1, len(read_output))
+    self.assertEqual(1, len(read_output[0]))
+    self.assertEqual('weight1', read_output[0][0]['name'])
+    np.testing.assert_array_equal(read_output[0][0]['data'],
+                                  np.array([['test', 'a'], ['b', 'c']], 'object'))
+
+  def testReadOneGroupStringWithShards(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array(['test', 'a', 'c'], 'object')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(groups, self._tmp_dir,
+                                           shard_size_bytes=4)
+
+    # Read the weights using `read_weights`.
+    read_output = read_weights.read_weights(manifest, self._tmp_dir)
+    self.assertEqual(1, len(read_output))
+    self.assertEqual(1, len(read_output[0]))
+    self.assertEqual('weight1', read_output[0][0]['name'])
+    np.testing.assert_array_equal(read_output[0][0]['data'],
+                                  np.array(['test', 'a', 'c'], 'object'))
+
   def testReadOneGroupFlattened(self):
     groups = [
         [{

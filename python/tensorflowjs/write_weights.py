@@ -21,11 +21,13 @@ import os
 import numpy as np
 from tensorflowjs import quantization
 
-_OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool]
+_OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool, np.object]
 _AUTO_DTYPE_CONVERSION = {
     np.dtype(np.float64): np.float32,
     np.dtype(np.int64): np.int32}
 
+# Delimiter used in serializing string tensors.
+STRING_DELIMITER = '\x00'
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
@@ -175,6 +177,12 @@ def _quantize_entry(entry, quantization_dtype):
   return quantized_entry
 
 
+def _serialize_string_array(data):
+  return STRING_DELIMITER.join(data.flatten().tolist()).encode('utf-8')
+
+def _serialize_numeric_array(data):
+  return data.tobytes()
+
 def _stack_group_bytes(group):
   """Stacks the bytes for a weight group into a flat byte array.
 
@@ -196,7 +204,12 @@ def _stack_group_bytes(group):
     _assert_valid_weight_entry(entry)
     _auto_convert_weight_entry(entry)
     data = entry['data']
-    data_bytes = data.tobytes()
+
+    if data.dtype == np.object:
+      data_bytes = _serialize_string_array(data)
+      entry['byte_length'] = len(data_bytes)
+    else:
+      data_bytes = _serialize_numeric_array(data)
     group_bytes_writer.write(data_bytes)
     total_bytes += len(data_bytes)
 
@@ -260,6 +273,11 @@ def _get_weights_manifest_for_group(group):
         'shape': list(entry['data'].shape),
         'dtype': dtype
     }
+    # String arrays have dtype 'object' and need extra metadata to parse.
+    if dtype == 'object':
+      var_manifest['dtype'] = 'string'
+      var_manifest['delimiter'] = STRING_DELIMITER
+      var_manifest['byte_length'] = entry['byte_length']
     if is_quantized:
       var_manifest['quantization'] = {
           'min': entry['quantization']['min'],

@@ -23,8 +23,9 @@ import os
 
 import numpy as np
 from tensorflowjs import quantization
+from tensorflowjs import write_weights
 
-_INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16]
+_INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.object]
 
 
 def read_weights(weights_manifest, base_path, flatten=False):
@@ -69,6 +70,20 @@ def read_weights(weights_manifest, base_path, flatten=False):
     data_buffers.append(buff.read())
   return decode_weights(weights_manifest, data_buffers, flatten=flatten)
 
+
+def _deserialize_string_array(data_buffer, offset, byte_length, shape):
+  decoded = data_buffer[offset : offset + byte_length].decode('utf-8')
+  return np.array(
+      decoded.split(write_weights.STRING_DELIMITER), 'object').reshape(shape)
+
+
+def _deserialize_numeric_array(data_buffer, offset, dtype, shape):
+  weight_numel = 1
+  for dim in shape:
+    weight_numel *= dim
+  return np.frombuffer(
+      data_buffer, dtype=dtype, count=weight_numel,
+      offset=offset).reshape(shape)
 
 def decode_weights(weights_manifest, data_buffers, flatten=False):
   """Load weight values from buffer(s) according to a weights manifest.
@@ -117,25 +132,31 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
     out_group = []
 
     for weight in group['weights']:
-      quantization_info = weight.get('quantization', None)
+      quant_info = weight.get('quantization', None)
       name = weight['name']
-      dtype = np.dtype(
-          quantization_info['dtype'] if quantization_info else weight['dtype'])
+      if weight['dtype'] == 'string':
+        # String array.
+        dtype = np.object
+      elif quant_info:
+        # Quantized array.
+        dtype = np.dtype(quant_info['dtype'])
+      else:
+        # Regular numeric array.
+        dtype = np.dtype(weight['dtype'])
       shape = weight['shape']
       if dtype not in _INPUT_DTYPES:
         raise NotImplementedError('Unsupported data type: %s' % dtype)
-      unit_bytes = dtype.itemsize
+      if dtype == np.object:
+        weight_bytes = weight['byte_length']
+        value = _deserialize_string_array(data_buffer, offset,
+                                          weight_bytes, shape)
 
-      weight_numel = 1
-      for dim in shape:
-        weight_numel *= dim
-      weight_bytes = unit_bytes * weight_numel
-      value = np.frombuffer(
-          data_buffer, dtype=dtype, count=weight_numel,
-          offset=offset).reshape(shape)
-      if quantization_info:
+      else:
+        value = _deserialize_numeric_array(data_buffer, offset, dtype, shape)
+        weight_bytes = dtype.itemsize * value.size
+      if quant_info:
         value = quantization.dequantize_weights(
-            value, quantization_info['scale'], quantization_info['min'],
+            value, quant_info['scale'], quant_info['min'],
             np.dtype(weight['dtype']))
       offset += weight_bytes
       out_group.append({'name': name, 'data': value})
