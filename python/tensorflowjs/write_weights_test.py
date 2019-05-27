@@ -99,7 +99,41 @@ class TestWriteWeights(unittest.TestCase):
     groups = [
         [{
             'name': 'weight1',
-            'data': np.array([['hello', 'end'], ['test', 'a']], 'object')
+            'data': np.array([[b'hello', b'end'], [b'test', b'a']], 'object')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(
+        groups, TMP_DIR, shard_size_bytes=4 * 1024 * 1024)
+
+    self.assertTrue(
+        os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
+        'weights_manifest.json does not exist')
+
+    self.assertEqual(
+        manifest,
+        [{
+            'paths': ['group1-shard1of1.bin'],
+            'weights': [{
+                'name': 'weight1',
+                'delimiter': '\x00',
+                'byte_length': 16,
+                'shape': [2, 2],
+                'dtype': 'string'
+            }]
+        }])
+
+    weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
+    with open(weights_path, 'rb') as f:
+      weight_bytes = f.read()
+      self.assertEqual(weight_bytes, b'hello\x00end\x00test\x00a')
+
+
+  def test_1_group_1_weight_string_unicode(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([[u'hello', u'end'], [u'test', u'a']], 'object')
         }]
     ]
 

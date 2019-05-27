@@ -72,8 +72,9 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertEqual(1, len(read_output))
     self.assertEqual(1, len(read_output[0]))
     self.assertEqual('weight1', read_output[0][0]['name'])
-    np.testing.assert_array_equal(read_output[0][0]['data'],
-                                  np.array([['test', 'a'], ['b', 'c']], 'object'))
+    np.testing.assert_array_equal(
+        read_output[0][0]['data'],
+        np.array([['test', 'a'], ['b', 'c']], 'object'))
 
   def testReadOneGroupStringWithShards(self):
     groups = [

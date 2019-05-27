@@ -27,7 +27,7 @@ _AUTO_DTYPE_CONVERSION = {
     np.dtype(np.int64): np.int32}
 
 # Delimiter used in serializing string tensors.
-STRING_DELIMITER = '\x00'
+STRING_DELIMITER = u'\x00'
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
@@ -178,7 +178,11 @@ def _quantize_entry(entry, quantization_dtype):
 
 
 def _serialize_string_array(data):
-  return STRING_DELIMITER.join(data.flatten().tolist()).encode('utf-8')
+  unicode_strings = [
+      x.decode('utf-8') if isinstance(x, bytes) else x
+      for x in data.flatten().tolist()
+  ]
+  return STRING_DELIMITER.join(unicode_strings).encode('utf-8')
 
 def _serialize_numeric_array(data):
   return data.tobytes()
