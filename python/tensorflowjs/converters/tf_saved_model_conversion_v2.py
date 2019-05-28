@@ -37,6 +37,8 @@ from google.protobuf.json_format import MessageToDict
 
 import tensorflow_hub as hub
 
+# print(hub.version.__version__)
+
 from tensorflowjs import write_weights
 from tensorflowjs.converters import common
 
@@ -87,6 +89,7 @@ def validate(nodes, skip_op_check, strip_debug_ops):
   ops = []
   op_list_path = os.path.join(
       os.path.dirname(os.path.abspath(__file__)), '../op_list/')
+
   for filename in os.listdir(op_list_path):
     if os.path.splitext(filename)[1] == '.json':
       with open(os.path.join(op_list_path, filename)) as json_data:
@@ -246,7 +249,7 @@ def write_artifacts(topology,
     json.dump(model_json, f)
 
 def convert_tf_saved_model(saved_model_dir,
-                           output_dir, signature_def='serving_default',
+                           output_dir, signature_name='serving_default',
                            saved_model_tags='serve',
                            quantization_dtype=None,
                            skip_op_check=False,
@@ -263,24 +266,31 @@ def convert_tf_saved_model(saved_model_dir,
       will consist of
       - a file named 'model.json'
       - possibly sharded binary weight files.
-    signature_def: string Tagset of the SignatureDef to load. Defaulted to
-      'serving_default'
+    signature_name: string Tagset of the SignatureDef to load. Defaults to
+      'serving_default'.
+    saved_model_tags: tags of the GraphDef to load. Unless a list is provided,
+      the provided string will be comma separated. Defaults to 'serve'.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
     skip_op_check: Bool whether to skip the op check.
     strip_debug_ops: Bool whether to strip debug ops.
   """
-  if signature_def is None:
-    signature_def = 'serving_default'
+  if not isinstance(saved_model_tags, list):
+    saved_model_tags = saved_model_tags.split(',')
 
   if not os.path.exists(output_dir):
     os.makedirs(output_dir)
   output_graph = os.path.join(
       output_dir, common.ARTIFACT_MODEL_JSON_FILE_NAME)
 
-  saved_model_tags = saved_model_tags.split(', ')
-  model = load(saved_model_dir, saved_model_tags)
-  concrete_func = model.signatures[signature_def]
+  model = hub.load(saved_model_dir, saved_model_tags)
+
+  if signature_name not in model.signatures:
+    raise ValueError("Signature '%s' does not exist. The following signatures "
+                     "are available: %s" % (signature_name,
+                                            model.signatures.keys()))
+
+  concrete_func = model.signatures[signature_name]
   frozen_func = convert_to_constants.convert_variables_to_constants_v2(
       concrete_func)
 
@@ -288,106 +298,13 @@ def convert_tf_saved_model(saved_model_dir,
                  quantization_dtype=quantization_dtype,
                  skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
-def load_and_initialize_hub_module(module_path, signature='default'):
-  """Loads graph of a TF-Hub module and initializes it into a session.
-
-  Args:
-    module_path: string Path to TF-Hub module.
-    signature: string Signature to use when creating the apply graph.
-
-  Return:
-    graph: tf.Graph Graph of the module.
-    session: tf.Session Session with initialized variables and tables.
-    inputs: dict Dictionary of input tensors.
-    outputs: dict Dictionary of output tensors.
-
-  Raises:
-    ValueError: If signature contains a SparseTensor on input or output.
-  """
-  graph = tf.Graph()
-  with graph.as_default():
-    tf.compat.v1.logging.info('Importing %s', module_path)
-    module = hub.Module(module_path)
-
-    signature_inputs = module.get_input_info_dict(signature)
-    signature_outputs = module.get_output_info_dict(signature)
-    # First check there are no SparseTensors in input or output.
-    for key, info in list(signature_inputs.items()) + list(
-        signature_outputs.items()):
-      if info.is_sparse:
-        raise ValueError(
-            'Signature "%s" has a SparseTensor on input/output "%s".'
-            ' SparseTensors are not supported.' % (signature, key))
-
-    # Create placeholders to represent the input of the provided signature.
-    inputs = {}
-    for input_key, input_info in signature_inputs.items():
-      inputs[input_key] = tf.compat.v1.placeholder(
-          shape=input_info.get_shape(), dtype=input_info.dtype, name=input_key)
-
-    outputs = module(inputs=inputs, signature=signature, as_dict=True)
-
-    session = tf.compat.v1.Session(graph=graph)
-    session.run(tf.compat.v1.global_variables_initializer())
-    session.run(tf.compat.v1.tables_initializer())
-
-  return graph, session, inputs, outputs
-
-
 def convert_tf_hub_module(module_path, output_dir,
-                          signature='default', quantization_dtype=None,
-                          skip_op_check=False, strip_debug_ops=False):
-  """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
-
-  Optimize and convert the TF-Hub module to Tensorflow.js format, if it passes
-  the compatiblity check.
-
-  Args:
-    module_path: string Path to the module.
-    output_dir: string The name of the output directory. The directory
-      will consist of
-      - a file named 'model.json'
-      - possibly sharded binary weight files.
-    signature: string Signature to load.
-    skip_op_check: Bool whether to skip the op check.
-    strip_debug_ops: Bool whether to strip debug ops.
-  """
-
-  if signature is None:
-    signature = 'default'
-
-  if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-  graph, sess, inputs, outputs = load_and_initialize_hub_module(
-      module_path, signature)
-
-  input_node_names = []
-  output_node_names = []
-
-  for _, input_tensor in inputs.items():
-    input_node_names.append(input_tensor.name.split(':')[0])
-  for _, output_tensor in outputs.items():
-    output_node_names.append(output_tensor.name.split(':')[0])
-
-  print('Creating a model with inputs %s and outputs %s.' % (input_node_names,
-                                                             output_node_names))
-
-  frozen_graph_def = graph_util.convert_variables_to_constants(
-      sess, graph.as_graph_def(), output_node_names)
-
-  output_graph = os.path.join(output_dir, common.ARTIFACT_MODEL_JSON_FILE_NAME)
-  frozen_file = output_graph + '.frozen'
-  try:
-    with tf.compat.v1.gfile.GFile(frozen_file, 'wb') as f:
-      f.write(frozen_graph_def.SerializeToString())
-
-    graph = load_graph(frozen_file, ','.join(output_node_names))
-    optimize_graph(None, output_graph, tf.__version__,
-                   quantization_dtype=quantization_dtype,
-                   skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops,
-                   graph=graph)
-  finally:
-    # Clean up the temp files.
-    if os.path.exists(frozen_file):
-      os.remove(frozen_file)
+                          signature_name='default', saved_model_tags=[],
+                          quantization_dtype=None, skip_op_check=False,
+                          strip_debug_ops=False):
+  convert_tf_saved_model(saved_model_dir=module_path, output_dir=output_dir,
+                         signature_name=signature_name,
+                         saved_model_tags=saved_model_tags,
+                         quantization_dtype=quantization_dtype,
+                         skip_op_check=skip_op_check,
+                         strip_debug_ops=strip_debug_ops)

@@ -342,14 +342,16 @@ def setup_arguments():
       type=str,
       default=None,
       help='Signature of the SavedModel Graph or TF-Hub module to load. '
-      'Applicable only if input format is "tf_hub" or "tf_saved_model".')
+      'Defaults to "serving_default" for "tf_saved_model" and "default" for '
+      '"tf_hub". Applicable only if input format is "tf_hub" or '
+      '"tf_saved_model".')
   parser.add_argument(
       '--saved_model_tags',
       type=str,
-      default='serve',
+      default=None,
       help='Tags of the MetaGraphDef to load, in comma separated string '
-      'format. Defaults to "serve". Applicable only if input format is '
-      '"tf_saved_model".')
+      'format. Defaults to "serve" for "tf_saved_model" and [] for "tf_hub". '
+      'Applicable only if input format is "tf_saved_model" or "tf_hub".')
   parser.add_argument(
       '--quantization_bytes',
       type=int,
@@ -416,6 +418,13 @@ def main():
       quantization.QUANTIZATION_BYTES_TO_DTYPES[FLAGS.quantization_bytes]
       if FLAGS.quantization_bytes else None)
 
+  maybe_signature_name = {}
+  if FLAGS.signature_name:
+    maybe_signature_name["signature"] = FLAGS.signature_name
+  maybe_saved_model_tags = {}
+  if FLAGS.saved_model_tags:
+    maybe_saved_model_tags["saved_model_tags"] = FLAGS.saved_model_tags
+
   if (FLAGS.signature_name and input_format not in
       ('tf_saved_model', 'tf_hub')):
     raise ValueError(
@@ -440,17 +449,17 @@ def main():
         output_format == 'tfjs_graph_model'):
     tf_saved_model_conversion_v2.convert_tf_saved_model(
         FLAGS.input_path, FLAGS.output_path,
-        signature_def=FLAGS.signature_name,
-        saved_model_tags=FLAGS.saved_model_tags,
         quantization_dtype=quantization_dtype,
         skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+        strip_debug_ops=FLAGS.strip_debug_ops,
+        **dict(maybe_signature_name, **maybe_saved_model_tags))
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
     tf_saved_model_conversion_v2.convert_tf_hub_module(
-        FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
+        FLAGS.input_path, FLAGS.output_path,
         skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+        strip_debug_ops=FLAGS.strip_debug_ops,
+        **dict(maybe_signature_name, **maybe_saved_model_tags))
   elif (input_format == 'tfjs_layers_model' and
         output_format == 'keras'):
     dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
