@@ -28,10 +28,8 @@ from tensorflow.core.protobuf import meta_graph_pb2
 from tensorflow.core.protobuf import config_pb2
 from tensorflow.core.framework import types_pb2
 from tensorflow.python.framework import convert_to_constants
-from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
-from tensorflow.python.saved_model.load import load
 from tensorflow.python.training.saver import export_meta_graph
 from google.protobuf.json_format import MessageToDict
 
@@ -296,9 +294,11 @@ def convert_tf_saved_model(saved_model_dir,
                  skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
 
 def convert_tf_hub_module(module_path, output_dir,
-                          signature_name='default', saved_model_tags=[],
+                          signature_name='default', saved_model_tags='',
                           quantization_dtype=None, skip_op_check=False,
                           strip_debug_ops=False):
+  if saved_model_tags == '':
+    saved_model_tags = []
   convert_tf_saved_model(saved_model_dir=module_path, output_dir=output_dir,
                          signature_name=signature_name,
                          saved_model_tags=saved_model_tags,

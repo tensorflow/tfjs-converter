@@ -365,7 +365,7 @@ class ConvertTest(unittest.TestCase):
         'paths': ['group1-shard1of1.bin'],
         'weights': [{
             'shape': [2],
-            'name': 'module/Variable',
+            'name': 'Variable',
             'dtype': 'float32'
         }]
     }]
