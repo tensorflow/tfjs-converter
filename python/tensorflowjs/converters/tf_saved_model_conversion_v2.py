@@ -37,8 +37,6 @@ from google.protobuf.json_format import MessageToDict
 
 import tensorflow_hub as hub
 
-# print(hub.version.__version__)
-
 from tensorflowjs import write_weights
 from tensorflowjs.converters import common
 
@@ -89,7 +87,6 @@ def validate(nodes, skip_op_check, strip_debug_ops):
   ops = []
   op_list_path = os.path.join(
       os.path.dirname(os.path.abspath(__file__)), '../op_list/')
-
   for filename in os.listdir(op_list_path):
     if os.path.splitext(filename)[1] == '.json':
       with open(os.path.join(op_list_path, filename)) as json_data:
