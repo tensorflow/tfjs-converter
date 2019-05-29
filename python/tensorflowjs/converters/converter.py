@@ -133,7 +133,7 @@ def dispatch_keras_h5_to_tfjs_graph_model_conversion(
   #   `convert_tf_saved_model()` works only in v2.
   tf_saved_model_conversion_v2.convert_tf_saved_model(
       temp_savedmodel_dir, output_dir,
-      signature_def='serving_default',
+      signature_name='serving_default',
       saved_model_tags='serve',
       quantization_dtype=quantization_dtype,
       skip_op_check=skip_op_check,
