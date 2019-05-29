@@ -4,7 +4,7 @@
 TensorFlow [SavedModel](https://www.tensorflow.org/programmers_guide/saved_model#overview_of_saving_and_restoring_models) or [TensorFlow Hub module](https://www.tensorflow.org/hub/)
 into the browser and run inference through [TensorFlow.js](https://js.tensorflow.org).
 
-__Note__: _Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use the TensorFlow.js 0.15.x backend to convert these formats, available in `tfjs-converter` [0.8.5](https://pypi.org/project/tensorflowjs/0.8.5/)._
+__Note__: _Session bundle and Frozen model formats have been deprecated in TensorFlow.js 1.0. Please use the TensorFlow.js 0.15.x backend to convert these formats, available in `tfjs-converter` [0.8.6](https://pypi.org/project/tensorflowjs/0.8.6/)._
 
 A 2-step process to import your model:
 
@@ -90,7 +90,7 @@ saved a tf.keras model in the SavedModel format.
 |`--strip_debug_ops`   | Strips out TensorFlow debug operations `Print`, `Assert`, `CheckNumerics`. Defaults to `True`.|
 |`--quantization_bytes`  | How many bytes to optionally quantize/compress the weights to. Valid values are 1 and 2. which will quantize int32 and float32 to 1 or 2 bytes respectively. The default (unquantized) size is 4 bytes.|
 
-__Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions of the tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.5`.__
+__Note: If you want to convert TensorFlow frozen model or session bundle, you can install older versions of the tensorflowjs pip package, i.e. `pip install tensorflowjs==0.8.6`.__
 
 ### Format Conversion Support Tables
 
@@ -102,7 +102,8 @@ most cases.
 
 | `--input_format` | `--output_format` | Description |
 |---|---|---|
-| `keras` | `tfjs_layers_model` | Convert a keras or tf.keras HDF5 model file to TensorFlow.js Layers model format. Use [`tf.loadLayersModel()`](https://js.tensorflow.org/api/latest/#loadLayersModel) to load the model in JavaScript. |
+| `keras` | `tfjs_layers_model` | Convert a keras or tf.keras HDF5 model file to TensorFlow.js Layers model format. Use [`tf.loadLayersModel()`](https://js.tensorflow.org/api/latest/#loadLayersModel) to load the model in JavaScript. The loaded model supports the full inference and training (e.g., transfer learning) features of the original keras or tf.keras model. |
+| `keras` | `tfjs_graph_model` | Convert a keras or tf.keras HDF5 model file to TensorFlow.js Graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript. The loaded model supports only inference, but the speed of inference is generally faster than that of a tfjs_layers_model (see above row) thanks to the graph optimization performed by TensorFlow. Another limitation of this conversion route is that it does not support some layer types (e.g., recurrent layers such as LSTM) yet. |
 | `keras_saved_model` | `tfjs_layers_model` | Convert a tf.keras SavedModel model file (from [`tf.contrib.saved_model.save_keras_model`](https://www.tensorflow.org/api_docs/python/tf/contrib/saved_model/save_keras_model)) to TensorFlow.js Layers model format. Use [`tf.loadLayersModel()`](https://js.tensorflow.org/api/latest/#loadLayersModel) to load the model in JavaScript. |
 | `tf_hub` | `tfjs_graph_model` | Convert a [TF-Hub](https://www.tensorflow.org/hub) model file to TensorFlow.js graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript. |
 | `tf_saved_model` | `tfjs_graph_model` | Convert a [TensorFlow SavedModel](https://www.tensorflow.org/guide/saved_model#build_and_load_a_savedmodel) to TensorFlow.js graph model format. Use [`tf.loadGraphModel()`](https://js.tensorflow.org/api/latest/#loadGraphModel) to load the converted model in JavaScript. |
@@ -114,6 +115,8 @@ most cases.
 | `tfjs_layers_model` | `keras` | Convert a TensorFlow.js Layers model (JSON + binary weight file(s)) to a Keras HDF5 model file. Use [`keras.model.load_model()`](https://keras.io/getting-started/faq/#savingloading-whole-models-architecture-weights-optimizer-state) or [`tf.keras.models.load_model()`](https://www.tensorflow.org/api_docs/python/tf/keras/models/load_model) to load the converted model in Python. |
 
 #### JavaScript-to-JavaScript
+
+##### Converting tfjs_layers_model to tfjs_layers_model with weight sharding and quantization
 
 The tfjs_layers_model-to-tfjs_layer_model conversion option serves the following
 purposes:
@@ -145,6 +148,33 @@ purposes:
       original_model/model.json
       quantized_model/
    ```
+
+##### Converting tfjs_layers_model to tfjs_graph_model
+
+Converting a tfjs_layers_model to a tfjs_graph_model usually leads to
+faster inference speed in the browser and Node.js, thanks to the graph
+optimization that goes into generating the tfjs_graph_models. For more details,
+see the following document on TensorFlow's Grappler:
+["TensorFlow Graph Optimizations" by R. Larsen an T. Shpeisman](https://ai.google/research/pubs/pub48051).
+
+There are two caveats:
+
+1. The model that results from this conversion does not support further
+   training.
+2. Certain layer types (e.g., recurrent layers such as LSTM) are not supported
+   yet.
+
+See example command below:
+
+```sh
+ tensorflowjs_converter \
+    --input_format tfjs_layers_model \
+    --output_format tfjs_graph_model \
+    my_layers_model/model.json
+    my_graph_model/
+```
+
+tfjs_layers_model-to-tfjs_graph_model also support weight quantization.
 
 ### Web-friendly format
 
@@ -292,7 +322,7 @@ You can install a previous version of TensorFlow.js in a virtual environment to 
 ```bash
 virtualenv --no-site-packages venv
 . venv/bin/activate
-pip install tensorflowjs==0.8.5
+pip install tensorflowjs==0.8.6
 ```
 
 `venv` is the name of the virtual environment.
