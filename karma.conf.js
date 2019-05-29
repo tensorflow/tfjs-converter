@@ -58,7 +58,7 @@ module.exports = function(config) {
         // TODO(cais): Change it back to 'latest' once the ongoing instability
         // with regard to OS X and FireFox is resolved on BrowserStack:
         // https://github.com/tensorflow/tfjs/issues/1620
-        browser_version: '6.6',
+        browser_version: '66.0',
         os: 'OS X',
         os_version: 'Sierra'
       }
