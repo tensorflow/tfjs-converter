@@ -152,9 +152,9 @@ purposes:
 ##### Converting tfjs_layers_model to tfjs_graph_model
 
 Converting a tfjs_layers_model to a tfjs_graph_model usually leads to
-faster speed of inference in the browser and Node.js, thanks to the graph
+faster inference speed in the browser and Node.js, thanks to the graph
 optimization that goes into generating the tfjs_graph_models. For more details,
-see
+see the following document on TensorFlow's Grappler:
 ["TensorFlow Graph Optimizations" by R. Larsen an T. Shpeisman](https://ai.google/research/pubs/pub48051).
 
 There are two caveats:
