@@ -41,9 +41,9 @@ __1. Install the TensorFlow.js pip package:__
 
 __2. Run the converter script provided by the pip package:__
 
-The converter expects a TensorFlow SavedModel, TensorFlow session bundle, TensorFlow Hub module, TensorFlow.js JSON format, or Keras HDF5 model for input.
+The converter expects a __TensorFlow SavedModel__, __TensorFlow session bundle__, __TensorFlow Hub module__, __TensorFlow.js JSON__ format, __Keras HDF5 model__, or __Keras SavedModel__ for input.
 
-* __SavedModel__ example:
+* __TensorFlow SavedModel__ example:
 
 ```bash
 tensorflowjs_converter \
@@ -64,7 +64,7 @@ tensorflowjs_converter \
     /mobilenet/web_model
 ```
 
-* __Keras h5 model__ example:
+* __Keras HDF5 model__ example:
 
 ```bash
 tensorflowjs_converter \
@@ -73,7 +73,7 @@ tensorflowjs_converter \
     /tmp/my_tfjs_model
 ```
 
-* __tf.keras SavedModel model__ example:
+* __Keras SavedModel__ example:
 
 ```bash
 tensorflowjs_converter \
