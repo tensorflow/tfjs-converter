@@ -42,6 +42,14 @@ describe('string', () => {
   });
 
   describe('executeOp', () => {
+    describe('DecodeBase64', () => {
+      it('should call tfc.decodeBase64', () => {
+        spyOn(tfc, 'decodeBase64');
+        node.op = 'DecodeBase64';
+        executeOp(node, {input1}, context);
+        expect(tfc.decodeBase64).toHaveBeenCalledWith(input1[0]);
+      });
+    });
     describe('EncodeBase64', () => {
       it('should call tfc.encodeBase64', () => {
         spyOn(tfc, 'encodeBase64');
