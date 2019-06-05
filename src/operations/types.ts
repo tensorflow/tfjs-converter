@@ -25,7 +25,8 @@ export type ParamType = 'number'|'string'|'string[]'|'number[]'|'bool'|'bool[]'|
 export type Category =
     'arithmetic'|'basic_math'|'control'|'convolution'|'custom'|'dynamic'|
     'evaluation'|'image'|'creation'|'graph'|'logical'|'matrices'|
-    'normalization'|'reduction'|'slice_join'|'spectral'|'transformation';
+    'normalization'|'reduction'|'slice_join'|'spectral'|'string'|
+    'transformation';
 
 // For mapping input or attributes of NodeDef into TensorFlow.js op param.
 export declare interface ParamMapper {
