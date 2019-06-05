@@ -27,6 +27,11 @@ export let executeOp: InternalOpExecutor =
     (node: Node, tensorMap: NamedTensorsMap,
      context: ExecutionContext): tfc.Tensor[] => {
       switch (node.op) {
+        case 'DecodeBase64': {
+          const input =
+              getParamValue('str', node, tensorMap, context) as tfc.Tensor;
+          return [tfc.decodeBase64(input)];
+        }
         case 'EncodeBase64': {
           const input =
               getParamValue('str', node, tensorMap, context) as tfc.Tensor;

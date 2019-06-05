@@ -19,6 +19,11 @@ import {OpMapper} from '../types';
 
 export const json: OpMapper[] = [
   {
+    'tfOpName': 'DecodeBase64',
+    'category': 'string',
+    'inputs': [{'start': 0, 'name': 'input', 'type': 'tensor'}]
+  },
+  {
     'tfOpName': 'EncodeBase64',
     'category': 'string',
     'inputs': [{'start': 0, 'name': 'input', 'type': 'tensor'}],
