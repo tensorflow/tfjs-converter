@@ -263,6 +263,7 @@
 
 |Tensorflow Op Name|Tensorflow.js Op Name|
 |---|---|
+|DecodeBase64|decodeBase64|
 |EncodeBase64|encodeBase64|
 
 ## Tensors - Transformations
