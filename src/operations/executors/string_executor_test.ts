@@ -55,7 +55,6 @@ describe('string', () => {
         node.op = 'EncodeBase64';
         node.attrParams.pad = createBoolAttr(true);
         executeOp(node, {input1}, context);
-
         expect(tfc.encodeBase64).toHaveBeenCalledWith(input1[0], true);
       });
     });
