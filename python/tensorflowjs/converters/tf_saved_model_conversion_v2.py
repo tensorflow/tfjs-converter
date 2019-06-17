@@ -441,7 +441,7 @@ def convert_tf_hub_module(module_handle, output_dir,
     convert_tf_saved_model(saved_model_dir=module_path,
                            output_dir=output_dir,
                            signature_def=signature,
-                           saved_model_tags='serve',
+                           saved_model_tags=saved_model_tags,
                            quantization_dtype=None,
                            skip_op_check=False,
                            strip_debug_ops=False)
