@@ -202,6 +202,7 @@
 |---|---|
 |FusedBatchNorm|batchNormalization|
 |FusedBatchNormV2|batchNormalization|
+|FusedBatchNormV3|batchNormalization|
 |LogSoftmax|logSoftmax|
 |LRN|localResponseNormalization|
 |Softmax|softmax|
