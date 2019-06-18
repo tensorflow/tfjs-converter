@@ -35,6 +35,8 @@
 |ClipByValue|clipByValue|
 |Cos|cos|
 |Cosh|cosh|
+|Complex|complex|
+|ComplexAbs|abs|
 |Elu|elu|
 |Erf|erf|
 |Exp|exp|
@@ -200,6 +202,7 @@
 |---|---|
 |FusedBatchNorm|batchNormalization|
 |FusedBatchNormV2|batchNormalization|
+|FusedBatchNormV3|batchNormalization|
 |LogSoftmax|logSoftmax|
 |LRN|localResponseNormalization|
 |Softmax|softmax|
