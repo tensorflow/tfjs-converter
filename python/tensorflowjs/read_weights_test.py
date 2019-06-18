@@ -84,8 +84,7 @@ class ReadWeightsTest(unittest.TestCase):
             'name': 'weight1',
             # String is stored as unicode.
             'data': np.array([u'здраво'], 'object')
-        },
-        {
+        }, {
             'name': 'weight2',
             # String is stored encoded.
             'data': np.array([u'поздрав'.encode('utf-8')], 'object')
@@ -103,14 +102,14 @@ class ReadWeightsTest(unittest.TestCase):
     weight1 = group[0]
     self.assertEqual('weight1', weight1['name'])
     np.testing.assert_array_equal(
-      weight1['data'],
-      np.array([u'здраво'], 'object'))
+        weight1['data'],
+        np.array([u'здраво'], 'object'))
 
     weight2 = group[1]
     self.assertEqual('weight2', weight2['name'])
     np.testing.assert_array_equal(
-      weight2['data'],
-      np.array([u'поздрав'], 'object'))
+        weight2['data'],
+        np.array([u'поздрав'], 'object'))
 
   def testReadOneGroupStringWithShards(self):
     groups = [
