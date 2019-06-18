@@ -211,7 +211,7 @@ def _stack_group_bytes(group):
 
     if data.dtype == np.object:
       data_bytes = _serialize_string_array(data, STRING_DELIMITER)
-      entry['byte_length'] = len(data_bytes)
+      entry['byteLength'] = len(data_bytes)
     else:
       data_bytes = _serialize_numeric_array(data)
     group_bytes_writer.write(data_bytes)
@@ -281,7 +281,7 @@ def _get_weights_manifest_for_group(group):
     if dtype == 'object':
       var_manifest['dtype'] = 'string'
       var_manifest['delimiter'] = STRING_DELIMITER
-      var_manifest['byte_length'] = entry['byte_length']
+      var_manifest['byteLength'] = entry['byteLength']
     if is_quantized:
       var_manifest['quantization'] = {
           'min': entry['quantization']['min'],

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,6 +76,41 @@ class ReadWeightsTest(unittest.TestCase):
     np.testing.assert_array_equal(
         read_output[0][0]['data'],
         np.array([['test', 'a'], ['b', 'c']], 'object'))
+
+
+  def testReadCyrillicStringUnicodeAndEncoded(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            # String is stored as unicode.
+            'data': np.array([u'здраво'], 'object')
+        },
+        {
+            'name': 'weight2',
+            # String is stored encoded.
+            'data': np.array([u'поздрав'.encode('utf-8')], 'object')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(groups, self._tmp_dir)
+
+    # Read the weights using `read_weights`.
+    read_output = read_weights.read_weights(manifest, self._tmp_dir)
+    self.assertEqual(1, len(read_output))
+    group = read_output[0]
+    self.assertEqual(2, len(group))
+
+    weight1 = group[0]
+    self.assertEqual('weight1', weight1['name'])
+    np.testing.assert_array_equal(
+      weight1['data'],
+      np.array([u'здраво'], 'object'))
+
+    weight2 = group[1]
+    self.assertEqual('weight2', weight2['name'])
+    np.testing.assert_array_equal(
+      weight2['data'],
+      np.array([u'поздрав'], 'object'))
 
   def testReadOneGroupStringWithShards(self):
     groups = [

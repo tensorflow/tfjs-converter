@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 # Copyright 2018 Google LLC
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -99,7 +100,7 @@ class TestWriteWeights(unittest.TestCase):
     groups = [
         [{
             'name': 'weight1',
-            'data': np.array([[b'hello', b'end'], [b'test', b'a']], 'object')
+            'data': np.array([['здраво', 'end'], ['test', 'a']], 'object')
         }]
     ]
 
@@ -117,7 +118,8 @@ class TestWriteWeights(unittest.TestCase):
             'weights': [{
                 'name': 'weight1',
                 'delimiter': '\x00',
-                'byte_length': 16,
+                # 6 cyrillic chars (2 bytes each), 8 ascii and 3 delimiters.
+                'byteLength': 23,
                 'shape': [2, 2],
                 'dtype': 'string'
             }]
@@ -125,15 +127,45 @@ class TestWriteWeights(unittest.TestCase):
 
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
     with open(weights_path, 'rb') as f:
-      weight_bytes = f.read()
-      self.assertEqual(weight_bytes, b'hello\x00end\x00test\x00a')
+      weight_bytes = f.read().decode('utf-8')
+      self.assertEqual(weight_bytes, u'здраво\x00end\x00test\x00a')
 
+  def test_1_group_1_weight_string_empty(self):
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([''], 'object')
+        }]
+    ]
+
+    manifest = write_weights.write_weights(
+        groups, TMP_DIR, shard_size_bytes=4 * 1024 * 1024)
+
+    self.assertTrue(
+        os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
+        'weights_manifest.json does not exist')
+
+    self.assertEqual(
+        manifest,
+        [{
+            'paths': [],
+            'weights': [{
+                'name': 'weight1',
+                'delimiter': '\x00',
+                'byteLength': 0,
+                'shape': [1],
+                'dtype': 'string'
+            }]
+        }])
+
+    weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
+    self.assertFalse(os.path.exists(weights_path))
 
   def test_1_group_1_weight_string_unicode(self):
     groups = [
         [{
             'name': 'weight1',
-            'data': np.array([[u'hello', u'end'], [u'test', u'a']], 'object')
+            'data': np.array([[u'здраво', u'end'], [u'test', u'a']], 'object')
         }]
     ]
 
@@ -151,7 +183,8 @@ class TestWriteWeights(unittest.TestCase):
             'weights': [{
                 'name': 'weight1',
                 'delimiter': '\x00',
-                'byte_length': 16,
+                # 6 cyrillic chars (2 bytes each), 8 ascii and 3 delimiters.
+                'byteLength': 23,
                 'shape': [2, 2],
                 'dtype': 'string'
             }]
@@ -159,18 +192,18 @@ class TestWriteWeights(unittest.TestCase):
 
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
     with open(weights_path, 'rb') as f:
-      weight_bytes = f.read()
-      self.assertEqual(weight_bytes, b'hello\x00end\x00test\x00a')
+      weight_bytes = f.read().decode('utf-8')
+      self.assertEqual(weight_bytes, u'здраво\x00end\x00test\x00a')
 
   def test_1_group_1_weight_string_sharded(self):
     groups = [
         [{
             'name': 'weight1',
-            'data': np.array(['hello', 'a', 'b'], 'object')
+            'data': np.array(['helloworld'], 'object')
         }]
     ]
 
-    # The array takes up 9 bytes, requiring 3 shards when shard size is 4 bytes.
+    # The array takes up 10 bytes across 3 shards when shard size is 4 bytes.
     manifest = write_weights.write_weights(
         groups, TMP_DIR, shard_size_bytes=4)
 
@@ -189,8 +222,8 @@ class TestWriteWeights(unittest.TestCase):
             'weights': [{
                 'name': 'weight1',
                 'delimiter': '\x00',
-                'byte_length': 9,
-                'shape': [3],
+                'byteLength': 10,
+                'shape': [1],
                 'dtype': 'string'
             }]
         }])
@@ -202,7 +235,7 @@ class TestWriteWeights(unittest.TestCase):
       weight_bytes += f.read()
     with open(os.path.join(TMP_DIR, 'group1-shard3of3.bin'), 'rb') as f:
       weight_bytes += f.read()
-      self.assertEqual(weight_bytes, b'hello\x00a\x00b')
+      self.assertEqual(weight_bytes, b'helloworld')
 
   def test_1_group_3_weights_packed_multi_dtype(self):
     groups = [
@@ -236,7 +269,7 @@ class TestWriteWeights(unittest.TestCase):
             }, {
                 'name': 'weight2',
                 'delimiter': '\x00',
-                'byte_length': 14,
+                'byteLength': 14,
                 'shape': [3],
                 'dtype': 'string'
             }, {

@@ -147,7 +147,7 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
       if dtype not in _INPUT_DTYPES:
         raise NotImplementedError('Unsupported data type: %s' % dtype)
       if dtype == np.object:
-        weight_bytes = weight['byte_length']
+        weight_bytes = weight['byteLength']
         delimiter = weight['delimiter']
         value = _deserialize_string_array(
             data_buffer, offset, weight_bytes, shape, delimiter)
