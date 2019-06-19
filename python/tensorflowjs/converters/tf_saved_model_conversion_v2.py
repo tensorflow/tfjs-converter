@@ -408,7 +408,7 @@ def convert_tf_hub_module_v1(module_path, output_dir,
 
 
 def convert_tf_hub_module(module_handle, output_dir,
-                          signature='default', saved_model_tags='',
+                          signature='default', saved_model_tags='serve',
                           quantization_dtype=None, skip_op_check=False,
                           strip_debug_ops=False):
   """Conversion for TF Hub modules V1 and V2.
