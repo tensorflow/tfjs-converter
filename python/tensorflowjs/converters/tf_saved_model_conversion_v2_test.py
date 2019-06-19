@@ -309,7 +309,7 @@ class ConvertTest(unittest.TestCase):
     weights = [{
         'paths': ['group1-shard1of1.bin'],
         'weights': [{'dtype': 'float32',
-                     'name': 'StatefulPartitionedCall/MatrixDiag',
+                     'name': 'StatefulPartitionedCall/diag',
                      'shape': [2, 2, 2]}]}]
     tfjs_path = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     # Check model.json and weights manifest.
