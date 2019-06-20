@@ -17,6 +17,7 @@ import io
 import json
 import math
 import os
+import chardet
 
 import numpy as np
 from tensorflowjs import quantization
@@ -178,9 +179,20 @@ def _quantize_entry(entry, quantization_dtype):
 
 
 def _serialize_string_array(data, delimiter):
+  strings = data.flatten().tolist()
+
+  # Use the longest string to detect the encoding.
+  maxlen = 0
+  maxstr = None
+  for s in strings:
+    if isinstance(s, bytes) and len(s) > maxlen:
+      maxlen = len(s)
+      maxstr = s
+  enc = 'utf-8' if maxstr is None else chardet.detect(maxstr)['encoding']
+
   unicode_strings = [
-      x.decode('utf-8') if isinstance(x, bytes) else x
-      for x in data.flatten().tolist()
+      x.decode(enc) if isinstance(x, bytes) else x
+      for x in strings
   ]
   return delimiter.join(unicode_strings).encode('utf-8')
 
