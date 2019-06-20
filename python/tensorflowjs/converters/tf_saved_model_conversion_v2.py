@@ -40,6 +40,9 @@ import tensorflow_hub as hub
 from tensorflowjs import write_weights
 from tensorflowjs.converters import common
 
+# enable eager execution for v2 APIs
+tf.enable_eager_execution()
+
 CLEARED_TENSOR_FIELDS = (
     'tensor_content', 'half_val', 'float_val', 'double_val', 'int_val',
     'string_val', 'scomplex_val', 'int64_val', 'bool_val',

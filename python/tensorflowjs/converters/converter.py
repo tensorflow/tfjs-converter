@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import shutil
+import sys
 import tempfile
 
 import h5py
@@ -584,4 +585,7 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  try:
+    main()
+  except AttributeError:
+    sys.stderr.write("Exc on close: " + str(sys.exc_info()[0]) + "\n")

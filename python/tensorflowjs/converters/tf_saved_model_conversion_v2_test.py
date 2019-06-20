@@ -384,4 +384,7 @@ class ConvertTest(unittest.TestCase):
 
 
 if __name__ == '__main__':
-  unittest.main()
+  try:
+    unittest.main()
+  except AttributeError:
+    sys.stderr.write("Exc on close: " + str(sys.exc_info()[0]) + "\n")
