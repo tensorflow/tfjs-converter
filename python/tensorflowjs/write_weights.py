@@ -179,6 +179,20 @@ def _quantize_entry(entry, quantization_dtype):
 
 
 def _serialize_string_array(data, delimiter):
+  """Serializes a numpy array of dtype `string` into bytes.
+
+  The delimiter will only exist between neighboring strings. If the tensor has
+  no strings or only 1 string, there will be no delimiter. If the tensor has
+  N strings (N > 0), there will be N-1 delimiters. The entire string is encoded
+  as UTF-8.
+
+  Args:
+    data: A numpy array of dtype `string`.
+    delimiter: A string used to delimit neighboring entries.
+
+  Returns:
+    utf-8 encoded bytes of the array to be serialized on disk.
+  """
   strings = data.flatten().tolist()
 
   # Use the longest string to detect the encoding.
@@ -190,13 +204,25 @@ def _serialize_string_array(data, delimiter):
       maxstr = s
   enc = 'utf-8' if maxstr is None else chardet.detect(maxstr)['encoding']
 
-  unicode_strings = [
-      x.decode(enc) if isinstance(x, bytes) else x
-      for x in strings
-  ]
-  return delimiter.join(unicode_strings).encode('utf-8')
+  decoded_strings = []
+  for x in strings:
+    decoded = x.decode(enc) if isinstance(x, bytes) else x
+    if delimiter in decoded:
+      raise ValueError(
+          'Failed to serialize entry `{}` which contains '
+          'the delimiter `{}`'.format(decoded, delimiter))
+    decoded_strings.append(decoded)
+  return delimiter.join(decoded_strings).encode('utf-8')
 
 def _serialize_numeric_array(data):
+  """Serializes a numeric numpy array into bytes.
+
+  Args:
+    data: A numeric numpy array.
+
+  Returns:
+    bytes of the array to be serialized on disk.
+  """
   return data.tobytes()
 
 def _stack_group_bytes(group):

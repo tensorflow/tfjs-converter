@@ -73,8 +73,12 @@ def read_weights(weights_manifest, base_path, flatten=False):
 def _deserialize_string_array(
     data_buffer, offset, byte_length, shape, delimiter):
   decoded = data_buffer[offset : offset + byte_length].decode('utf-8')
-  return np.array(
-      decoded.split(delimiter), 'object').reshape(shape)
+  size = np.prod(shape)
+  if size == 0:
+    return np.array([], 'object').reshape(shape)
+  else:
+    return np.array(
+        decoded.split(delimiter), 'object').reshape(shape)
 
 
 def _deserialize_numeric_array(data_buffer, offset, dtype, shape):
@@ -146,7 +150,7 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
       shape = weight['shape']
       if dtype not in _INPUT_DTYPES:
         raise NotImplementedError('Unsupported data type: %s' % dtype)
-      if dtype == np.object:
+      if weight['dtype'] == 'string':
         weight_bytes = weight['byteLength']
         delimiter = weight['delimiter']
         value = _deserialize_string_array(
