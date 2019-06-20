@@ -238,15 +238,23 @@ class TestWriteWeights(unittest.TestCase):
       self.assertEqual(weight_bytes, b'helloworld')
 
   def test_1_group_3_weights_packed_multi_dtype(self):
+    # Each string tensor uses different encoding.
     groups = [
         [{
             'name': 'weight1',
             'data': np.array([1, 2, 3], 'float32')
         }, {
             'name': 'weight2',
-            'data': np.array(['hello', 'end', 'test'], 'object')
+            'data': np.array([
+                u'hello'.encode('utf-16'), u'end'.encode('utf-16')], 'object')
         }, {
             'name': 'weight3',
+            'data': np.array([u'здраво'.encode('windows-1251')], 'object')
+        }, {
+            'name': 'weight4',
+            'data': np.array([u'语言处理'.encode('utf-8')], 'object')
+        }, {
+            'name': 'weight5',
             'data': np.array([4, 5, 6], 'float32')
         }]
     ]
@@ -269,11 +277,23 @@ class TestWriteWeights(unittest.TestCase):
             }, {
                 'name': 'weight2',
                 'delimiter': '\x00',
-                'byteLength': 14,
-                'shape': [3],
+                'byteLength': 9,
+                'shape': [2],
                 'dtype': 'string'
             }, {
                 'name': 'weight3',
+                'delimiter': '\x00',
+                'byteLength': 12,
+                'shape': [1],
+                'dtype': 'string'
+            }, {
+                'name': 'weight4',
+                'delimiter': '\x00',
+                'byteLength': 12,
+                'shape': [1],
+                'dtype': 'string'
+            }, {
+                'name': 'weight5',
                 'shape': [3],
                 'dtype': 'float32'
             }]
@@ -287,9 +307,11 @@ class TestWriteWeights(unittest.TestCase):
       np.testing.assert_array_equal(weight1, np.array([1, 2, 3], 'float32'))
 
 
-      self.assertEqual(weight_bytes[12:-12], b'hello\x00end\x00test')
+      self.assertEqual(weight_bytes[12:21], b'hello\x00end')
+      self.assertEqual(weight_bytes[21:33], b'здраво')
+      self.assertEqual(weight_bytes[33:45], b'语言处理')
 
-      weight3 = np.frombuffer(weight_bytes[-12:], 'float32')
+      weight3 = np.frombuffer(weight_bytes[45:], 'float32')
       np.testing.assert_array_equal(weight3, np.array([4, 5, 6], 'float32'))
 
   def test_1_group_1_weight_sharded(self):
