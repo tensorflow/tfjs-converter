@@ -161,6 +161,18 @@ class TestWriteWeights(unittest.TestCase):
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
     self.assertFalse(os.path.exists(weights_path))
 
+  def test_delimiter_in_string_throws(self):
+    string = 'a' + write_weights.STRING_DELIMITER + 'b'
+    groups = [
+        [{
+            'name': 'weight1',
+            'data': np.array([string], 'object')
+        }]
+    ]
+
+    with self.assertRaises(ValueError):
+      write_weights.write_weights(groups, TMP_DIR)
+
   def test_1_group_1_weight_string_unicode(self):
     groups = [
         [{
