@@ -307,9 +307,9 @@ class TestWriteWeights(unittest.TestCase):
       np.testing.assert_array_equal(weight1, np.array([1, 2, 3], 'float32'))
 
 
-      self.assertEqual(weight_bytes[12:21], b'hello\x00end')
-      self.assertEqual(weight_bytes[21:33], b'здраво')
-      self.assertEqual(weight_bytes[33:45], b'语言处理')
+      self.assertEqual(weight_bytes[12:21].decode('utf-8'), u'hello\x00end')
+      self.assertEqual(weight_bytes[21:33].decode('utf-8'), u'здраво')
+      self.assertEqual(weight_bytes[33:45].decode('utf-8'), u'语言处理')
 
       weight3 = np.frombuffer(weight_bytes[45:], 'float32')
       np.testing.assert_array_equal(weight3, np.array([4, 5, 6], 'float32'))
