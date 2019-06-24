@@ -26,13 +26,11 @@ const CUSTOM_OPS: {[key: string]: OpMapper} = {};
  *
  * Here is an example of registering a new MatMul Op.
  * ```js
- * const matmulOpExecutor = (node) => {
- *    return tf.matMul(
- *        node.inputs[0] as tfc.Tensor2D,
- *        node.inputs[1] as tfc.Tensor2D,
- *        node.attrs['transpose_a'] as boolean,
- *        node.attrs['transpose_b'] as boolean);
- * }
+ * const matmulOpExecutor = (node) =>
+ *    tf.matMul(
+ *        node.inputs[0], node.inputs[1],
+ *        node.attrs['transpose_a'], node.attrs['transpose_b']);
+ *
  * tf.registerOp('MatMul', matmulOpExecutor);
  * ```
  * The inputs and attrs of the node object is based on the TensorFlow op
