@@ -19,14 +19,17 @@ import * as tfc from '@tensorflow/tfjs-core';
 
 import {NamedTensorsMap} from '../../data/types';
 import {ExecutionContext} from '../../executor/execution_context';
-import {Node, OpExecutor} from '../types';
+import {InternalOpExecutor, Node} from '../types';
+
 import {getParamValue, getTensor} from './utils';
 
-export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
-                                    context: ExecutionContext):
-                                       tfc.Tensor[] => {
+export let executeOp: InternalOpExecutor = (node: Node,
+                                            tensorMap: NamedTensorsMap,
+                                            context: ExecutionContext):
+                                               tfc.Tensor[] => {
   switch (node.op) {
     case 'Abs':
+    case 'ComplexAbs':
       return [tfc.abs(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
     case 'Acos':
@@ -54,6 +57,10 @@ export let executeOp: OpExecutor = (node: Node, tensorMap: NamedTensorsMap,
     case 'Ceil':
       return [tfc.ceil(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
+    case 'Complex':
+      return [tfc.complex(
+          getParamValue('real', node, tensorMap, context) as tfc.Tensor,
+          getParamValue('imag', node, tensorMap, context) as tfc.Tensor)];
     case 'Cos':
       return [tfc.cos(
           getParamValue('x', node, tensorMap, context) as tfc.Tensor)];
