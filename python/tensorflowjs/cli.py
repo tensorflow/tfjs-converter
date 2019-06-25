@@ -21,6 +21,7 @@ import re
 
 from PyInquirer import prompt
 from examples import custom_style_3
+from tensorflow.python.saved_model.loader_impl import parse_saved_model
 
 '''regex for recognizing valid url for TFHub module.'''
 URL_REGEX = re.compile(
@@ -111,21 +112,39 @@ def default_signature_name(answers):
   return ''
 
 
-def generate_command(options, paths):
+def generate_command(options, params):
+  params.update(options)
   args = 'tensorflowjs_converter'
-  for key, value in options.items():
-    if value is not None:
-      if key is not 'split_weights_by_layer' or value is not False:
+  not_param_list = ['input_path', 'output_path']
+  no_false_param = ['split_weights_by_layer', 'skip_op_check']
+  for key, value in params.items():
+    if key not in not_param_list and value is not None:
+      if key not in no_false_param or value is not False:
         args += ' --%s=%s' % (key, value)
 
-  args += ' %s %s' % (paths['input_path'], paths['output_path'])
+  args += ' %s %s' % (params['input_path'], params['output_path'])
   return args
 
+def available_tags(answers):
+  saved_model = parse_saved_model(answers['input_path'])
+  tags = []
+  for meta_graph in saved_model.meta_graphs:
+    tags.append(",".join(meta_graph.meta_info_def.tags))
+  return tags
+
+def available_signature_names(answers):
+  path = answers['input_path']
+  tags = answers['saved_model_tags']
+  saved_model = parse_saved_model(path)
+  for meta_graph in saved_model.meta_graphs:
+    if tags == ",".join(meta_graph.meta_info_def.tags):
+      return meta_graph.signature_def.keys()
+  return []
 
 def main():
   print('Weclome to TensorFlow.js converter.')
 
-  questions = [
+  input_format = [
       {
           'type': 'list',
           'name': 'input_format',
@@ -133,22 +152,34 @@ def main():
           'choices': ['keras', 'keras_saved_model',
                       'tf_saved_model', 'tf_hub', 'tfjs_layers_model',
                       'tensorflowjs']
-      },
+      }
+  ]
+
+  options = prompt(input_format, style=custom_style_3)
+  message = input_path_message(options)
+
+  questions = [
       {
           'type': 'input',
+          'name': 'input_path',
+          'message': message,
+          'validate': lambda value: validate_input_path(value, options['input_format'])
+      },
+      {
+          'type': 'list',
           'name': 'saved_model_tags',
-          'default': 'serve',
+          'choices': available_tags,
           'message': 'What is tags for the saved model?',
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: of_values(options, 'input_format',
                                             ['tf_saved_model'])
       },
       {
-          'type': 'input',
+          'type': 'list',
           'name': 'signature_name',
           'message': 'What is signature name of the model?',
-          'default': default_signature_name,
-          'when': lambda answers: of_values(answers, 'input_format',
-                                            ['tf_saved_model', 'tfhub'])
+          'choices': available_signature_names,
+          'when': lambda answers: of_values(options, 'input_format',
+                                            ['tf_saved_model'])
       },
       {
           'type': 'list',
@@ -165,7 +196,7 @@ def main():
           'name': 'split_weights_by_layer',
           'message': 'Do you want to split weights by layers?',
           'default': False,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: of_values(options, 'input_format',
                                             ['tf_layers_model'])
       },
       {
@@ -173,7 +204,7 @@ def main():
           'name': 'skip_op_check',
           'message': 'Do you want to skip op validation?',
           'default': False,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: of_values(options, 'input_format',
                                             ['tf_saved_model', 'tfhub'])
       },
       {
@@ -181,32 +212,19 @@ def main():
           'name': 'strip_debug_ops',
           'message': 'Do you want to strip debug ops?',
           'default': False,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: of_values(options, 'input_format',
                                             ['tf_saved_model', 'tfhub'])
-      }
-  ]
-
-  options = prompt(questions, style=custom_style_3)
-  print('Conversion configuration:')
-
-  message = input_path_message(options)
-  directories = [
-      {
-          'type': 'input',
-          'name': 'input_path',
-          'message': message,
-          'validate': lambda value: validate_input_path(value, options['input_format'])
       },
       {
           'type': 'input',
           'name': 'output_path',
           'message': 'Which directory do you want save the converted model?',
           'validate': lambda value: validate_output_path(value)
-      },
+      }
   ]
+  params = prompt(questions, style=custom_style_3)
 
-  paths = prompt(directories, style=custom_style_3)
-  command = generate_command(options, paths)
+  command = generate_command(options, params)
   print(command)
   os.system(command)
 
