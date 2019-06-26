@@ -21,7 +21,7 @@ import os
 import numpy as np
 
 from tensorflowjs import quantization
-from read_weights import STRING_LENGTH_DTYPE
+from tensorflowjs.read_weights import STRING_LENGTH_DTYPE
 
 _OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool, np.object]
 _AUTO_DTYPE_CONVERSION = {
