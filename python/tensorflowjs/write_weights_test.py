@@ -128,22 +128,22 @@ class TestWriteWeights(unittest.TestCase):
 
       self.assertEqual(len(weight_bytes), 36)
       # 'здраво'
-      size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+      size = np.frombuffer(weight_bytes[:4], 'uint32')[0]
       self.assertEqual(size, 12) # 6 cyrillic chars (2 bytes each).
       string = weight_bytes[4:16].decode('utf-8')
       self.assertEqual(string, u'здраво')
       # 'end'
-      size = np.frombuffer(weight_bytes[16:20], 'int32')[0]
+      size = np.frombuffer(weight_bytes[16:20], 'uint32')[0]
       self.assertEqual(size, 3) # 3 ascii chars.
       string = weight_bytes[20:23].decode('utf-8')
       self.assertEqual(string, u'end')
       # 'test'
-      size = np.frombuffer(weight_bytes[23:27], 'int32')[0]
+      size = np.frombuffer(weight_bytes[23:27], 'uint32')[0]
       self.assertEqual(size, 4) # 4 ascii chars.
       string = weight_bytes[27:31].decode('utf-8')
       self.assertEqual(string, u'test')
       # 'a'
-      size = np.frombuffer(weight_bytes[31:35], 'int32')[0]
+      size = np.frombuffer(weight_bytes[31:35], 'uint32')[0]
       self.assertEqual(size, 1) # 4 ascii chars.
       string = weight_bytes[35:36].decode('utf-8')
       self.assertEqual(string, u'a')
@@ -179,7 +179,7 @@ class TestWriteWeights(unittest.TestCase):
     with open(weights_path, 'rb') as f:
       weight_bytes = f.read()
       self.assertEqual(len(weight_bytes), 4)
-      size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+      size = np.frombuffer(weight_bytes[:4], 'uint32')[0]
       self.assertEqual(size, 0) # Empty string.
 
   def test_1_group_1_weight_string_unicode(self):
@@ -214,22 +214,22 @@ class TestWriteWeights(unittest.TestCase):
 
       self.assertEqual(len(weight_bytes), 36)
       # 'здраво'
-      size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+      size = np.frombuffer(weight_bytes[:4], 'uint32')[0]
       self.assertEqual(size, 12) # 6 cyrillic chars (2 bytes each).
       string = weight_bytes[4:16].decode('utf-8')
       self.assertEqual(string, u'здраво')
       # 'end'
-      size = np.frombuffer(weight_bytes[16:20], 'int32')[0]
+      size = np.frombuffer(weight_bytes[16:20], 'uint32')[0]
       self.assertEqual(size, 3) # 3 ascii chars.
       string = weight_bytes[20:23].decode('utf-8')
       self.assertEqual(string, u'end')
       # 'test'
-      size = np.frombuffer(weight_bytes[23:27], 'int32')[0]
+      size = np.frombuffer(weight_bytes[23:27], 'uint32')[0]
       self.assertEqual(size, 4) # 4 ascii chars.
       string = weight_bytes[27:31].decode('utf-8')
       self.assertEqual(string, u'test')
       # 'a'
-      size = np.frombuffer(weight_bytes[31:35], 'int32')[0]
+      size = np.frombuffer(weight_bytes[31:35], 'uint32')[0]
       self.assertEqual(size, 1) # 4 ascii chars.
       string = weight_bytes[35:36].decode('utf-8')
       self.assertEqual(string, u'a')
@@ -274,7 +274,7 @@ class TestWriteWeights(unittest.TestCase):
       weight_bytes += f.read()
 
     self.assertEqual(len(weight_bytes), 14)
-    size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+    size = np.frombuffer(weight_bytes[:4], 'uint32')[0]
     self.assertEqual(size, 10) # 10 ascii chars.
     string = weight_bytes[4:14].decode('utf-8')
     self.assertEqual(string, u'helloworld')
@@ -345,25 +345,25 @@ class TestWriteWeights(unittest.TestCase):
       np.testing.assert_array_equal(weight1, np.array([1, 2, 3], 'float32'))
 
       # 'hello'
-      size = np.frombuffer(weight_bytes[12:16], 'int32')[0]
+      size = np.frombuffer(weight_bytes[12:16], 'uint32')[0]
       self.assertEqual(size, 12) # 5 ascii chars in utf-16.
       string = weight_bytes[16:28].decode('utf-16')
       self.assertEqual(string, u'hello')
 
       # 'end'
-      size = np.frombuffer(weight_bytes[28:32], 'int32')[0]
+      size = np.frombuffer(weight_bytes[28:32], 'uint32')[0]
       self.assertEqual(size, 8) # 3 ascii chars in utf-16.
       string = weight_bytes[32:40].decode('utf-16')
       self.assertEqual(string, u'end')
 
       # 'здраво'
-      size = np.frombuffer(weight_bytes[40:44], 'int32')[0]
+      size = np.frombuffer(weight_bytes[40:44], 'uint32')[0]
       self.assertEqual(size, 6) # 6 cyrillic chars in windows-1251.
       string = weight_bytes[44:50].decode('windows-1251')
       self.assertEqual(string, u'здраво')
 
       # '语言处理'
-      size = np.frombuffer(weight_bytes[50:54], 'int32')[0]
+      size = np.frombuffer(weight_bytes[50:54], 'uint32')[0]
       self.assertEqual(size, 12) # 4 east asian chars in utf-8.
       string = weight_bytes[54:66].decode('utf-8')
       self.assertEqual(string, u'语言处理')

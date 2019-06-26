@@ -26,6 +26,10 @@ from tensorflowjs import quantization
 
 _INPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.object]
 
+# Number of bytes used to encode the length of a string in a string tensor.
+STRING_LENGTH_NUM_BYTES = 4
+# The data type used to encode the length of a string in a string tensor.
+STRING_LENGTH_DTYPE = np.dtype('uint32').newbyteorder('<')
 
 def read_weights(weights_manifest, base_path, flatten=False):
   """Load weight values according to a TensorFlow.js weights manifest.
@@ -73,10 +77,11 @@ def read_weights(weights_manifest, base_path, flatten=False):
 def _deserialize_string_array(data_buffer, offset, shape):
   """Deserializes bytes into np.array of dtype `object` which holds strings.
 
-  Each string value is preceeded by 4 bytes which denote a 32-bit integer that
-  specifies the byte length of the following string. This is followed by the
-  actual string bytes. If the tensor has no strings there will
-  be no bytes reserved. Empty strings will still take 4 bytes for the length.
+  Each string value is preceeded by 4 bytes which denote a 32-bit unsigned
+  integer in little endian that specifies the byte length of the following
+  string. This is followed by the actual string bytes. If the tensor has no
+  strings there will be no bytes reserved. Empty strings will still take 4 bytes
+  for the length.
 
   For example, a tensor that has 2 strings will be encoded as
   [byte length of s1][bytes of s1...][byte length of s2][bytes of s2...]
@@ -89,16 +94,20 @@ def _deserialize_string_array(data_buffer, offset, shape):
     shape: The logical shape of the tensor.
 
   Returns:
-    A np.array of dtype `object` where each element contains the encoded
-    bytes of the string.
+    A tuple of (np.array, offset) where the np.array contains the encoded
+    strings, and the offset contains the new offset (the byte position in the
+    buffer at the end of the string data).
   """
   size = np.prod(shape)
   if size == 0:
-    return np.array([], 'object').reshape(shape), offset + 4
+    return (np.array([], 'object').reshape(shape),
+            offset + STRING_LENGTH_NUM_BYTES)
   vals = []
   for _ in range(size):
-    byte_length = np.frombuffer(data_buffer[offset:offset + 4], 'int32')[0]
-    offset += 4
+    byte_length = np.frombuffer(
+        data_buffer[offset:offset + STRING_LENGTH_NUM_BYTES],
+        STRING_LENGTH_DTYPE)[0]
+    offset += STRING_LENGTH_NUM_BYTES
     string = data_buffer[offset:offset + byte_length]
     vals.append(string)
     offset += byte_length

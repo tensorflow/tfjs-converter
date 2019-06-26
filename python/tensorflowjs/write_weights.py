@@ -19,7 +19,9 @@ import math
 import os
 
 import numpy as np
+
 from tensorflowjs import quantization
+from read_weights import STRING_LENGTH_DTYPE
 
 _OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool, np.object]
 _AUTO_DTYPE_CONVERSION = {
@@ -177,10 +179,11 @@ def _quantize_entry(entry, quantization_dtype):
 def _serialize_string_array(data):
   """Serializes a numpy array of dtype `string` into bytes.
 
-  Each string is preceeded by 4 bytes which denote a 32-bit integer that
-  specifies the byte length of the following string. This is followed by the
-  actual string bytes (already encoded). If the tensor has no strings there will
-  be no bytes reserved. Empty strings will still take up 4 bytes for the length.
+  Each string value is preceeded by 4 bytes which denote a 32-bit unsigned
+  integer in little endian that specifies the byte length of the following
+  string. This is followed by the actual string bytes. If the tensor has no
+  strings there will be no bytes reserved. Empty strings will still take 4 bytes
+  for the length.
 
   For example, a tensor that has 2 strings will be encoded as
   [byte length of s1][bytes of s1...][byte length of s2][bytes of s2...]
@@ -200,7 +203,7 @@ def _serialize_string_array(data):
 
   for x in strings:
     encoded = x if isinstance(x, bytes) else x.encode('utf-8')
-    length_as_bytes = np.array(len(encoded), 'int32').tobytes()
+    length_as_bytes = np.array(len(encoded), STRING_LENGTH_DTYPE).tobytes()
     bytes_writer.write(length_as_bytes)
     bytes_writer.write(encoded)
   bytes_writer.flush()
