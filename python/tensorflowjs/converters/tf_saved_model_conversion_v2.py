@@ -27,7 +27,6 @@ from tensorflow.core.protobuf import device_properties_pb2
 from tensorflow.core.protobuf import meta_graph_pb2
 from tensorflow.core.protobuf import config_pb2
 from tensorflow.python.framework import convert_to_constants
-from tensorflow.python.framework import graph_util
 from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
 from tensorflow.python.saved_model.load import load
@@ -39,10 +38,15 @@ import tensorflow_hub as hub
 from tensorflowjs import write_weights
 from tensorflowjs.converters import common
 
+# enable eager execution for v2 APIs
+tf.compat.v1.enable_eager_execution()
+
 CLEARED_TENSOR_FIELDS = (
     'tensor_content', 'half_val', 'float_val', 'double_val', 'int_val',
     'string_val', 'scomplex_val', 'int64_val', 'bool_val',
     'resource_handle_val', 'variant_val', 'uint32_val', 'uint64_val')
+
+_HUB_V1_MODULE_PB = "tfhub_module.pb"
 
 def load_graph(graph_filename, output_node_names):
   """Loads GraphDef. Returns Python Graph object.
@@ -238,6 +242,14 @@ def write_artifacts(topology,
   with open(output_graph, 'wt') as f:
     json.dump(model_json, f)
 
+
+def _check_signature_in_model(saved_model, signature_name):
+  if signature_name not in saved_model.signatures:
+    raise ValueError("Signature '%s' does not exist. The following signatures "
+                     "are available: %s" % (signature_name,
+                                            saved_model.signatures.keys()))
+
+
 def convert_tf_saved_model(saved_model_dir,
                            output_dir, signature_def='serving_default',
                            saved_model_tags='serve',
@@ -256,8 +268,9 @@ def convert_tf_saved_model(saved_model_dir,
       will consist of
       - a file named 'model.json'
       - possibly sharded binary weight files.
-    signature_def: string Tagset of the SignatureDef to load. Defaulted to
-      'serving_default'
+    signature_def: string Tagset of the SignatureDef to load. Defaults to
+      'serving_default'.
+    saved_model_tags: tags of the GraphDef to load. Defaults to 'serve'.
     quantization_dtype: An optional numpy dtype to quantize weights to for
       compression. Only np.uint8 and np.uint16 are supported.
     skip_op_check: Bool whether to skip the op check.
@@ -273,6 +286,9 @@ def convert_tf_saved_model(saved_model_dir,
 
   saved_model_tags = saved_model_tags.split(', ')
   model = load(saved_model_dir, saved_model_tags)
+
+  _check_signature_in_model(model, signature_def)
+
   concrete_func = model.signatures[signature_def]
   frozen_func = convert_to_constants.convert_variables_to_constants_v2(
       concrete_func)
@@ -327,9 +343,9 @@ def load_and_initialize_hub_module(module_path, signature='default'):
   return graph, session, inputs, outputs
 
 
-def convert_tf_hub_module(module_path, output_dir,
-                          signature='default', quantization_dtype=None,
-                          skip_op_check=False, strip_debug_ops=False):
+def convert_tf_hub_module_v1(module_path, output_dir,
+                             signature='default', quantization_dtype=None,
+                             skip_op_check=False, strip_debug_ops=False):
   """Freeze the TF-Hub module and check compatibility with Tensorflow.js.
 
   Optimize and convert the TF-Hub module to Tensorflow.js format, if it passes
@@ -366,7 +382,7 @@ def convert_tf_hub_module(module_path, output_dir,
   print('Creating a model with inputs %s and outputs %s.' % (input_node_names,
                                                              output_node_names))
 
-  frozen_graph_def = graph_util.convert_variables_to_constants(
+  frozen_graph_def = tf.compat.v1.graph_util.convert_variables_to_constants(
       sess, graph.as_graph_def(), output_node_names)
 
   output_graph = os.path.join(output_dir, common.ARTIFACT_MODEL_JSON_FILE_NAME)
@@ -384,3 +400,43 @@ def convert_tf_hub_module(module_path, output_dir,
     # Clean up the temp files.
     if os.path.exists(frozen_file):
       os.remove(frozen_file)
+
+
+def convert_tf_hub_module(module_handle, output_dir,
+                          signature='default', saved_model_tags='serve',
+                          quantization_dtype=None, skip_op_check=False,
+                          strip_debug_ops=False):
+  """Conversion for TF Hub modules V1 and V2.
+
+  See convert_tf_hub_module and convert_tf_saved_model.
+
+  Args:
+    module_path: string Path to the module.
+    output_dir: string The name of the output directory. The directory
+      will consist of
+      - a file named 'model.json'
+      - possibly sharded binary weight files.
+    signature: string Signature to load.
+    saved_model_tags: tags of the GraphDef to load. Defaults to ''.
+    skip_op_check: Bool whether to skip the op check.
+    strip_debug_ops: Bool whether to strip debug ops.
+  """
+  module_path = hub.resolve(module_handle)
+  # TODO(vbardiovskyg): We can remove this v1 code path once loading of all v1
+  # modules is fixed on the TF side, or once the modules we cannot load become
+  # replaced with newer versions.
+  if tf.io.gfile.exists(os.path.join(module_path, _HUB_V1_MODULE_PB)):
+    print("Loading the module using TF 1.X interface from %s." % module_path)
+    convert_tf_hub_module_v1(module_path, output_dir, signature,
+                             quantization_dtype, skip_op_check, strip_debug_ops)
+  else:
+    print("Loading the module using TF 2.X interface from %s." % module_path)
+    if signature is None:
+      signature = 'default'
+    convert_tf_saved_model(saved_model_dir=module_path,
+                           output_dir=output_dir,
+                           signature_def=signature,
+                           saved_model_tags=saved_model_tags,
+                           quantization_dtype=None,
+                           skip_op_check=False,
+                           strip_debug_ops=False)

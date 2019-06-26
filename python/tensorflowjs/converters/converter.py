@@ -361,7 +361,7 @@ def _standardize_input_output_formats(input_format, output_format):
   input_format_is_keras = (
       input_format in ['keras', 'keras_saved_model'])
   input_format_is_tf = (
-      input_format in ['tf_frozen_model', 'tf_hub'])
+      input_format in ['tf_saved_model', 'tf_hub'])
   if output_format is None:
     # If no explicit output_format is provided, infer it from input format.
     if input_format_is_keras:
@@ -558,7 +558,7 @@ def main():
         output_format == 'tfjs_graph_model'):
     tf_saved_model_conversion_v2.convert_tf_hub_module(
         FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
-        skip_op_check=FLAGS.skip_op_check,
+        FLAGS.saved_model_tags, skip_op_check=FLAGS.skip_op_check,
         strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tfjs_layers_model' and
         output_format == 'keras'):

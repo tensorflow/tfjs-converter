@@ -117,9 +117,6 @@ class TestWriteWeights(unittest.TestCase):
             'paths': ['group1-shard1of1.bin'],
             'weights': [{
                 'name': 'weight1',
-                'delimiter': '\x00',
-                # 6 cyrillic chars (2 bytes each), 8 ascii and 3 delimiters.
-                'byteLength': 23,
                 'shape': [2, 2],
                 'dtype': 'string'
             }]
@@ -127,8 +124,30 @@ class TestWriteWeights(unittest.TestCase):
 
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
     with open(weights_path, 'rb') as f:
-      weight_bytes = f.read().decode('utf-8')
-      self.assertEqual(weight_bytes, u'здраво\x00end\x00test\x00a')
+      weight_bytes = f.read()
+
+      self.assertEqual(len(weight_bytes), 36)
+      # 'здраво'
+      size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+      self.assertEqual(size, 12) # 6 cyrillic chars (2 bytes each).
+      string = weight_bytes[4:16].decode('utf-8')
+      self.assertEqual(string, u'здраво')
+      # 'end'
+      size = np.frombuffer(weight_bytes[16:20], 'int32')[0]
+      self.assertEqual(size, 3) # 3 ascii chars.
+      string = weight_bytes[20:23].decode('utf-8')
+      self.assertEqual(string, u'end')
+      # 'test'
+      size = np.frombuffer(weight_bytes[23:27], 'int32')[0]
+      self.assertEqual(size, 4) # 4 ascii chars.
+      string = weight_bytes[27:31].decode('utf-8')
+      self.assertEqual(string, u'test')
+      # 'a'
+      size = np.frombuffer(weight_bytes[31:35], 'int32')[0]
+      self.assertEqual(size, 1) # 4 ascii chars.
+      string = weight_bytes[35:36].decode('utf-8')
+      self.assertEqual(string, u'a')
+
 
   def test_1_group_1_weight_string_empty(self):
     groups = [
@@ -148,30 +167,20 @@ class TestWriteWeights(unittest.TestCase):
     self.assertEqual(
         manifest,
         [{
-            'paths': [],
+            'paths': ['group1-shard1of1.bin'],
             'weights': [{
                 'name': 'weight1',
-                'delimiter': '\x00',
-                'byteLength': 0,
                 'shape': [1],
                 'dtype': 'string'
             }]
         }])
 
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
-    self.assertFalse(os.path.exists(weights_path))
-
-  def test_delimiter_in_string_throws(self):
-    string = 'a' + write_weights.STRING_DELIMITER + 'b'
-    groups = [
-        [{
-            'name': 'weight1',
-            'data': np.array([string], 'object')
-        }]
-    ]
-
-    with self.assertRaises(ValueError):
-      write_weights.write_weights(groups, TMP_DIR)
+    with open(weights_path, 'rb') as f:
+      weight_bytes = f.read()
+      self.assertEqual(len(weight_bytes), 4)
+      size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+      self.assertEqual(size, 0) # Empty string.
 
   def test_1_group_1_weight_string_unicode(self):
     groups = [
@@ -194,9 +203,6 @@ class TestWriteWeights(unittest.TestCase):
             'paths': ['group1-shard1of1.bin'],
             'weights': [{
                 'name': 'weight1',
-                'delimiter': '\x00',
-                # 6 cyrillic chars (2 bytes each), 8 ascii and 3 delimiters.
-                'byteLength': 23,
                 'shape': [2, 2],
                 'dtype': 'string'
             }]
@@ -204,8 +210,29 @@ class TestWriteWeights(unittest.TestCase):
 
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
     with open(weights_path, 'rb') as f:
-      weight_bytes = f.read().decode('utf-8')
-      self.assertEqual(weight_bytes, u'здраво\x00end\x00test\x00a')
+      weight_bytes = f.read()
+
+      self.assertEqual(len(weight_bytes), 36)
+      # 'здраво'
+      size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+      self.assertEqual(size, 12) # 6 cyrillic chars (2 bytes each).
+      string = weight_bytes[4:16].decode('utf-8')
+      self.assertEqual(string, u'здраво')
+      # 'end'
+      size = np.frombuffer(weight_bytes[16:20], 'int32')[0]
+      self.assertEqual(size, 3) # 3 ascii chars.
+      string = weight_bytes[20:23].decode('utf-8')
+      self.assertEqual(string, u'end')
+      # 'test'
+      size = np.frombuffer(weight_bytes[23:27], 'int32')[0]
+      self.assertEqual(size, 4) # 4 ascii chars.
+      string = weight_bytes[27:31].decode('utf-8')
+      self.assertEqual(string, u'test')
+      # 'a'
+      size = np.frombuffer(weight_bytes[31:35], 'int32')[0]
+      self.assertEqual(size, 1) # 4 ascii chars.
+      string = weight_bytes[35:36].decode('utf-8')
+      self.assertEqual(string, u'a')
 
   def test_1_group_1_weight_string_sharded(self):
     groups = [
@@ -215,9 +242,9 @@ class TestWriteWeights(unittest.TestCase):
         }]
     ]
 
-    # The array takes up 10 bytes across 3 shards when shard size is 4 bytes.
+    # The array takes up 14 bytes across 3 shards when shard size is 5 bytes.
     manifest = write_weights.write_weights(
-        groups, TMP_DIR, shard_size_bytes=4)
+        groups, TMP_DIR, shard_size_bytes=5)
 
     self.assertTrue(
         os.path.isfile(os.path.join(TMP_DIR, 'weights_manifest.json')),
@@ -233,8 +260,6 @@ class TestWriteWeights(unittest.TestCase):
             ],
             'weights': [{
                 'name': 'weight1',
-                'delimiter': '\x00',
-                'byteLength': 10,
                 'shape': [1],
                 'dtype': 'string'
             }]
@@ -247,7 +272,12 @@ class TestWriteWeights(unittest.TestCase):
       weight_bytes += f.read()
     with open(os.path.join(TMP_DIR, 'group1-shard3of3.bin'), 'rb') as f:
       weight_bytes += f.read()
-      self.assertEqual(weight_bytes, b'helloworld')
+
+    self.assertEqual(len(weight_bytes), 14)
+    size = np.frombuffer(weight_bytes[:4], 'int32')[0]
+    self.assertEqual(size, 10) # 10 ascii chars.
+    string = weight_bytes[4:14].decode('utf-8')
+    self.assertEqual(string, u'helloworld')
 
   def test_1_group_3_weights_packed_multi_dtype(self):
     # Each string tensor uses different encoding.
@@ -288,20 +318,14 @@ class TestWriteWeights(unittest.TestCase):
                 'dtype': 'float32'
             }, {
                 'name': 'weight2',
-                'delimiter': '\x00',
-                'byteLength': 9,
                 'shape': [2],
                 'dtype': 'string'
             }, {
                 'name': 'weight3',
-                'delimiter': '\x00',
-                'byteLength': 12,
                 'shape': [1],
                 'dtype': 'string'
             }, {
                 'name': 'weight4',
-                'delimiter': '\x00',
-                'byteLength': 12,
                 'shape': [1],
                 'dtype': 'string'
             }, {

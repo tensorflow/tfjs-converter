@@ -17,7 +17,6 @@ import io
 import json
 import math
 import os
-import chardet
 
 import numpy as np
 from tensorflowjs import quantization
@@ -26,9 +25,6 @@ _OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool, np.object]
 _AUTO_DTYPE_CONVERSION = {
     np.dtype(np.float64): np.float32,
     np.dtype(np.int64): np.int32}
-
-# Delimiter used in serializing string tensors.
-STRING_DELIMITER = u'\x00'
 
 def write_weights(
     weight_groups, write_dir, shard_size_bytes=1024 * 1024 * 4,
@@ -178,7 +174,7 @@ def _quantize_entry(entry, quantization_dtype):
   return quantized_entry
 
 
-def _serialize_string_array(data, delimiter):
+def _serialize_string_array(data):
   """Serializes a numpy array of dtype `string` into bytes.
 
   The delimiter will only exist between neighboring strings. If the tensor has
@@ -195,24 +191,17 @@ def _serialize_string_array(data, delimiter):
   """
   strings = data.flatten().tolist()
 
-  # Use the longest string to detect the encoding.
-  maxlen = 0
-  maxstr = None
-  for s in strings:
-    if isinstance(s, bytes) and len(s) > maxlen:
-      maxlen = len(s)
-      maxstr = s
-  enc = 'utf-8' if maxstr is None else chardet.detect(maxstr)['encoding']
+  string_bytes = io.BytesIO()
+  bytes_writer = io.BufferedWriter(string_bytes)
 
-  decoded_strings = []
   for x in strings:
-    decoded = x.decode(enc) if isinstance(x, bytes) else x
-    if delimiter in decoded:
-      raise ValueError(
-          'Failed to serialize entry `{}` which contains '
-          'the delimiter `{}`'.format(decoded, delimiter))
-    decoded_strings.append(decoded)
-  return delimiter.join(decoded_strings).encode('utf-8')
+    encoded = x if isinstance(x, bytes) else x.encode('utf-8')
+    length_as_bytes = np.array(len(encoded), 'int32').tobytes()
+    bytes_writer.write(length_as_bytes)
+    bytes_writer.write(encoded)
+  bytes_writer.flush()
+  string_bytes.seek(0)
+  return string_bytes.read()
 
 def _serialize_numeric_array(data):
   """Serializes a numeric numpy array into bytes.
@@ -248,7 +237,7 @@ def _stack_group_bytes(group):
     data = entry['data']
 
     if data.dtype == np.object:
-      data_bytes = _serialize_string_array(data, STRING_DELIMITER)
+      data_bytes = _serialize_string_array(data)
       entry['byteLength'] = len(data_bytes)
     else:
       data_bytes = _serialize_numeric_array(data)
@@ -318,8 +307,6 @@ def _get_weights_manifest_for_group(group):
     # String arrays have dtype 'object' and need extra metadata to parse.
     if dtype == 'object':
       var_manifest['dtype'] = 'string'
-      var_manifest['delimiter'] = STRING_DELIMITER
-      var_manifest['byteLength'] = entry['byteLength']
     if is_quantized:
       var_manifest['quantization'] = {
           'min': entry['quantization']['min'],
