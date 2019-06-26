@@ -338,17 +338,38 @@ class TestWriteWeights(unittest.TestCase):
     weights_path = os.path.join(TMP_DIR, 'group1-shard1of1.bin')
     with open(weights_path, 'rb') as f:
       weight_bytes = f.read()
+      self.assertEqual(len(weight_bytes), 78)
 
+      # [1, 2, 3]
       weight1 = np.frombuffer(weight_bytes[:12], 'float32')
       np.testing.assert_array_equal(weight1, np.array([1, 2, 3], 'float32'))
 
+      # 'hello'
+      size = np.frombuffer(weight_bytes[12:16], 'int32')[0]
+      self.assertEqual(size, 12) # 5 ascii chars in utf-16.
+      string = weight_bytes[16:28].decode('utf-16')
+      self.assertEqual(string, u'hello')
 
-      self.assertEqual(weight_bytes[12:21].decode('utf-8'), u'hello\x00end')
-      self.assertEqual(weight_bytes[21:33].decode('utf-8'), u'здраво')
-      self.assertEqual(weight_bytes[33:45].decode('utf-8'), u'语言处理')
+      # 'end'
+      size = np.frombuffer(weight_bytes[28:32], 'int32')[0]
+      self.assertEqual(size, 8) # 3 ascii chars in utf-16.
+      string = weight_bytes[32:40].decode('utf-16')
+      self.assertEqual(string, u'end')
 
-      weight3 = np.frombuffer(weight_bytes[45:], 'float32')
-      np.testing.assert_array_equal(weight3, np.array([4, 5, 6], 'float32'))
+      # 'здраво'
+      size = np.frombuffer(weight_bytes[40:44], 'int32')[0]
+      self.assertEqual(size, 6) # 6 cyrillic chars in windows-1251.
+      string = weight_bytes[44:50].decode('windows-1251')
+      self.assertEqual(string, u'здраво')
+
+      # '语言处理'
+      size = np.frombuffer(weight_bytes[50:54], 'int32')[0]
+      self.assertEqual(size, 12) # 4 east asian chars in utf-8.
+      string = weight_bytes[54:66].decode('utf-8')
+      self.assertEqual(string, u'语言处理')
+
+      weight5 = np.frombuffer(weight_bytes[66:], 'float32')
+      np.testing.assert_array_equal(weight5, np.array([4, 5, 6], 'float32'))
 
   def test_1_group_1_weight_sharded(self):
     groups = [

@@ -75,7 +75,8 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertEqual('weight1', read_output[0][0]['name'])
     np.testing.assert_array_equal(
         read_output[0][0]['data'],
-        np.array([['test', 'a'], ['b', 'c']], 'object'))
+        np.array([[u'test'.encode('utf-8'), u'a'.encode('utf-8')],
+                  [u'b'.encode('utf-8'), u'c'.encode('utf-8')]], 'object'))
 
 
   def testReadCyrillicStringUnicodeAndEncoded(self):
@@ -103,13 +104,13 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertEqual('weight1', weight1['name'])
     np.testing.assert_array_equal(
         weight1['data'],
-        np.array([u'здраво'], 'object'))
+        np.array([u'здраво'.encode('utf-8')], 'object'))
 
     weight2 = group[1]
     self.assertEqual('weight2', weight2['name'])
     np.testing.assert_array_equal(
         weight2['data'],
-        np.array([u'поздрав'], 'object'))
+        np.array([u'поздрав'.encode('utf-8')], 'object'))
 
   def testReadEastAsianStringUnicodeAndEncoded(self):
     # Each string tensor uses different encoding.
@@ -141,19 +142,19 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertEqual('weight1', weight1['name'])
     np.testing.assert_array_equal(
         weight1['data'],
-        np.array([u'语言处理'], 'object'))
+        np.array([u'语言处理'.encode('utf-8')], 'object'))
 
     weight2 = group[1]
     self.assertEqual('weight2', weight2['name'])
     np.testing.assert_array_equal(
         weight2['data'],
-        np.array([u'语言处理'], 'object'))
+        np.array([u'语言处理'.encode('utf-16')], 'object'))
 
     weight3 = group[2]
     self.assertEqual('weight3', weight3['name'])
     np.testing.assert_array_equal(
         weight3['data'],
-        np.array([u'语言处理'], 'object'))
+        np.array([u'语言处理'.encode('utf-8')], 'object'))
 
   def testReadOneGroupStringWithShards(self):
     groups = [
@@ -172,7 +173,9 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertEqual(1, len(read_output[0]))
     self.assertEqual('weight1', read_output[0][0]['name'])
     np.testing.assert_array_equal(read_output[0][0]['data'],
-                                  np.array(['test', 'a', 'c'], 'object'))
+                                  np.array([u'test'.encode('utf-8'),
+                                            u'a'.encode('utf-8'),
+                                            u'c'.encode('utf-8')], 'object'))
 
   def testReadOneGroupEmptyStrings(self):
     groups = [
@@ -200,7 +203,7 @@ class ReadWeightsTest(unittest.TestCase):
     self.assertEqual('weight1', weight1['name'])
     np.testing.assert_array_equal(
         weight1['data'],
-        np.array(['', ''], 'object'))
+        np.array([u''.encode('utf-8'), u''.encode('utf-8')], 'object'))
 
     weight2 = group[1]
     self.assertEqual('weight2', weight2['name'])

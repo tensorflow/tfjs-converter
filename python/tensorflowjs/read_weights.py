@@ -70,15 +70,18 @@ def read_weights(weights_manifest, base_path, flatten=False):
   return decode_weights(weights_manifest, data_buffers, flatten=flatten)
 
 
-def _deserialize_string_array(
-    data_buffer, offset, byte_length, shape, delimiter):
-  decoded = data_buffer[offset : offset + byte_length].decode('utf-8')
+def _deserialize_string_array(data_buffer, offset, shape):
   size = np.prod(shape)
   if size == 0:
-    return np.array([], 'object').reshape(shape)
-  else:
-    return np.array(
-        decoded.split(delimiter), 'object').reshape(shape)
+    return np.array([], 'object').reshape(shape), offset + 4
+  vals = []
+  for _ in range(size):
+    byteLength = np.frombuffer(data_buffer[offset:offset + 4], 'int32')[0]
+    offset += 4
+    string = data_buffer[offset:offset + byteLength]
+    vals.append(string)
+    offset += byteLength
+  return np.array(vals, 'object').reshape(shape), offset
 
 
 def _deserialize_numeric_array(data_buffer, offset, dtype, shape):
@@ -151,19 +154,14 @@ def decode_weights(weights_manifest, data_buffers, flatten=False):
       if dtype not in _INPUT_DTYPES:
         raise NotImplementedError('Unsupported data type: %s' % dtype)
       if weight['dtype'] == 'string':
-        weight_bytes = weight['byteLength']
-        delimiter = weight['delimiter']
-        value = _deserialize_string_array(
-            data_buffer, offset, weight_bytes, shape, delimiter)
-
+        value, offset = _deserialize_string_array(data_buffer, offset, shape)
       else:
         value = _deserialize_numeric_array(data_buffer, offset, dtype, shape)
-        weight_bytes = dtype.itemsize * value.size
+        offset += dtype.itemsize * value.size
       if quant_info:
         value = quantization.dequantize_weights(
             value, quant_info['scale'], quant_info['min'],
             np.dtype(weight['dtype']))
-      offset += weight_bytes
       out_group.append({'name': name, 'data': value})
 
     if flatten:
