@@ -71,16 +71,37 @@ def read_weights(weights_manifest, base_path, flatten=False):
 
 
 def _deserialize_string_array(data_buffer, offset, shape):
+  """Deserializes bytes into np.array of dtype `object` which holds strings.
+
+  Each string value is preceeded by 4 bytes which denote a 32-bit integer that
+  specifies the byte length of the following string. This is followed by the
+  actual string bytes. If the tensor has no strings there will
+  be no bytes reserved. Empty strings will still take 4 bytes for the length.
+
+  For example, a tensor that has 2 strings will be encoded as
+  [byte length of s1][bytes of s1...][byte length of s2][bytes of s2...]
+
+  where byte length always takes 4 bytes.
+
+  Args:
+    data_buffer: A buffer of bytes containing the serialized data.
+    offset: The byte offset in that buffer that denotes the start of the tensor.
+    shape: The logical shape of the tensor.
+
+  Returns:
+    A np.array of dtype `object` where each element contains the encoded
+    bytes of the string.
+  """
   size = np.prod(shape)
   if size == 0:
     return np.array([], 'object').reshape(shape), offset + 4
   vals = []
   for _ in range(size):
-    byteLength = np.frombuffer(data_buffer[offset:offset + 4], 'int32')[0]
+    byte_length = np.frombuffer(data_buffer[offset:offset + 4], 'int32')[0]
     offset += 4
-    string = data_buffer[offset:offset + byteLength]
+    string = data_buffer[offset:offset + byte_length]
     vals.append(string)
-    offset += byteLength
+    offset += byte_length
   return np.array(vals, 'object').reshape(shape), offset
 
 

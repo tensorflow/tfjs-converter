@@ -177,17 +177,21 @@ def _quantize_entry(entry, quantization_dtype):
 def _serialize_string_array(data):
   """Serializes a numpy array of dtype `string` into bytes.
 
-  The delimiter will only exist between neighboring strings. If the tensor has
-  no strings or only 1 string, there will be no delimiter. If the tensor has
-  N strings (N > 0), there will be N-1 delimiters. The entire string is encoded
-  as UTF-8.
+  Each string is preceeded by 4 bytes which denote a 32-bit integer that
+  specifies the byte length of the following string. This is followed by the
+  actual string bytes (already encoded). If the tensor has no strings there will
+  be no bytes reserved. Empty strings will still take up 4 bytes for the length.
+
+  For example, a tensor that has 2 strings will be encoded as
+  [byte length of s1][bytes of s1...][byte length of s2][bytes of s2...]
+
+  where byte length always takes 4 bytes.
 
   Args:
     data: A numpy array of dtype `string`.
-    delimiter: A string used to delimit neighboring entries.
 
   Returns:
-    utf-8 encoded bytes of the array to be serialized on disk.
+    bytes of the entire string tensor to be serialized on disk.
   """
   strings = data.flatten().tolist()
 
@@ -238,7 +242,6 @@ def _stack_group_bytes(group):
 
     if data.dtype == np.object:
       data_bytes = _serialize_string_array(data)
-      entry['byteLength'] = len(data_bytes)
     else:
       data_bytes = _serialize_numeric_array(data)
     group_bytes_writer.write(data_bytes)
