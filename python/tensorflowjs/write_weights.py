@@ -21,7 +21,7 @@ import os
 import numpy as np
 
 from tensorflowjs import quantization
-from tensorflowjs.read_weights import STRING_LENGTH_DTYPE
+from tensorflowjs import read_weights
 
 _OUTPUT_DTYPES = [np.float32, np.int32, np.uint8, np.uint16, np.bool, np.object]
 _AUTO_DTYPE_CONVERSION = {
@@ -203,7 +203,8 @@ def _serialize_string_array(data):
 
   for x in strings:
     encoded = x if isinstance(x, bytes) else x.encode('utf-8')
-    length_as_bytes = np.array(len(encoded), STRING_LENGTH_DTYPE).tobytes()
+    length_as_bytes = np.array(len(encoded),
+                               read_weights.STRING_LENGTH_DTYPE).tobytes()
     bytes_writer.write(length_as_bytes)
     bytes_writer.write(encoded)
   bytes_writer.flush()
