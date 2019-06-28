@@ -99,6 +99,16 @@ py_test(
     ],
 )
 
+py_test(
+    name = "cli_test",
+    srcs = ["cli_test.py"],
+    srcs_version = "PY2AND3",
+    deps = [
+        ":expect_numpy_installed",
+        ":cli",
+    ],
+)
+
 py_binary(
     name = "cli",
     srcs = ["cli.py"],
