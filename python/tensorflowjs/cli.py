@@ -46,7 +46,7 @@ def quantization_type(value):
 
 
 def of_values(answers, key, values):
-  """Determine user's answers for the key is within the value list.
+  """Determine user's answer for the key is in the value list.
   Args:
     answer: Dict of user's answers to the questions.
     key: question key.
@@ -62,8 +62,7 @@ def of_values(answers, key, values):
 def input_path_message(answers):
   """Determine question for model's input path.
   Args:
-    answer: Dict of user's answers to the questions.
-    key: question key.
+    answer: Dict of user's answers to the questions
   """
   answer = answers['input_format']
   if answer == 'keras':
@@ -101,14 +100,22 @@ def validate_input_path(value, input_format):
 
 
 def validate_output_path(value):
+  """validate the input path for given input format.
+  Args:
+    value: input path of the model.
+    input_format: model format string.
+  """
   value = os.path.expanduser(value)
   if os.path.exists(value):
     return 'The output path already exists: %s' % value
   return True
 
 
-def generate_command(options, params):
-  params.update(options)
+def generate_command(params):
+  """generate the tensorflowjs command string for the selected params.
+  Args:
+    params: user selected parameters for the conversion.
+  """
   args = 'tensorflowjs_converter'
   not_param_list = ['input_path', 'output_path']
   no_false_param = ['split_weights_by_layer', 'skip_op_check']
@@ -123,8 +130,20 @@ def generate_command(options, params):
   args += ' %s %s' % (params['input_path'], params['output_path'])
   return args
 
+def is_saved_model(answers):
+  """check if the input path contains saved model.
+  Args:
+    params: user selected parameters for the conversion.
+  """
+  return answers['input_format'] == 'tf_saved_model' or \
+         answers['input_format'] == 'keras_saved_model' and \
+         answers['output_format'] == 'tfjs_graph_model'
 
 def available_output_formats(answers):
+  """generate the output formats for given input format.
+  Args:
+    ansowers: user selected parameter dict.
+  """
   input_format = answers['input_format']
   if input_format == 'keras_saved_model':
     return ['tfjs_graph_model', 'tfjs_layers_model']
@@ -132,8 +151,13 @@ def available_output_formats(answers):
     return ['keras', 'tfjs_graph_model']
   return []
 
+
 def available_tags(answers):
-  if answers['input_format'] == 'tf_saved_model':
+  """generate the available saved model tags from the proto file.
+  Args:
+    ansowers: user selected parameter dict.
+  """
+  if is_saved_model(answers):
     saved_model = parse_saved_model(answers['input_path'])
     tags = []
     for meta_graph in saved_model.meta_graphs:
@@ -143,7 +167,12 @@ def available_tags(answers):
 
 
 def available_signature_names(answers):
-  if answers['input_format'] == 'tf_saved_model':
+  """generate the available saved model signatures from the proto file
+    and selected tags.
+  Args:
+    ansowers: user selected parameter dict.
+  """
+  if is_saved_model(answers):
     path = answers['input_path']
     tags = answers['saved_model_tags']
     saved_model = parse_saved_model(path)
@@ -192,16 +221,14 @@ def main():
           'name': 'saved_model_tags',
           'choices': available_tags,
           'message': 'What is tags for the saved model?',
-          'when': lambda answers: of_values(answers, 'input_format',
-                                            ['tf_saved_model'])
+          'when': is_saved_model
       },
       {
           'type': 'list',
           'name': 'signature_name',
           'message': 'What is signature name of the model?',
           'choices': available_signature_names,
-          'when': lambda answers: of_values(answers, 'input_format',
-                                            ['tf_saved_model'])
+          'when': is_saved_model
       },
       {
           'type': 'list',
@@ -241,7 +268,7 @@ def main():
           'type': 'confirm',
           'name': 'strip_debug_ops',
           'message': 'Do you want to strip debug ops?',
-          'default': False,
+          'default': True,
           'when': lambda answers: of_values(answers, 'input_format',
                                             ['tf_saved_model', 'tf_hub'])
       },
