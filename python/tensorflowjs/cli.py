@@ -282,7 +282,7 @@ def main():
   ]
   params = prompt(questions, options, style=custom_style_3)
 
-  command = generate_command(options, params)
+  command = generate_command(params)
   print(command)
   os.system(command)
 
