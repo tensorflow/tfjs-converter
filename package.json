@@ -14,10 +14,10 @@
   },
   "license": "Apache-2.0",
   "peerDependencies": {
-    "@tensorflow/tfjs-core": "1.2.1"
+    "@tensorflow/tfjs-core": "1.2.2"
   },
   "devDependencies": {
-    "@tensorflow/tfjs-core": "1.2.1",
+    "@tensorflow/tfjs-core": "1.2.2",
     "@types/jasmine": "~2.8.6",
     "@types/long": "~3.0.32",
     "@types/node-fetch": "1.6.9",
@@ -57,6 +57,7 @@
     "publish-local": "yarn build-npm && yalc push",
     "test": "karma start",
     "test-ci": "yarn build && yarn lint && yarn run-browserstack",
+    "test-snippets": "ts-node ./scripts/test_snippets.ts",
     "run-browserstack": "karma start --singleRun --browsers='bs_firefox_mac,bs_chrome_mac' --reporters='dots,karma-typescript,BrowserStack'",
     "lint": "tslint -p . -t verbose",
     "make-version": "sh -c ./scripts/make-version",
