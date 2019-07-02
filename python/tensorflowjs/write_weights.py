@@ -169,6 +169,7 @@ def _quantize_entry(entry, quantization_dtype):
         }
   """
   data = entry['data']
+  # Strings tensors are not quantized.
   if data.dtype == 'object':
     return entry
   quantized_data, scale, min_val = quantization.quantize_weights(
