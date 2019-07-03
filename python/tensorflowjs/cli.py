@@ -23,6 +23,7 @@ import json
 from PyInquirer import prompt
 from examples import custom_style_3
 from tensorflow.python.saved_model.loader_impl import parse_saved_model
+from tensorflow.core.framework import types_pb2
 from tensorflowjs.converters.converter import main as convert
 # regex for recognizing valid url for TFHub module.
 URL_REGEX = re.compile(
@@ -255,9 +256,9 @@ def available_signature_names(answers):
 
 
 def format_signature(name, input_nodes, output_nodes):
-  string = f"signature name: {name}\n"
-  string += f"        inputs: \n{format_nodes(input_nodes)}"
-  string += f"        outputs: \n{format_nodes(output_nodes)}"
+  string = "signature name: %s\n" % name
+  string += "        inputs: \n%s" % format_nodes(input_nodes)
+  string += "        outputs: \n%s" % format_nodes(output_nodes)
   return string
 
 
@@ -265,9 +266,11 @@ def format_nodes(nodes):
   string = ""
   for key in nodes:
     value = nodes[key]
-    string += f"              name: {value.name}, "
-    string += f"dtype: {value.dtype}, "
-    string += f"shape: {list(map(lambda x: x.size, value.tensor_shape.dim))}\n"
+    string += "              name: %s, " % value.name
+    string += "dtype: %s, " % types_pb2.DataType.Name(value.dtype)
+    shape = 'Unknown' if value.tensor_shape.unknown_rank else list(
+            map(lambda x: x.size, value.tensor_shape.dim))
+    string += "shape: %s\n" % shape
   return string
 
 
