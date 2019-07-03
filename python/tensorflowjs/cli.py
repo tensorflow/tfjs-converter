@@ -281,7 +281,6 @@ def input_format_string(base, target_format, detected_format):
 def input_format_message(answers):
   message = 'What is your input model format? '
   if DETECTED_INPUT_FORMAT in answers:
-    detected_format = answers[DETECTED_INPUT_FORMAT]
     message += '(auto-detected format is marked with *)'
   else:
     message += '(model format cannot be detected.) '
