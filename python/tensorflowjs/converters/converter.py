@@ -399,7 +399,7 @@ def _parse_quantization_bytes(quantization_bytes):
     raise ValueError('Unsupported quantization bytes: %s' % quantization_bytes)
 
 
-def setup_arguments():
+def setup_arguments(arguments=None):
   parser = argparse.ArgumentParser('TensorFlow.js model converters.')
   parser.add_argument(
       'input_path',
@@ -487,11 +487,13 @@ def setup_arguments():
       default=None,
       help='Shard size (in bytes) of the weight files. Curently applicable '
       'only to output_format=tfjs_layers_model.')
-  return parser.parse_args()
+  if arguments:
+    return parser.parse_args(arguments)
+  else:
+    return parser.parse_args()
 
-
-def main():
-  FLAGS = setup_arguments()
+def main(arguments=None):
+  FLAGS = setup_arguments(arguments)
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')

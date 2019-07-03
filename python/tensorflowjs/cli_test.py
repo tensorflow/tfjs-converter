@@ -71,15 +71,18 @@ class CliTest(unittest.TestCase):
 
   def testInputPathMessage(self):
     answers = {'input_format': 'keras'}
-    self.assertEqual("What is the path of input HDF5 file?",
+    self.assertEqual("The original path seems to be wrong, "
+                     "what is the path of input HDF5 file?",
                      cli.input_path_message(answers))
 
     answers = {'input_format': 'tf_hub'}
-    self.assertEqual("What is the TFHub module URL?",
+    self.assertEqual("The original path seems to be wrong, "
+                     "what is the TFHub module URL?",
                      cli.input_path_message(answers))
 
     answers = {'input_format': 'tf_saved_model'}
-    self.assertEqual("What is the directory that contains the model?",
+    self.assertEqual("The original path seems to be wrong, "
+                     "what is the directory that contains the model?",
                      cli.input_path_message(answers))
 
   def testValidateInputPathForTFHub(self):
@@ -127,10 +130,11 @@ class CliTest(unittest.TestCase):
     self._create_saved_model()
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     self.assertEqual(['__saved_model_init_op', 'serving_default'],
-                     list(cli.available_signature_names(
+                     list(map(lambda x: x['value'],
+                     cli.available_signature_names(
                          {'input_path': save_dir,
                           'input_format': 'tf_saved_model',
-                          'saved_model_tags': 'serve'})))
+                          'saved_model_tags': 'serve'}))))
 
   def testGenerateCommandForSavedModel(self):
     options = {'input_format': 'tf_saved_model',
@@ -142,11 +146,11 @@ class CliTest(unittest.TestCase):
                'strip_debug_ops': True,
                'output_path': 'tmp/web_model'}
 
-    self.assertEqual(('tensorflowjs_converter --input_format=tf_saved_model '
-                      '--quantization_bytes=2 --saved_model_tags=test '
-                      '--signature_name=test_default --strip_debug_ops=True '
-                      'tmp/saved_model tmp/web_model'),
-                     cli.generate_command(options))
+    self.assertEqual(['--input_format=tf_saved_model',
+                      '--quantization_bytes=2', '--saved_model_tags=test',
+                      '--signature_name=test_default', '--strip_debug_ops=True',
+                      'tmp/saved_model', 'tmp/web_model'],
+                     cli.generate_arguments(options))
 
   def testGenerateCommandForKerasSavedModel(self):
     options = {'input_format': 'tf_keras_saved_model',
@@ -159,13 +163,13 @@ class CliTest(unittest.TestCase):
                'strip_debug_ops': False,
                'output_path': 'tmp/web_model'}
 
-    self.assertEqual(('tensorflowjs_converter '
-                      '--input_format=tf_keras_saved_model '
-                      '--output_format=tfjs_layers_model '
-                      '--quantization_bytes=1 --saved_model_tags=test '
-                      '--signature_name=test_default --skip_op_check '
-                      '--strip_debug_ops=False tmp/saved_model tmp/web_model'),
-                     cli.generate_command(options))
+    self.assertEqual(['--input_format=tf_keras_saved_model',
+                      '--output_format=tfjs_layers_model',
+                      '--quantization_bytes=1', '--saved_model_tags=test',
+                      '--signature_name=test_default', '--skip_op_check',
+                      '--strip_debug_ops=False', 'tmp/saved_model',
+                      'tmp/web_model'],
+                     cli.generate_arguments(options))
 
   def testGenerateCommandForKerasModel(self):
     options = {'input_format': 'keras',
@@ -173,9 +177,9 @@ class CliTest(unittest.TestCase):
                'quantization_bytes': 1,
                'output_path': 'tmp/web_model'}
 
-    self.assertEqual(('tensorflowjs_converter --input_format=keras '
-                      '--quantization_bytes=1 tmp/model.HD5 tmp/web_model'),
-                     cli.generate_command(options))
+    self.assertEqual(['--input_format=keras', '--quantization_bytes=1',
+                      'tmp/model.HD5', 'tmp/web_model'],
+                     cli.generate_arguments(options))
 
   def testGenerateCommandForLayerModel(self):
     options = {'input_format': 'tfjs_layers_model',
@@ -184,11 +188,11 @@ class CliTest(unittest.TestCase):
                'quantization_bytes': 1,
                'output_path': 'tmp/web_model'}
 
-    self.assertEqual(('tensorflowjs_converter '
-                      '--input_format=tfjs_layers_model '
-                      '--output_format=keras '
-                      '--quantization_bytes=1 tmp/model.json tmp/web_model'),
-                     cli.generate_command(options))
+    self.assertEqual(['--input_format=tfjs_layers_model',
+                      '--output_format=keras',
+                      '--quantization_bytes=1', 'tmp/model.json',
+                      'tmp/web_model'],
+                     cli.generate_arguments(options))
 
 
 if __name__ == '__main__':
