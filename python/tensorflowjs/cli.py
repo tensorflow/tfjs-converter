@@ -268,9 +268,10 @@ def format_nodes(nodes):
     value = nodes[key]
     string += "              name: %s, " % value.name
     string += "dtype: %s, " % types_pb2.DataType.Name(value.dtype)
-    shape = 'Unknown' if value.tensor_shape.unknown_rank else list(
-            map(lambda x: x.size, value.tensor_shape.dim))
-    string += "shape: %s\n" % shape
+    if value.tensor_shape.unknown_rank:
+      string += "shape: Unknown\n"
+    else:
+      string += "shape: %s\n" % [x.size for x in value.tensor_shape.dim]
   return string
 
 
@@ -451,6 +452,7 @@ def main():
     for entry in it:
       print(entry.name,
             os.path.getsize(os.path.join(params['output_path'], entry.name)))
+
 
 if __name__ == '__main__':
   main()

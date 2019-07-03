@@ -130,11 +130,10 @@ class CliTest(unittest.TestCase):
     self._create_saved_model()
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     self.assertEqual(['__saved_model_init_op', 'serving_default'],
-                     list(map(lambda x: x['value'],
-                              cli.available_signature_names(
-                                  {'input_path': save_dir,
-                                   'input_format': 'tf_saved_model',
-                                   'saved_model_tags': 'serve'}))))
+                     [x['value'] for x in cli.available_signature_names(
+                         {'input_path': save_dir,
+                          'input_format': 'tf_saved_model',
+                          'saved_model_tags': 'serve'})])
 
   def testGenerateCommandForSavedModel(self):
     options = {'input_format': 'tf_saved_model',
