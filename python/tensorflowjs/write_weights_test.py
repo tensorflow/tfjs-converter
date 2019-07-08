@@ -20,7 +20,6 @@ import unittest
 
 import numpy as np
 
-from tensorflowjs import quantization
 from tensorflowjs import write_weights
 
 TMP_DIR = '/tmp/write_weights_test/'
