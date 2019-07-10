@@ -66,7 +66,7 @@
     "gen-doc": "ts-node ./scripts/gen_doc.ts",
     "gen-json": "ts-node ./scripts/gen_json.ts",
     "pb2json": "ts-node ./tools/pb2json_converter.ts",
-    "build-pip-package": "cd python && ./build-pip-package.sh --test /tmp/tfjs-pips",
-    "run-python-tests": "cd python && ./run-python-tests.sh"
+    "build-pip-package": "yarn gen-json --test && cd python && ./build-pip-package.sh --test /tmp/tfjs-pips",
+    "run-python-tests": "yarn gen-json --test && cd python && ./run-python-tests.sh"
   }
 }
