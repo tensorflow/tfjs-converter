@@ -833,13 +833,14 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
   def testConvertTfjsLayersModelToTfjsGraphModel(self):
     x = np.random.randn(8, 10)
 
-    # 1. Create a model for testing.
-    model = keras.Sequential()
-    model.add(keras.layers.Dense(10, activation='relu', input_shape=[4]))
-    model.add(keras.layers.Dense(1, activation='sigmoid'))
+    with tf.Graph().as_default(), tf.compat.v1.Session():
+      # 1. Create a model for testing.
+      model = keras.Sequential()
+      model.add(keras.layers.Dense(10, activation='relu', input_shape=[4]))
+      model.add(keras.layers.Dense(1, activation='sigmoid'))
 
-    h5_path = os.path.join(self._tmp_dir, 'model.h5')
-    model.save(h5_path)
+      h5_path = os.path.join(self._tmp_dir, 'model.h5')
+      model.save(h5_path)
 
     # 2. Convert the keras saved model to tfjs_layers_model format.
     layers_model_output_dir = os.path.join(self._tmp_dir, 'tfjs_layers')
@@ -868,13 +869,14 @@ class ConvertTfKerasSavedModelTest(tf.test.TestCase):
     self.assertEqual(len(weight_files), 1)
 
   def testConvertTfjsLayersModelToKerasSavedModel(self):
-    # 1. Create a model for testing.
-    model = keras.Sequential()
-    model.add(keras.layers.Dense(10, activation='relu', input_shape=[4]))
-    model.add(keras.layers.Dense(1, activation='sigmoid'))
+    with tf.Graph().as_default(), tf.compat.v1.Session():
+      # 1. Create a model for testing.
+      model = keras.Sequential()
+      model.add(keras.layers.Dense(10, activation='relu', input_shape=[4]))
+      model.add(keras.layers.Dense(1, activation='sigmoid'))
 
-    h5_path = os.path.join(self._tmp_dir, 'model.h5')
-    model.save(h5_path)
+      h5_path = os.path.join(self._tmp_dir, 'model.h5')
+      model.save(h5_path)
 
     # 2. Convert the keras saved model to tfjs_layers_model format.
     layers_model_output_dir = os.path.join(self._tmp_dir, 'tfjs_layers')
