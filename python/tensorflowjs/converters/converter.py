@@ -472,8 +472,8 @@ def setup_arguments():
       '--output_format',
       type=str,
       required=False,
-      choices=set(['keras', 'tfjs_layers_model', 'tfjs_graph_model',
-                   'tensorflowjs']),
+      choices=set(['keras', 'keras_saved_model', 'tfjs_layers_model',
+                   'tfjs_graph_model', 'tensorflowjs']),
       help='Output format. Default: tfjs_graph_model.')
   parser.add_argument(
       '--signature_name',
