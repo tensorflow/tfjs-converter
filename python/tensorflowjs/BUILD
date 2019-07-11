@@ -5,6 +5,8 @@ package(
     licenses = ["notice"],  # Apache 2.0
 )
 
+exports_files(["LICENSE"])
+
 py_library(
     name = "expect_h5py_installed",
     # This is a dummy rule used as a h5py dependency in open-source.
