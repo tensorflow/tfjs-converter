@@ -48,7 +48,7 @@ fileNames.forEach(fileName => {
   try {
     const m = require('../' + srcPath);
     if (m.json === null) {
-      console.log('Ignored', srcPath);
+      console.log(`Ignored ${srcPath}`);
       return;
     }
     tsFilesNamesWithJSONs.push(path.basename(srcPath));
