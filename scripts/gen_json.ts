@@ -56,7 +56,8 @@ fileNames.forEach(fileName => {
     if (testing) {
       if (!fs.existsSync(destPath) || !fs.lstatSync(destPath).isFile()) {
         throw new Error(
-            `Op JSON consistency test failed: Missing file ${destPath}`);
+            `Op JSON consistency test failed: Missing file ${destPath}.` +
+            `You may want to run: yarn gen-json`);
       }
       const destJSON =
           JSON.parse(fs.readFileSync(destPath, {encoding: 'utf8'}));
@@ -79,7 +80,8 @@ if (testing) {
   const dirContent = fs.readdirSync(destDir);
   dirContent.forEach(itemPath => {
     if (!itemPath.endsWith('.json')) {
-      throw new Error(`Found non .json file in directory ${destDir}`);
+      throw new Error(
+          `Found non-json file in directory ${destDir}: ${itemPath}`);
     }
     if (tsFilesNamesWithJSONs.indexOf(itemPath.replace('.json', '.ts')) ===
         -1) {

@@ -53,7 +53,7 @@
     "yalc": "~1.0.0-pre.21"
   },
   "scripts": {
-    "build": "tsc && copyfiles -f src/data/compiled_api.* dist/src/data/",
+    "build": "yarn gen-json --test && tsc && copyfiles -f src/data/compiled_api.* dist/src/data/",
     "build-npm": "./scripts/build-npm.sh",
     "link-local": "yalc link",
     "publish-local": "yarn build-npm && yalc push",
