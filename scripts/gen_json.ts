@@ -45,34 +45,34 @@ const testing = process.argv.indexOf('--test') !== -1;
 const tsFilesNamesWithJSONs: string[] = [];
 fileNames.forEach(fileName => {
   const srcPath = path.join(srcDir, fileName);
-  try {
-    const m = require('../' + srcPath);
-    if (m.json === null) {
-      console.log(`Ignored ${srcPath}`);
-      return;
+  if (srcPath.endsWith('_test.ts')) {
+    return;
+  }
+  const m = require('../' + srcPath);
+  if (m.json == null) {
+    console.log(srcPath);  // DEBUG
+    console.log(m);        // DEBUG
+    console.log(`Ignored ${srcPath}`);
+    return;
+  }
+  tsFilesNamesWithJSONs.push(path.basename(srcPath));
+  const destPath = path.join(destDir, fileName.replace('.ts', '.json'));
+  if (testing) {
+    if (!fs.existsSync(destPath) || !fs.lstatSync(destPath).isFile()) {
+      throw new Error(
+          `Op JSON consistency test failed: Missing file ${destPath}. ` +
+          `You may want to run: yarn gen-json`);
     }
-    tsFilesNamesWithJSONs.push(path.basename(srcPath));
-    const destPath = path.join(destDir, fileName.replace('.ts', '.json'));
-    if (testing) {
-      if (!fs.existsSync(destPath) || !fs.lstatSync(destPath).isFile()) {
-        throw new Error(
-            `Op JSON consistency test failed: Missing file ${destPath}.` +
-            `You may want to run: yarn gen-json`);
-      }
-      const destJSON =
-          JSON.parse(fs.readFileSync(destPath, {encoding: 'utf8'}));
-      if (!deepEqual(m.json, destJSON)) {
-        throw new Error(
-            `JSON content of ${destPath} does not match TypeScript file ` +
-            `${srcPath}. Run the following command to make sure they are ` +
-            `in sync: yarn gen-json`);
-      }
-    } else {
-      fs.writeFileSync(destPath, JSON.stringify(m.json, null, 2));
-      console.log('Generated', destPath);
+    const destJSON = JSON.parse(fs.readFileSync(destPath, {encoding: 'utf8'}));
+    if (!deepEqual(m.json, destJSON)) {
+      throw new Error(
+          `JSON content of ${destPath} does not match TypeScript file ` +
+          `${srcPath}. Run the following command to make sure they are ` +
+          `in sync: yarn gen-json`);
     }
-  } catch (ex) {
-    console.log('Ignored', srcPath);
+  } else {
+    fs.writeFileSync(destPath, JSON.stringify(m.json, null, 2));
+    console.log('Generated', destPath);
   }
 });
 
