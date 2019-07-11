@@ -50,9 +50,7 @@ fileNames.forEach(fileName => {
   }
   const m = require('../' + srcPath);
   if (m.json == null) {
-    console.log(srcPath);  // DEBUG
-    console.log(m);        // DEBUG
-    console.log(`Ignored ${srcPath}`);
+    console.log(`Ignored ${srcPath} due to absent "json" field.`);
     return;
   }
   tsFilesNamesWithJSONs.push(path.basename(srcPath));
