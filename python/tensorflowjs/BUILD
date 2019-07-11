@@ -5,6 +5,8 @@ package(
     licenses = ["notice"],  # Apache 2.0
 )
 
+licenses(["notice"])  # Apache 2.0
+
 exports_files(["LICENSE"])
 
 py_library(
