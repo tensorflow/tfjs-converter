@@ -20,17 +20,26 @@ import os
 import re
 import json
 
-from PyInquirer import prompt
-from examples import custom_style_3
+from questionary import prompt
+from prompt_toolkit.styles import Style
 from tensorflow.python.saved_model.loader_impl import parse_saved_model
 from tensorflow.core.framework import types_pb2
-from tensorflowjs.converters.converter import main as convert
+from tensorflowjs.converters.converter import convert
 # regex for recognizing valid url for TFHub module.
-URL_REGEX = re.compile(
+TFHUB_VALID_URL_REGEX = re.compile(
     # http:// or https://
     r'^(?:http)s?://', re.IGNORECASE)
 
-DETECTED_INPUT_FORMAT = 'detected_input_format'
+# prompt style
+prompt_style = Style([
+    ('separator', 'fg:#cc5454'),
+    ('qmark', 'fg:#673ab7 bold'),
+    ('question', ''),
+    ('selected', 'fg:#cc5454'),
+    ('pointer', 'fg:#673ab7 bold'),
+    ('answer', 'fg:#f44336 bold'),
+])
+
 KERAS_SAVED_MODEL = 'keras_saved_model'
 KERAS_MODEL = 'keras'
 TF_SAVED_MODEL = 'tf_saved_model'
@@ -39,23 +48,26 @@ TFJS_GRAPH_MODEL = 'tfjs_keras_model'
 TFJS_LAYERS_MODEL = 'tfjs_layers_model'
 
 
-def quantization_type(value):
+def quantization_type(user_selection_quant):
   """Determine the quantization type based on user selection.
   Args:
-    value: user selected value.
+    user_selection_quant: user selected quantization value.
+
+  Returns:
+    int: quantization parameter value for converter.
   """
   answer = None
   try:
-    if '1/2' in value:
+    if '1/2' in user_selection_quant:
       answer = 2
-    elif '1/4' in value:
+    elif '1/4' in user_selection_quant:
       answer = 1
   except ValueError:
     answer = None
   return answer
 
 
-def of_values(answers, key, values):
+def value_in_list(answers, key, values):
   """Determine user's answer for the key is in the value list.
   Args:
     answer: Dict of user's answers to the questions.
@@ -69,7 +81,7 @@ def of_values(answers, key, values):
     return False
 
 
-def getTFJSModelType(file):
+def get_tfjs_model_type(file):
   with open(file) as f:
     data = json.load(f)
     return data['format']
@@ -79,27 +91,31 @@ def detect_input_format(answers):
   """Determine the input format from model's input path or file.
   Args:
     answer: Dict of user's answers to the questions
+  returns:
+    string: detected input format
+    string: normalized input path
   """
+  detected_input_format = None
   value = answers['input_path']
-  if re.match(URL_REGEX, value):
-    answers[DETECTED_INPUT_FORMAT] = TF_HUB
+  if re.match(TFHUB_VALID_URL_REGEX, value):
+    detected_input_format = TF_HUB
   elif (os.path.isdir(value) and
         any(fname.endswith('.pb') for fname in os.listdir(value))):
-    answers[DETECTED_INPUT_FORMAT] = TF_SAVED_MODEL
+    detected_input_format = TF_SAVED_MODEL
   elif os.path.isfile(value) and value.endswith('.HDF5'):
-    answers[DETECTED_INPUT_FORMAT] = KERAS_MODEL
+    detected_input_format = KERAS_MODEL
   elif os.path.isdir(value) and value.endswith('model.json'):
-    if getTFJSModelType(value) == 'layers-model':
-      answers[DETECTED_INPUT_FORMAT] = TFJS_LAYERS_MODEL
+    if get_tfjs_model_type(value) == 'layers-model':
+      detected_input_format = TFJS_LAYERS_MODEL
   elif os.path.isdir(value):
     for fname in os.listdir(value):
       if fname.endswith('model.json'):
         filename = os.path.join(value, fname)
-        if getTFJSModelType(filename) == 'layers-model':
-          answers['input_path'] = os.path.join(value, fname)
-          answers[DETECTED_INPUT_FORMAT] = TFJS_LAYERS_MODEL
+        if get_tfjs_model_type(filename) == 'layers-model':
+          value = os.path.join(value, fname)
+          detected_input_format = TFJS_LAYERS_MODEL
           break
-
+  return detect_input_path, value
 
 def input_path_message(answers):
   """Determine question for model's input path.
@@ -116,45 +132,48 @@ def input_path_message(answers):
     return message + 'what is the directory that contains the model?'
 
 
-def validate_input_path(value, input_format):
+def validate_input_path(input_path, input_format):
   """validate the input path for given input format.
   Args:
-    value: input path of the model.
+    input_path: input path of the model.
     input_format: model format string.
   """
-  value = os.path.expanduser(value)
-  if not value:
+  input_path = os.path.expanduser(input_path)
+  if not input_path:
     return 'Please enter a valid path'
   if input_format == TF_HUB:
-    if re.match(URL_REGEX, value) is None:
-      return 'This is not an valid url for TFHub module: %s' % value
-  elif not os.path.exists(value):
+    if re.match(TFHUB_VALID_URL_REGEX, input_path) is None:
+      return """This is not an valid URL for TFHub module: %s,
+        We expect a URL that starts with http(s)://""" % value
+  elif not os.path.exists(input_path):
     return 'Nonexistent path for the model: %s' % value
   if input_format in [KERAS_SAVED_MODEL, TF_SAVED_MODEL]:
-    if not os.path.isdir(value):
+    if not os.path.isdir(input_path):
       return 'The path provided is not a directory: %s' % value
     if not any(fname.endswith('.pb') for fname in os.listdir(value)):
-      return 'This is an invalid saved model directory: %s' % value
+      return 'Did not find a .pb file inside the model\'s directory: %s' % value
   if input_format == TFJS_LAYERS_MODEL:
-    if not os.path.isfile(value):
+    if not os.path.isfile(input_path):
       return 'The path provided is not a file: %s' % value
   if input_format == KERAS_MODEL:
-    if not os.path.isfile(value):
+    if not os.path.isfile(input_path):
       return 'The path provided is not a file: %s' % value
   return True
 
 
-def validate_output_path(value):
+def validate_output_path(output_path):
   """validate the input path for given input format.
   Args:
-    value: input path of the model.
+    output_path: input path of the model.
     input_format: model format string.
+  Returns:
+    bool: return true when the output directory does not exist.
   """
-  value = os.path.expanduser(value)
-  if not value:
+  output_path = os.path.expanduser(output_path)
+  if not output_path:
     return 'Please provide a valid output path'
-  if os.path.exists(value):
-    return 'The output path already exists: %s' % value
+  if os.path.exists(output_path):
+    return 'The output path already exists: %s' % output_path
   return True
 
 
@@ -162,9 +181,11 @@ def generate_arguments(params):
   """generate the tensorflowjs command string for the selected params.
   Args:
     params: user selected parameters for the conversion.
+  Returns:
+    list: the argument list for converter.
   """
   args = []
-  not_param_list = [DETECTED_INPUT_FORMAT, 'input_path', 'output_path']
+  not_param_list = ['input_path', 'output_path']
   no_false_param = ['split_weights_by_layer', 'skip_op_check']
   for key, value in sorted(params.items()):
     if key not in not_param_list and value is not None:
@@ -183,6 +204,8 @@ def is_saved_model(answers):
   """check if the input path contains saved model.
   Args:
     params: user selected parameters for the conversion.
+  Returns:
+    bool:
   """
   return answers['input_format'] == TF_SAVED_MODEL or \
       answers['input_format'] == KERAS_SAVED_MODEL and \
@@ -282,19 +305,16 @@ def input_format_string(base, target_format, detected_format):
     return base
 
 
-def input_format_message(answers):
+def input_format_message(detected_input_format):
   message = 'What is your input model format? '
-  if DETECTED_INPUT_FORMAT in answers:
+  if detected_input_format:
     message += '(auto-detected format is marked with *)'
   else:
     message += '(model format cannot be detected.) '
   return message
 
 
-def input_formats(answers):
-  detected_format = None
-  if DETECTED_INPUT_FORMAT in answers:
-    detected_format = answers[DETECTED_INPUT_FORMAT]
+def input_formats(detected_format):
   formats = [{
       'key': 'k',
       'name': input_format_string('Keras (HDF5)', KERAS_MODEL,
@@ -342,26 +362,28 @@ def main():
           lambda value: 'Please enter a valid path' if not value else True
   }]
 
-  input_params = prompt(input_path, style=custom_style_3)
-  detect_input_format(input_params)
+  input_params = prompt(input_path, style=prompt_style)
+  detected_input_format, normalized_path = detect_input_format(
+      input_params['input_path'])
+  input_params['input_path'] = normalized_path
 
   formats = [
       {
           'type': 'list',
           'name': 'input_format',
-          'message': input_format_message(input_params),
+          'message': input_format_message(detected_input_format),
           'choices': input_formats(input_params)},
       {
           'type': 'list',
           'name': 'output_format',
           'message': 'What is your output format?',
           'choices': available_output_formats,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: value_in_list(answers, 'input_format',
                                             [KERAS_SAVED_MODEL,
                                              TFJS_LAYERS_MODEL])
       }
   ]
-  options = prompt(formats, input_params, style=custom_style_3)
+  options = prompt(formats, input_params, style=prompt_style)
   message = input_path_message(options)
 
   questions = [
@@ -372,8 +394,7 @@ def main():
           'filter': os.path.expanduser,
           'validate': lambda value: validate_input_path(
               value, options['input_format']),
-          'when': lambda answers: (DETECTED_INPUT_FORMAT not in answers)
-
+          'when': lambda answers: detect_input_format
       },
       {
           'type': 'list',
@@ -404,7 +425,7 @@ def main():
           'name': 'weight_shard_size_byte',
           'message': 'Please enter shard size (in bytes) of the weight files?',
           'default': str(4 * 1024 * 1024),
-          'when': lambda answers: of_values(answers, 'output_format',
+          'when': lambda answers: value_in_list(answers, 'output_format',
                                             [TFJS_LAYERS_MODEL])
       },
       {
@@ -412,7 +433,7 @@ def main():
           'name': 'split_weights_by_layer',
           'message': 'Do you want to split weights by layers?',
           'default': False,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: value_in_list(answers, 'input_format',
                                             [TFJS_LAYERS_MODEL])
       },
       {
@@ -422,7 +443,7 @@ def main():
                      'This will allow conversion of unsupported ops, \n'
                      'you can implement them as custom ops in tfjs-converter.',
           'default': False,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: value_in_list(answers, 'input_format',
                                             [TF_SAVED_MODEL, TF_HUB])
       },
       {
@@ -431,7 +452,7 @@ def main():
           'message': 'Do you want to strip debug ops? \n'
                      'This will improve model execution performance.',
           'default': True,
-          'when': lambda answers: of_values(answers, 'input_format',
+          'when': lambda answers: value_in_list(answers, 'input_format',
                                             [TF_SAVED_MODEL, TF_HUB])
       },
       {
@@ -443,15 +464,14 @@ def main():
           'validate': validate_output_path
       }
   ]
-  params = prompt(questions, options, style=custom_style_3)
+  params = prompt(questions, options, style=prompt_style)
 
   arguments = generate_arguments(params)
   convert(arguments)
   print('file generated after conversion:')
   with os.scandir(params['output_path']) as it:
     for entry in it:
-      print(entry.name,
-            os.path.getsize(os.path.join(params['output_path'], entry.name)))
+      print(entry.name, entry.stat().st_size)
 
 
 if __name__ == '__main__':

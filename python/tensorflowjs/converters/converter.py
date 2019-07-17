@@ -492,7 +492,7 @@ def setup_arguments(arguments=None):
   else:
     return parser.parse_args()
 
-def main(arguments=None):
+def convert(arguments=None):
   FLAGS = setup_arguments(arguments)
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
@@ -585,6 +585,8 @@ def main(arguments=None):
         'Unsupported input_format - output_format pair: %s - %s' %
         (input_format, output_format))
 
+def main():
+  convert()
 
 if __name__ == '__main__':
   main()
