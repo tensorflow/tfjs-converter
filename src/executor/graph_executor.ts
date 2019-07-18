@@ -24,6 +24,7 @@ import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
 import {getExecutionSubgraph, getNodesInTopologicalOrder, isControlFlow} from './model_analysis';
+import {rewritePrelu} from './model_rewrite';
 
 interface NodeWithContexts {
   contexts: ExecutionContextInfo[];
@@ -122,6 +123,16 @@ export class GraphExecutor {
         this.graph, this.weightMap, executionInfo);
   }
 
+  fusePrelu() {
+    const addNodes = [];
+    for (const key in this.graph.nodes) {
+      const node = this.graph.nodes[key];
+      if (node.op === 'Add' || node.op === 'AddV2') {
+        addNodes.push(node);
+      }
+    }
+    addNodes.forEach(node => rewritePrelu(node));
+  }
   /**
    * Executes the inference for given input tensors.
    * @param inputs Tensor map for the model inputs, keyed by the input node
