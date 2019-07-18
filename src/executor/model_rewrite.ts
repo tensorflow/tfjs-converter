@@ -20,7 +20,7 @@ import {Graph, Node} from '../operations/types';
  * f(x) = Add(Relu(x), Mul(negative_alpha, Relu(Neg(x))))
  */
 
-export function rewritePrelu(addNode: Node): boolean {
+export function rewritePrelu(graph: Graph, addNode: Node): boolean {
   if (addNode == null || addNode.op !== 'Add' && addNode.op !== 'AddV2' ||
       addNode.inputNames.length !== 2) {
     return false;
@@ -51,9 +51,8 @@ export function rewritePrelu(addNode: Node): boolean {
       negInputNode.inputNames.length !== 1) {
     return false;
   }
-  const finalInputNode = negInputNode;
 
-  if (reluNode.inputNames[0] !== finalInputNode.inputNames[0]) {
+  if (reluNode.inputNames[0] !== negInputNode.inputNames[0]) {
     return false;
   }
 
@@ -101,6 +100,11 @@ export function rewritePrelu(addNode: Node): boolean {
     inputNode.children.splice(negIndex, 1);
   }
 
+  delete graph.nodes[addNode.name];
+  delete graph.nodes[mulOp.name];
+  delete graph.nodes[reluNegInputNode.name];
+  delete graph.nodes[negInputNode.name];
+  inputNode.children.push(negNode);
   outputNode.inputNames[0] = preluNode.name;
   outputNode.inputs[0] = preluNode;
   return true;
