@@ -299,7 +299,7 @@ def convert_tf_saved_model(saved_model_dir,
   # graph using V1 utils.
   try:
     frozen_graph = _freeze_saved_model_v2(concrete_func)
-  except ValueError:
+  except Exception:
     frozen_graph = _freeze_saved_model_v1(
         concrete_func.graph, output_node_names)
 
