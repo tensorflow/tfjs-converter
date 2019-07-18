@@ -357,6 +357,9 @@ def _assert_valid_weight_entry(entry):
   name = entry['name']
   data = entry['data']
 
+  if data.dtype.name.startswith('string'):
+    data = data.astype(np.object)
+
   if not (data.dtype in _OUTPUT_DTYPES or data.dtype in _AUTO_DTYPE_CONVERSION):
     raise ValueError('Error dumping weight ' + name + ', dtype ' +
                      data.dtype.name + ' not supported.')

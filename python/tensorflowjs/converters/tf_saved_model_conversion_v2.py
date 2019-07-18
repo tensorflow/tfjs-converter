@@ -289,12 +289,34 @@ def convert_tf_saved_model(saved_model_dir,
   _check_signature_in_model(model, signature_def)
 
   concrete_func = model.signatures[signature_def]
-  frozen_func = convert_to_constants.convert_variables_to_constants_v2(
+  try:
+    frozen_func = convert_to_constants.convert_variables_to_constants_v2(
       concrete_func)
 
-  optimize_graph(frozen_func, output_graph, model.tensorflow_version,
+    optimize_graph(frozen_func, output_graph, model.tensorflow_version,
                  quantization_dtype=quantization_dtype,
                  skip_op_check=skip_op_check, strip_debug_ops=strip_debug_ops)
+  except:
+    graph_def = concrete_func.graph.as_graph_def()
+    output_node_names = []
+    for output_tensor in concrete_func.outputs:
+      output_node_names.append(output_tensor.name.split(':')[0])
+
+    frozen_graph_def = tf.compat.v1.graph_util.convert_variables_to_constants(
+      tf.compat.v1.Session(), graph_def, output_node_names)
+
+    frozen_graph = tf.Graph()
+    with frozen_graph.as_default():
+      tf.import_graph_def(frozen_graph_def, name='')
+
+    for output in output_node_names:
+      frozen_graph.add_to_collection('train_op',
+                            frozen_graph.get_operation_by_name(output))
+    optimize_graph(None, output_graph, model.tensorflow_version,
+                  quantization_dtype=quantization_dtype,
+                  skip_op_check=skip_op_check,
+                  strip_debug_ops=strip_debug_ops,
+                  graph=frozen_graph)
 
 def load_and_initialize_hub_module(module_path, signature='default'):
   """Loads graph of a TF-Hub module and initializes it into a session.
