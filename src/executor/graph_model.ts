@@ -88,6 +88,7 @@ export class GraphModel implements InferenceModel {
    * f(x) = Relu(x) + (-alpha * Relu(-x))
    * Since tfjs-core has a prelu op, this will fuse the TensorFlow generated ops
    * into prelu op.
+   * This will also try to register a custom op that supports prelu op.
    */
   public fusePrelu() {
     this.executor.fusePrelu();

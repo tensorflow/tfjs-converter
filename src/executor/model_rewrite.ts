@@ -36,9 +36,12 @@ import {Graph, Node} from '../operations/types';
  *
  * f(x) = Add(Relu(x), Mul(negative_alpha, Relu(Neg(x))))
  *
+ * And generate the follow sub graph:
+ * f(x) = Prelu(x, neg(negative_alpha))
+ *
  * @param graph Graph, model graph object
- * @param addNode Node, the Add op that could the root of subgraph that tf.keras
- *    generated for prelu
+ * @param addNode Node, the Add op which is the root node of subgraph that
+ *   tf.keras generated for prelu.
  */
 
 export function rewritePrelu(graph: Graph, addNode: Node): boolean {
@@ -96,6 +99,7 @@ export function rewritePrelu(graph: Graph, addNode: Node): boolean {
     rawAttrs: {}
   };
 
+  // construct the prelu node
   const preluNode: Node = {
     name: reluNode.name + '_Prelu',
     inputNames: [inputNode.name, negNode.name],
@@ -112,6 +116,7 @@ export function rewritePrelu(graph: Graph, addNode: Node): boolean {
 
   negNode.children.push(preluNode);
 
+  // clean up the children and inputs of input/output nodes of the subgraph.
   const mulIndex = negAlphaTensorNode.children.indexOf(mulOp);
   if (mulIndex > -1) {
     negAlphaTensorNode.children.splice(mulIndex, 1);
@@ -129,14 +134,18 @@ export function rewritePrelu(graph: Graph, addNode: Node): boolean {
   }
   inputNode.children.push(preluNode);
 
+  outputNode.inputNames[0] = preluNode.name;
+  outputNode.inputs[0] = preluNode;
+
+  // remove the nodes for keras generated prelu subgraph.
   delete graph.nodes[addNode.name];
   delete graph.nodes[mulOp.name];
   delete graph.nodes[reluNode.name];
   delete graph.nodes[reluNegInputNode.name];
   delete graph.nodes[negInputNode.name];
+
+  // add the newly generated nodes.
   graph.nodes[preluNode.name] = preluNode;
   graph.nodes[negNode.name] = negNode;
-  outputNode.inputNames[0] = preluNode.name;
-  outputNode.inputs[0] = preluNode;
   return true;
 }
