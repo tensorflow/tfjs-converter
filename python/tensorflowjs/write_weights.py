@@ -342,7 +342,7 @@ def _assert_no_duplicate_weight_names(weight_groups):
 def _auto_convert_weight_entry(entry):
   data = entry['data']
   if data.dtype in _AUTO_DTYPE_CONVERSION:
-    entry['data'] = _AUTO_DTYPE_CONVERSION[data.dtype](data)
+    entry['data'] = data.astype(_AUTO_DTYPE_CONVERSION[data.dtype])
     print('weight ' + entry['name'] + ' with shape ' + str(data.shape) +
           ' and dtype ' + data.dtype.name + ' was auto converted to the type ' +
           np.dtype(_AUTO_DTYPE_CONVERSION[data.dtype]).name)
