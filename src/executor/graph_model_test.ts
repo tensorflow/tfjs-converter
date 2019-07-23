@@ -66,6 +66,42 @@ const SIMPLE_MODEL: tensorflow.IGraphDef = {
   versions: {producer: 1.0, minConsumer: 3}
 };
 
+const PRELU_MODEL: tensorflow.IGraphDef = {
+  node: [
+    {
+      name: 'Input',
+      op: 'Placeholder',
+      attr: {
+        dtype: {
+          type: tensorflow.DataType.DT_INT32,
+        },
+        shape: {shape: {dim: [{size: -1}, {size: 1}]}}
+      }
+    },
+    {
+      name: 'Const',
+      op: 'Const',
+      attr: {
+        dtype: {type: tensorflow.DataType.DT_INT32},
+        value: {
+          tensor: {
+            dtype: tensorflow.DataType.DT_INT32,
+            tensorShape: {dim: [{size: 1}]},
+          }
+        },
+        index: {i: 0},
+        length: {i: 4}
+      }
+    },
+    {name: 'Relu', op: 'Relu', input: ['Input'], attr: {}},
+    {name: 'Neg', op: 'Neg', input: ['Input'], attr: {}},
+    {name: 'Relu2', op: 'Relu', input: ['Neg'], attr: {}},
+    {name: 'Mul', op: 'Mul', input: ['Const', 'Relu2'], attr: {}},
+    {name: 'Add', op: 'Add', input: ['Relu', 'Mul'], attr: {}}
+  ],
+  versions: {producer: 1.0, minConsumer: 3}
+};
+
 const CONTROL_FLOW_MODEL: tensorflow.IGraphDef = {
   node: [
     {
@@ -108,7 +144,15 @@ const SIMPLE_HTTP_MODEL_LOADER = {
     };
   }
 };
-
+const PRELU_HTTP_MODEL_LOADER = {
+  load: async () => {
+    return {
+      modelTopology: PRELU_MODEL,
+      weightSpecs: weightsManifest,
+      weightData: bias.dataSync()
+    };
+  }
+};
 const CUSTOM_OP_MODEL: tensorflow.IGraphDef = {
   node: [
     {
@@ -146,6 +190,16 @@ const CUSTOM_HTTP_MODEL_LOADER = {
   load: async () => {
     return {
       modelTopology: CUSTOM_OP_MODEL,
+      weightSpecs: weightsManifest,
+      weightData: bias.dataSync()
+    };
+  }
+};
+
+const CONTROL_FLOW_HTTP_MODEL_LOADER = {
+  load: async () => {
+    return {
+      modelTopology: CONTROL_FLOW_MODEL,
       weightSpecs: weightsManifest,
       weightData: bias.dataSync()
     };
@@ -369,15 +423,23 @@ describe('Model', () => {
       });
     });
   });
-  const CONTROL_FLOW_HTTP_MODEL_LOADER = {
-    load: async () => {
-      return {
-        modelTopology: CONTROL_FLOW_MODEL,
-        weightSpecs: weightsManifest,
-        weightData: bias.dataSync()
-      };
-    }
-  };
+
+  describe('prelu op model', () => {
+    beforeEach(() => {
+      spyOn(tfc.io, 'getLoadHandlers').and.returnValue([
+        PRELU_HTTP_MODEL_LOADER
+      ]);
+      spyOn(tfc.io, 'browserHTTPRequest')
+          .and.returnValue(PRELU_HTTP_MODEL_LOADER);
+    });
+
+    it('fusePrelu should call model rewrite method', async () => {
+      await model.load();
+      model.fusePrelu();
+      expect(Object.keys(model.weights)).toContain('Const_neg');
+      expect(model.outputNodes[0]).toEqual('Add_Prelu');
+    });
+  });
 
   describe('control flow model', () => {
     beforeEach(() => {

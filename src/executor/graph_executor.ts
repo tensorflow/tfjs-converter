@@ -131,7 +131,7 @@ export class GraphExecutor {
         addNodes.push(node);
       }
     }
-    addNodes.forEach(node => rewritePrelu(this.graph, node));
+    addNodes.forEach(node => rewritePrelu(this.graph, this.weightMap, node));
   }
   /**
    * Executes the inference for given input tensors.

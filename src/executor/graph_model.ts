@@ -86,9 +86,9 @@ export class GraphModel implements InferenceModel {
    * There's no native PRelu op in TensorFlow, so Keras generates the following
    * structure which does the equivalent calculation:
    * f(x) = Relu(x) + (-alpha * Relu(-x))
-   * Since tfjs-core has a prelu op, this will fuse the TensorFlow generated ops
-   * into prelu op.
-   * This will also try to register a custom op that supports prelu op.
+   * Since tfjs-core has a prelu op, this method will fuse the TensorFlow
+   * generated ops into prelu op. It will also try to register a custom op that
+   * supports prelu op.
    */
   public fusePrelu() {
     this.executor.fusePrelu();

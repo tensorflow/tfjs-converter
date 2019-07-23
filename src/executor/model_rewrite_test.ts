@@ -14,6 +14,9 @@
  * limitations under the License.
  * =============================================================================
  */
+import {scalar} from '@tensorflow/tfjs-core';
+
+import {NamedTensorsMap} from '../data/types';
 import {Graph, Node} from '../operations/types';
 
 import {rewritePrelu} from './model_rewrite';
@@ -60,7 +63,8 @@ describe('rewritePrelu', () => {
       nodes: {'add': ADD_NODE, 'x': X_NODE, 'y': Y_NODE}
     };
 
-    rewritePrelu(graph, ADD_NODE);
+    const weights: NamedTensorsMap = {'x': [scalar(1)], 'y': [scalar(2)]};
+    rewritePrelu(graph, weights, ADD_NODE);
 
     expect(Object.keys(graph.nodes)).toEqual(jasmine.arrayWithExactContents([
       'x', 'y', 'add'
@@ -68,11 +72,14 @@ describe('rewritePrelu', () => {
     expect(ADD_NODE.inputNames).toEqual(jasmine.arrayWithExactContents([
       'x', 'y'
     ]));
+    expect(Object.keys(weights)).toEqual(jasmine.arrayWithExactContents([
+      'x', 'y'
+    ]));
   });
   it('should rewrite prelu add node', () => {
     const X_NODE: Node = {
       name: 'x',
-      op: 'Const',
+      op: 'Placeholder',
       category: 'graph',
       inputNames: [],
       inputs: [],
@@ -153,10 +160,10 @@ describe('rewritePrelu', () => {
       children: [NOOP_NODE]
     };
     const graph: Graph = {
-      placeholders: [],
-      weights: [],
-      inputs: [],
-      outputs: [],
+      placeholders: [X_NODE],
+      weights: [Y_NODE],
+      inputs: [X_NODE],
+      outputs: [NOOP_NODE],
       nodes: {
         'add2': PRELU_ADD_NODE,
         'x': X_NODE,
@@ -171,16 +178,20 @@ describe('rewritePrelu', () => {
     X_NODE.children = [RELU_NODE, NEG_NODE];
     Y_NODE.children = [MUL_NODE];
 
-    rewritePrelu(graph, PRELU_ADD_NODE);
+    const weights: NamedTensorsMap = {'x': [scalar(1)], 'y': [scalar(2)]};
+    rewritePrelu(graph, weights, PRELU_ADD_NODE);
     expect(Object.keys(graph.nodes)).toEqual(jasmine.arrayWithExactContents([
-      'x', 'y', 'y_neg', 'relu_Prelu', 'noop'
+      'x', 'y', 'y_neg', 'add2_Prelu', 'noop'
     ]));
 
-    expect(graph.nodes['y'].children).toEqual([graph.nodes['y_neg']]);
-    expect(graph.nodes['y_neg'].inputNames).toEqual(['y']);
-    expect(graph.nodes['x'].children).toEqual([graph.nodes['relu_Prelu']]);
-    expect(graph.nodes['relu_Prelu'].inputNames).toEqual(['x', 'y_neg']);
-    expect(graph.nodes['relu_Prelu'].children).toEqual([graph.nodes['noop']]);
-    expect(graph.nodes['noop'].inputNames).toEqual(['relu_Prelu']);
+    expect(graph.nodes['y'].children).toEqual([]);
+    expect(graph.nodes['y_neg'].inputNames).toEqual([]);
+    expect(graph.nodes['y_neg'].op).toEqual('Const');
+    expect(graph.nodes['x'].children).toEqual([graph.nodes['add2_Prelu']]);
+    expect(graph.nodes['add2_Prelu'].inputNames).toEqual(['x', 'y_neg']);
+    expect(graph.nodes['add2_Prelu'].children).toEqual([graph.nodes['noop']]);
+    expect(graph.nodes['add2_Prelu'].op).toEqual('Prelu');
+    expect(graph.nodes['noop'].inputNames).toEqual(['add2_Prelu']);
+    expect(Object.keys(weights)).toEqual(['x', 'y', 'y_neg']);
   });
 });
