@@ -436,11 +436,15 @@ describe('Model', () => {
 
     it('fusePrelu should call model rewrite method', async () => {
       await model.load();
+      const originalResult = model.predict(tfc.scalar(1)) as tfc.Tensor;
+
       model.fusePrelu();
       expect(Object.keys(model.weights)).toContain('Const_neg');
       expect(model.outputNodes[0]).toEqual('Add_Prelu');
       const result = model.predict(tfc.scalar(1)) as tfc.Tensor;
-      tfc.test_util.expectArraysClose(result.dataSync(), 1);
+
+      tfc.test_util.expectArraysClose(
+          result.dataSync(), originalResult.dataSync());
     });
   });
 
