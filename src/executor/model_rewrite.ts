@@ -43,128 +43,128 @@ import {Graph, Node} from '../operations/types';
  * f(x) = Prelu(x, neg(negative_alpha))
  *
  * @param graph Graph, model graph object
- * @param addNode Node, the Add op which is the root node of subgraph that
- *   tf.keras generated for prelu.
+ * @param weightMap NamedTensorsMap, the weight map for the executor.
  */
 
-export function rewritePrelu(
-    graph: Graph, weightMap: NamedTensorsMap, addNode: Node): boolean {
-  if (addNode == null || addNode.op !== 'Add' && addNode.op !== 'AddV2' ||
-      addNode.inputNames.length !== 2) {
-    return false;
-  }
-
-  const reluNode = addNode.inputs.find(input => input.op === 'Relu');
-  if (reluNode == null || reluNode.inputNames.length !== 1) {
-    return false;
-  }
-
-  const mulOp = addNode.inputs.find(input => input.op === 'Mul');
-  if (mulOp == null || mulOp.inputNames.length !== 2) {
-    return false;
-  }
-
-  const negAlphaTensorNode = mulOp.inputs.find(input => input.op === 'Const');
-
-  const reluNegInputNode = mulOp.inputs.find(input => input.op === 'Relu');
-
-  if (negAlphaTensorNode == null || reluNegInputNode == null ||
-      reluNegInputNode.inputNames.length !== 1) {
-    return false;
-  }
-
-  // This detects a Neg op followed by a separated Relu op.
-  const negInputNode = reluNegInputNode.inputs[0];
-  if (negInputNode == null || negInputNode.op !== 'Neg' ||
-      negInputNode.inputNames.length !== 1) {
-    return false;
-  }
-
-  if (reluNode.inputNames[0] !== negInputNode.inputNames[0]) {
-    return false;
-  }
-
-  const inputNode = reluNode.inputs[0];
-  const outputNodes = addNode.children;
-
-  // Construct a tensor for positive alpha (double negative).
-  const alphaTensorName = negAlphaTensorNode.name + '_neg';
-
-  const negNode: Node = {
-    name: alphaTensorName,
-    inputNames: [],
-    inputs: [],
-    attrParams: {},
-    category: 'graph',
-    children: [],
-    op: 'Const',
-    inputParams: {},
-    rawAttrs: {}
-  };
-
-  // Add the constant to weightMap
-  weightMap[alphaTensorName] = [neg(weightMap[negAlphaTensorNode.name][0])];
-  graph.weights.push(negNode);
-
-  // Construct the prelu node
-  const preluNode: Node = {
-    name: addNode.name + '_Prelu',
-    inputNames: [inputNode.name, negNode.name],
-    inputs: [inputNode, negNode],
-    attrParams: {},
-    category: 'custom',
-    children: outputNodes,
-    op: 'Prelu',
-    inputParams: {
-      'x': {inputIndexStart: 0, type: 'tensor'},
-      'alpha': {inputIndexStart: 1, type: 'tensor'}
+export function rewritePrelu(graph: Graph, weightMap: NamedTensorsMap) {
+  for (const key in graph.nodes) {
+    const addNode = graph.nodes[key];
+    if (addNode == null || addNode.op !== 'Add' && addNode.op !== 'AddV2' ||
+        addNode.inputNames.length !== 2) {
+      continue;
     }
-  };
 
-  negNode.children.push(preluNode);
-
-  // Clean up the children and inputs of input/output nodes of the subgraph.
-  const mulIndex = negAlphaTensorNode.children.indexOf(mulOp);
-  if (mulIndex > -1) {
-    negAlphaTensorNode.children.splice(mulIndex, 1);
-  }
-
-  const reluIndex = inputNode.children.indexOf(reluNode);
-  if (reluIndex > -1) {
-    inputNode.children.splice(reluIndex, 1);
-  }
-
-  const negIndex = inputNode.children.indexOf(negInputNode);
-  if (negIndex > -1) {
-    inputNode.children.splice(negIndex, 1);
-  }
-  inputNode.children.push(preluNode);
-
-  outputNodes.forEach(node => {
-    const addIndex = node.inputNames.indexOf(addNode.name);
-    if (addIndex > -1) {
-      node.inputNames[addIndex] = preluNode.name;
-      node.inputs[addIndex] = preluNode;
+    const reluNode = addNode.inputs.find(input => input.op === 'Relu');
+    if (reluNode == null || reluNode.inputNames.length !== 1) {
+      continue;
     }
-  });
 
-  // The prelu node should be an output node.
-  if (outputNodes.length === 0) {
-    const addIndex = graph.outputs.indexOf(addNode);
-    if (addIndex > -1) {
-      graph.outputs.splice(addIndex, 1);
+    const mulOp = addNode.inputs.find(input => input.op === 'Mul');
+    if (mulOp == null || mulOp.inputNames.length !== 2) {
+      continue;
     }
-    graph.outputs.push(preluNode);
-  }
-  // remove the nodes for keras generated prelu subgraph.
-  delete graph.nodes[addNode.name];
-  delete graph.nodes[mulOp.name];
-  delete graph.nodes[reluNode.name];
-  delete graph.nodes[reluNegInputNode.name];
-  delete graph.nodes[negInputNode.name];
 
-  // add the newly generated nodes.
-  graph.nodes[preluNode.name] = preluNode;
-  graph.nodes[negNode.name] = negNode;
-  return true;
+    const negAlphaTensorNode = mulOp.inputs.find(input => input.op === 'Const');
+
+    const reluNegInputNode = mulOp.inputs.find(input => input.op === 'Relu');
+
+    if (negAlphaTensorNode == null || reluNegInputNode == null ||
+        reluNegInputNode.inputNames.length !== 1) {
+      continue;
+    }
+
+    // This detects a Neg op followed by a separated Relu op.
+    const negInputNode = reluNegInputNode.inputs[0];
+    if (negInputNode == null || negInputNode.op !== 'Neg' ||
+        negInputNode.inputNames.length !== 1) {
+      continue;
+    }
+
+    if (reluNode.inputNames[0] !== negInputNode.inputNames[0]) {
+      continue;
+    }
+
+    const inputNode = reluNode.inputs[0];
+    const outputNodes = addNode.children;
+
+    // Construct a tensor for positive alpha (double negative).
+    const alphaTensorName = negAlphaTensorNode.name + '_neg';
+
+    const negNode: Node = {
+      name: alphaTensorName,
+      inputNames: [],
+      inputs: [],
+      attrParams: {},
+      category: 'graph',
+      children: [],
+      op: 'Const',
+      inputParams: {},
+      rawAttrs: {}
+    };
+
+    // Add the constant to weightMap
+    weightMap[alphaTensorName] = [neg(weightMap[negAlphaTensorNode.name][0])];
+    graph.weights.push(negNode);
+
+    // Construct the prelu node
+    const preluNode: Node = {
+      name: addNode.name + '_Prelu',
+      inputNames: [inputNode.name, negNode.name],
+      inputs: [inputNode, negNode],
+      attrParams: {},
+      category: 'custom',
+      children: outputNodes,
+      op: 'Prelu',
+      inputParams: {
+        'x': {inputIndexStart: 0, type: 'tensor'},
+        'alpha': {inputIndexStart: 1, type: 'tensor'}
+      }
+    };
+
+    negNode.children.push(preluNode);
+
+    // Clean up the children and inputs of input/output nodes of the subgraph.
+    const mulIndex = negAlphaTensorNode.children.indexOf(mulOp);
+    if (mulIndex > -1) {
+      negAlphaTensorNode.children.splice(mulIndex, 1);
+    }
+
+    const reluIndex = inputNode.children.indexOf(reluNode);
+    if (reluIndex > -1) {
+      inputNode.children.splice(reluIndex, 1);
+    }
+
+    const negIndex = inputNode.children.indexOf(negInputNode);
+    if (negIndex > -1) {
+      inputNode.children.splice(negIndex, 1);
+    }
+    inputNode.children.push(preluNode);
+
+    outputNodes.forEach(node => {
+      const addIndex = node.inputNames.indexOf(addNode.name);
+      if (addIndex > -1) {
+        node.inputNames[addIndex] = preluNode.name;
+        node.inputs[addIndex] = preluNode;
+      }
+    });
+
+    // The prelu node should be an output node.
+    if (outputNodes.length === 0) {
+      const addIndex = graph.outputs.indexOf(addNode);
+      if (addIndex > -1) {
+        graph.outputs.splice(addIndex, 1);
+      }
+      graph.outputs.push(preluNode);
+    }
+    // remove the nodes for keras generated prelu subgraph.
+    delete graph.nodes[addNode.name];
+    delete graph.nodes[mulOp.name];
+    delete graph.nodes[reluNode.name];
+    delete graph.nodes[reluNegInputNode.name];
+    delete graph.nodes[negInputNode.name];
+
+    // add the newly generated nodes.
+    graph.nodes[preluNode.name] = preluNode;
+    graph.nodes[negNode.name] = negNode;
+  }
 }

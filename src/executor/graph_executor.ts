@@ -124,14 +124,7 @@ export class GraphExecutor {
   }
 
   fusePrelu() {
-    const addNodes = [];
-    for (const key in this.graph.nodes) {
-      const node = this.graph.nodes[key];
-      if (node.op === 'Add' || node.op === 'AddV2') {
-        addNodes.push(node);
-      }
-    }
-    addNodes.forEach(node => rewritePrelu(this.graph, this.weightMap, node));
+    rewritePrelu(this.graph, this.weightMap);
   }
   /**
    * Executes the inference for given input tensors.

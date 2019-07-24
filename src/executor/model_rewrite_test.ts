@@ -64,7 +64,7 @@ describe('rewritePrelu', () => {
     };
 
     const weights: NamedTensorsMap = {'x': [scalar(1)], 'y': [scalar(2)]};
-    rewritePrelu(graph, weights, ADD_NODE);
+    rewritePrelu(graph, weights);
 
     expect(Object.keys(graph.nodes)).toEqual(jasmine.arrayWithExactContents([
       'x', 'y', 'add'
@@ -179,7 +179,7 @@ describe('rewritePrelu', () => {
     Y_NODE.children = [MUL_NODE];
 
     const weights: NamedTensorsMap = {'x': [scalar(1)], 'y': [scalar(2)]};
-    rewritePrelu(graph, weights, PRELU_ADD_NODE);
+    rewritePrelu(graph, weights);
     expect(Object.keys(graph.nodes)).toEqual(jasmine.arrayWithExactContents([
       'x', 'y', 'y_neg', 'add2_Prelu', 'noop'
     ]));

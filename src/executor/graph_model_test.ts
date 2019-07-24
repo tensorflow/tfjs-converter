@@ -29,6 +29,7 @@ const MODEL_URL = `${HOST}/model.json`;
 const RELATIVE_MODEL_URL = '/path/model.pb';
 let model: GraphModel;
 const bias = tfc.tensor1d([1], 'int32');
+const alpha = tfc.scalar(1, 'int32');
 
 const weightsManifest: tfc.io.WeightsManifestEntry[] =
     [{'name': 'Const', 'dtype': 'int32', 'shape': [1]}];
@@ -73,9 +74,9 @@ const PRELU_MODEL: tensorflow.IGraphDef = {
       op: 'Placeholder',
       attr: {
         dtype: {
-          type: tensorflow.DataType.DT_INT32,
+          type: tensorflow.DataType.DT_FLOAT,
         },
-        shape: {shape: {dim: [{size: -1}, {size: 1}]}}
+        shape: {shape: {dim: []}}
       }
     },
     {
@@ -86,7 +87,7 @@ const PRELU_MODEL: tensorflow.IGraphDef = {
         value: {
           tensor: {
             dtype: tensorflow.DataType.DT_INT32,
-            tensorShape: {dim: [{size: 1}]},
+            tensorShape: {dim: []},
           }
         },
         index: {i: 0},
@@ -149,7 +150,7 @@ const PRELU_HTTP_MODEL_LOADER = {
     return {
       modelTopology: PRELU_MODEL,
       weightSpecs: weightsManifest,
-      weightData: bias.dataSync()
+      weightData: alpha.dataSync()
     };
   }
 };
@@ -438,6 +439,8 @@ describe('Model', () => {
       model.fusePrelu();
       expect(Object.keys(model.weights)).toContain('Const_neg');
       expect(model.outputNodes[0]).toEqual('Add_Prelu');
+      const result = model.predict(tfc.scalar(1)) as tfc.Tensor;
+      tfc.test_util.expectArraysClose(result.dataSync(), 1);
     });
   });
 
