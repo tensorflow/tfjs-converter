@@ -52,7 +52,26 @@ __1. Install the TensorFlow.js pip package:__
  pip install tensorflowjs
 ```
 
-__2. Run the converter script provided by the pip package:__
+__2. Run the conversion script provided by the pip package:__
+
+There are two way to trigger the model conversion:
+
+- The interactive CLI: tensorflowjs_cli
+- Regular conversion script: tensorflowjs_converter
+
+To start the interactive CLI:
+```bash
+tensorflowjs_cli
+```
+
+This tool will walk you through the conversion process and provide you with
+details explanations for each choice you need to make. Behind the scene it calls
+the converter script (tensorflowjs_converter) in pip package. This is the easier
+way to convert a single model.
+
+To convert a batch of models or integrate the conversion process into your own script, you should look into using the tensorflowjs_converter script.
+
+Here is detail information of parameters of the converter script.
 
 The converter expects a __TensorFlow SavedModel__, __TensorFlow Hub module__,
 __TensorFlow.js JSON__ format, __Keras HDF5 model__, or __tf.keras SavedModel__

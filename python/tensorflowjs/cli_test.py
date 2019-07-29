@@ -65,9 +65,10 @@ class CliTest(unittest.TestCase):
 
   def testOfValues(self):
     answers = {'input_path': 'abc', 'input_format': '123'}
-    self.assertEqual(True, cli.of_values(answers, 'input_path', ['abc']))
-    self.assertEqual(False, cli.of_values(answers, 'input_path', ['abd']))
-    self.assertEqual(False, cli.of_values(answers, 'input_format2', ['abc']))
+    self.assertEqual(True, cli.value_in_list(answers, 'input_path', ['abc']))
+    self.assertEqual(False, cli.value_in_list(answers, 'input_path', ['abd']))
+    self.assertEqual(False, cli.value_in_list(answers,
+                                              'input_format2', ['abc']))
 
   def testInputPathMessage(self):
     answers = {'input_format': 'keras'}
