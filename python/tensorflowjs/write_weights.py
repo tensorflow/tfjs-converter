@@ -115,6 +115,8 @@ def write_weights(
   manifest = []
 
   for group_index, group in enumerate(weight_groups):
+    for e in group:
+      _auto_convert_weight_entry(e)
     if quantization_dtype:
       group = [_quantize_entry(e, quantization_dtype) for e in group]
     group_bytes, total_bytes, _ = _stack_group_bytes(group)
@@ -167,6 +169,9 @@ def _quantize_entry(entry, quantization_dtype):
         }
   """
   data = entry['data']
+  # Strings tensors are not quantized.
+  if data.dtype == 'object':
+    return entry
   quantized_data, scale, min_val = quantization.quantize_weights(
       data, quantization_dtype)
   quantized_entry = entry.copy()
@@ -179,7 +184,7 @@ def _quantize_entry(entry, quantization_dtype):
 def _serialize_string_array(data):
   """Serializes a numpy array of dtype `string` into bytes.
 
-  Each string value is preceeded by 4 bytes which denote a 32-bit unsigned
+  Each string value is preceded by 4 bytes which denote a 32-bit unsigned
   integer in little endian that specifies the byte length of the following
   string. This is followed by the actual string bytes. If the tensor has no
   strings there will be no bytes reserved. Empty strings will still take 4 bytes
@@ -241,7 +246,6 @@ def _stack_group_bytes(group):
 
   for entry in group:
     _assert_valid_weight_entry(entry)
-    _auto_convert_weight_entry(entry)
     data = entry['data']
 
     if data.dtype == np.object:
@@ -338,20 +342,27 @@ def _assert_no_duplicate_weight_names(weight_groups):
 def _auto_convert_weight_entry(entry):
   data = entry['data']
   if data.dtype in _AUTO_DTYPE_CONVERSION:
-    entry['data'] = _AUTO_DTYPE_CONVERSION[data.dtype](data)
+    entry['data'] = data.astype(_AUTO_DTYPE_CONVERSION[data.dtype])
     print('weight ' + entry['name'] + ' with shape ' + str(data.shape) +
           ' and dtype ' + data.dtype.name + ' was auto converted to the type ' +
           np.dtype(_AUTO_DTYPE_CONVERSION[data.dtype]).name)
 
 
 def _assert_valid_weight_entry(entry):
-  if not 'name' in entry:
+  if 'name' not in entry:
     raise ValueError('Error dumping weight, no name field found.')
-  if not 'data' in entry:
+  if 'data' not in entry:
     raise ValueError('Error dumping weight, no data field found.')
 
   name = entry['name']
   data = entry['data']
+
+  # String tensors can be backed by different numpy dtypes, thus we consolidate
+  # to a single 'np.object' dtype.
+  if data.dtype.name.startswith('str') or data.dtype.name.startswith('bytes'):
+    data = data.astype(np.object)
+    entry['data'] = data
+
 
   if not (data.dtype in _OUTPUT_DTYPES or data.dtype in _AUTO_DTYPE_CONVERSION):
     raise ValueError('Error dumping weight ' + name + ', dtype ' +
