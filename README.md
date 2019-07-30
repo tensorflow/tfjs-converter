@@ -69,7 +69,8 @@ details explanations for each choice you need to make. Behind the scene it calls
 the converter script (tensorflowjs_converter) in pip package. This is the easier
 way to convert a single model.
 
-To convert a batch of models or integrate the conversion process into your own script, you should look into using the tensorflowjs_converter script.
+To convert a batch of models or integrate the conversion process into your own
+script, you should look into using the tensorflowjs_converter script.
 
 Here is detail information of parameters of the converter script.
 

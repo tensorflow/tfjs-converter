@@ -22,16 +22,17 @@ import json
 import os
 import shutil
 import tensorflow as tf
+from tensorflow import keras
 from tensorflow.python.eager import def_function
 from tensorflow.python.ops import variables
 from tensorflow.python.training.tracking import tracking
-from tensorflow.python.saved_model.save import save
+from tensorflow.python.saved_model import save
 
 from tensorflowjs import cli
 
 SAVED_MODEL_DIR = 'saved_model'
 SAVED_MODEL_NAME = 'saved_model.pb'
-HD5_FILE_NAME = 'test.HD5'
+HD5_FILE_NAME = 'test.h5'
 LAYERS_MODEL_NAME = 'model.json'
 
 
@@ -52,8 +53,16 @@ class CliTest(unittest.TestCase):
       json.dump(data, file)
 
   def _create_hd5_file(self):
-    filename = os.path.join(self._tmp_dir, 'test.HD5')
-    open(filename, 'a').close()
+    input_tensor = keras.layers.Input((3,))
+    dense1 = keras.layers.Dense(
+        4, use_bias=True, kernel_initializer='ones', bias_initializer='zeros',
+        name='MyDense10')(input_tensor)
+    output = keras.layers.Dense(
+        2, use_bias=False, kernel_initializer='ones', name='MyDense20')(dense1)
+    model = keras.models.Model(inputs=[input_tensor], outputs=[output])
+    h5_path = os.path.join(self._tmp_dir, HD5_FILE_NAME)
+    print(h5_path)
+    model.save_weights(h5_path)
 
   def _create_saved_model(self):
     """Test a basic model with functions to make sure functions are inlined."""
@@ -65,7 +74,7 @@ class CliTest(unittest.TestCase):
     to_save = root.f.get_concrete_function(input_data)
 
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
-    save(root, save_dir, to_save)
+    save.save(root, save_dir, to_save)
 
   def testQuantizationType(self):
     self.assertEqual(2, cli.quantization_type('1/2'))
