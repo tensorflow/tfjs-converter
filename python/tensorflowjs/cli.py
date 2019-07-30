@@ -166,18 +166,18 @@ def validate_input_path(input_path, input_format):
     if not is_dir and not path.endswith('.json'):
       return 'The path provided is not a directory or .json file: %s' % path
     if is_dir and not any(f.endswith('.json') for f in os.listdir(path)):
-      return 'Did not find a .pb file inside the directory: %s' % path
+      return 'Did not find a .json file inside the directory: %s' % path
   if input_format == KERAS_MODEL:
     if not os.path.isfile(path):
       return 'The path provided is not a file: %s' % path
   return True
 
 
-def expand_input_path(input_format, input_path):
+def expand_input_path(input_path, input_format):
   """expand the relative input path to absolute path, and add layers model file
   name to the end if input format is `tfjs_layers_model`.
   Args:
-    output_path: input path of the model.
+    input_path: input path of the model.
     input_format: model format string.
   Returns:
     string: return expanded input path.
@@ -247,7 +247,6 @@ def available_output_formats(answers):
   Args:
     ansowers: user selected parameter dict.
   """
-  print(answers)
   input_format = answers['input_format']
   if input_format == KERAS_SAVED_MODEL:
     return [{
@@ -277,7 +276,6 @@ def available_tags(answers):
   Args:
     ansowers: user selected parameter dict.
   """
-  print(answers)
   if is_saved_model(answers['input_format']):
     saved_model = parse_saved_model(answers['input_path'])
     tags = []
@@ -427,7 +425,7 @@ def main(dry_run):
               value, options['input_format']),
           'validate': lambda value: validate_input_path(
               value, options['input_format']),
-          'when': lambda answers: (not detect_input_format)
+          'when': lambda answers: (not detected_input_format)
       },
       {
           'type': 'list',
@@ -511,8 +509,8 @@ def main(dry_run):
 
 
 if __name__ == '__main__':
-  if len (sys.argv) > 2 or len(sys.argv) == 1 and not sys.argv[1] == 'dryrun':
+  if len(sys.argv) > 2 or len(sys.argv) == 2 and not sys.argv[1] == '--dryrun':
     print("Usage: tensorflowjs_cli [--dryrun]")
     sys.exit (1)
-  dry_run = sys.argv[1] == '--dryrun'
+  dry_run = len(sys.argv) == 2 and sys.argv[1] == '--dryrun'
   main(dry_run)
