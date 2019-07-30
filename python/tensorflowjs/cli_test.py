@@ -18,6 +18,7 @@ from __future__ import print_function
 
 import unittest
 import tempfile
+import json
 import os
 import shutil
 import tensorflow as tf
@@ -29,7 +30,9 @@ from tensorflow.python.saved_model.save import save
 from tensorflowjs import cli
 
 SAVED_MODEL_DIR = 'saved_model'
+SAVED_MODEL_NAME = 'saved_model.pb'
 HD5_FILE_NAME = 'test.HD5'
+LAYERS_MODEL_NAME = 'model.json'
 
 
 class CliTest(unittest.TestCase):
@@ -41,6 +44,12 @@ class CliTest(unittest.TestCase):
     if os.path.isdir(self._tmp_dir):
       shutil.rmtree(self._tmp_dir)
     super(CliTest, self).tearDown()
+
+  def _create_layers_model(self):
+    data = {'format': 'layers-model'}
+    filename = os.path.join(self._tmp_dir, 'model.json')
+    with open(filename, 'a') as file:
+      json.dump(data, file)
 
   def _create_hd5_file(self):
     filename = os.path.join(self._tmp_dir, 'test.HD5')
@@ -100,6 +109,10 @@ class CliTest(unittest.TestCase):
     self.assertEqual(True, cli.validate_input_path(
         save_dir, 'tf_saved_model'))
 
+    save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR, SAVED_MODEL_NAME)
+    self.assertEqual(True, cli.validate_input_path(
+        save_dir, 'tf_saved_model'))
+
   def testValidateInputPathForKerasSavedModel(self):
     self.assertNotEqual(True, cli.validate_input_path(
         self._tmp_dir, 'keras_saved_model'))
@@ -114,6 +127,17 @@ class CliTest(unittest.TestCase):
     save_dir = os.path.join(self._tmp_dir, HD5_FILE_NAME)
     self.assertEqual(True, cli.validate_input_path(
         save_dir, 'keras'))
+
+  def testValidateInputPathForLayersModel(self):
+    self.assertNotEqual(True, cli.validate_input_path(self._tmp_dir, 'keras'))
+    self._create_layers_model()
+    save_dir = os.path.join(self._tmp_dir)
+    self.assertEqual(True, cli.validate_input_path(
+        save_dir, 'tfjs_layers_model'))
+
+    save_dir = os.path.join(self._tmp_dir, 'model.json')
+    self.assertEqual(True, cli.validate_input_path(
+        save_dir, 'tfjs_layers_model'))
 
   def testValidateOutputPath(self):
     self.assertNotEqual(True, cli.validate_output_path(self._tmp_dir))
@@ -133,7 +157,7 @@ class CliTest(unittest.TestCase):
     self.assertEqual(['__saved_model_init_op', 'serving_default'],
                      [x['value'] for x in cli.available_signature_names(
                          {'input_path': save_dir,
-                          'input_format': 'tf_saved_model',
+                          'input_format': 'tf_saved_model'
                           'saved_model_tags': 'serve'})])
 
   def testGenerateCommandForSavedModel(self):

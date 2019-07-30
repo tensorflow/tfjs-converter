@@ -19,6 +19,7 @@ from __future__ import print_function, unicode_literals
 import os
 import re
 import json
+import sys
 
 from PyInquirer import prompt, style_from_dict, Token
 from tensorflow.python.saved_model.loader_impl import parse_saved_model
@@ -96,25 +97,31 @@ def detect_input_format(input_path):
     string: detected input format
     string: normalized input path
   """
+  input_path = input_path.lower()
   detected_input_format = None
   if re.match(TFHUB_VALID_URL_REGEX, input_path):
     detected_input_format = TF_HUB
-  elif (os.path.isdir(input_path) and
-        any(fname.endswith('.pb') for fname in os.listdir(input_path))):
-    detected_input_format = TF_SAVED_MODEL
-  elif os.path.isfile(input_path) and input_path.endswith('.HDF5'):
-    detected_input_format = KERAS_MODEL
-  elif os.path.isdir(input_path) and input_path.endswith('model.json'):
-    if get_tfjs_model_type(input_path) == 'layers-model':
-      detected_input_format = TFJS_LAYERS_MODEL
   elif os.path.isdir(input_path):
-    for fname in os.listdir(input_path):
-      if fname.endswith('model.json'):
-        filename = os.path.join(input_path, fname)
-        if get_tfjs_model_type(filename) == 'layers-model':
-          input_path = os.path.join(input_path, fname)
-          detected_input_format = TFJS_LAYERS_MODEL
-          break
+    if any(fname.lower().endswith('.pb') for fname in os.listdir(input_path)):
+      detected_input_format = TF_SAVED_MODEL
+    else:
+      for fname in os.listdir(input_path):
+        fname = fname.lower()
+        if fname.endswith('.json'):
+          filename = os.path.join(input_path, fname)
+          if get_tfjs_model_type(filename) == 'layers-model':
+            input_path = os.path.join(input_path, fname)
+            detected_input_format = TFJS_LAYERS_MODEL
+            break
+  elif os.path.isfile(input_path):
+    if input_path.endswith('.hdf5'):
+      detected_input_format = KERAS_MODEL
+    elif input_path.endswith('.pb'):
+      detected_input_format = TF_SAVED_MODEL
+    elif (input_path.endswith('.json') and
+          get_tfjs_model_type(input_path) == 'layers-model'):
+      detected_input_format = TFJS_LAYERS_MODEL
+
   return detected_input_format, input_path
 
 
@@ -139,27 +146,50 @@ def validate_input_path(input_path, input_format):
     input_path: input path of the model.
     input_format: model format string.
   """
-  input_path = os.path.expanduser(input_path)
-  if not input_path:
+  path = os.path.expanduser(input_path)
+  if not path:
     return 'Please enter a valid path'
   if input_format == TF_HUB:
-    if re.match(TFHUB_VALID_URL_REGEX, input_path) is None:
+    if re.match(TFHUB_VALID_URL_REGEX, path) is None:
       return """This is not an valid URL for TFHub module: %s,
-        We expect a URL that starts with http(s)://""" % input_path
-  elif not os.path.exists(input_path):
-    return 'Nonexistent path for the model: %s' % input_path
+        We expect a URL that starts with http(s)://""" % path
+  elif not os.path.exists(path):
+    return 'Nonexistent path for the model: %s' % path
   if input_format in [KERAS_SAVED_MODEL, TF_SAVED_MODEL]:
-    if not os.path.isdir(input_path):
-      return 'The path provided is not a directory: %s' % input_path
-    if not any(fname.endswith('.pb') for fname in os.listdir(input_path)):
-      return 'Did not find a .pb file inside the directory: %s' % input_path
+    is_dir = os.path.isdir(path)
+    if not is_dir and not path.endswith('.pb'):
+      return 'The path provided is not a directory or .pb file: %s' % path
+    if is_dir and not any(f.endswith('.pb') for f in os.listdir(path)):
+      return 'Did not find a .pb file inside the directory: %s' % path
   if input_format == TFJS_LAYERS_MODEL:
-    if not os.path.isfile(input_path):
-      return 'The path provided is not a file: %s' % input_path
+    is_dir = os.path.isdir(path)
+    if not is_dir and not path.endswith('.json'):
+      return 'The path provided is not a directory or .json file: %s' % path
+    if is_dir and not any(f.endswith('.json') for f in os.listdir(path)):
+      return 'Did not find a .pb file inside the directory: %s' % path
   if input_format == KERAS_MODEL:
-    if not os.path.isfile(input_path):
-      return 'The path provided is not a file: %s' % input_path
+    if not os.path.isfile(path):
+      return 'The path provided is not a file: %s' % path
   return True
+
+
+def expand_input_path(input_format, input_path):
+  """expand the relative input path to absolute path, and add layers model file
+  name to the end if input format is `tfjs_layers_model`.
+  Args:
+    output_path: input path of the model.
+    input_format: model format string.
+  Returns:
+    string: return expanded input path.
+  """
+  input_path = os.path.expanduser(input_path)
+  is_dir = os.path.isdir(input_path)
+  if is_dir:
+    for fname in os.listdir(input_path):
+      if fname.endswith('.json'):
+        filename = os.path.join(input_path, fname)
+        return filename
+  return input_path
 
 
 def validate_output_path(output_path):
@@ -201,16 +231,15 @@ def generate_arguments(params):
   return args
 
 
-def is_saved_model(answers):
+def is_saved_model(input_format):
   """check if the input path contains saved model.
   Args:
-    params: user selected parameters for the conversion.
+    input_format: input model format.
   Returns:
-    bool:
+    bool: whether this is for a saved model conversion.
   """
-  return answers['input_format'] == TF_SAVED_MODEL or \
-      answers['input_format'] == KERAS_SAVED_MODEL and \
-      answers['output_format'] == TFJS_GRAPH_MODEL
+  return input_format == TF_SAVED_MODEL or \
+      input_format == KERAS_SAVED_MODEL
 
 
 def available_output_formats(answers):
@@ -248,7 +277,8 @@ def available_tags(answers):
   Args:
     ansowers: user selected parameter dict.
   """
-  if is_saved_model(answers):
+  print(answers)
+  if is_saved_model(answers['input_format']):
     saved_model = parse_saved_model(answers['input_path'])
     tags = []
     for meta_graph in saved_model.meta_graphs:
@@ -263,7 +293,7 @@ def available_signature_names(answers):
   Args:
     ansowers: user selected parameter dict.
   """
-  if is_saved_model(answers):
+  if is_saved_model(answers['input_format']):
     path = answers['input_path']
     tags = answers['saved_model_tags']
     saved_model = parse_saved_model(path)
@@ -351,7 +381,7 @@ def input_formats(detected_format):
   return formats
 
 
-def main():
+def main(dry_run):
   print('Weclome to TensorFlow.js converter.')
   input_path = [{
       'type': 'input',
@@ -361,7 +391,7 @@ def main():
                  'If you are converting TFHub module please provide the URL.',
       'filter': os.path.expanduser,
       'validate':
-          lambda value: 'Please enter a valid path' if not value else True
+          lambda path: 'Please enter a valid path' if not path else True
   }]
 
   input_params = prompt(input_path, style=prompt_style)
@@ -393,7 +423,8 @@ def main():
           'type': 'input',
           'name': 'input_path',
           'message': message,
-          'filter': os.path.expanduser,
+          'filter': lambda value: expand_input_path(
+              value, options['input_format']),
           'validate': lambda value: validate_input_path(
               value, options['input_format']),
           'when': lambda answers: (not detect_input_format)
@@ -403,14 +434,14 @@ def main():
           'name': 'saved_model_tags',
           'choices': available_tags,
           'message': 'What is tags for the saved model?',
-          'when': is_saved_model
+          'when': lambda answers: is_saved_model(answers['input_format'])
       },
       {
           'type': 'list',
           'name': 'signature_name',
           'message': 'What is signature name of the model?',
           'choices': available_signature_names,
-          'when': is_saved_model
+          'when': lambda answers: is_saved_model(answers['input_format'])
       },
       {
           'type': 'list',
@@ -469,11 +500,19 @@ def main():
   params = prompt(questions, options, style=prompt_style)
 
   arguments = generate_arguments(params)
-  convert(arguments)
-  print('file generated after conversion:')
-  for entry in os.scandir(params['output_path']):
-    print(entry.stat().st_size, entry.name)
+  if dry_run:
+    print('converter command generated:')
+    print('tensorflowjs_converter %s' % ' '.join(arguments))
+  else:
+    convert(arguments)
+    print('file generated after conversion:')
+    for entry in os.scandir(params['output_path']):
+      print(entry.stat().st_size, entry.name)
 
 
 if __name__ == '__main__':
-  main()
+  if len (sys.argv) > 2 or len(sys.argv) == 1 and not sys.argv[1] == 'dryrun':
+    print("Usage: tensorflowjs_cli [--dryrun]")
+    sys.exit (1)
+  dry_run = sys.argv[1] == '--dryrun'
+  main(dry_run)

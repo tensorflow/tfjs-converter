@@ -593,7 +593,6 @@ def convert(arguments=None):
         strip_debug_ops=FLAGS.strip_debug_ops)
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
-    print(FLAGS)
     tf_saved_model_conversion_v2.convert_tf_hub_module(
         FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
         FLAGS.saved_model_tags, skip_op_check=FLAGS.skip_op_check,
