@@ -150,7 +150,7 @@ def validate_input_path(input_path, input_format):
         We expect a URL that starts with http(s)://""" % path
   elif not os.path.exists(path):
     return 'Nonexistent path for the model: %s' % path
-  if input_format in [common.KERAS_SAVED_MODEL, common.TF_SAVED_MODEL]:
+  if input_format in (common.KERAS_SAVED_MODEL, common.TF_SAVED_MODEL):
     is_dir = os.path.isdir(path)
     if not is_dir and not path.endswith('saved_model.pb'):
       return 'The path provided is not a directory or pb file: %s' % path
