@@ -187,20 +187,16 @@ def expand_input_path(input_path):
   return input_path
 
 
-def validate_output_path(output_path):
-  """Validate the input path for given input format.
+def output_path_exists(output_path):
+  """Check the existence of the output path.
   Args:
     output_path: input path of the model.
-    input_format: model format string.
   Returns:
-    bool: return true when the output directory does not exist.
+    bool: return true when the output directory exists.
   """
-  output_path = os.path.expanduser(output_path)
-  if not output_path:
-    return 'Please provide a valid output path'
   if os.path.exists(output_path):
-    return 'The output path already exists: %s' % output_path
-  return True
+    return True
+  return False
 
 
 def generate_arguments(params):
@@ -211,7 +207,8 @@ def generate_arguments(params):
     list: the argument list for converter.
   """
   args = []
-  not_param_list = [common.INPUT_PATH, common.OUTPUT_PATH]
+  not_param_list = [common.INPUT_PATH, common.OUTPUT_PATH,
+                    'overwrite_output_path']
   no_false_param = [common.SPLIT_WEIGHTS_BY_LAYER, common.SKIP_OP_CHECK]
   for key, value in sorted(params.items()):
     if key not in not_param_list and value is not None:
@@ -403,13 +400,13 @@ def main(dryrun):
           'message': 'What is your output format?',
           'choices': available_output_formats,
           'when': lambda answers: value_in_list(answers, common.INPUT_FORMAT,
-                                                [common.KERAS_SAVED_MODEL,
-                                                 common.TFJS_LAYERS_MODEL])
+                                                (common.KERAS_SAVED_MODEL,
+                                                 common.TFJS_LAYERS_MODEL))
       }
   ]
-  formats = PyInquirer.prompt(formats, input_params, style=prompt_style)
-  message = input_path_message(formats)
-  print(formats)
+  format_params = PyInquirer.prompt(formats, input_params, style=prompt_style)
+  message = input_path_message(format_params)
+  print(format_params)
   questions = [
       {
           'type': 'input',
@@ -417,7 +414,7 @@ def main(dryrun):
           'message': message,
           'filter': expand_input_path,
           'validate': lambda value: validate_input_path(
-              value, formats[common.INPUT_FORMAT]),
+              value, format_params[common.INPUT_FORMAT]),
           'when': lambda answers: (not detected_input_format)
       },
       {
@@ -426,7 +423,8 @@ def main(dryrun):
           'choices': available_tags,
           'message': 'What is tags for the saved model?',
           'when': lambda answers: (is_saved_model(answers[common.INPUT_FORMAT])
-                                   and formats[common.OUTPUT_FORMAT] ==
+                                   and not common.OUTPUT_FORMAT in format_params
+                                   or format_params[common.OUTPUT_FORMAT] ==
                                    common.TFJS_GRAPH_MODEL)
       },
       {
@@ -435,7 +433,8 @@ def main(dryrun):
           'message': 'What is signature name of the model?',
           'choices': available_signature_names,
           'when': lambda answers: (is_saved_model(answers[common.INPUT_FORMAT])
-                                   and formats[common.OUTPUT_FORMAT] ==
+                                   and not common.OUTPUT_FORMAT in format_params
+                                   or format_params[common.OUTPUT_FORMAT] ==
                                    common.TFJS_GRAPH_MODEL)
       },
       {
@@ -454,7 +453,7 @@ def main(dryrun):
           'message': 'Please enter shard size (in bytes) of the weight files?',
           'default': str(4 * 1024 * 1024),
           'when': lambda answers: value_in_list(answers, common.OUTPUT_FORMAT,
-                                                [common.TFJS_LAYERS_MODEL])
+                                                (common.TFJS_LAYERS_MODEL))
       },
       {
           'type': 'confirm',
@@ -462,7 +461,7 @@ def main(dryrun):
           'message': 'Do you want to split weights by layers?',
           'default': False,
           'when': lambda answers: value_in_list(answers, common.INPUT_FORMAT,
-                                                [common.TFJS_LAYERS_MODEL])
+                                                (common.TFJS_LAYERS_MODEL))
       },
       {
           'type': 'confirm',
@@ -472,8 +471,8 @@ def main(dryrun):
                      'you can implement them as custom ops in tfjs-converter.',
           'default': False,
           'when': lambda answers: value_in_list(answers, common.INPUT_FORMAT,
-                                                [common.TF_SAVED_MODEL,
-                                                 common.TF_HUB_MODEL])
+                                                (common.TF_SAVED_MODEL,
+                                                 common.TF_HUB_MODEL))
       },
       {
           'type': 'confirm',
@@ -482,33 +481,50 @@ def main(dryrun):
                      'This will improve model execution performance.',
           'default': True,
           'when': lambda answers: value_in_list(answers, common.INPUT_FORMAT,
-                                                [common.TF_SAVED_MODEL,
-                                                 common.TF_HUB_MODEL])
-      },
-      {
+                                                (common.TF_SAVED_MODEL,
+                                                 common.TF_HUB_MODEL))
+      }
+  ]
+  params = PyInquirer.prompt(questions, format_params, style=prompt_style)
+
+  output_options = [
+    {
           'type': 'input',
           'name': common.OUTPUT_PATH,
           'message': 'Which directory do you want to save '
                      'the converted model in?',
-          'filter': os.path.expanduser,
-          'validate': validate_output_path
+          'filter': lambda path: os.path.expanduser(path.strip()),
+          'validate': lambda path: len(path) > 0
+      }, {
+        'type': 'confirm',
+        'message': 'The output already directory exists, '
+                   'do you want to overwrite it?',
+        'name': 'overwrite_output_path',
+        'default': False,
+        'when': lambda ans: output_path_exists(ans[common.OUTPUT_PATH])
       }
   ]
-  params = PyInquirer.prompt(questions, formats, style=prompt_style)
+
+  while (not common.OUTPUT_PATH in params or
+         output_path_exists(params[common.OUTPUT_PATH]) and
+         not params['overwrite_output_path']):
+    params = PyInquirer.prompt(output_options, params, style=prompt_style)
 
   arguments = generate_arguments(params)
   print('converter command generated:')
   print('tensorflowjs_converter %s' % ' '.join(arguments))
+  print('\n\n')
+
   if not dryrun:
     converter.convert(arguments)
-    print('file generated after conversion:')
+    print('\n\nFile(s) generated after conversion:')
     for entry in os.scandir(params[common.OUTPUT_PATH]):
       print(entry.stat().st_size, entry.name)
 
 
 if __name__ == '__main__':
   if len(sys.argv) > 2 or len(sys.argv) == 2 and not sys.argv[1] == '--dryrun':
-    print("Usage: tensorflowjs_cli [--dryrun]")
+    print("Usage: tensorflowjs_wizard [--dryrun]")
     sys.exit(1)
   dry_run = len(sys.argv) == 2 and sys.argv[1] == '--dryrun'
   main(dry_run)

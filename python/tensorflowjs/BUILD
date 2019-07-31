@@ -51,7 +51,7 @@ py_library(
 py_library(
     name = "expect_PyInquirer_installed",
     # This is a dummy rule used as a PyInquirer dependency in open-source.
-    # We expect tensorflow to already be installed on the system, e.g. via
+    # We expect PyInquirer to already be installed on the system, e.g. via
     # `pip install PyInquirer`.
 )
 
@@ -124,20 +124,21 @@ py_test(
 )
 
 py_test(
-    name = "cli_test",
-    srcs = ["cli_test.py"],
+    name = "wizard_test",
+    srcs = ["wizard_test.py"],
     srcs_version = "PY2AND3",
     deps = [
         ":expect_numpy_installed",
-        ":cli",
+        ":wizard",
     ],
 )
 
 py_binary(
-    name = "cli",
-    srcs = ["cli.py"],
+    name = "wizard",
+    srcs = ["wizard.py"],
     srcs_version = "PY2AND3",
     deps = [
+        ":converters/common",
         ":converters/converter",
         "//tensorflowjs:expect_h5py_installed",
         "//tensorflowjs:expect_keras_installed",

@@ -509,7 +509,7 @@ def setup_arguments(arguments=None):
       'and 2-byte quantizaton is supported. The default (unquantized) size is '
       '4 bytes.')
   parser.add_argument(
-      '--%s' % common.SPLIT_WEIGHTS_BY_LAYERS,
+      '--%s' % common.SPLIT_WEIGHTS_BY_LAYER,
       action='store_true',
       help='Applicable to keras input_format only: Whether the weights from '
       'different layers are to be stored in separate weight groups, '

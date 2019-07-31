@@ -27,7 +27,7 @@ def _get_requirements(file):
 
 CONSOLE_SCRIPTS = [
     'tensorflowjs_converter = tensorflowjs.converters.converter:main',
-    'tensorflowjs_cli = tensorflowjs.cli:main',
+    'tensorflowjs_wizard = tensorflowjs.wizard:main',
 ]
 
 setuptools.setup(
@@ -55,10 +55,10 @@ setuptools.setup(
     ],
     py_modules=[
         'tensorflowjs',
-        'tensorflowjs.cli',
         'tensorflowjs.version',
         'tensorflowjs.quantization',
         'tensorflowjs.read_weights',
+        'tensorflowjs.wizard',
         'tensorflowjs.write_weights',
         'tensorflowjs.converters',
         'tensorflowjs.converters.common',

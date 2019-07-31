@@ -28,7 +28,7 @@ from tensorflow.python.ops import variables
 from tensorflow.python.training.tracking import tracking
 from tensorflow.python.saved_model import save
 
-from tensorflowjs import cli
+from tensorflowjs import wizard
 
 SAVED_MODEL_DIR = 'saved_model'
 SAVED_MODEL_NAME = 'saved_model.pb'
@@ -77,86 +77,89 @@ class CliTest(unittest.TestCase):
     save.save(root, save_dir, to_save)
 
   def testQuantizationType(self):
-    self.assertEqual(2, cli.quantization_type('1/2'))
-    self.assertEqual(1, cli.quantization_type('1/4'))
-    self.assertEqual(None, cli.quantization_type('1'))
+    self.assertEqual(2, wizard.quantization_type('1/2'))
+    self.assertEqual(1, wizard.quantization_type('1/4'))
+    self.assertEqual(None, wizard.quantization_type('1'))
 
   def testOfValues(self):
     answers = {'input_path': 'abc', 'input_format': '123'}
-    self.assertEqual(True, cli.value_in_list(answers, 'input_path', ['abc']))
-    self.assertEqual(False, cli.value_in_list(answers, 'input_path', ['abd']))
-    self.assertEqual(False, cli.value_in_list(answers,
+    self.assertEqual(True, wizard.value_in_list(answers, 'input_path', ['abc']))
+    self.assertEqual(False, wizard.value_in_list(answers,
+                     'input_path', ['abd']))
+    self.assertEqual(False, wizard.value_in_list(answers,
                                               'input_format2', ['abc']))
 
   def testInputPathMessage(self):
     answers = {'input_format': 'keras'}
     self.assertEqual("The original path seems to be wrong, "
                      "what is the path of input HDF5 file?",
-                     cli.input_path_message(answers))
+                     wizard.input_path_message(answers))
 
     answers = {'input_format': 'tf_hub'}
     self.assertEqual("The original path seems to be wrong, "
                      "what is the TFHub module URL?",
-                     cli.input_path_message(answers))
+                     wizard.input_path_message(answers))
 
     answers = {'input_format': 'tf_saved_model'}
     self.assertEqual("The original path seems to be wrong, "
                      "what is the directory that contains the model?",
-                     cli.input_path_message(answers))
+                     wizard.input_path_message(answers))
 
   def testValidateInputPathForTFHub(self):
-    self.assertNotEqual(True, cli.validate_input_path(self._tmp_dir, 'tf_hub'))
+    self.assertNotEqual(True,
+                        wizard.validate_input_path(self._tmp_dir, 'tf_hub'))
     self.assertEqual(True,
-                     cli.validate_input_path("https://tfhub.dev/mobilenet",
+                     wizard.validate_input_path("https://tfhub.dev/mobilenet",
                                              'tf_hub'))
 
   def testValidateInputPathForSavedModel(self):
-    self.assertNotEqual(True, cli.validate_input_path(
+    self.assertNotEqual(True, wizard.validate_input_path(
         self._tmp_dir, 'tf_saved_model'))
     self._create_saved_model()
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
-    self.assertEqual(True, cli.validate_input_path(
+    self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'tf_saved_model'))
 
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR, SAVED_MODEL_NAME)
-    self.assertEqual(True, cli.validate_input_path(
+    self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'tf_saved_model'))
 
   def testValidateInputPathForKerasSavedModel(self):
-    self.assertNotEqual(True, cli.validate_input_path(
+    self.assertNotEqual(True, wizard.validate_input_path(
         self._tmp_dir, 'keras_saved_model'))
     self._create_saved_model()
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
-    self.assertEqual(True, cli.validate_input_path(
+    self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'keras_saved_model'))
 
   def testValidateInputPathForKerasModel(self):
-    self.assertNotEqual(True, cli.validate_input_path(self._tmp_dir, 'keras'))
+    self.assertNotEqual(True, wizard.validate_input_path(self._tmp_dir, 'keras'))
     self._create_hd5_file()
     save_dir = os.path.join(self._tmp_dir, HD5_FILE_NAME)
-    self.assertEqual(True, cli.validate_input_path(
+    self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'keras'))
 
   def testValidateInputPathForLayersModel(self):
-    self.assertNotEqual(True, cli.validate_input_path(self._tmp_dir, 'keras'))
+    self.assertNotEqual(True,
+                        wizard.validate_input_path(self._tmp_dir, 'keras'))
     self._create_layers_model()
     save_dir = os.path.join(self._tmp_dir)
-    self.assertEqual(True, cli.validate_input_path(
+    self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'tfjs_layers_model'))
 
     save_dir = os.path.join(self._tmp_dir, 'model.json')
-    self.assertEqual(True, cli.validate_input_path(
+    self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'tfjs_layers_model'))
 
   def testValidateOutputPath(self):
-    self.assertNotEqual(True, cli.validate_output_path(self._tmp_dir))
+    self.assertNotEqual(True, wizard.validate_output_path(self._tmp_dir))
     output_dir = os.path.join(self._tmp_dir, 'test')
-    self.assertEqual(True, cli.validate_output_path(output_dir))
+    self.assertEqual(True, wizard.validate_output_path(output_dir))
 
   def testAvailableTags(self):
     self._create_saved_model()
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
-    self.assertEqual(['serve'], cli.available_tags(
+    self.assertEqual(['serve'], wizard.available_tags(
         {'input_path': save_dir,
          'input_format': 'tf_saved_model'}))
 
@@ -164,7 +167,7 @@ class CliTest(unittest.TestCase):
     self._create_saved_model()
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     self.assertEqual(['__saved_model_init_op', 'serving_default'],
-                     [x['value'] for x in cli.available_signature_names(
+                     [x['value'] for x in wizard.available_signature_names(
                          {'input_path': save_dir,
                           'input_format': 'tf_saved_model',
                           'saved_model_tags': 'serve'})])
@@ -183,7 +186,7 @@ class CliTest(unittest.TestCase):
                       '--quantization_bytes=2', '--saved_model_tags=test',
                       '--signature_name=test_default', '--strip_debug_ops=True',
                       'tmp/saved_model', 'tmp/web_model'],
-                     cli.generate_arguments(options))
+                     wizard.generate_arguments(options))
 
   def testGenerateCommandForKerasSavedModel(self):
     options = {'input_format': 'tf_keras_saved_model',
@@ -202,7 +205,7 @@ class CliTest(unittest.TestCase):
                       '--signature_name=test_default', '--skip_op_check',
                       '--strip_debug_ops=False', 'tmp/saved_model',
                       'tmp/web_model'],
-                     cli.generate_arguments(options))
+                     wizard.generate_arguments(options))
 
   def testGenerateCommandForKerasModel(self):
     options = {'input_format': 'keras',
@@ -212,7 +215,7 @@ class CliTest(unittest.TestCase):
 
     self.assertEqual(['--input_format=keras', '--quantization_bytes=1',
                       'tmp/model.HD5', 'tmp/web_model'],
-                     cli.generate_arguments(options))
+                     wizard.generate_arguments(options))
 
   def testGenerateCommandForLayerModel(self):
     options = {'input_format': 'tfjs_layers_model',
@@ -225,7 +228,7 @@ class CliTest(unittest.TestCase):
                       '--output_format=keras',
                       '--quantization_bytes=1', 'tmp/model.json',
                       'tmp/web_model'],
-                     cli.generate_arguments(options))
+                     wizard.generate_arguments(options))
 
 
 if __name__ == '__main__':

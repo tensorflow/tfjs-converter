@@ -30,7 +30,7 @@ TFJS_LAYERS_MODEL_FORMAT = 'layers-model'
 GENERATED_BY_KEY = 'generatedBy'
 CONVERTED_BY_KEY = 'convertedBy'
 
-# model formats
+# Model formats.
 KERAS_SAVED_MODEL = 'keras_saved_model'
 KERAS_MODEL = 'keras'
 TF_SAVED_MODEL = 'tf_saved_model'
@@ -38,7 +38,7 @@ TF_HUB_MODEL = 'tf_hub'
 TFJS_GRAPH_MODEL = 'tfjs_graph_model'
 TFJS_LAYERS_MODEL = 'tfjs_layers_model'
 
-# cli argument string
+# CLI argument strings.
 INPUT_PATH = 'input_path'
 OUTPUT_PATH = 'output_path'
 INPUT_FORMAT = 'input_format'
