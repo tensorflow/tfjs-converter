@@ -58,8 +58,8 @@ def value_in_list(answers, key, values):
     return False
 
 
-def get_tfjs_model_type(file):
-  with open(file) as f:
+def get_tfjs_model_type(model_file):
+  with open(model_file) as f:
     data = json.load(f)
     return data['format']
 

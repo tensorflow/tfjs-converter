@@ -49,8 +49,8 @@ class CliTest(unittest.TestCase):
   def _create_layers_model(self):
     data = {'format': 'layers-model'}
     filename = os.path.join(self._tmp_dir, 'model.json')
-    with open(filename, 'a') as file:
-      json.dump(data, file)
+    with open(filename, 'a') as model_file:
+      json.dump(data, model_file)
 
   def _create_hd5_file(self):
     input_tensor = keras.layers.Input((3,))
