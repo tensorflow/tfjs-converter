@@ -80,9 +80,9 @@ class CliTest(unittest.TestCase):
     answers = {'input_path': 'abc', 'input_format': '123'}
     self.assertEqual(True, wizard.value_in_list(answers, 'input_path', ['abc']))
     self.assertEqual(False, wizard.value_in_list(answers,
-                     'input_path', ['abd']))
+                                                 'input_path', ['abd']))
     self.assertEqual(False, wizard.value_in_list(answers,
-                                              'input_format2', ['abc']))
+                                                 'input_format2', ['abc']))
 
   def testInputPathMessage(self):
     answers = {'input_format': 'keras'}
@@ -107,7 +107,7 @@ class CliTest(unittest.TestCase):
                         wizard.validate_input_path(self._tmp_dir, 'tf_hub'))
     self.assertEqual(True,
                      wizard.validate_input_path("https://tfhub.dev/mobilenet",
-                                             'tf_hub'))
+                                                'tf_hub'))
 
   def testValidateInputPathForSavedModel(self):
     self.assertNotEqual(True, wizard.validate_input_path(
@@ -130,7 +130,8 @@ class CliTest(unittest.TestCase):
         save_dir, 'keras_saved_model'))
 
   def testValidateInputPathForKerasModel(self):
-    self.assertNotEqual(True, wizard.validate_input_path(self._tmp_dir, 'keras'))
+    self.assertNotEqual(True,
+                        wizard.validate_input_path(self._tmp_dir, 'keras'))
     self._create_hd5_file()
     save_dir = os.path.join(self._tmp_dir, HD5_FILE_NAME)
     self.assertEqual(True, wizard.validate_input_path(

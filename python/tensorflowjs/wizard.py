@@ -112,8 +112,8 @@ def input_path_message(answers):
     return message + 'what is the path of input HDF5 file?'
   elif answer == common.TF_HUB_MODEL:
     return message + ("what is the TFHub module URL? \n"
-      "(i.e. https://tfhub.dev/google/imagenet/"
-      "mobilenet_v1_100_224/classification/1)")
+                      "(i.e. https://tfhub.dev/google/imagenet/"
+                      "mobilenet_v1_100_224/classification/1)")
   else:
     return message + 'what is the directory that contains the model?'
 
@@ -408,8 +408,8 @@ def main(dryrun):
           'when': lambda answers: (is_saved_model(answers[common.INPUT_FORMAT])
                                    and
                                    (not common.OUTPUT_FORMAT in format_params
-                                   or format_params[common.OUTPUT_FORMAT] ==
-                                   common.TFJS_GRAPH_MODEL))
+                                    or format_params[common.OUTPUT_FORMAT] ==
+                                    common.TFJS_GRAPH_MODEL))
       },
       {
           'type': 'list',
@@ -419,8 +419,8 @@ def main(dryrun):
           'when': lambda answers: (is_saved_model(answers[common.INPUT_FORMAT])
                                    and
                                    (not common.OUTPUT_FORMAT in format_params
-                                   or format_params[common.OUTPUT_FORMAT] ==
-                                   common.TFJS_GRAPH_MODEL))
+                                    or format_params[common.OUTPUT_FORMAT] ==
+                                    common.TFJS_GRAPH_MODEL))
       },
       {
           'type': 'list',
@@ -428,15 +428,15 @@ def main(dryrun):
           'message': 'Do you want to compress the model? '
                      '(this will decrease the model precision.)',
           'choices': [{
-                        'name': 'No compression, no accuracy loss.',
-                        'value': None
-                      }, {
-                        'name': '2x compression, medium accuracy loss.',
-                        'value': 2
-                      }, {
-                        'name': '4x compression, highest accuracy loss.',
-                        'value': 1
-                      }]
+              'name': 'No compression, no accuracy loss.',
+              'value': None
+          }, {
+              'name': '2x compression, medium accuracy loss.',
+              'value': 2
+          }, {
+              'name': '4x compression, highest accuracy loss.',
+              'value': 1
+          }]
       },
       {
           'type': 'input',
@@ -479,7 +479,7 @@ def main(dryrun):
   params = PyInquirer.prompt(questions, format_params, style=prompt_style)
 
   output_options = [
-    {
+      {
           'type': 'input',
           'name': common.OUTPUT_PATH,
           'message': 'Which directory do you want to save '
@@ -487,12 +487,12 @@ def main(dryrun):
           'filter': lambda path: os.path.expanduser(path.strip()),
           'validate': lambda path: len(path) > 0
       }, {
-        'type': 'confirm',
-        'message': 'The output already directory exists, '
-                   'do you want to overwrite it?',
-        'name': 'overwrite_output_path',
-        'default': False,
-        'when': lambda ans: output_path_exists(ans[common.OUTPUT_PATH])
+          'type': 'confirm',
+          'message': 'The output already directory exists, '
+                     'do you want to overwrite it?',
+          'name': 'overwrite_output_path',
+          'default': False,
+          'when': lambda ans: output_path_exists(ans[common.OUTPUT_PATH])
       }
   ]
 
