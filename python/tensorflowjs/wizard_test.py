@@ -76,11 +76,6 @@ class CliTest(unittest.TestCase):
     save_dir = os.path.join(self._tmp_dir, SAVED_MODEL_DIR)
     save.save(root, save_dir, to_save)
 
-  def testQuantizationType(self):
-    self.assertEqual(2, wizard.quantization_type('1/2'))
-    self.assertEqual(1, wizard.quantization_type('1/4'))
-    self.assertEqual(None, wizard.quantization_type('1'))
-
   def testOfValues(self):
     answers = {'input_path': 'abc', 'input_format': '123'}
     self.assertEqual(True, wizard.value_in_list(answers, 'input_path', ['abc']))
@@ -97,7 +92,9 @@ class CliTest(unittest.TestCase):
 
     answers = {'input_format': 'tf_hub'}
     self.assertEqual("The original path seems to be wrong, "
-                     "what is the TFHub module URL?",
+                     "what is the TFHub module URL? \n"
+                     "(i.e. https://tfhub.dev/google/imagenet/"
+                     "mobilenet_v1_100_224/classification/1)",
                      wizard.input_path_message(answers))
 
     answers = {'input_format': 'tf_saved_model'}
@@ -151,10 +148,10 @@ class CliTest(unittest.TestCase):
     self.assertEqual(True, wizard.validate_input_path(
         save_dir, 'tfjs_layers_model'))
 
-  def testValidateOutputPath(self):
-    self.assertNotEqual(True, wizard.validate_output_path(self._tmp_dir))
+  def testOutputPathExist(self):
+    self.assertEqual(True, wizard.output_path_exists(self._tmp_dir))
     output_dir = os.path.join(self._tmp_dir, 'test')
-    self.assertEqual(True, wizard.validate_output_path(output_dir))
+    self.assertNotEqual(True, wizard.output_path_exists(output_dir))
 
   def testAvailableTags(self):
     self._create_saved_model()

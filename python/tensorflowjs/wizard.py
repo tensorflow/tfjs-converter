@@ -31,7 +31,7 @@ from tensorflowjs.converters import common
 # regex for recognizing valid url for TFHub module.
 TFHUB_VALID_URL_REGEX = re.compile(
     # http:// or https://
-    r'^(?:http)s?://', re.IGNORECASE)
+    r'^(http)s?://', re.IGNORECASE)
 
 # prompt style
 prompt_style = PyInquirer.style_from_dict({
@@ -43,25 +43,6 @@ prompt_style = PyInquirer.style_from_dict({
     PyInquirer.Token.Answer: '#5F819D bold',
     PyInquirer.Token.Question: '',
 })
-
-def quantization_type(user_selection_quant):
-  """Determine the quantization type based on user selection.
-  Args:
-    user_selection_quant: user selected quantization value.
-
-  Returns:
-    int: quantization parameter value for converter.
-  """
-  answer = None
-  try:
-    if '1/2' in user_selection_quant:
-      answer = 2
-    elif '1/4' in user_selection_quant:
-      answer = 1
-  except ValueError:
-    answer = None
-  return answer
-
 
 def value_in_list(answers, key, values):
   """Determine user's answer for the key is in the value list.
@@ -91,7 +72,7 @@ def detect_input_format(input_path):
     string: detected input format
     string: normalized input path
   """
-  input_path = input_path.lower()
+  input_path = input_path.strip()
   detected_input_format = None
   if re.match(TFHUB_VALID_URL_REGEX, input_path):
     detected_input_format = common.TF_HUB_MODEL
@@ -130,7 +111,9 @@ def input_path_message(answers):
   if answer == common.KERAS_MODEL:
     return message + 'what is the path of input HDF5 file?'
   elif answer == common.TF_HUB_MODEL:
-    return message + 'what is the TFHub module URL?'
+    return message + ("what is the TFHub module URL? \n"
+      "(i.e. https://tfhub.dev/google/imagenet/"
+      "mobilenet_v1_100_224/classification/1)")
   else:
     return message + 'what is the directory that contains the model?'
 
@@ -141,7 +124,7 @@ def validate_input_path(input_path, input_format):
     input_path: input path of the model.
     input_format: model format string.
   """
-  path = os.path.expanduser(input_path)
+  path = os.path.expanduser(input_path.strip())
   if not path:
     return 'Please enter a valid path'
   if input_format == common.TF_HUB_MODEL:
@@ -177,7 +160,7 @@ def expand_input_path(input_path):
   Returns:
     string: return expanded input path.
   """
-  input_path = os.path.expanduser(input_path)
+  input_path = os.path.expanduser(input_path.strip())
   is_dir = os.path.isdir(input_path)
   if is_dir:
     for fname in os.listdir(input_path):
@@ -423,9 +406,10 @@ def main(dryrun):
           'choices': available_tags,
           'message': 'What is tags for the saved model?',
           'when': lambda answers: (is_saved_model(answers[common.INPUT_FORMAT])
-                                   and not common.OUTPUT_FORMAT in format_params
+                                   and
+                                   (not common.OUTPUT_FORMAT in format_params
                                    or format_params[common.OUTPUT_FORMAT] ==
-                                   common.TFJS_GRAPH_MODEL)
+                                   common.TFJS_GRAPH_MODEL))
       },
       {
           'type': 'list',
@@ -433,19 +417,26 @@ def main(dryrun):
           'message': 'What is signature name of the model?',
           'choices': available_signature_names,
           'when': lambda answers: (is_saved_model(answers[common.INPUT_FORMAT])
-                                   and not common.OUTPUT_FORMAT in format_params
+                                   and
+                                   (not common.OUTPUT_FORMAT in format_params
                                    or format_params[common.OUTPUT_FORMAT] ==
-                                   common.TFJS_GRAPH_MODEL)
+                                   common.TFJS_GRAPH_MODEL))
       },
       {
           'type': 'list',
           'name': common.QUANTIZATION_BYTES,
           'message': 'Do you want to compress the model? '
                      '(this will decrease the model precision.)',
-          'choices': ['No compression, no accuracy loss.',
-                      '2x compression, medium accuracy loss.',
-                      '4x compression, highest accuracy loss.'],
-          'filter': quantization_type
+          'choices': [{
+                        'name': 'No compression, no accuracy loss.',
+                        'value': None
+                      }, {
+                        'name': '2x compression, medium accuracy loss.',
+                        'value': 2
+                      }, {
+                        'name': '4x compression, highest accuracy loss.',
+                        'value': 1
+                      }]
       },
       {
           'type': 'input',
