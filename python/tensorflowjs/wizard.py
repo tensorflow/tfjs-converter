@@ -389,7 +389,7 @@ def main(dryrun):
   ]
   format_params = PyInquirer.prompt(formats, input_params, style=prompt_style)
   message = input_path_message(format_params)
-  print(format_params)
+
   questions = [
       {
           'type': 'input',
@@ -509,8 +509,15 @@ def main(dryrun):
   if not dryrun:
     converter.convert(arguments)
     print('\n\nFile(s) generated after conversion:')
-    for entry in os.scandir(params[common.OUTPUT_PATH]):
-      print(entry.stat().st_size, entry.name)
+
+    print("Filename:{0:20} Size {1}".format('',''))
+    total_size = 0
+    for basename in os.listdir(params[common.OUTPUT_PATH]):
+      filename = os.path.join(params[common.OUTPUT_PATH], basename)
+      size = os.path.getsize(filename)
+      print("{0:30} {1}".format(basename, size))
+      total_size += size
+    print("Total size:{0:20}".format(total_size))
 
 
 if __name__ == '__main__':
