@@ -18,7 +18,7 @@
     "@tensorflow/tfjs-core": "1.2.6"
   },
   "devDependencies": {
-    "@tensorflow/tfjs-core": "1.2.6",
+    "@tensorflow/tfjs-core": "file:.yalc/@tensorflow/tfjs-core",
     "@types/deep-equal": "^1.0.1",
     "@types/jasmine": "~2.8.6",
     "@types/long": "~3.0.32",

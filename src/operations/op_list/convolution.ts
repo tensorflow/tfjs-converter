@@ -142,7 +142,7 @@ export const json: OpMapper[] = [
       },
       {
         'tfName': 'epsilon',
-        'name': 'fusedOps',
+        'name': 'epsilon',
         'type': 'number',
         'defaultValue': 0.0001
       },

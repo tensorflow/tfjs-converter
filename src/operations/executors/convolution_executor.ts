@@ -64,8 +64,8 @@ export let executeOp: InternalOpExecutor = (node: Node,
       const fusedOps =
           (getParamValue('fusedOps', node, tensorMap, context) as string[]);
 
-      const isBiasAdd = fusedOps[0] === 'BiasAdd';
-      const isBatchNorm = fusedOps[0] === 'FusedBatchNorm';
+      const isBiasAdd = fusedOps[0] === 'biasadd';
+      const isBatchNorm = fusedOps[0] === 'fusedbatchnorm';
       const activationFunc = fusedOps[1];
 
       const numArgs =
@@ -90,7 +90,7 @@ export let executeOp: InternalOpExecutor = (node: Node,
               tfc.Tensor4D,
           getParamValue('filter', node, tensorMap, context) as tfc.Tensor4D,
           [stride[1], stride[2]], pad as 'valid' | 'same',
-          dataFormat as 'NHWC' | 'NCHW', [dilations[1], dilations[2]], 'floor',
+          dataFormat as 'NHWC' | 'NCHW', [dilations[1], dilations[2]], null,
           getParamValue('args', node, tensorMap, context) as tfc.Tensor4D,
           activationFunc as Activation)];
     }
