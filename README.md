@@ -25,12 +25,10 @@ __0. Please make sure that you run in a Docker container or a virtual environmen
  The script pulls its own subset of TensorFlow, which might conflict with the
  existing TensorFlow/Keras installation.
 
-__Note__: *Check that [`tf-nightly-2.0-preview`](https://pypi.org/project/tf-nightly-2.0-preview/#files) is available for your platform.*
-
-Most of the times, this means that you have to use Python 3.6.8 in your local
-environment. To force Python 3.6.8 in your local project, you can install
-[`pyenv`](https://github.com/pyenv/pyenv) and proceed as follows in the target
-directory:
+The converter supports both Python 2 and Python 3. But Python 3.6.8 is recommended
+for your local environment. To force Python 3.6.8 in your local project, you can
+install [`pyenv`](https://github.com/pyenv/pyenv) and proceed as follows in the
+target directory:
 
 ```bash
 pyenv install 3.6.8
@@ -66,11 +64,11 @@ tensorflowjs_wizard
 
 This tool will walk you through the conversion process and provide you with
 details explanations for each choice you need to make. Behind the scene it calls
-the converter script (tensorflowjs_converter) in pip package. This is the easier
+the converter script (`tensorflowjs_converter`) in pip package. This is the easier
 way to convert a single model.
 
 There is also dry run mode for the wizard, which will not perform the actual
-conversion but only generate the command for tensorflowjs_converter command.
+conversion but only generate the command for `tensorflowjs_converter` command.
 This command can be used in your own shell script.
 
 ```bash
