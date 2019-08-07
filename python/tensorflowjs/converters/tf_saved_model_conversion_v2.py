@@ -30,6 +30,7 @@ from tensorflow.python.grappler import cluster as gcluster
 from tensorflow.python.grappler import tf_optimizer
 from tensorflow.python.saved_model.load import load
 from tensorflow.python.training.saver import export_meta_graph
+from tensorflow.python.tools import optimize_for_inference_lib
 from google.protobuf.json_format import MessageToDict
 import tensorflow_hub as hub
 
@@ -60,7 +61,7 @@ def load_graph(graph_filename):
     # Set name to empty to avoid using the default name 'import'.
     tf.import_graph_def(graph_def, name='')
 
-  return graph
+  return j
 
 def get_cluster():
   """Grappler optimization configuration for GPU."""
@@ -110,12 +111,18 @@ def optimize_graph(graph, output_node_names, output_graph, tf_version,
     skip_op_check: Bool whether to skip the op check.
     strip_debug_ops: Bool whether to strip debug ops.
   """
+  graph_def = graph.as_graph_def()
+
+  # set the device to CPU for all Conv2d nodes
+  for node in graph_def.node:
+    if node.op == 'Conv2D':
+      node.device = '/device:CPU:0'
 
   # Add a collection 'train_op' so that Grappler knows the outputs.
   for output in output_node_names:
     graph.add_to_collection('train_op', graph.get_operation_by_name(output))
 
-  graph_def = graph.as_graph_def()
+  # graph_def = graph.as_graph_def()
   unsupported = validate(graph_def.node, skip_op_check,
                          strip_debug_ops)
   if unsupported:
@@ -125,7 +132,7 @@ def optimize_graph(graph, output_node_names, output_graph, tf_version,
   config = config_pb2.ConfigProto()
   rewriter_config = config.graph_options.rewrite_options
   rewriter_config.optimizers[:] = [
-      'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning', 'remap',
+      'pruning', 'constfold', 'arithmetic', 'dependency', 'pruning',
       'constfold', 'arithmetic', 'dependency'
   ]
   if strip_debug_ops:
@@ -133,6 +140,19 @@ def optimize_graph(graph, output_node_names, output_graph, tf_version,
   meta_graph = export_meta_graph(
       graph_def=graph_def, graph=graph)
 
+  optimized_graph = tf_optimizer.OptimizeGraph(
+      config, meta_graph, cluster=get_cluster())
+
+  optimized_graph = optimize_for_inference_lib.fold_batch_norms(optimized_graph)
+
+  # for node in graph_def.node:
+  #   print(node.name, node.op, node.input)
+
+  rewriter_config.optimizers[:] = [
+      'remap', 'constfold', 'arithmetic', 'dependency'
+  ]
+  meta_graph = export_meta_graph(
+      graph_def=optimized_graph, graph=graph)
   optimized_graph = tf_optimizer.OptimizeGraph(
       config, meta_graph, cluster=get_cluster())
 
