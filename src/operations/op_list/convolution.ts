@@ -103,7 +103,7 @@ export const json: OpMapper[] = [
     'inputs': [
       {'start': 0, 'name': 'x', 'type': 'tensor'},
       {'start': 1, 'name': 'filter', 'type': 'tensor'},
-      {'start': 2, 'name': 'args', 'type': 'tensor'},
+      {'start': 2, end: 0, 'name': 'args', 'type': 'tensors'},
     ],
     'attrs': [
       {'tfName': 'num_args', 'name': 'numArgs', 'type': 'number'},

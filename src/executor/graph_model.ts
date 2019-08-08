@@ -101,6 +101,9 @@ export class GraphModel implements InferenceModel {
     }
   }
 
+  public foldConv2dPrelu() {
+    this.executor.foldConv2dPrelu();
+  }
   private findIOHandler() {
     const path = this.modelUrl;
     if ((path as io.IOHandler).load != null) {

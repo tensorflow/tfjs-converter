@@ -24,7 +24,7 @@ import {Graph, Node} from '../operations/types';
 
 import {ExecutionContext, ExecutionContextInfo} from './execution_context';
 import {getExecutionSubgraph, getNodesInTopologicalOrder, isControlFlow} from './model_analysis';
-import {rewritePrelu} from './model_rewrite';
+import {foldConv2dPrelu, rewritePrelu} from './model_rewrite';
 
 interface NodeWithContexts {
   contexts: ExecutionContextInfo[];
@@ -125,6 +125,10 @@ export class GraphExecutor {
 
   fusePrelu() {
     rewritePrelu(this.graph, this.weightMap);
+  }
+
+  foldConv2dPrelu() {
+    foldConv2dPrelu(this.graph, this.weightMap);
   }
   /**
    * Executes the inference for given input tensors.

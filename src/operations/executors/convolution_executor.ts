@@ -65,12 +65,13 @@ export let executeOp: InternalOpExecutor = (node: Node,
           (getParamValue('fusedOps', node, tensorMap, context) as string[]);
 
       const isBiasAdd = fusedOps[0] === 'biasadd';
+      const isPrelu = fusedOps[1] === 'prelu';
       const isBatchNorm = fusedOps[0] === 'fusedbatchnorm';
       const activationFunc = fusedOps[1];
 
       const numArgs =
           (getParamValue('numArgs', node, tensorMap, context) as number);
-      if (isBiasAdd && numArgs !== 1) {
+      if (isBiasAdd && !isPrelu && numArgs !== 1) {
         throw new Error(
             'Fused Conv2d with BiasAdd must have one extra argument: bias.');
       }
@@ -85,14 +86,21 @@ export let executeOp: InternalOpExecutor = (node: Node,
               .toUpperCase();
       const dilations =
           getParamValue('dilations', node, tensorMap, context) as number[];
-      return [tfc.fused.conv2d(
-          getParamValue('x', node, tensorMap, context) as tfc.Tensor3D |
-              tfc.Tensor4D,
-          getParamValue('filter', node, tensorMap, context) as tfc.Tensor4D,
-          [stride[1], stride[2]], pad as 'valid' | 'same',
-          dataFormat as 'NHWC' | 'NCHW', [dilations[1], dilations[2]], null,
-          getParamValue('args', node, tensorMap, context) as tfc.Tensor4D,
-          activationFunc as Activation)];
+      const args =
+          getParamValue('args', node, tensorMap, context) as tfc.Tensor[];
+      return [tfc.fused.conv2d({
+        x: getParamValue('x', node, tensorMap, context) as tfc.Tensor3D |
+            tfc.Tensor4D,
+        filter: getParamValue('filter', node, tensorMap, context) as
+            tfc.Tensor4D,
+        strides: [stride[1], stride[2]],
+        pad: pad as 'valid' | 'same',
+        dataFormat: dataFormat as 'NHWC' | 'NCHW',
+        dilations: [dilations[1], dilations[2]],
+        bias: args[0],
+        activation: activationFunc as Activation,
+        preluActivationWeights: args[1]
+      })];
     }
     case 'Conv2DBackpropInput':
     case 'Conv2dTranspose': {

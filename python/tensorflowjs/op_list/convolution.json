@@ -191,8 +191,9 @@
       },
       {
         "start": 2,
+        "end": 0,
         "name": "args",
-        "type": "tensor"
+        "type": "tensors"
       }
     ],
     "attrs": [
