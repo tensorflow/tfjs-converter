@@ -528,7 +528,6 @@ def get_arg_parser():
 
 
 def main(_):
-  FLAGS = setup_arguments()
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
