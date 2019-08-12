@@ -536,7 +536,9 @@ def main():
     # required by the pip-packaged binary case. The pip-packaged binary calls
     # the `main()` method directly and therefore by passes the
     # `__name__ == '__main__'` branch.
+    # pylint: disable=redefined-outer-name,invalid-name
     FLAGS = get_arg_parser().parse_args()
+    # pylint: enable=redefined-outer-name,invalid-name
 
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
@@ -634,6 +636,7 @@ def main():
 
 
 if __name__ == '__main__':
-  # pylint:disable=redefined-outer-name
+  # pylint: disable=redefined-outer-name,invalid-name
   FLAGS, unparsed = get_arg_parser().parse_known_args()
+  # pylint: enable=redefined-outer-name,invalid-name
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
