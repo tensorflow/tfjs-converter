@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import shutil
+import sys
 import tempfile
 
 import h5py
@@ -434,7 +435,8 @@ def _parse_quantization_bytes(quantization_bytes):
     raise ValueError('Unsupported quantization bytes: %s' % quantization_bytes)
 
 
-def setup_arguments():
+def get_arg_parser():
+  """Create the argument parser for the converter binary."""
   parser = argparse.ArgumentParser('TensorFlow.js model converters.')
   parser.add_argument(
       'input_path',
@@ -522,7 +524,7 @@ def setup_arguments():
       default=None,
       help='Shard size (in bytes) of the weight files. Currently applicable '
       'only to output_format=tfjs_layers_model.')
-  return parser.parse_args()
+  return parser
 
 
 def main():
@@ -623,4 +625,5 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  FLAGS, unparsed = get_arg_parser().parse_known_args()
+  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
