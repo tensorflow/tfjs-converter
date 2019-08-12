@@ -634,5 +634,6 @@ def main():
 
 
 if __name__ == '__main__':
+  # pylint:disable=redefined-outer-name
   FLAGS, unparsed = get_arg_parser().parse_known_args()
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
