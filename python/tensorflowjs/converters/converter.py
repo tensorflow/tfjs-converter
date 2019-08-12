@@ -527,7 +527,17 @@ def get_arg_parser():
   return parser
 
 
-def main(_):
+def main():
+  try:
+    FLAGS
+  except NameError:
+    # This code path is added in addition to to the flags-parsing
+    # code in the `__name__ == '__main__'` branch below, because it is
+    # required by the pip-packaged binary case. The pip-packaged binary calls
+    # the `main()` method directly and therefore by passes the
+    # `__name__ == '__main__'` branch.
+    FLAGS = get_arg_parser().parse_args()
+
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
