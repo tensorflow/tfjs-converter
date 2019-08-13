@@ -102,8 +102,8 @@ py_binary(
 )
 
 py_binary(
-    name = "generate_model_for_test",
-    srcs = ["generate_model_for_test.py"],
+    name = "generate_test_model",
+    srcs = ["generate_test_model.py"],
     testonly = True,
     srcs_version = "PY2AND3",
     deps = [
@@ -129,6 +129,6 @@ sh_test(
     srcs = ["converter_binary_test.sh"],
     data = [
         ":converter",
-        ":generate_model_for_test",
+        ":generate_test_model",
     ],
 )
