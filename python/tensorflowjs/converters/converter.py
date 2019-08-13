@@ -527,6 +527,15 @@ def get_arg_parser():
   return parser
 
 
+def pip_main():
+  """Entry point for pip-packaged binary.
+
+  Note that pip-packaged binary calls the entry method without
+  any arguments.
+  """
+  main([' '.join(sys.argv[1:])])
+
+
 def main(argv):
   FLAGS = get_arg_parser().parse_args(argv[0].split(' '))
 
@@ -536,6 +545,13 @@ def main(argv):
     print('  keras %s' % keras.__version__)
     print('  tensorflow %s' % tf.__version__)
     return
+
+  if not FLAGS.input_path:
+    raise ValueError(
+        'Missing input_path argument. For usage, use the --help flag.')
+  if not FLAGS.output_path:
+    raise ValueError(
+        'Missing output_path argument. For usage, use the --help flag.')
 
   weight_shard_size_bytes = 1024 * 1024 * 4
   if FLAGS.weight_shard_size_bytes:
