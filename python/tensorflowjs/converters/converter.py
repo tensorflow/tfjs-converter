@@ -527,18 +527,8 @@ def get_arg_parser():
   return parser
 
 
-def main():
-  try:
-    FLAGS
-  except NameError:
-    # This code path is added in addition to to the flags-parsing
-    # code in the `__name__ == '__main__'` branch below, because it is
-    # required by the pip-packaged binary case. The pip-packaged binary calls
-    # the `main()` method directly and therefore by passes the
-    # `__name__ == '__main__'` branch.
-    # pylint: disable=redefined-outer-name,invalid-name
-    FLAGS = get_arg_parser().parse_args()
-    # pylint: enable=redefined-outer-name,invalid-name
+def main(argv):
+  FLAGS = get_arg_parser().parse_args(argv[0].split(' '))
 
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)
@@ -636,7 +626,4 @@ def main():
 
 
 if __name__ == '__main__':
-  # pylint: disable=redefined-outer-name,invalid-name
-  FLAGS, unparsed = get_arg_parser().parse_known_args()
-  # pylint: enable=redefined-outer-name,invalid-name
-  tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
+  tf.app.run(main=main, argv=[' '.join(sys.argv[1:])])
