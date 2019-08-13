@@ -45,12 +45,12 @@ def parse_args():
 
 def main(_):
 
-  if FLAGS.model_type == 'tf_keras_h5':
+  if args.model_type == 'tf_keras_h5':
     model = tf.keras.Sequential()
     model.add(tf.keras.layers.Dense(5, activation='relu', input_shape=(8,)))
     model.add(tf.keras.layers.Dense(1, activation='sigmoid'))
-    model.save(os.path.join(FLAGS.output_path))
-  elif FLAGS.model_type == 'tf_saved_model':
+    model.save(os.path.join(args.output_path))
+  elif args.model_type == 'tf_saved_model':
     class TimesThreePlusOne(tf.train.Checkpoint):
 
       @tf.function(input_signature=[
@@ -58,11 +58,11 @@ def main(_):
       def compute(self, x):
         return x * 3.0 + 1.0
 
-    tf.saved_model.save(TimesThreePlusOne(), FLAGS.output_path)
+    tf.saved_model.save(TimesThreePlusOne(), args.output_path)
   else:
-    raise ValueError('Unrecognized model type: %s' % FLAGS.model_type)
+    raise ValueError('Unrecognized model type: %s' % args.model_type)
 
 
 if __name__ == '__main__':
-  FLAGS, unparsed = parse_args()  # pylint: disable=invalid-name
+  args, unparsed = parse_args()
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
