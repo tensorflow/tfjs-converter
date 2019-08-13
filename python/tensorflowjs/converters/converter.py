@@ -531,7 +531,8 @@ def pip_main():
   """Entry point for pip-packaged binary.
 
   Note that pip-packaged binary calls the entry method without
-  any arguments.
+  any arguments, which is why this method is needed in addition to the
+  `main` method below.
   """
   main([' '.join(sys.argv[1:])])
 

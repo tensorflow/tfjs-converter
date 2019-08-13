@@ -50,6 +50,6 @@ OUTPUT_H5_PATH="${KERAS_H5_PATH}_converted.h5"
     "${OUTPUT_H5_PATH}"
 
 if [[ ! -d "${OUTPUT_H5_PATH}" ]]; then
-  echo "ERROR: Failed to find conversion output directory: ${CONVERTER_BIN}" 1>&2
+  echo "ERROR: Failed to find conversion output directory: ${OUTPUT_H5_PATH}" 1>&2
   exit 1
 fi
