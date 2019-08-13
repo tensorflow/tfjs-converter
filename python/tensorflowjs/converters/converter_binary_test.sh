@@ -18,8 +18,6 @@ set -e
 GENERATE_BIN="${TEST_SRCDIR}/org_tensorflow_js/tensorflowjs/converters/generate_model_for_test"
 CONVERTER_BIN="${TEST_SRCDIR}/org_tensorflow_js/tensorflowjs/converters/converter"
 
-ls -l ${TEST_SRCDIR}/org_tensorflow_js  # DEBUG
-
 # 1. Test tf_saved_model --> tfjs_graph_model conversion.
 SAVED_MODEL_DIR="$(mktemp -d)"
 echo "Genearting TF SavedModel for testing..."
@@ -50,8 +48,6 @@ OUTPUT_H5_PATH="${KERAS_H5_PATH}_converted.h5"
     --output_format tfjs_layers_model \
     "${KERAS_H5_PATH}" \
     "${OUTPUT_H5_PATH}"
-
-ls -l ${OUTPUT_H5_PATH}  # DEBUG
 
 if [[ ! -d "${OUTPUT_H5_PATH}" ]]; then
   echo "ERROR: Failed to find conversion output directory: ${CONVERTER_BIN}" 1>&2
