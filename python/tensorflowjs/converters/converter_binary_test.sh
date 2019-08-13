@@ -36,6 +36,9 @@ if [[ ! -d "${OUTPUT_DIR}" ]]; then
   exit 1
 fi
 
+# Clean up files.
+rm -rf "${SAVED_MODEL_DIR}" "${OUTPUT_DIR}"
+
 # 2. Test keras HDF5 --> tfjs_layers_model conversion.
 KERAS_H5_PATH="$(mktemp).h5"
 echo "Genearting Keras HDF5 model for testing..."
@@ -53,3 +56,6 @@ if [[ ! -d "${OUTPUT_H5_PATH}" ]]; then
   echo "ERROR: Failed to find conversion output directory: ${OUTPUT_H5_PATH}" 1>&2
   exit 1
 fi
+
+# Clean up files.
+rm -rf "${KERAS_H5_PATH}" "${OUTPUT_H5_PATH}"
