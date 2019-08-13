@@ -537,7 +537,9 @@ def pip_main():
 
 
 def main(argv):
+  # pylint: disable=invalid-name
   FLAGS = get_arg_parser().parse_args(argv[0].split(' '))
+  # pylint: enable=invalid-name
 
   if FLAGS.show_version:
     print('\ntensorflowjs %s\n' % version.version)

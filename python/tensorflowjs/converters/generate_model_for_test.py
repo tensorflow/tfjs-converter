@@ -53,14 +53,16 @@ def main(_):
   elif FLAGS.model_type == 'tf_saved_model':
     class TimesThreePlusOne(tf.train.Checkpoint):
 
-      @tf.function(input_signature=[tf.TensorSpec(shape=None, dtype=tf.float32)])
+      @tf.function(input_signature=[
+          tf.TensorSpec(shape=None, dtype=tf.float32)])
       def compute(self, x):
         return x * 3.0 + 1.0
+
     tf.saved_model.save(TimesThreePlusOne(), FLAGS.output_path)
   else:
     raise ValueError('Unrecognized model type: %s' % FLAGS.model_type)
 
 
 if __name__ == '__main__':
-  FLAGS, unparsed = parse_args()
+  FLAGS, unparsed = parse_args()  # pylint: disable=invalid-name
   tf.app.run(main=main, argv=[sys.argv[0]] + unparsed)
