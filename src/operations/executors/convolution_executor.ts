@@ -91,6 +91,24 @@ export let executeOp: InternalOpExecutor =
               [stride[1], stride[2]], pad as 'valid' | 'same',
               dataFormat as 'NHWC' | 'NCHW', [dilations[1], dilations[2]])];
         }
+        case 'Conv3D': {
+          const stride =
+              getParamValue('strides', node, tensorMap, context) as number[];
+          const pad = getParamValue('pad', node, tensorMap, context);
+          const dataFormat =
+              (getParamValue('dataFormat', node, tensorMap, context) as string)
+                  .toUpperCase();
+          const dilations =
+              getParamValue('dilations', node, tensorMap, context) as number[];
+          return [tfc.conv3d(
+              getParamValue('x', node, tensorMap, context) as tfc.Tensor4D |
+                  tfc.Tensor<tfc.Rank.R5>,
+              getParamValue('filter', node, tensorMap, context) as
+                  tfc.Tensor<tfc.Rank.R5>,
+              [stride[1], stride[2], stride[3]], pad as 'valid' | 'same',
+              dataFormat as 'NDHWC' | 'NCDHW',
+              [dilations[1], dilations[2], dilations[3]])];
+        }
 
         case 'AvgPool': {
           const stride =
@@ -119,6 +137,33 @@ export let executeOp: InternalOpExecutor =
               [kernelSize[1], kernelSize[2]], [stride[1], stride[2]],
               pad as 'valid' | 'same')];
         }
+
+        case 'AvgPool3D': {
+          const stride =
+              getParamValue('strides', node, tensorMap, context) as number[];
+          const pad = getParamValue('pad', node, tensorMap, context);
+          const kernelSize =
+              getParamValue('kernelSize', node, tensorMap, context) as number[];
+
+          return [tfc.avgPool3d(
+              getParamValue('x', node, tensorMap, context) as tfc.Tensor5D,
+              [kernelSize[1], kernelSize[2], kernelSize[3]],
+              [stride[1], stride[2], stride[3]], pad as 'valid' | 'same')];
+        }
+
+        case 'MaxPool3D': {
+          const stride =
+              getParamValue('strides', node, tensorMap, context) as number[];
+          const pad = getParamValue('pad', node, tensorMap, context);
+          const kernelSize =
+              getParamValue('kernelSize', node, tensorMap, context) as number[];
+
+          return [tfc.maxPool3d(
+              getParamValue('x', node, tensorMap, context) as tfc.Tensor5D,
+              [kernelSize[1], kernelSize[2], kernelSize[3]],
+              [stride[1], stride[2], stride[3]], pad as 'valid' | 'same')];
+        }
+
         default:
           throw TypeError(`Node type ${node.op} is not implemented`);
       }
