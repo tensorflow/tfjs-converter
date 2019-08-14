@@ -45,10 +45,12 @@
 |LeakyRelu|leakyRelu|
 |Log|log|
 |Log1p|log1p|
+|Imag|imag|
 |Neg|neg|
 |Prod|prod|
 |Reciprocal|reciprocal|
 |Reciprocal|reciprocal|
+|Real|real|
 |Relu|relu|
 |Relu6|clipByValue|
 |Round|round|
