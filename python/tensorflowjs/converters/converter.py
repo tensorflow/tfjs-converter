@@ -22,6 +22,7 @@ import argparse
 import json
 import os
 import shutil
+import sys
 import tempfile
 
 import h5py
@@ -222,6 +223,41 @@ def dispatch_tensorflowjs_to_keras_h5_conversion(config_json_path, h5_path):
     model.save(h5_path)
 
 
+def dispatch_tensorflowjs_to_keras_saved_model_conversion(
+    config_json_path, keras_saved_model_path):
+  """Converts a TensorFlow.js Layers model format to a tf.keras SavedModel.
+
+  Args:
+    config_json_path: Path to the JSON file that includes the model's
+      topology and weights manifest, in tensorflowjs format.
+    keras_saved_model_path: Path for the to-be-created Keras SavedModel.
+
+  Raises:
+    ValueError, if `config_json_path` is not a path to a valid JSON
+      file, or if h5_path points to an existing directory.
+  """
+  if os.path.isdir(config_json_path):
+    raise ValueError(
+        'For input_type=tfjs_layers_model & output_format=keras_saved_model, '
+        'the input path should be a model.json '
+        'file, but received a directory.')
+
+  # Verify that config_json_path points to a JSON file.
+  with open(config_json_path, 'rt') as f:
+    try:
+      json.load(f)
+    except (ValueError, IOError):
+      raise ValueError(
+          'For input_type=tfjs_layers_model & output_format=keras, '
+          'the input path is expected to contain valid JSON content, '
+          'but cannot read valid JSON content from %s.' % config_json_path)
+
+  with tf.Graph().as_default(), tf.compat.v1.Session():
+    model = keras_tfjs_loader.load_keras_model(config_json_path)
+    keras.experimental.export_saved_model(
+        model, keras_saved_model_path, serving_only=True)
+
+
 def dispatch_tensorflowjs_to_tensorflowjs_conversion(
     config_json_path,
     output_dir_path,
@@ -361,7 +397,7 @@ def _standardize_input_output_formats(input_format, output_format):
   input_format_is_keras = (
       input_format in ['keras', 'keras_saved_model'])
   input_format_is_tf = (
-      input_format in ['tf_frozen_model', 'tf_hub'])
+      input_format in ['tf_saved_model', 'tf_hub'])
   if output_format is None:
     # If no explicit output_format is provided, infer it from input format.
     if input_format_is_keras:
@@ -399,7 +435,8 @@ def _parse_quantization_bytes(quantization_bytes):
     raise ValueError('Unsupported quantization bytes: %s' % quantization_bytes)
 
 
-def setup_arguments():
+def get_arg_parser():
+  """Create the argument parser for the converter binary."""
   parser = argparse.ArgumentParser('TensorFlow.js model converters.')
   parser.add_argument(
       'input_path',
@@ -437,8 +474,8 @@ def setup_arguments():
       '--output_format',
       type=str,
       required=False,
-      choices=set(['keras', 'tfjs_layers_model', 'tfjs_graph_model',
-                   'tensorflowjs']),
+      choices=set(['keras', 'keras_saved_model', 'tfjs_layers_model',
+                   'tfjs_graph_model', 'tensorflowjs']),
       help='Output format. Default: tfjs_graph_model.')
   parser.add_argument(
       '--signature_name',
@@ -485,41 +522,59 @@ def setup_arguments():
       '--weight_shard_size_bytes',
       type=int,
       default=None,
-      help='Shard size (in bytes) of the weight files. Curently applicable '
+      help='Shard size (in bytes) of the weight files. Currently applicable '
       'only to output_format=tfjs_layers_model.')
-  return parser.parse_args()
+  return parser
 
 
-def main():
-  FLAGS = setup_arguments()
-  if FLAGS.show_version:
+def pip_main():
+  """Entry point for pip-packaged binary.
+
+  Note that pip-packaged binary calls the entry method without
+  any arguments, which is why this method is needed in addition to the
+  `main` method below.
+  """
+  main([' '.join(sys.argv[1:])])
+
+
+def main(argv):
+  args = get_arg_parser().parse_args(argv[0].split(' '))
+
+  if args.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
     print('  keras %s' % keras.__version__)
     print('  tensorflow %s' % tf.__version__)
     return
 
+  if not args.input_path:
+    raise ValueError(
+        'Missing input_path argument. For usage, use the --help flag.')
+  if not args.output_path:
+    raise ValueError(
+        'Missing output_path argument. For usage, use the --help flag.')
+
   weight_shard_size_bytes = 1024 * 1024 * 4
-  if FLAGS.weight_shard_size_bytes:
-    if  FLAGS.output_format != 'tfjs_layers_model':
+  if args.weight_shard_size_bytes:
+    if  args.output_format != 'tfjs_layers_model':
       raise ValueError(
           'The --weight_shard_size_byte flag is only supported under '
           'output_format=tfjs_layers_model.')
-    weight_shard_size_bytes = FLAGS.weight_shard_size_bytes
+    weight_shard_size_bytes = args.weight_shard_size_bytes
 
-  if FLAGS.input_path is None:
+  if args.input_path is None:
     raise ValueError(
         'Error: The input_path argument must be set. '
         'Run with --help flag for usage information.')
 
   input_format, output_format = _standardize_input_output_formats(
-      FLAGS.input_format, FLAGS.output_format)
+      args.input_format, args.output_format)
 
   quantization_dtype = (
-      quantization.QUANTIZATION_BYTES_TO_DTYPES[FLAGS.quantization_bytes]
-      if FLAGS.quantization_bytes else None)
+      quantization.QUANTIZATION_BYTES_TO_DTYPES[args.quantization_bytes]
+      if args.quantization_bytes else None)
 
-  if (FLAGS.signature_name and input_format not in
+  if (args.signature_name and input_format not in
       ('tf_saved_model', 'tf_hub')):
     raise ValueError(
         'The --signature_name flag is applicable only to "tf_saved_model" and '
@@ -530,53 +585,57 @@ def main():
   #   branches below.
   if input_format == 'keras' and output_format == 'tfjs_layers_model':
     dispatch_keras_h5_to_tfjs_layers_model_conversion(
-        FLAGS.input_path, output_dir=FLAGS.output_path,
+        args.input_path, output_dir=args.output_path,
         quantization_dtype=quantization_dtype,
-        split_weights_by_layer=FLAGS.split_weights_by_layer)
+        split_weights_by_layer=args.split_weights_by_layer)
   elif input_format == 'keras' and output_format == 'tfjs_graph_model':
     dispatch_keras_h5_to_tfjs_graph_model_conversion(
-        FLAGS.input_path, output_dir=FLAGS.output_path,
+        args.input_path, output_dir=args.output_path,
         quantization_dtype=quantization_dtype,
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+        skip_op_check=args.skip_op_check,
+        strip_debug_ops=args.strip_debug_ops)
   elif (input_format == 'keras_saved_model' and
         output_format == 'tfjs_layers_model'):
     dispatch_keras_saved_model_to_tensorflowjs_conversion(
-        FLAGS.input_path, FLAGS.output_path,
+        args.input_path, args.output_path,
         quantization_dtype=quantization_dtype,
-        split_weights_by_layer=FLAGS.split_weights_by_layer)
+        split_weights_by_layer=args.split_weights_by_layer)
   elif (input_format == 'tf_saved_model' and
         output_format == 'tfjs_graph_model'):
     tf_saved_model_conversion_v2.convert_tf_saved_model(
-        FLAGS.input_path, FLAGS.output_path,
-        signature_def=FLAGS.signature_name,
-        saved_model_tags=FLAGS.saved_model_tags,
+        args.input_path, args.output_path,
+        signature_def=args.signature_name,
+        saved_model_tags=args.saved_model_tags,
         quantization_dtype=quantization_dtype,
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+        skip_op_check=args.skip_op_check,
+        strip_debug_ops=args.strip_debug_ops)
   elif (input_format == 'tf_hub' and
         output_format == 'tfjs_graph_model'):
     tf_saved_model_conversion_v2.convert_tf_hub_module(
-        FLAGS.input_path, FLAGS.output_path, FLAGS.signature_name,
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+        args.input_path, args.output_path, args.signature_name,
+        args.saved_model_tags, skip_op_check=args.skip_op_check,
+        strip_debug_ops=args.strip_debug_ops)
   elif (input_format == 'tfjs_layers_model' and
         output_format == 'keras'):
-    dispatch_tensorflowjs_to_keras_h5_conversion(FLAGS.input_path,
-                                                 FLAGS.output_path)
+    dispatch_tensorflowjs_to_keras_h5_conversion(args.input_path,
+                                                 args.output_path)
+  elif (input_format == 'tfjs_layers_model' and
+        output_format == 'keras_saved_model'):
+    dispatch_tensorflowjs_to_keras_saved_model_conversion(args.input_path,
+                                                          args.output_path)
   elif (input_format == 'tfjs_layers_model' and
         output_format == 'tfjs_layers_model'):
     dispatch_tensorflowjs_to_tensorflowjs_conversion(
-        FLAGS.input_path, FLAGS.output_path,
-        quantization_dtype=_parse_quantization_bytes(FLAGS.quantization_bytes),
+        args.input_path, args.output_path,
+        quantization_dtype=_parse_quantization_bytes(args.quantization_bytes),
         weight_shard_size_bytes=weight_shard_size_bytes)
   elif (input_format == 'tfjs_layers_model' and
         output_format == 'tfjs_graph_model'):
     dispatch_tfjs_layers_model_to_tfjs_graph_conversion(
-        FLAGS.input_path, FLAGS.output_path,
-        quantization_dtype=_parse_quantization_bytes(FLAGS.quantization_bytes),
-        skip_op_check=FLAGS.skip_op_check,
-        strip_debug_ops=FLAGS.strip_debug_ops)
+        args.input_path, args.output_path,
+        quantization_dtype=_parse_quantization_bytes(args.quantization_bytes),
+        skip_op_check=args.skip_op_check,
+        strip_debug_ops=args.strip_debug_ops)
   else:
     raise ValueError(
         'Unsupported input_format - output_format pair: %s - %s' %
@@ -584,4 +643,4 @@ def main():
 
 
 if __name__ == '__main__':
-  main()
+  tf.app.run(main=main, argv=[' '.join(sys.argv[1:])])
