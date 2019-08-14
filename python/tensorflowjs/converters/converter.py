@@ -435,14 +435,11 @@ def _parse_quantization_bytes(quantization_bytes):
   else:
     raise ValueError('Unsupported quantization bytes: %s' % quantization_bytes)
 
-def setup_arguments(arguments=None):
+def get_arg_parser():
   """
   Create the argument parser for the converter binary.
-
-  Args:
-    arguments: list, the argument string list to be parsed from. If arguments is
-      not given, it will try to parse from the system arguments.
   """
+
   parser = argparse.ArgumentParser('TensorFlow.js model converters.')
   parser.add_argument(
       common.INPUT_PATH,
@@ -535,13 +532,10 @@ def setup_arguments(arguments=None):
       default=None,
       help='Shard size (in bytes) of the weight files. Currently applicable '
       'only to output_format=tfjs_layers_model.')
-  if arguments:
-    return parser.parse_args(arguments)
-  else:
-    return parser.parse_args()
+  return parser
 
-def convert(arguments=None):
-  args = setup_arguments(arguments)
+def convert(arguments):
+  args = get_arg_parser().parse_args(arguments)
   if args.show_version:
     print('\ntensorflowjs %s\n' % version.version)
     print('Dependency versions:')
@@ -656,7 +650,7 @@ def pip_main():
 
 
 def main(argv):
-  convert(args)
+  convert(argv)
 
 if __name__ == '__main__':
   tf.app.run(main=main, argv=[' '.join(sys.argv[1:])])
