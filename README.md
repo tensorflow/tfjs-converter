@@ -25,12 +25,10 @@ __0. Please make sure that you run in a Docker container or a virtual environmen
  The script pulls its own subset of TensorFlow, which might conflict with the
  existing TensorFlow/Keras installation.
 
-__Note__: *Check that [`tf-nightly-2.0-preview`](https://pypi.org/project/tf-nightly-2.0-preview/#files) is available for your platform.*
-
-Most of the times, this means that you have to use Python 3.6.8 in your local
-environment. To force Python 3.6.8 in your local project, you can install
-[`pyenv`](https://github.com/pyenv/pyenv) and proceed as follows in the target
-directory:
+The converter supports both Python 2 and Python 3. But Python 3.6.8 is recommended
+for your local environment. To force Python 3.6.8 in your local project, you can
+install [`pyenv`](https://github.com/pyenv/pyenv) and proceed as follows in the
+target directory:
 
 ```bash
 pyenv install 3.6.8
@@ -52,7 +50,35 @@ __1. Install the TensorFlow.js pip package:__
  pip install tensorflowjs
 ```
 
-__2. Run the converter script provided by the pip package:__
+__2. Run the conversion script provided by the pip package:__
+
+There are two way to trigger the model conversion:
+
+- The conversion wizard: tensorflowjs_wizard
+- Regular conversion script: tensorflowjs_converter
+
+To start the conversion wizard:
+```bash
+tensorflowjs_wizard
+```
+
+This tool will walk you through the conversion process and provide you with
+details explanations for each choice you need to make. Behind the scene it calls
+the converter script (`tensorflowjs_converter`) in pip package. This is the easier
+way to convert a single model.
+
+There is also dry run mode for the wizard, which will not perform the actual
+conversion but only generate the command for `tensorflowjs_converter` command.
+This command can be used in your own shell script.
+
+```bash
+tensorflowjs_wizard --dryrun
+```
+
+To convert a batch of models or integrate the conversion process into your own
+script, you should look into using the tensorflowjs_converter script.
+
+Here is detail information of parameters of the converter script.
 
 The converter expects a __TensorFlow SavedModel__, __TensorFlow Hub module__,
 __TensorFlow.js JSON__ format, __Keras HDF5 model__, or __tf.keras SavedModel__
