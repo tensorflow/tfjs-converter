@@ -1,0 +1,1 @@
+## This repository has been archived in favor of the monorepo at https://github.com/tensorflow/tfjs. Please send pull requests there.
